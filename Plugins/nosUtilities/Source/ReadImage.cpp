@@ -90,7 +90,7 @@ struct ReadImageContext : NodeContext
         {
 			std::stringstream ss;
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
-			std::string fileName = std::path_to_utf8(FilePath.filename());
+			std::string fileName = nos::PathToUtf8(FilePath.filename());
 			auto statusText = std::string("Image ") + fileName + " loaded in " + std::to_string(dt) + "ms";
 			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, statusText.c_str(), fb::NodeStatusMessageType::INFO));
             break;
@@ -113,7 +113,7 @@ struct ReadImageContext : NodeContext
 	{
 		UpdateStatus(State::Loading);
 		FilePath = path;
-		std::thread([this, outPinId, path = std::path_to_utf8(path), sRGB]() mutable {
+		std::thread([this, outPinId, path = nos::PathToUtf8(path), sRGB]() mutable {
 			try
 			{
 				int w, h, n;
@@ -192,7 +192,7 @@ struct ReadImageContext : NodeContext
 		}
 
 		nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-		std::filesystem::path path = std::utf8_to_path(InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data));
+		std::filesystem::path path = nos::Utf8ToPath(InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data));
 		auto outPinId = nodeParams[NSN_Out].Id;
 		auto sRGB = *InterpretPinValue<bool>(nodeParams[NSN_sRGB].Data->Data);
 
