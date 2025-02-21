@@ -65,7 +65,7 @@ struct WriteImage : NodeContext {
         nos::NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
         
         std::unique_lock<std::mutex> lock(Mutex);
-        Path = std::utf8_to_wstring(std::string((const char*)execParams[NSN_Path].Data->Data, execParams[NSN_Path].Data->Size));
+        Path = std::utf8_to_path(std::string((const char*)execParams[NSN_Path].Data->Data, execParams[NSN_Path].Data->Size));
         IncludeAlpha = *(bool*)execParams[NSN_IncludeAlpha].Data->Data;
         assert(Event == 0);
         nosCmd cmd = vkss::BeginCmd(NOS_NAME("Write Image Copy To"), NodeId);
@@ -85,7 +85,7 @@ struct WriteImage : NodeContext {
     }
 
     void WriteImageToFile() {
-        std::string UTF8Path = std::wstring_to_utf8(this->Path);
+        std::string UTF8Path = std::path_to_utf8(this->Path);
         try {
             if (!std::filesystem::exists(this->Path.parent_path()))
                 std::filesystem::create_directories(this->Path.parent_path());

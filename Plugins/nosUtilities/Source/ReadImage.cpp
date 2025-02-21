@@ -90,7 +90,7 @@ struct ReadImageContext : NodeContext
         {
 			std::stringstream ss;
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
-			std::string fileName = std::wstring_to_utf8(FilePath.filename());
+			std::string fileName = std::path_to_utf8(FilePath.filename());
 			auto statusText = std::string("Image ") + fileName + " loaded in " + std::to_string(dt) + "ms";
 			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, statusText.c_str(), fb::NodeStatusMessageType::INFO));
             break;
@@ -109,11 +109,11 @@ struct ReadImageContext : NodeContext
 		OutPendingImageRefs.clear();
 	}
 
-	nosResult LoadImage(std::string path, nosUUID outPinId, bool sRGB)
+	nosResult LoadImage(std::filesystem::path path, nosUUID outPinId, bool sRGB)
 	{
 		UpdateStatus(State::Loading);
-		FilePath = std::utf8_to_wstring(path);
-		std::thread([this, outPinId, path, sRGB]() mutable {
+		FilePath = path;
+		std::thread([this, outPinId, path = std::path_to_utf8(path), sRGB]() mutable {
 			try
 			{
 				int w, h, n;
@@ -136,7 +136,7 @@ struct ReadImageContext : NodeContext
 				auto outResOpt = vkss::Resource::Create(outResInfo, "ReadImage Texture");
 				if (!outResOpt)
 				{
-					nosEngine.LogE("Failed to create texture resource for image %s.", path.string().c_str());
+					nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());
 					UpdateStatus(State::Failed);
 					return;
 				}
@@ -192,7 +192,7 @@ struct ReadImageContext : NodeContext
 		}
 
 		nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-		std::string path = InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data);
+		std::filesystem::path path = std::utf8_to_path(InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data));
 		auto outPinId = nodeParams[NSN_Out].Id;
 		auto sRGB = *InterpretPinValue<bool>(nodeParams[NSN_sRGB].Data->Data);
 
