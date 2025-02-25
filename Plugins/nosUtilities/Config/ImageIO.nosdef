@@ -19,7 +19,7 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": {
 							"type": "FILE_PICKER",
-							"file_extensions": [ "*.png", "*.jpg", "*.jpeg", "*.tga", "*.bmp", "*.psd" ],
+							"file_extensions": [ "png", "jpg", "jpeg", "tga", "bmp", "psd" ],
 							"file_picker_type": "OPEN"
 						},
 						"description": "Supported filetypes (with some limitations):\nJPEG, PNG, TGA, BMP, PSD, GIF, HDR, PIC"
@@ -38,7 +38,7 @@
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 					}
 				],
-				"functions": [
+				"functions": [ 
 					{
 						"class_name": "ReadImage_Load",
 						"display_name": "Load",
@@ -78,7 +78,7 @@
 								"can_show_as": "INPUT_PIN_OR_PROPERTY",
 								"visualizer": {
 									"type": "FILE_PICKER",
-									"file_extensions": [ "*.png", "*.jpg", "*.jpeg", "*.tga", "*.bmp", "*.psd" ],
+									"file_extensions": [ "png", "jpg", "jpeg", "tga", "bmp", "psd" ],
 									"file_picker_type": "SAVE"
 								}
 							},
