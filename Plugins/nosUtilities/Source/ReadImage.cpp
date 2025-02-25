@@ -3,7 +3,6 @@
 #include <Nodos/PluginHelpers.hpp>
 
 // External
-#include <stb/stb_image.h>
 #define STBI_WINDOWS_UTF8
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
