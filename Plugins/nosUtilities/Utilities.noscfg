@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.8.2"
+			"version": "3.9.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -54,7 +54,8 @@
 		"Config/ConditionalTrigger.nosdef",
 		"Config/TriggerOnAnyInput.nosdef",
 		"Config/TextureMonitor.nosdef",
-		"Config/SwitchTrigger.nosdef"
+		"Config/SwitchTrigger.nosdef",
+		"Config/PrintLog.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
