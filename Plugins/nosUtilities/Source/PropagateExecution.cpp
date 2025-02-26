@@ -11,7 +11,7 @@ struct PropagateExecutionNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nosEngine.CallNodeFunction(NodeId, NOS_NAME("Propagate"));
+		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Propagate"));
 		nosScheduleNodeParams schedule{
 			.NodeId = NodeId,
 			.AddScheduleCount = 1

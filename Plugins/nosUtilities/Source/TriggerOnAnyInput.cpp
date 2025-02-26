@@ -9,7 +9,7 @@ struct TriggerOnAnyInput : NodeContext
 
 	nosResult Branch(nosFunctionExecuteParams* functionExecParams)
 	{
-		nosEngine.CallNodeFunction(NodeId, NOS_NAME("OnTrigger"));
+		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("OnTrigger"));
 		return NOS_RESULT_SUCCESS;
 	}
 

@@ -106,25 +106,9 @@
 											"contents": {},
 											"orphan_state": {},
 											"description": ""
-										},
-										{
-											"id": "b85d365c-333b-406c-bade-d45a37becc43",
-											"name": "InExe",
-											"type_name": "nos.exe",
-											"show_as": "PROPERTY",
-											"can_show_as": "INPUT_PIN_OR_PROPERTY",
-											"pin_category": "",
-											"visualizer": {},
-											"data": {},
-											"referred_by": [],
-											"def": {},
-											"meta_data_map": [],
-											"contents_type": "JobPin",
-											"contents": {},
-											"orphan_state": {},
-											"description": ""
 										}
 									],
+									"scheduling_type": "Event",
 									"pos": {
 										"x": 0.0,
 										"y": 0.0

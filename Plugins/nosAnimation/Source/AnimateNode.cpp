@@ -21,7 +21,7 @@ struct AnimateNode : NodeContext
 			TransientReverse = false;
 			Running = true;
 			ResetAnimationFrameNum();
-			nosEngine.CallNodeFunction(NodeId, NOS_NAME("Started_Internal"));
+			nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Started"));
 		}
 		if (Running)
 		{
@@ -58,7 +58,7 @@ struct AnimateNode : NodeContext
 			SetPinValue(NSN_t, nos::Buffer::From(out));
 			if (finished)
 			{
-				nosEngine.CallNodeFunction(NodeId, NOS_NAME("Finished_Internal"));
+				nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Finished"));
 				Running = false;
 				TransientReverse = false;
 			}

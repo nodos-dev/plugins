@@ -29,7 +29,8 @@
 								"show_as": "OUTPUT_PIN",
 								"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 							}
-						]
+						],
+						"scheduling_type": "Event"
 					}
 				]
 			}

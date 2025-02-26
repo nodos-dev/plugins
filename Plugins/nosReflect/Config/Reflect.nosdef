@@ -505,7 +505,8 @@
         ],
         "functions": [
           {
-            "class_name": "OnVariableUpdated_Event"
+            "class_name": "OnVariableUpdated",
+			"scheduling_type": "Event"
           }
         ]
       }

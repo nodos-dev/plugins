@@ -11,10 +11,11 @@ struct ConditionalTrigger : NodeContext
 	{
 		NodeExecuteParams params(functionExecParams->FunctionNodeExecuteParams);
 		bool condition = *params.GetPinData<bool>(NOS_NAME("Condition"));
+		functionExecParams->MarkOutExeDirty = false;
 		if (condition)
-			nosEngine.CallNodeFunction(NodeId, NOS_NAME("True"));
+			nosEngine.SetPinDirty(params[NOS_NAME("True")].Id);
 		else
-			nosEngine.CallNodeFunction(NodeId, NOS_NAME("False"));
+			nosEngine.SetPinDirty(params[NOS_NAME("False")].Id);
 		return NOS_RESULT_SUCCESS;
 	}
 
