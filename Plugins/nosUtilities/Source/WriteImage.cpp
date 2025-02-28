@@ -5,7 +5,7 @@
 #include <AppService_generated.h>
 #define STBIW_WINDOWS_UTF8
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
+#include <stb_image_write.h>
 
 #include <nosVulkanSubsystem/Helpers.hpp>
 

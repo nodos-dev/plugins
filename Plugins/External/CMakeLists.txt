@@ -1,7 +1,4 @@
 if (NOT WITH_NODOS AND NOT TARGET stb)
-    project(stb C)
-
-    add_library(stb ${CMAKE_CURRENT_SOURCE_DIR}/stb/stb_vorbis.c)
-
-    target_include_directories(stb PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+	add_library(stb INTERFACE)
+    target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 endif()
