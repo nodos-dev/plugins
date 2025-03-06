@@ -12,6 +12,8 @@ struct AnimateNode : NodeContext
 	bool Running = false;
 	bool TransientReverse = false;
 
+	std::chrono::nanoseconds VariableStepTotalRuntime;
+
 	nosResult ExecuteNode(nosNodeExecuteParams* params)
 	{
 		NodeExecuteParams args(params);
@@ -27,7 +29,13 @@ struct AnimateNode : NodeContext
 		{
 			bool reverse = *args.GetPinData<bool>(NOS_NAME("Reverse")) || TransientReverse;
 			double animationDuration = *args.GetPinData<double>(NOS_NAME("Duration"));
-			double out = double(params->DeltaSeconds.x * *args.GetPinData<uint64_t>(NSN_AnimationFrame)) / double(params->DeltaSeconds.y * animationDuration);
+
+			double out = 0.0;
+			if (args.GetVariableStepTiming())
+				out = std::chrono::duration<double>(VariableStepTotalRuntime).count();
+			else
+				out = args.GetTotalTime(*args.GetPinData<uint64_t>(NSN_AnimationFrame));
+			out /= animationDuration;
 			bool loop = *args.GetPinData<bool>(NOS_NAME("Loop"));
 			bool finished = false;
 			if (loop)
@@ -63,7 +71,14 @@ struct AnimateNode : NodeContext
 				TransientReverse = false;
 			}
 			else
-				SetPinValue(NSN_AnimationFrame, nos::Buffer::From(*args.GetPinData<uint64_t>(NSN_AnimationFrame) + (reverse ? -1 : 1)));
+			{
+				if (auto variableStep = args.GetVariableStepTiming())
+					VariableStepTotalRuntime +=
+						std::chrono::nanoseconds(variableStep->TimeSinceLastFrameNs) * (reverse ? -1 : 1);
+				else
+					SetPinValue(NSN_AnimationFrame, nos::Buffer::From(*args.GetPinData<uint64_t>(NSN_AnimationFrame) + (reverse ? -1 : 1)));
+
+			}
 			return NOS_RESULT_SUCCESS;
 		}
 		params->MarkAllOutsDirty = false;
@@ -92,6 +107,7 @@ struct AnimateNode : NodeContext
 	void ResetAnimationFrameNum()
 	{
 		SetPinValue(NSN_AnimationFrame, nos::Buffer::From(0ull));
+		VariableStepTotalRuntime = std::chrono::nanoseconds{};
 	}
 
 	nosResult Reset(nosFunctionExecuteParams* functionExecParams)

@@ -12,7 +12,7 @@
 #include "Window/WindowNode.h"
 #include <cstdint>
 
-NOS_INIT()
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
 
 NOS_REGISTER_NAME(in1)
 NOS_REGISTER_NAME(in2)

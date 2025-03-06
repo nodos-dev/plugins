@@ -20,7 +20,6 @@ layout(push_constant) uniform constants
 {
     uvec2 RTSize;
     uint frameNumber;
-    float deltaSeconds;
 } PC;
 
 vec4 manhattan_distance(float i, float j, int b, vec2 R)

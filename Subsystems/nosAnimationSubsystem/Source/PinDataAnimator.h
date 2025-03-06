@@ -14,6 +14,8 @@ namespace nos::sys::animation
 
 inline uint64_t MillisecondsToFrameNumber(uint64_t ms, nosVec2u deltaSeconds)
 {
+	if (deltaSeconds.y == 0)
+		deltaSeconds = {1, 60};
 	return (ms * (uint64_t)deltaSeconds.y) / (uint64_t)deltaSeconds.x / 1000ull;
 }
 

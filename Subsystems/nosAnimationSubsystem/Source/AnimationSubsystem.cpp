@@ -6,7 +6,7 @@
 #include <PinDataAnimator.h>
 
 
-NOS_INIT()
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
 
@@ -56,8 +56,6 @@ struct AnimationSubsystemCtx
 	nosAnimationSubsystem AnimationSubsystem;
 };
 
-
-
 nosResult OnRequest(uint32_t minorVersion, void** outSubsystemCtx)
 {
 	*outSubsystemCtx = &GAnimationSysContext->AnimationSubsystem;
@@ -78,7 +76,7 @@ nosResult OnPreExecuteNode(nosNodeExecuteParams* params)
 	uint64_t curFrame = pathInfo->StartFSM + pathInfo->CurFrame;
 
 	for (size_t i = 0; i < params->PinCount; ++i)
-		GAnimationSysContext->Animator.UpdatePin(params->Pins[i].Id, params->DeltaSeconds, curFrame, params->Pins[i].Data);
+		GAnimationSysContext->Animator.UpdatePin(params->Pins[i].Id, params->DeltaSeconds_Deprecated, curFrame, params->Pins[i].Data);
 	return NOS_RESULT_SUCCESS;
 }
 

@@ -173,7 +173,7 @@ struct SinkNode : NodeContext
 		if (IsPeriodic())
 			info->DeltaSeconds = {10000u, (uint32_t)std::floor(Fps * 10000)};
 		else
-			info->DeltaSeconds = {0, 1};
+			info->DeltaSeconds = {0, 0};
 		nosEngine.LogI("Sink Node delta seconds: %d/%d", info->DeltaSeconds.x, info->DeltaSeconds.y);
 		info->Importance = 0;
 		for (int i = 0; i < info->PinInfosCount; i++)

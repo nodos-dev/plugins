@@ -21,13 +21,12 @@ struct FrameInterpolatorNode : NodeContext
 	FrameInterpolatorNode(nosFbNodePtr node)
 		: NodeContext(node), DeltaNanosec(0)
 	{
-		Thread = std::thread([this]() { InterpolatorThread(); });
+		Thread = std::jthread([this]() { InterpolatorThread(); });
 	}
 
 	~FrameInterpolatorNode()
 	{
 		ShouldStop = true;
-		Thread.join();
 	}
 
 	nosResult CopyFrom(nosCopyInfo* copyInfo) override
@@ -37,16 +36,16 @@ struct FrameInterpolatorNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
+		NodeExecuteParams execParams(params);
 		{
 			std::unique_lock guard(Mutex);
-			DeltaNanosec = 1'000'000'000u * (params->DeltaSeconds.x / double(params->DeltaSeconds.y));
+			DeltaNanosec = 1'000'000'000u * execParams.GetDeltaTime();
 			if (!InputPinId)
-				InputPinId = params->Pins[0].Id;
+				InputPinId = execParams[NSN_Input].Id;
 		}
-		auto pinValues = GetPinValues(params);
-		auto inputTextureInfo = vkss::DeserializeTextureInfo(pinValues[NSN_Input]);
-		auto outputTextureInfo = vkss::DeserializeTextureInfo(pinValues[NSN_Output]);
-		auto method = GetPinValue<nos::test::FrameInterpolationMethod>(pinValues, NSN_Method);
+		auto inputTextureInfo = vkss::DeserializeTextureInfo(execParams[NSN_Input].Data->Data);
+		auto outputTextureInfo = vkss::DeserializeTextureInfo(execParams.GetPinData<void>(NSN_Output));
+		auto method = execParams.GetPinData<nos::test::FrameInterpolationMethod>(NSN_Method);
 		switch (*method)
 		{
 		case FrameInterpolationMethod::REPEAT: {
@@ -81,19 +80,11 @@ struct FrameInterpolatorNode : NodeContext
 		}
 	}
 
-	static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
-	{
-		*count = 0;
-		if (!names || !fns)
-			return NOS_RESULT_SUCCESS;
-		return NOS_RESULT_SUCCESS;
-	}
-
 	uint64_t DeltaNanosec = 0;
 	std::optional<uuid> InputPinId = std::nullopt;
 	std::shared_mutex Mutex;
 	std::atomic_bool ShouldStop;
-	std::thread Thread;
+	std::jthread Thread;
 };
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions)

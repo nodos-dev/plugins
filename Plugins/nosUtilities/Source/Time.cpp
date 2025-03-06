@@ -12,10 +12,10 @@ struct TimeNodeContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pin = GetPinValues(params);
-		auto sec = GetPinValue<float>(pin, NSN_Seconds);
-		float time = (params->DeltaSeconds.x * frameCount++) / (double)params->DeltaSeconds.y;
-		nosEngine.SetPinValue(params->Pins[0].Id, { .Data = &time, .Size = sizeof(float) });
+		NodeExecuteParams execParams(params);
+		float time = execParams.GetTotalTime(frameCount);
+		nosEngine.SetPinValue(execParams[NOS_NAME("Seconds")].Id, {.Data = &time, .Size = sizeof(float)});
+		frameCount++;
 		return NOS_RESULT_SUCCESS;
 	}
 

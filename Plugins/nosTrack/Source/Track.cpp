@@ -143,7 +143,10 @@ void TrackNodeContext::OnPathStart()
 
 nosResult TrackNodeContext::ExecuteNode(nosNodeExecuteParams* params)
 {
-	DeltaSeconds = params->DeltaSeconds;
+	if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
+		DeltaSeconds = params->TimingInfo.FixedStepTiming.DeltaSeconds;
+	else
+		DeltaSeconds = {};
 	FramesSinceStart++;
 	if (EffectiveAutoSpare && !VBLReceived)
 	{

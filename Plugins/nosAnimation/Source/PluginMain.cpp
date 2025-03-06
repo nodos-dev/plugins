@@ -7,7 +7,7 @@
 // Subsystem dependencies
 #include <nosAnimationSubsystem/nosAnimationSubsystem.h>
 
-NOS_INIT()
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
 NOS_ANIMATION_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()

@@ -9,7 +9,7 @@
 #include <chrono>
 #include <Nodos/PluginHelpers.hpp>
 
-NOS_INIT()
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
 
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
@@ -245,16 +245,14 @@ struct SineWaveNodeContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto ids = GetPinIds(params);
-		auto pins = GetPinValues(params);
-		auto amplitude = *GetPinValue<float>(pins, NOS_NAME_STATIC("Amplitude"));
-		auto offset = *GetPinValue<float>(pins, NOS_NAME_STATIC("Offset"));
-		auto frequency = *GetPinValue<float>(pins, NOS_NAME_STATIC("Frequency"));
-		double time = (params->DeltaSeconds.x * frameCount++) / (double)params->DeltaSeconds.y;
+		NodeExecuteParams execParams(params);
+		auto amplitude = *execParams.GetPinData<float>(NOS_NAME_STATIC("Amplitude"));
+		auto offset = *execParams.GetPinData<float>(NOS_NAME_STATIC("Offset"));
+		auto frequency = *execParams.GetPinData<float>(NOS_NAME_STATIC("Frequency"));
+		double time = execParams.GetTotalTime(frameCount++);
 		double sec = glm::mod(time * (double)frequency, glm::pi<double>() * 2.0);
 		float result = (amplitude * glm::sin(sec)) + offset;
-		*GetPinValue<float>(pins, NOS_NAME_STATIC("Out")) = result;
-		//nosEngine.SetPinValue(ids[NOS_NAME_STATIC("Out")], {.Data = &result, .Size = sizeof(float)});
+		nosEngine.SetPinValue(execParams[NOS_NAME_STATIC("Out")].Id, {.Data = &result, .Size = sizeof(float)});
 		return NOS_RESULT_SUCCESS;
 	}
 
