@@ -24,172 +24,72 @@ NOS_REGISTER_NAME(FOV);
 
 namespace nos::math
 {
-
-using i8 = int8_t;
-using i16 = int16_t;
-using i32 = int32_t;
-using i64 = int64_t;
-using u8 = uint8_t;
-using u16 = uint16_t;
-using u32 = uint32_t;
-using u64 = uint64_t;
-using f32 = float;
-using f64 = double;
-
 #define NO_ARG
 
 #define DEF_OP0(o, n, t) nos::fb::vec##n##t operator o(nos::fb::vec##n##t l, nos::fb::vec##n##t r) { (glm::t##vec##n&)l += (glm::t##vec##n&)r; return (nos::fb::vec##n##t&)l; }
 #define DEF_OP1(n, t) DEF_OP0(+, n, t) DEF_OP0(-, n, t) DEF_OP0(*, n, t) DEF_OP0(/, n, t)
 #define DEF_OP(t) DEF_OP1(2, t) DEF_OP1(3, t) DEF_OP1(4, t)
 
-DEF_OP(u);
-DEF_OP(i);
-DEF_OP(d);
-DEF_OP(NO_ARG);
+	DEF_OP(u);
+	DEF_OP(i);
+	DEF_OP(d);
+	DEF_OP(NO_ARG);
+	template<class T> T Add(T x, T y) { return x + y; }
+	template<class T> T Sub(T x, T y) { return x - y; }
+	template<class T> T Mul(T x, T y) { return x * y; }
+	template<class T> T Div(T x, T y) { return x / y; }
 
-template<class T> T Add(T x, T y) { return x + y; }
-template<class T> T Sub(T x, T y) { return x - y; }
-template<class T> T Mul(T x, T y) { return x * y; }
-template<class T> T Div(T x, T y) { return x / y; }
-
-template<class T, T F(T, T)>
-nosResult ScalarBinopExecute(void* ctx, nosNodeExecuteParams* params)
-{
-	auto X = static_cast<T*>(params->Pins[0].Data->Data);
-	auto Y = static_cast<T*>(params->Pins[1].Data->Data);
-	auto Z = static_cast<T*>(params->Pins[2].Data->Data);
-	*Z = F(*X, *Y);
-	return NOS_RESULT_SUCCESS;
-}
-
-template<class T, int N>
-struct Vec {
-	T C[N] = {};
-
-	Vec() = default;
-
-	template<class P>
-	Vec(const P* p)  : C{}
+	template<class T, T F(T, T)>
+	nosResult ScalarBinopExecute(void* ctx, nosNodeExecuteParams* params)
 	{
-		C[0] = p->x();
-		C[1] = p->y();
-		if constexpr(N > 2) C[2] = p->z();
-		if constexpr(N > 3) C[3] = p->w();
+		auto X = static_cast<T*>(params->Pins[0].Data->Data);
+		auto Y = static_cast<T*>(params->Pins[1].Data->Data);
+		auto Z = static_cast<T*>(params->Pins[2].Data->Data);
+		*Z = F(*X, *Y);
+		return NOS_RESULT_SUCCESS;
 	}
-	
-	template<T F(T,T)>
-	Vec Binop(Vec r) const
+
+	template<class T, int N>
+	struct Vec {
+		T C[N] = {};
+
+		Vec() = default;
+
+		template<class P>
+		Vec(const P* p) : C{}
+		{
+			C[0] = p->x();
+			C[1] = p->y();
+			if constexpr (N > 2) C[2] = p->z();
+			if constexpr (N > 3) C[3] = p->w();
+		}
+
+		template<T F(T, T)>
+		Vec Binop(Vec r) const
+		{
+			Vec<T, N> result = {};
+			for (int i = 0; i < N; i++)
+				result.C[i] = F(C[i], r.C[i]);
+			return result;
+		}
+
+		Vec operator +(Vec r) const { return Binop<Add>(r); }
+		Vec operator -(Vec r) const { return Binop<Sub>(r); }
+		Vec operator *(Vec r) const { return Binop<Mul>(r); }
+		Vec operator /(Vec r) const { return Binop<Div>(r); }
+	};
+
+	template<class T, int Dim, Vec<T, Dim>F(Vec<T, Dim>, Vec<T, Dim>)>
+	nosResult VecBinopExecute(void* ctx, nosNodeExecuteParams* params)
 	{
-		Vec<T, N> result = {};
-		for(int i = 0; i < N; i++)
-			result.C[i] = F(C[i], r.C[i]);
-		return result;  
+		auto X = static_cast<Vec<T, Dim>*>(params->Pins[0].Data->Data);
+		auto Y = static_cast<Vec<T, Dim>*>(params->Pins[1].Data->Data);
+		auto Z = static_cast<Vec<T, Dim>*>(params->Pins[2].Data->Data);
+		*Z = F(*X, *Y);
+		return NOS_RESULT_SUCCESS;
 	}
-	
-	Vec operator +(Vec r) const { return Binop<Add>(r); }
-	Vec operator -(Vec r) const { return Binop<Sub>(r); }
-	Vec operator *(Vec r) const { return Binop<Mul>(r); }
-	Vec operator /(Vec r) const { return Binop<Div>(r); }
-};
-
-template<class T, int Dim, Vec<T,Dim>F(Vec<T,Dim>,Vec<T,Dim>)>
-nosResult VecBinopExecute(void* ctx, nosNodeExecuteParams* params)
-{
-	auto X = static_cast<Vec<T, Dim>*>(params->Pins[0].Data->Data);
-	auto Y = static_cast<Vec<T, Dim>*>(params->Pins[1].Data->Data);
-	auto Z = static_cast<Vec<T, Dim>*>(params->Pins[2].Data->Data);
-	*Z = F(*X, *Y);
-	return NOS_RESULT_SUCCESS;
-}
-
-#define NODE_NAME(op, t, sz, postfix) \
-	op ##_ ##t ##sz ##postfix
-
-#define ENUM_GEN_INTEGER_NODE_NAMES(op, t) \
-	NODE_NAME(op, t, 8, ) , \
-	NODE_NAME(op, t, 16, ) , \
-	NODE_NAME(op, t, 32, ) , \
-	NODE_NAME(op, t, 64, ) ,
-
-#define ENUM_GEN_FLOAT_NODE_NAMES(op) \
-	NODE_NAME(op, f, 32, ) , \
-	NODE_NAME(op, f, 64, ) ,
-
-#define ENUM_GEN_VEC_NODE_NAMES_DIM(op, dim) \
-	NODE_NAME(op, vec, dim, u), \
-	NODE_NAME(op, vec, dim, i), \
-	NODE_NAME(op, vec, dim, d), \
-	NODE_NAME(op, vec, dim, ),
-
-#define ENUM_GEN_VEC_NODE_NAMES(op) \
-	ENUM_GEN_VEC_NODE_NAMES_DIM(op, 2) \
-	ENUM_GEN_VEC_NODE_NAMES_DIM(op, 3) \
-	ENUM_GEN_VEC_NODE_NAMES_DIM(op, 4)
-
-#define ENUM_GEN_NODE_NAMES(op) \
-	ENUM_GEN_INTEGER_NODE_NAMES(op, u) \
-	ENUM_GEN_INTEGER_NODE_NAMES(op, i) \
-	ENUM_GEN_FLOAT_NODE_NAMES(op) \
-	ENUM_GEN_VEC_NODE_NAMES(op)
-
-#define ENUM_GEN_NODE_NAMES_ALL_OPS() \
-	ENUM_GEN_NODE_NAMES(Add) \
-	ENUM_GEN_NODE_NAMES(Sub) \
-	ENUM_GEN_NODE_NAMES(Mul) \
-	ENUM_GEN_NODE_NAMES(Div)
-
-#define GEN_CASE_SCALAR(op, t, sz) \
-	case MathNodeTypes::NODE_NAME(op, t, sz, ): { \
-		node->ClassName = NOS_NAME_STATIC("nos.math." #op "_" #t #sz); \
-		node->ExecuteNode = ScalarBinopExecute<t ##sz, op<t ##sz>>; \
-		break; \
-	}
-
-#define GEN_CASE_INTEGER(op, t) \
-	GEN_CASE_SCALAR(op, t, 8) \
-	GEN_CASE_SCALAR(op, t, 16) \
-	GEN_CASE_SCALAR(op, t, 32) \
-	GEN_CASE_SCALAR(op, t, 64)
-
-#define GEN_CASE_INTEGERS(op) \
-	GEN_CASE_INTEGER(op, u) \
-	GEN_CASE_INTEGER(op, i)
-
-#define GEN_CASE_FLOAT(op) \
-	GEN_CASE_SCALAR(op, f, 32) \
-	GEN_CASE_SCALAR(op, f, 64)
-
-#define GEN_CASE_VEC(op, namePostfix, t, dim) \
-	case MathNodeTypes::NODE_NAME(op, vec, dim, namePostfix): { \
-		node->ClassName = NOS_NAME_STATIC("nos.math." #op "_vec" #dim #namePostfix); \
-		node->ExecuteNode = VecBinopExecute<t, dim, op>; \
-		break; \
-	}
-
-#define GEN_CASE_VEC_ALL_DIMS(op, namePostfix, t) \
-	GEN_CASE_VEC(op, namePostfix, t, 2) \
-	GEN_CASE_VEC(op, namePostfix, t, 3) \
-	GEN_CASE_VEC(op, namePostfix, t, 4)
-
-#define GEN_CASE_VEC_ALL_TYPES(op) \
-	GEN_CASE_VEC_ALL_DIMS(op, u, u32) \
-	GEN_CASE_VEC_ALL_DIMS(op, i, i32) \
-	GEN_CASE_VEC_ALL_DIMS(op, d, f64) \
-	GEN_CASE_VEC_ALL_DIMS(op, , f32)
-
-#define GEN_CASES(op) \
-	GEN_CASE_INTEGERS(op) \
-	GEN_CASE_FLOAT(op) \
-	GEN_CASE_VEC_ALL_TYPES(op)
-
-#define GEN_ALL_CASES() \
-	GEN_CASES(Add) \
-	GEN_CASES(Sub) \
-	GEN_CASES(Mul) \
-	GEN_CASES(Div)
 
 enum class MathNodeTypes : int {
-	ENUM_GEN_NODE_NAMES_ALL_OPS()
 	SineWave,
 	Clamp,
 	Absolute,
@@ -279,7 +179,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		auto node = outList[i];
 		switch ((MathNodeTypes)i)
 		{
-			GEN_ALL_CASES()
 		case MathNodeTypes::SineWave: {
 			NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.math.SineWave"), SineWaveNodeContext, node);
 			break;
@@ -386,6 +285,60 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			break;
 		}
 	}
+
+	std::vector<nosName> typeNames;
+	size_t count = 0;
+	auto res = nosEngine.GetPinDataTypeNames(0, &count);
+	if (NOS_RESULT_FAILED != res)
+	{
+		typeNames.resize(count);
+		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
+	}
+	std::vector<nos::Buffer> nodePresets;
+	for (auto& typeName : typeNames)
+	{
+		nos::TypeInfo typeInfo(typeName);
+		if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
+			continue;
+		// If has 'skip_make' attribute
+		if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
+			|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+		{
+
+			bool skip = true;
+			for (int i = 0; i < typeInfo->AttributeCount; ++i)
+			{
+				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+					skip = false;
+				else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
+				{
+					skip = true;
+					break;
+				}
+			}
+			if (skip)
+				continue;
+		}
+		std::string name = nos::Name(typeInfo.TypeName).AsString();
+		auto idx = name.find_last_of(".");
+		idx = idx == std::string::npos ? 0 : 1 + idx;
+		fb::TNodePreset preset;
+		fb::TNodeMenuInfo info;
+		info.category = "Type";
+		info.display_name = "Mul " + name.substr(idx);
+		preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
+		std::vector<uint8_t> data(1 + name.size());
+		memcpy(data.data(), name.data(), name.size());
+		preset.params.emplace_back(new fb::TTemplateParameter{ {}, "Operator", "nos.reflect.BinaryOperator", std::move(data)});
+		flatbuffers::FlatBufferBuilder fbb;
+		fbb.Finish(CreateNodePreset(fbb, &preset));
+		nos::Buffer buf = fbb.Release();
+		nodePresets.push_back(std::move(buf));
+	}
+	std::vector<nosFbNodePresetPtr> fbNodePresets;
+	for (auto& buf : nodePresets)
+		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
+	nosEngine.RegisterNodePresets(NOS_NAME_STATIC("nos.math.Multiply"), fbNodePresets.size(), fbNodePresets.data());
 	return NOS_RESULT_SUCCESS;
 }
 
