@@ -454,8 +454,7 @@ void RegisterArithmeticNodePresets() {
 			if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
 				continue;
 			// If has 'skip_make' attribute
-			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
-				|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT)
 			{
 
 				bool skip = true;
@@ -463,7 +462,7 @@ void RegisterArithmeticNodePresets() {
 				{
 					if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
 						skip = false;
-					else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
+					else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("resource"))
 					{
 						skip = true;
 						break;
@@ -472,6 +471,8 @@ void RegisterArithmeticNodePresets() {
 				if (skip)
 					continue;
 			}
+			if (typeInfo->BaseType == NOS_BASE_TYPE_UNION || typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+				continue;
 			std::string name = nos::Name(typeInfo.TypeName).AsString();
 			auto idx = name.find_last_of(".");
 			idx = idx == std::string::npos ? 0 : 1 + idx;
