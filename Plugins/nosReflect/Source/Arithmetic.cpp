@@ -159,8 +159,32 @@ struct ArithmeticNodeContext : NodeContext
 				}
 			}
 		}
-		if (newTypeName) {
+		if (newTypeName && *newTypeName != NSN_TypeNameGeneric) {
+			flatbuffers::FlatBufferBuilder fbb;
+			std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
+
 			Type = nos::TypeInfo(*newTypeName);
+
+			for (auto pin : *node->pins()) {
+				pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
+					pin->id(),
+					0,
+					nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
+					nos::Name(Type->TypeName).AsCStr()));
+			}
+
+			HandleEvent(CreateAppEvent(fbb,
+				CreatePartialNodeUpdateDirect(fbb,
+					&NodeId,
+					nos::ClearFlags::NONE,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					&pinsToUpdate)));
 		}
 		if constexpr (IsScalarArithmetic)
 		{
@@ -174,9 +198,8 @@ struct ArithmeticNodeContext : NodeContext
 				}
 			}
 
-			if (scalarTypeName)
-				if (*scalarTypeName != NSN_TypeNameGeneric)
-					ScalarType = nos::TypeInfo(*scalarTypeName);
+			if (scalarTypeName && *scalarTypeName != NSN_TypeNameGeneric)
+				ScalarType = nos::TypeInfo(*scalarTypeName);
 		}
 
 		if (Operator)
@@ -378,15 +401,79 @@ struct ArithmeticNodeContext : NodeContext
 	}
 };
 
+void RegisterArithmeticNodePresets(bool isScalar) {
+	std::vector<nosName> typeNames;
+	size_t count = 0;
+	auto res = nosEngine.GetPinDataTypeNames(0, &count);
+	if (NOS_RESULT_FAILED != res)
+	{
+		typeNames.resize(count);
+		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
+	}
+	std::vector<nos::Buffer> nodePresets;
+	for (uint32_t binaryOpIndx = 0; binaryOpIndx < uint32_t(BinaryOperator::MAX) + 1; binaryOpIndx++) {
+		auto binaryOp = BinaryOperator(binaryOpIndx);
+		std::string binaryOpStr = BinaryOpToDisplayName(binaryOp);
+		for (auto& typeName : typeNames)
+		{
+			nos::TypeInfo typeInfo(typeName);
+			if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
+				continue;
+			// If has 'skip_make' attribute
+			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
+				|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+			{
+
+				bool skip = true;
+				for (int i = 0; i < typeInfo->AttributeCount; ++i)
+				{
+					if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+						skip = false;
+					else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
+					{
+						skip = true;
+						break;
+					}
+				}
+				if (skip)
+					continue;
+			}
+			std::string name = nos::Name(typeInfo.TypeName).AsString();
+			auto idx = name.find_last_of(".");
+			idx = idx == std::string::npos ? 0 : 1 + idx;
+			fb::TNodePreset preset;
+			fb::TNodeMenuInfo info;
+			info.category = "Math|" + std::string(isScalar ? "Scalar " : "") + binaryOpStr;
+			info.display_name = (isScalar ? "Scalar " : "") + binaryOpStr + " " + name.substr(idx);
+			preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
+			std::vector<uint8_t> data(1 + name.size());
+			memcpy(data.data(), name.data(), name.size());
+			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Type.AsString(), "string", std::move(data) });
+			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Operator.AsString(), "nos.reflect.BinaryOperator", std::move(nos::Buffer::From(binaryOp)) });
+			flatbuffers::FlatBufferBuilder fbb;
+			fbb.Finish(CreateNodePreset(fbb, &preset));
+			nos::Buffer buf = fbb.Release();
+			nodePresets.push_back(std::move(buf));
+		}
+	}
+	std::vector<nosFbNodePresetPtr> fbNodePresets;
+	for (auto& buf : nodePresets)
+		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
+	nosEngine.RegisterNodePresets(nos::Name("nos.reflect." + (isScalar ? NSN_Arithmetic.AsString() : NSN_ScalarArithmetic.AsString())), fbNodePresets.size(), fbNodePresets.data());
+
+}
+
 nosResult RegisterArithmetic(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Arithmetic, ArithmeticNodeContext<false>, fn);
+	RegisterArithmeticNodePresets(false);
 	return NOS_RESULT_SUCCESS;
 }
 
 nosResult RegisterScalarArithmetic(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_ScalarArithmetic, ArithmeticNodeContext<true>, fn);
+	RegisterArithmeticNodePresets(true);
 	return NOS_RESULT_SUCCESS;
 }
 
