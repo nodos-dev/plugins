@@ -382,7 +382,7 @@ struct ArithmeticNodeContext : NodeContext
 	}
 };
 
-void RegisterArithmeticNodePresets(bool isScalar) {
+void RegisterArithmeticNodePresets() {
 	std::vector<nosName> typeNames;
 	size_t count = 0;
 	auto res = nosEngine.GetPinDataTypeNames(0, &count);
@@ -424,8 +424,8 @@ void RegisterArithmeticNodePresets(bool isScalar) {
 			idx = idx == std::string::npos ? 0 : 1 + idx;
 			fb::TNodePreset preset;
 			fb::TNodeMenuInfo info;
-			info.category = "Math|" + std::string(isScalar ? "Scalar " : "") + binaryOpStr;
-			info.display_name = (isScalar ? "Scalar " : "") + binaryOpStr + " " + name.substr(idx);
+			info.category = "Math|" + binaryOpStr;
+			info.display_name = binaryOpStr + " " + name.substr(idx);
 			preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
 			std::vector<uint8_t> data(1 + name.size());
 			memcpy(data.data(), name.data(), name.size());
@@ -440,21 +440,20 @@ void RegisterArithmeticNodePresets(bool isScalar) {
 	std::vector<nosFbNodePresetPtr> fbNodePresets;
 	for (auto& buf : nodePresets)
 		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
-	nosEngine.RegisterNodePresets(nos::Name("nos.reflect." + (isScalar ? NSN_Arithmetic.AsString() : NSN_ScalarArithmetic.AsString())), fbNodePresets.size(), fbNodePresets.data());
+	nosEngine.RegisterNodePresets(nos::Name("nos.reflect." + NSN_Arithmetic.AsString()), fbNodePresets.size(), fbNodePresets.data());
 
 }
 
 nosResult RegisterArithmetic(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Arithmetic, ArithmeticNodeContext<false>, fn);
-	RegisterArithmeticNodePresets(false);
+	RegisterArithmeticNodePresets();
 	return NOS_RESULT_SUCCESS;
 }
 
 nosResult RegisterScalarArithmetic(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_ScalarArithmetic, ArithmeticNodeContext<true>, fn);
-	RegisterArithmeticNodePresets(true);
 	return NOS_RESULT_SUCCESS;
 }
 
