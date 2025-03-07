@@ -165,26 +165,7 @@ struct ArithmeticNodeContext : NodeContext
 
 			Type = nos::TypeInfo(*newTypeName);
 
-			for (auto pin : *node->pins()) {
-				pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-					pin->id(),
-					0,
-					nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-					nos::Name(Type->TypeName).AsCStr()));
-			}
-
-			HandleEvent(CreateAppEvent(fbb,
-				CreatePartialNodeUpdateDirect(fbb,
-					&NodeId,
-					nos::ClearFlags::NONE,
-					0,
-					0,
-					0,
-					0,
-					0,
-					0,
-					0,
-					&pinsToUpdate)));
+			PinResolveRequest(nos::Name((*node->pins())[0]->name()->str()), Type->TypeName);
 		}
 		if constexpr (IsScalarArithmetic)
 		{
