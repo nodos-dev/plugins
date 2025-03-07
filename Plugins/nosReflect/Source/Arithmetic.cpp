@@ -160,12 +160,13 @@ struct ArithmeticNodeContext : NodeContext
 			}
 		}
 		if (newTypeName && *newTypeName != NSN_TypeNameGeneric) {
-			flatbuffers::FlatBufferBuilder fbb;
-			std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
-
 			Type = nos::TypeInfo(*newTypeName);
-
-			PinResolveRequest(nos::Name((*node->pins())[0]->name()->str()), Type->TypeName);
+			if (node->class_name()->str() == "nos.reflect." + NSN_ArithmeticDynamic.AsString()) {
+				if (node->pins() && node->pins()->size())
+					ResolvePinsForArithmeticDynamic(node);
+				else
+					CreatePins();
+			}
 		}
 		if constexpr (IsScalarArithmetic)
 		{
@@ -185,6 +186,58 @@ struct ArithmeticNodeContext : NodeContext
 
 		if (Operator)
 			SetOperator(*Operator, false);
+	}
+
+	void ResolvePinsForArithmeticDynamic(const fb::Node* node) {
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
+		for (auto pin : *node->pins()) {
+			pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb, pin->id(), nullptr, nos::fb::CreatePinOrphanStateDirect(fbb)));
+		}
+		HandleEvent(CreateAppEvent(fbb,
+			CreatePartialNodeUpdateDirect(fbb,
+				&NodeId,
+				ClearFlags::NONE,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				&pinsToUpdate)));
+
+	}
+
+	void CreatePins() {
+		auto& type = *Type;
+		auto defBuf = GetDefaultValueOfType(type->TypeName); // TODO: This can be freed after type is unloaded, so beware.
+		if (!defBuf)
+			return;
+		nos::Buffer buf = defBuf->GetBuffer();
+		std::vector<uint8_t> data = buf;
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd = {};
+
+		std::vector<nosName> pinNames = { NOS_NAME("A"), NOS_NAME("B"), NOS_NAME("Output")};
+		std::vector<nos::fb::ShowAs> pinShowAs = { nos::fb::ShowAs::INPUT_PIN, nos::fb::ShowAs::INPUT_PIN, nos::fb::ShowAs::OUTPUT_PIN };
+		std::vector<nos::fb::CanShowAs> pinCanShowAs = { nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_ONLY };
+		for (uint32_t pinIndx = 0; pinIndx < pinNames.size(); pinIndx++) {
+			nos::fb::TPin pin{};
+			uuid id = nosEngine.GenerateID();
+			pin.id = id;
+			pin.name = nos::Name(pinNames[pinIndx]).AsCStr();
+			pin.type_name = nos::Name(Type->TypeName).AsCStr();
+			pin.show_as = pinShowAs[pinIndx];
+			pin.can_show_as = pinCanShowAs[pinIndx];
+			pin.data = data;
+			pin.display_name = nos::Name(pinNames[pinIndx]).AsCStr();
+			pinsToAdd.push_back(fb::CreatePin(fbb, &pin));
+		}
+
+		HandleEvent(CreateAppEvent(
+			fbb,
+			CreatePartialNodeUpdateDirect(fbb, &NodeId, nos::ClearFlags::NONE, nullptr, &pinsToAdd)));
 	}
 
 	void SetOperator(reflect::BinaryOperator op, bool addTemplateParams)
@@ -361,7 +414,7 @@ struct ArithmeticNodeContext : NodeContext
 		templateParam->value = nos::Buffer::From(op);
 
 		templateParam->type_name = "nos.reflect.BinaryOperator";
-		tNode.class_name = "nos.reflect." + NSN_Arithmetic.AsString();
+		tNode.class_name = "nos.reflect." + NSN_ArithmeticDynamic.AsString();
 		std::string type = "float";
 		for (auto& pin : tNode.pins)
 		{
@@ -440,13 +493,18 @@ void RegisterArithmeticNodePresets() {
 	std::vector<nosFbNodePresetPtr> fbNodePresets;
 	for (auto& buf : nodePresets)
 		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
-	nosEngine.RegisterNodePresets(nos::Name("nos.reflect." + NSN_Arithmetic.AsString()), fbNodePresets.size(), fbNodePresets.data());
-
+	nosEngine.RegisterNodePresets(nos::Name("nos.reflect." + NSN_ArithmeticDynamic.AsString()), fbNodePresets.size(), fbNodePresets.data());
 }
 
 nosResult RegisterArithmetic(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Arithmetic, ArithmeticNodeContext<false>, fn);
+	return NOS_RESULT_SUCCESS;
+}
+
+nosResult RegisterArithmeticDynamic(nosNodeFunctions* fn)
+{
+	NOS_BIND_NODE_CLASS(NSN_ArithmeticDynamic, ArithmeticNodeContext<false>, fn);
 	RegisterArithmeticNodePresets();
 	return NOS_RESULT_SUCCESS;
 }
