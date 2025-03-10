@@ -170,7 +170,8 @@
             "display_name": "Log",
             "category": "Arithmetic",
             "name_aliases": [
-              "logarithm", "ln"
+              "logarithm",
+              "ln"
             ]
           },
           "params": [
@@ -207,6 +208,13 @@
             "connection_conditions": "!resource"
           }
         ]
+      }
+    },
+    {
+      "class_name": "ArithmeticDynamic",
+      "hide_in_context_menu": true,
+      "node": {
+        "contents_type": "Job"
       }
     },
     {
@@ -478,7 +486,8 @@
         "category": "Variables",
         "display_name": "Get Variable",
         "name_aliases": [
-          "load", "fetch",
+          "load",
+          "fetch",
           "retrieve"
         ]
       },
@@ -506,7 +515,7 @@
         "functions": [
           {
             "class_name": "OnVariableUpdated",
-			"scheduling_type": "Event"
+            "scheduling_type": "Event"
           }
         ]
       }
@@ -520,7 +529,8 @@
             "display_name": "Scalar Add",
             "category": "Arithmetic",
             "name_aliases": [
-              "plus", "sum"
+              "plus",
+              "sum"
             ]
           },
           "params": [
@@ -536,7 +546,8 @@
             "display_name": "Scalar Sub",
             "category": "Arithmetic",
             "name_aliases": [
-              "minus", "difference"
+              "minus",
+              "difference"
             ]
           },
           "params": [
@@ -552,7 +563,8 @@
             "display_name": "Scalar Mul",
             "category": "Arithmetic",
             "name_aliases": [
-              "times", "product"
+              "times",
+              "product"
             ]
           },
           "params": [
@@ -568,7 +580,8 @@
             "display_name": "Scalar Div",
             "category": "Arithmetic",
             "name_aliases": [
-              "divide", "quotient"
+              "divide",
+              "quotient"
             ]
           },
           "params": [
@@ -584,7 +597,8 @@
             "display_name": "Scalar Log",
             "category": "Arithmetic",
             "name_aliases": [
-              "logarithm", "ln"
+              "logarithm",
+              "ln"
             ]
           },
           "params": [
