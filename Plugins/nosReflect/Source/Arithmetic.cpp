@@ -320,6 +320,9 @@ struct ArithmeticNodeContext : NodeContext
 				return NOS_RESULT_SUCCESS;
 			}
 		}
+		if (incomingType->BaseType == NOS_BASE_TYPE_STRUCT && !incomingType->ByteSize)
+			return NOS_RESULT_FAILED;
+
 		if (incomingType->AttributeCount == 0)
 			return NOS_RESULT_SUCCESS;
 		for (int i = 0; i < incomingType->AttributeCount; ++i)
@@ -453,25 +456,20 @@ void RegisterArithmeticNodePresets() {
 			nos::TypeInfo typeInfo(typeName);
 			if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
 				continue;
-			// If has 'skip_make' attribute
-			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT)
-			{
-
-				bool skip = true;
-				for (int i = 0; i < typeInfo->AttributeCount; ++i)
-				{
-					if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
-						skip = false;
-					else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("resource"))
-					{
-						skip = true;
-						break;
-					}
-				}
-				if (skip)
-					continue;
-			}
+			// Don't show table types
+			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT && !typeInfo->ByteSize)
+				continue;
+			// Don't show enums and arrays
 			if (typeInfo->BaseType == NOS_BASE_TYPE_UNION || typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+				continue;
+			// Don't show types with no builtin attribute
+			bool skip = true;
+			for (int i = 0; i < typeInfo->AttributeCount; ++i)
+			{
+				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+					skip = false;
+			}
+			if (skip)
 				continue;
 			std::string name = nos::Name(typeInfo.TypeName).AsString();
 			auto idx = name.find_last_of(".");
