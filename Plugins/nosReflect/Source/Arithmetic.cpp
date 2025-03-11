@@ -322,6 +322,11 @@ struct ArithmeticNodeContext : NodeContext
 		}
 		if (incomingType->BaseType == NOS_BASE_TYPE_STRUCT && !incomingType->ByteSize)
 			return NOS_RESULT_FAILED;
+		if (incomingType->BaseType == NOS_BASE_TYPE_ARRAY || incomingType->BaseType == NOS_BASE_TYPE_UNION)
+			return NOS_RESULT_FAILED;
+
+		if (Operator != BinaryOperator::ADD && incomingType->BaseType == NOS_BASE_TYPE_STRING)
+			return NOS_RESULT_FAILED;
 
 		if (incomingType->AttributeCount == 0)
 			return NOS_RESULT_SUCCESS;
@@ -473,6 +478,10 @@ void RegisterArithmeticNodePresets() {
 			// Don't show enums and arrays
 			if (typeInfo->BaseType == NOS_BASE_TYPE_UNION || typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
 				continue;
+
+			if (binaryOp != BinaryOperator::ADD && typeInfo->BaseType == NOS_BASE_TYPE_STRING)
+				continue;
+
 			std::string name = nos::Name(typeInfo.TypeName).AsString();
 			auto idx = name.find_last_of(".");
 			idx = idx == std::string::npos ? 0 : 1 + idx;

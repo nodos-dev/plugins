@@ -286,59 +286,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		}
 	}
 
-	std::vector<nosName> typeNames;
-	size_t count = 0;
-	auto res = nosEngine.GetPinDataTypeNames(0, &count);
-	if (NOS_RESULT_FAILED != res)
-	{
-		typeNames.resize(count);
-		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
-	}
-	std::vector<nos::Buffer> nodePresets;
-	for (auto& typeName : typeNames)
-	{
-		nos::TypeInfo typeInfo(typeName);
-		if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
-			continue;
-		// If has 'skip_make' attribute
-		if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
-			|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
-		{
-
-			bool skip = true;
-			for (int i = 0; i < typeInfo->AttributeCount; ++i)
-			{
-				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
-					skip = false;
-				else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
-				{
-					skip = true;
-					break;
-				}
-			}
-			if (skip)
-				continue;
-		}
-		std::string name = nos::Name(typeInfo.TypeName).AsString();
-		auto idx = name.find_last_of(".");
-		idx = idx == std::string::npos ? 0 : 1 + idx;
-		fb::TNodePreset preset;
-		fb::TNodeMenuInfo info;
-		info.category = "Type";
-		info.display_name = "Mul " + name.substr(idx);
-		preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
-		std::vector<uint8_t> data(1 + name.size());
-		memcpy(data.data(), name.data(), name.size());
-		preset.params.emplace_back(new fb::TTemplateParameter{ {}, "Operator", "nos.reflect.BinaryOperator", std::move(data)});
-		flatbuffers::FlatBufferBuilder fbb;
-		fbb.Finish(CreateNodePreset(fbb, &preset));
-		nos::Buffer buf = fbb.Release();
-		nodePresets.push_back(std::move(buf));
-	}
-	std::vector<nosFbNodePresetPtr> fbNodePresets;
-	for (auto& buf : nodePresets)
-		fbNodePresets.push_back(flatbuffers::GetMutableRoot<nos::fb::NodePreset>(buf.Data()));
-	nosEngine.RegisterNodePresets(NOS_NAME_STATIC("nos.math.Multiply"), fbNodePresets.size(), fbNodePresets.data());
 	return NOS_RESULT_SUCCESS;
 }
 
