@@ -36,6 +36,7 @@ struct BoundedQueueNodeContext : RingNodeBase
 		cpy->FrameNumber = slot->FrameNumber;
 
 		Ring->EndPop(slot);
+		SendRingStats("End Copy From");
 		SendScheduleRequest(1);
 		return NOS_RESULT_SUCCESS;
 	}

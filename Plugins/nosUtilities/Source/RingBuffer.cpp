@@ -61,6 +61,7 @@ struct RingBufferNodeContext : RingNodeBase
 				return;
 			Ring->EndPop(LastPopped);
 			LastPopped = nullptr;
+			SendRingStats("End Frame");
 		}
 	}
 };

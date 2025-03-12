@@ -726,6 +726,8 @@ struct RingNodeBase : NodeContext
 	std::condition_variable ModeCV;
 	std::mutex ModeMutex;
 	std::atomic<RingMode> Mode = RingMode::CONSUME;
+	std::size_t RemainingRepeatableCount = 0;
+
 	std::atomic_bool RepeatWhenFilling = false;
 	TypeInfo TypeInfo;
 
@@ -803,11 +805,13 @@ struct RingNodeBase : NodeContext
 
 	virtual std::string GetName() const = 0;
 
-	void SendRingStats() const
+	void SendRingStats(std::string_view state) const
 	{
-		nosEngine.WatchLog((NodeName.AsString() + " Read Size").c_str(), std::to_string(Ring->Read.Pool.size()).c_str());
-		nosEngine.WatchLog((NodeName.AsString() + " Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
-		nosEngine.WatchLog((NodeName.AsString() + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
+		auto nodeName = NodeName.AsString();
+		nosEngine.WatchLog((nodeName + " Read Size").c_str(), std::to_string(Ring->Read.Pool.size()).c_str());
+		nosEngine.WatchLog((nodeName + " Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
+		nosEngine.WatchLog((nodeName + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
+		nosEngine.WatchLog((nodeName + " State").c_str(), state.data());
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
@@ -859,6 +863,8 @@ struct RingNodeBase : NodeContext
 		}
 
 		typename ResourceInterface::ResourceBase* slot = nullptr;
+		
+		SendRingStats("Pre Push");
 		{
 			nos::util::Stopwatch sw;
 			ScopedProfilerEvent _({ .Name = "Wait For Empty Slot" });
@@ -872,6 +878,7 @@ struct RingNodeBase : NodeContext
 		if(Mode == RingMode::FILL)
 			isFillComplete = Ring->Write.Pool.size() == 0;
 		Ring->EndPush(slot);
+		SendRingStats("Post Push");
 
 		if (isFillComplete)
 		{
@@ -890,7 +897,6 @@ struct RingNodeBase : NodeContext
 	nosResult CommonCopyFrom(nosCopyInfo* cpy, ResourceInterface::ResourceBase** foundSlot) {
 		if (!Ring || Ring->Exit)
 			return NOS_RESULT_FAILED;
-		SendRingStats();
 
 		// This is needed since out pins are created as dirty and CopyFrom is called for dirty pins.
 		if (!IsOutLive)
@@ -899,14 +905,18 @@ struct RingNodeBase : NodeContext
 		if (Mode == RingMode::FILL)
 		{
 			//Sleep for 100 ms & if still Fill, return pending
-			if (RepeatWhenFilling)
+			if (RepeatWhenFilling && RemainingRepeatableCount > 0)
+			{
+				RemainingRepeatableCount--;
 				return NOS_RESULT_SUCCESS;
+			}
 			std::unique_lock lock(ModeMutex);
 			if (!ModeCV.wait_for(lock, std::chrono::milliseconds(100), [this] { return Mode != RingMode::FILL; }))
 				return NOS_RESULT_PENDING;
 		}
 
 		ResourceInterface::ResourceBase* slot;
+		SendRingStats("Pre Begin Pop");
 		{
 			ScopedProfilerEvent _({ .Name = "Wait For Filled Slot" });
 			slot = Ring->BeginPop(100);
@@ -914,6 +924,7 @@ struct RingNodeBase : NodeContext
 		// If timeout or exit
 		if (!slot)
 			return Ring->Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
+		SendRingStats("Post Begin Pop");
 
 		nosResourceShareInfo output;
 		nos::Buffer outPinVal;
@@ -986,6 +997,7 @@ struct RingNodeBase : NodeContext
 			NeedsRecreation = false;
 		}
 		auto emptySlotCount = Ring->Write.Pool.size();
+		RemainingRepeatableCount = emptySlotCount - 1;
 		nosScheduleNodeParams schedule{ .NodeId = NodeId, .AddScheduleCount = emptySlotCount };
 		nosEngine.ScheduleNode(&schedule);
 		Ring->Exit = false;
