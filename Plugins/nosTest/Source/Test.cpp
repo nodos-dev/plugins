@@ -215,7 +215,7 @@ struct TestPluginFunctions : PluginFunctions
 	}
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 13;
+		outCount = 14;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -321,6 +321,13 @@ struct TestPluginFunctions : PluginFunctions
 		};
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Print"), PrintNode, outFunctions[12]);
+		outFunctions[13]->ClassName = NOS_NAME_STATIC("nos.test.Crash");
+		outFunctions[13]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		{
+			nosEngine.LogI("Crashing...");
+			*(int*)0 = 0;
+			return NOS_RESULT_SUCCESS;
+		};
 		return NOS_RESULT_SUCCESS;
 	}
 };
