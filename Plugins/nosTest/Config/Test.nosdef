@@ -664,6 +664,52 @@
 					}
 				]
 			}
+		},
+		{
+			"class_name": "Exception",
+			"menu_info": {
+				"category": "Test"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "IsStockTexture",
+			"menu_info": {
+				"category": "Test"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output",
+						"type_name": "bool",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
 		}
 	]
 }

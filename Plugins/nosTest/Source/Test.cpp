@@ -215,7 +215,7 @@ struct TestPluginFunctions : PluginFunctions
 	}
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 14;
+		outCount = 16;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -326,6 +326,26 @@ struct TestPluginFunctions : PluginFunctions
 		{
 			nosEngine.LogI("Crashing...");
 			*(int*)0 = 0;
+			return NOS_RESULT_SUCCESS;
+		};
+		outFunctions[14]->ClassName = NOS_NAME_STATIC("nos.test.Exception");
+		outFunctions[14]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		{
+			nosEngine.LogI("Throwing exception...");
+			throw std::runtime_error("Exception thrown");
+			return NOS_RESULT_SUCCESS;
+		};
+		outFunctions[15]->ClassName = NOS_NAME_STATIC("nos.test.IsStockTexture");
+		outFunctions[15]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+		{
+			auto pinValues = nos::GetPinValues(params);
+			auto outBool = InterpretPinValue<bool>(pinValues[NOS_NAME("Output")]);
+			auto in = vkss::DeserializeTextureInfo(pinValues[NOS_NAME("Input")]);
+			nosStockTexture outStock;
+			if (nosVulkan->IsStockTexture(&in, &outStock) == NOS_TRUE)
+				*outBool = true;
+			else
+				*outBool = false;
 			return NOS_RESULT_SUCCESS;
 		};
 		return NOS_RESULT_SUCCESS;
