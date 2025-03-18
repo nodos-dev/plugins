@@ -77,29 +77,29 @@ struct ReadImageContext : NodeContext
             return;
         }
 
-        flatbuffers::FlatBufferBuilder fbb;
-        std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
+		auto messageDetailsFileRef = std::string("[File](") + NOS_URI_EXPLORER_PREFIX + nos::PathToUtf8(FilePath) + ")";
         switch(newState)
         {
         case State::Loading:
 		    TimeStarted = Clock::now();
-			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, "Loading image", fb::NodeStatusMessageType::INFO));
+			SetNodeStatusMessage("Loading image", fb::NodeStatusMessageType::INFO);
             break;
         case State::Idle:
         {
 			std::stringstream ss;
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
 			std::string fileName = nos::PathToUtf8(FilePath.filename());
-			auto statusText = std::string("Image ") + fileName + " loaded in " + std::to_string(dt) + "ms";
-			msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, statusText.c_str(), fb::NodeStatusMessageType::INFO));
+			auto messageDetails = messageDetailsFileRef + " is loaded in " + std::to_string(dt) + "ms";
+			SetNodeStatusMessages(std::vector{ nos::fb::TNodeStatusMessage{{}, "Image loaded", fb::NodeStatusMessageType::INFO, messageDetails, 5}});
             break;
         }
         case State::Failed:
-            msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, "Failed to load image", fb::NodeStatusMessageType::FAILURE));
-            break;
+		{
+			auto messageDetails = messageDetailsFileRef + " failed to load";
+			SetNodeStatusMessages(std::vector{ nos::fb::TNodeStatusMessage{{}, "Failed to load image", fb::NodeStatusMessageType::FAILURE, messageDetails, 5} });
+			break;
+		}
         }
-
-        HandleEvent(CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 	}
 
 	void FlushImageDecRefCallbacks()
