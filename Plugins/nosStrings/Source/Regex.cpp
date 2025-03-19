@@ -39,7 +39,7 @@ struct RegexNode : NodeContext
 		{
 			Groups.clear();
 			nosEngine.SetPinValue(outMatchPin, nos::Buffer::From(false));
-			SetNodeStatusMessage(e.what(), fb::NodeStatusMessageType::FAILURE);
+			SetNodeStatusMessages({{{}, "Exception at execution", fb::NodeStatusMessageType::FAILURE, e.what(), 5, true, false}});
 			return NOS_RESULT_SUCCESS;
 		}
 
@@ -55,7 +55,7 @@ struct RegexNode : NodeContext
 			for (size_t i = 0; i < curGroups.size(); ++i)
 			{
 				std::string groupStr = "Group " + std::to_string(i) + ": " + curGroups[i];
-				messages.push_back({{}, groupStr, fb::NodeStatusMessageType::INFO });
+				messages.push_back({{}, groupStr, fb::NodeStatusMessageType::INFO, "", 3, true, false});
 			}
 			SetNodeStatusMessages(messages);
 		}

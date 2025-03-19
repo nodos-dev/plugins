@@ -90,13 +90,13 @@ struct ReadImageContext : NodeContext
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
 			std::string fileName = nos::PathToUtf8(FilePath.filename());
 			auto messageDetails = messageDetailsFileRef + " is loaded in " + std::to_string(dt) + "ms";
-			SetNodeStatusMessages(std::vector{ nos::fb::TNodeStatusMessage{{}, "Image loaded", fb::NodeStatusMessageType::INFO, messageDetails, 5}});
+			SetNodeStatusMessages({{{}, "Image loaded", fb::NodeStatusMessageType::INFO, messageDetails, 5, true, true}});
             break;
         }
         case State::Failed:
 		{
 			auto messageDetails = messageDetailsFileRef + " failed to load";
-			SetNodeStatusMessages(std::vector{ nos::fb::TNodeStatusMessage{{}, "Failed to load image", fb::NodeStatusMessageType::FAILURE, messageDetails, 5} });
+			SetNodeStatusMessages({{{}, "Failed to load image", fb::NodeStatusMessageType::FAILURE, messageDetails, 10, true, true} });
 			break;
 		}
         }

@@ -52,9 +52,9 @@ struct VariableNodeBase : NodeContext
 		SetNodeStatusMessages(messages);
 	}
 
-	void SetStatus(VariableStatusItem item, fb::NodeStatusMessageType msgType, std::string text)
+	void SetStatus(VariableStatusItem item, fb::NodeStatusMessageType msgType, std::string text, std::string details, uint64_t timeout, bool popup)
 	{
-		StatusMessages[item] = fb::TNodeStatusMessage{{}, std::move(text), msgType};
+		StatusMessages[item] = fb::TNodeStatusMessage{{}, std::move(text), msgType, details, timeout, true, popup};
 		UpdateStatus();
 	}
 
@@ -256,7 +256,7 @@ struct SetVariableNode : VariableNodeBase
 	{
 		if (!HasType())
 		{
-			SetStatus(VariableStatusItem::TypeName, fb::NodeStatusMessageType::WARNING, "Type not set");
+			SetStatus(VariableStatusItem::TypeName, fb::NodeStatusMessageType::WARNING, "Type not set", "", 5, true);
 			SetPinOrphanState(NSN_Value, fb::PinOrphanStateType::PASSIVE, "Data type not set");
 		}
 		else
@@ -269,9 +269,9 @@ struct SetVariableNode : VariableNodeBase
 	void CheckName()
 	{
 		if (!HasName())
-			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name");
+			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name", "", 5, true);
 		else
-			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::INFO, Name.AsString());
+			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::INFO, Name.AsString(), "", 2, false);
 	}
 	
 	std::optional<nos::Buffer> Value;
@@ -303,7 +303,7 @@ struct GetVariableNode : VariableNodeBase
 				auto newName = static_cast<const char*>(value.Data());
 				if (strlen(newName) == 0)
 				{
-					SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name");
+					SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name", "", 5, true);
 					return;
 				}
 				if (newName == Name)
@@ -321,7 +321,7 @@ struct GetVariableNode : VariableNodeBase
 					}
 					else
 					{
-						SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to get variable " + std::string(newName));
+						SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to get variable " + std::string(newName), "", 5, true);
 						SetPinValue(NOS_NAME("Name"), "");
 					}
 					return;
@@ -331,7 +331,7 @@ struct GetVariableNode : VariableNodeBase
 				ClearStatus(VariableStatusItem::VariableName);
 				SetPinType(NOS_NAME("Value"), outTypeName);
 				SetPinValue(NOS_NAME("Value"), outValue);
-				SetNodeStatusMessage(Name.AsString(), fb::NodeStatusMessageType::INFO);
+				SetNodeStatusMessages({{{}, Name.AsString(), fb::NodeStatusMessageType::INFO, "Variable type and value set", 3, true, false}});
 			});
 	}
 
@@ -346,7 +346,7 @@ struct GetVariableNode : VariableNodeBase
 		auto res = nosVariables->Set(Name, valuePin->TypeName, initialValue.GetInternal());
 		if (res != NOS_RESULT_SUCCESS)
 		{
-			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to set variable " + Name.AsString());
+			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to set variable " + Name.AsString(), "", 5, true);
 			SetPinValue(NOS_NAME("Name"), "");
 			return;
 		}

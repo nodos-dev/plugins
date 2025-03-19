@@ -25,7 +25,7 @@ namespace nos::utilities
 			if (statusMessage.empty())
 				ClearNodeStatusMessages();
 			else
-				SetNodeStatusMessage(std::move(statusMessage), statusType);
+				SetNodeStatusMessages({ {{}, std::move(statusMessage), statusType, "", 3, true, true}});
 			return NOS_RESULT_SUCCESS;
 		}
 

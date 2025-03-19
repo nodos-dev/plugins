@@ -158,7 +158,7 @@ struct IndexOfNode : NodeContext
 		{
 			if (index == -1)
 			{
-				SetNodeStatusMessage("No such value found in the array", fb::NodeStatusMessageType::FAILURE);
+				SetNodeStatusMessages({{{}, "No such value found in the array", fb::NodeStatusMessageType::FAILURE, "", 5, false} });
 				SetPinOrphanState(NSN_Index, fb::PinOrphanStateType::PASSIVE, "No such value found in the array");
 			}
 			else

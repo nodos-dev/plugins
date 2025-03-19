@@ -105,7 +105,7 @@ struct Indexer : NodeContext
 		Index = newIndex;
     	if (Index >= ArraySize)
     	{
-    		SetNodeStatusMessage("Array index out of bounds", fb::NodeStatusMessageType::FAILURE);
+			SetNodeStatusMessages({{{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true}});
 			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
     		return false;
     	}

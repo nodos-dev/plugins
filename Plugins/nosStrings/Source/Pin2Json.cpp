@@ -19,7 +19,7 @@ struct Pin2JsonNode : NodeContext
 			ClearNodeStatusMessages();
 		}
 		else
-			SetNodeStatusMessage("Unable to convert data to JSON", fb::NodeStatusMessageType::FAILURE);
+			SetNodeStatusMessages({{{}, "Unable to convert pin value to JSON", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 		return NOS_RESULT_SUCCESS;
 	}
 

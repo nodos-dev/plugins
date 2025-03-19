@@ -15,7 +15,7 @@ struct Json2PinNode : NodeContext
 		auto& outPin = execParams[NOS_NAME("Out")];
 		if(outPin.TypeName == NOS_NAME("nos.Generic"))
 		{
-			SetNodeStatusMessage("Out pin is not connected to typed pin", fb::NodeStatusMessageType::FAILURE);
+			SetNodeStatusMessages({{{}, "Out pin is not connected to typed pin", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 			return NOS_RESULT_FAILED;
 		}
 		if (auto buf = GenerateBufferFromJson(outPin.TypeName, (const char*)(*jsonPin.Data).Data))
@@ -24,7 +24,7 @@ struct Json2PinNode : NodeContext
 			ClearNodeStatusMessages();
 		}
 		else
-			SetNodeStatusMessage("Unable to convert data to JSON", fb::NodeStatusMessageType::FAILURE);
+			SetNodeStatusMessages({{{}, "Unable to generate pin value from JSON", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 		return NOS_RESULT_SUCCESS;
 	}
 

@@ -91,7 +91,7 @@ struct EvalNodeContext : NodeContext
 		{
 			auto exprStr = InterpretPinValue<const char>(value.Data);
 			if (strlen(exprStr) == 0)
-				SetStatus("No math expression is provided", fb::NodeStatusMessageType::WARNING);
+				SetStatus("No math expression is provided", fb::NodeStatusMessageType::WARNING, "", 4, true);
 			nosEngine.LogI("Compiling expression: %s", exprStr);
 			if (strcmp(Expression.c_str(), exprStr) != 0)
 			{
@@ -103,19 +103,19 @@ struct EvalNodeContext : NodeContext
 
 	bool ShowExpressionInNode = false;
 
-	void SetStatus(const std::string& message, fb::NodeStatusMessageType type)
+	void SetStatus(const std::string& message, fb::NodeStatusMessageType type, const std::string& details, uint64_t timeout, bool popup)
 	{
 		nosEngine.LogD("Eval: Setting node status");
 		if (type == fb::NodeStatusMessageType::FAILURE)
 		{
 			SetPinOrphanState(NOS_NAME("Result"), fb::PinOrphanStateType::ORPHAN, message.c_str());
-			SetNodeStatusMessage(message, type);
+			SetNodeStatusMessages({{{}, message, type, details, timeout, true, popup} });
 		}
 		else
 		{
 			SetPinOrphanState(NOS_NAME("Result"), fb::PinOrphanStateType::ACTIVE);
 			if (ShowExpressionInNode)
-				SetNodeStatusMessage(message, type);
+				SetNodeStatusMessages({{{}, message, type, details, timeout, true, popup} });
 			else
 				ClearNodeStatusMessages();
 		}
@@ -174,7 +174,7 @@ struct EvalNodeContext : NodeContext
 			constexpr std::string_view VARIABLE_NAMES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 			if (Variables.size() >= VARIABLE_NAMES.size())
 			{
-				SetStatus("Maximum number of inputs reached", fb::NodeStatusMessageType::WARNING);
+				SetStatus("Maximum number of inputs reached", fb::NodeStatusMessageType::WARNING, "", 5, true);
 				return;
 			}
 			// Find the first available variable name
@@ -193,7 +193,7 @@ struct EvalNodeContext : NodeContext
 			}
 			if (pinName.empty())
 			{
-				SetStatus("Failed to add input", fb::NodeStatusMessageType::FAILURE);
+				SetStatus("Failed to add input", fb::NodeStatusMessageType::FAILURE, "Pin name is empty", 5, true);
 				return;
 			}
 			std::vector pins = {
@@ -228,7 +228,7 @@ struct EvalNodeContext : NodeContext
 			vars.insert(std::move(var));
 			if (!displayNames.insert(pin->DisplayName).second)
 			{
-				SetStatus("Duplicate name: " + pin->DisplayName.AsString(), fb::NodeStatusMessageType::FAILURE);
+				SetStatus("Duplicate name: " + pin->DisplayName.AsString(), fb::NodeStatusMessageType::FAILURE, "There is already a pin with the same name", 5, true);
 				return false;
 			}
 		}
@@ -237,14 +237,14 @@ struct EvalNodeContext : NodeContext
 			Parser.set_variables_and_functions(vars);
 			if (!Parser.compile(Expression.c_str()))
 			{
-				SetStatus("Failed to compile expression", fb::NodeStatusMessageType::FAILURE);
+				SetStatus("Failed to compile expression", fb::NodeStatusMessageType::FAILURE, "", 5, true);
 				return false;
 			}
 		} catch (std::runtime_error& err) {
-			SetStatus(err.what(), fb::NodeStatusMessageType::FAILURE);
+			SetStatus("Exception at compilation", fb::NodeStatusMessageType::FAILURE, err.what(), 10, true);
 			return false;
 		}
-		SetStatus(Expression, fb::NodeStatusMessageType::INFO);
+		SetStatus(Expression, fb::NodeStatusMessageType::INFO, "", 5, false);
 		return true;
 	}
 
@@ -263,7 +263,7 @@ struct EvalNodeContext : NodeContext
 		}
 		catch (std::runtime_error& err)
 		{
-			SetStatus(err.what(), fb::NodeStatusMessageType::FAILURE);
+			SetStatus("Exception at evaluation", fb::NodeStatusMessageType::FAILURE, err.what(), 5, true);
 			return NOS_RESULT_FAILED;
 		}
 	}
