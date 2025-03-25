@@ -25,7 +25,7 @@ using Clock = std::chrono::high_resolution_clock;
 
 namespace nos::utilities
 {
-NOS_REGISTER_NAME_SPACED(Nos_Utilities_ReadImage, "nos.utilities.ReadImage")
+NOS_REGISTER_NAME_SPACED(Nos_Utilities_StbiLoad, "nos.utilities.StbiLoad")
 
 enum State
 {
@@ -34,7 +34,7 @@ enum State
     Failed = 2,
 };
 
-struct ReadImageContext : NodeContext
+struct StbiLoadContext : NodeContext
 {
     std::atomic<State> CurrentState;
     decltype(Clock::now()) TimeStarted;
@@ -42,7 +42,7 @@ struct ReadImageContext : NodeContext
 	std::mutex OutImageDecRefCallbacksMutex;
 	std::vector<vkss::Resource> OutPendingImageRefs;
 
-	ReadImageContext(nosFbNodePtr node) : 
+	StbiLoadContext(nosFbNodePtr node) :
 		NodeContext(node), 
 		CurrentState(State::Idle), 
 		TimeStarted(Clock::now())
@@ -64,12 +64,12 @@ struct ReadImageContext : NodeContext
 			LoadImage(path, *GetPinId(NSN_Out), sRGB);
 	}
 
-	~ReadImageContext()
+	~StbiLoadContext()
 	{
 		FlushImageDecRefCallbacks();
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) {
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
 		nos::NodeExecuteParams execParams(params);
 		nos::uuid outPinId = execParams[NSN_Out].Id;
 		bool sRGB = *InterpretPinValue<bool>(execParams[NSN_sRGB].Data->Data);
@@ -179,9 +179,9 @@ struct ReadImageContext : NodeContext
 
 };
 
-nosResult RegisterReadImage(nosNodeFunctions* fn)
+nosResult RegisterStbiLoad(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_ReadImage, ReadImageContext, fn);
+	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_StbiLoad, StbiLoadContext, fn);
 	return NOS_RESULT_SUCCESS;
 }
 

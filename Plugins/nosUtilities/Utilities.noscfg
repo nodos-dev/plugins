@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.9.3"
+			"version": "3.10.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -56,7 +56,8 @@
 		"Config/TextureMonitor.nosdef",
 		"Config/SwitchTrigger.nosdef",
 		"Config/PrintLog.nosdef",
-		"Config/ScheduleOnRequest.nosdef"
+		"Config/ScheduleOnRequest.nosdef",
+		"Config/ReadImage.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

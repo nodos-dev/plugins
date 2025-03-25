@@ -1,14 +1,14 @@
 {
 	"nodes": [
 		{
-			"class_name": "ReadImage",
+			"class_name": "StbiLoad",
 			"menu_info": {
 				"category": "Media",
-				"display_name": "Read Image",
-				"name_aliases": [ "Load texture from disk", "JPEG", "JPG", "PNG", "TGA", "BMP", "PSD", "GIF", "HDR", "PIC" ]
+				"display_name": "STBI Load",
+				"name_aliases": [ "Load", "Texture", "Image", "JPEG", "JPG", "PNG", "TGA", "BMP", "PSD", "GIF", "HDR", "PIC" ]
 			},
 			"node": {
-				"class_name": "ReadImage",
+				"class_name": "StbiLoad",
 				"contents_type": "Job",
 				"description": "Reads an image file from filesystem using STB library",
 				"pins": [
@@ -37,7 +37,8 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 					}
-				]
+				],
+				"functions": []
 			}
 		},
 		{

@@ -4,6 +4,7 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <glm/glm.hpp>
 #include <Builtins_generated.h>
+#include <Module_generated.h>
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
@@ -30,7 +31,7 @@ enum Utilities : int
 	ChannelViewer,
 	Merge,
 	Time,
-	ReadImage,
+	StbiLoad,
 	WriteImage,
 	CPUSleep,
 	UploadBuffer,
@@ -56,7 +57,7 @@ enum Utilities : int
 
 nosResult RegisterMerge(nosNodeFunctions*);
 nosResult RegisterTime(nosNodeFunctions*);
-nosResult RegisterReadImage(nosNodeFunctions*);
+nosResult RegisterStbiLoad(nosNodeFunctions*);
 nosResult RegisterWriteImage(nosNodeFunctions*);
 nosResult RegisterChannelViewer(nosNodeFunctions*);
 nosResult RegisterResize(nosNodeFunctions*);
@@ -82,9 +83,10 @@ nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 
+static nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer);
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
-	*outSize = Utilities::Count;
+	*outSize = Utilities::Count + 1;
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
@@ -104,7 +106,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			break;
 			GEN_CASE_NODE(Merge)
 			GEN_CASE_NODE(Time)
-			GEN_CASE_NODE(ReadImage)
+			GEN_CASE_NODE(StbiLoad)
 			GEN_CASE_NODE(WriteImage)
 			GEN_CASE_NODE(ChannelViewer)
 			GEN_CASE_NODE(Resize)
@@ -129,6 +131,79 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(ScheduleOnRequest)
 		}
 	}
+	
+	*outList[(int)Utilities::Count] = nosNodeFunctions{
+		.ClassName = NOS_NAME("nos.utilities.ReadImage"),
+		.MigrateNode = MigrateReadImageToGraph
+	};
+	return NOS_RESULT_SUCCESS;
+}
+
+static nos::fb::TPin* UpdateEveryReferredBy(nos::fb::TGraph* graph, nos::fb::UUID oldId, nos::fb::UUID newId) {
+	for (auto const& node : graph->nodes)
+		for (auto const& pin : node->pins)
+			for (auto& referredById : pin->referred_by)
+				if (referredById == oldId) {
+					referredById = newId;
+				}
+	return nullptr;
+};
+
+static nosResult UpdateSourcePinData(nos::fb::TGraph* graph, nos::fb::UUID pinId, std::vector<uint8_t> const& data) {
+	for (auto const& node : graph->nodes)
+		for (auto const& pin : node->pins)
+			if (pin->id == pinId) {
+				pin->data = data;
+				return NOS_RESULT_SUCCESS;
+			}
+	return NOS_RESULT_FAILED;
+}
+
+static nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
+	auto pluginVersion = node->plugin_version();
+	bool needsMigration = !pluginVersion || pluginVersion->major() <= 3 && pluginVersion->minor() < 10;
+	if (!needsMigration)
+		return NOS_RESULT_SUCCESS;
+	fb::TNode cur;
+	node->UnPackTo(&cur);
+	char path[256];
+	nosEngine.GetModuleFolderPath(nosEngine.Module->Id, 256, path);
+	std::string ReadImageGraphFile = ReadToString(std::string(path) + "/Config/ReadImage.nosdef");
+	auto graphBuffer = GenerateBufferFromJson(NOS_NAME(nos::fb::NodeDefinitions::GetFullyQualifiedName()), ReadImageGraphFile.c_str());
+	if (!graphBuffer) {
+		// Failed to read graph file
+		nosEngine.LogE("Failed to read graph file");
+		return NOS_RESULT_FAILED;
+	}
+	nos::fb::TNodeDefinitions read;
+	graphBuffer->As<nos::fb::NodeDefinitions>()->UnPackTo(&read);
+	nos::fb::TNode outNode;
+	outNode = *read.nodes[0]->node;
+	auto matchPinIds = [&](const char* pinName, bool copyData) {
+		bool isFound = false;
+		for (auto& targetPin : outNode.pins)
+			if (targetPin->name == pinName && !isFound)
+				for (auto const& sourcePin : cur.pins)
+					if (sourcePin->name == pinName) {
+						auto prevId = targetPin->id;
+						targetPin->id = sourcePin->id;
+
+						if (auto targetPinPortal = targetPin->contents.AsPortalPin()) {
+							UpdateEveryReferredBy(outNode.contents.AsGraph(), prevId, targetPin->id);
+							UpdateSourcePinData(outNode.contents.AsGraph(), targetPinPortal->source_id, sourcePin->data);
+						}
+						else if (targetPin->type_name == sourcePin->type_name)
+							targetPin->data = sourcePin->data;
+						isFound = true;
+						break;
+					}
+		assert(isFound);
+	};
+	matchPinIds("Path", true);
+	matchPinIds("sRGB", true);
+	matchPinIds("Out", false);
+	auto nodeBuffer = EngineBuffer::CopyFrom(outNode);
+	*outBuffer = nodeBuffer.Release();
 	return NOS_RESULT_SUCCESS;
 }
 
