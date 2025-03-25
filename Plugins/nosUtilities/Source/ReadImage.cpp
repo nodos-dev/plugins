@@ -70,6 +70,28 @@ struct ReadImageContext : NodeContext
 		FlushImageDecRefCallbacks();
 	}
 
+	nosResult ExecuteNode(nosNodeExecuteParams* params) {
+		nos::NodeExecuteParams execParams(params);
+		nos::uuid outPinId = {};
+		bool sRGB = false;
+		for (auto& pin : execParams)
+		{
+			if (pin.first == NSN_Out)
+			{
+				outPinId = pin.second.Id;
+			}
+			else if (pin.first == NSN_sRGB)
+			{
+				sRGB = *InterpretPinValue<bool>(pin.second.Data->Data);
+			}
+			else if (pin.first == NSN_Path)
+			{
+				FilePath = nos::Utf8ToPath(InterpretPinValue<const char>(pin.second.Data->Data));
+			}
+		}
+		return LoadImage(FilePath, outPinId, sRGB);
+	}
+
 	void UpdateStatus(State newState)
 	{
         if(newState == CurrentState.exchange(newState))
@@ -112,106 +134,65 @@ struct ReadImageContext : NodeContext
 	{
 		UpdateStatus(State::Loading);
 		FilePath = path;
-		std::thread([this, outPinId, path = nos::PathToUtf8(path), sRGB]() mutable {
-			try
-			{
-				int w, h, n;
-				uint8_t* img = stbi_load(path.c_str(), &w, &h, &n, 4);
-				if (!img)
-				{
-						nosEngine.LogE("Couldn't load image from %s.", path.c_str());
-						UpdateStatus(State::Failed);
-					return;
-				}
-
-				nosResourceShareInfo outResInfo = {
-					.Info = {.Type = NOS_RESOURCE_TYPE_TEXTURE,
-								.Texture = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}} };
-
-				// unless reading raw bytes, this is useless since samplers convert to linear space automatically
-				if (sRGB)
-					outResInfo.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
-
-				auto outResOpt = vkss::Resource::Create(outResInfo, "ReadImage Texture");
-				if (!outResOpt)
-				{
-					nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());
-					UpdateStatus(State::Failed);
-					return;
-				}
-				auto outRes = std::move(*outResOpt);
-
-				nosCmd cmd{};
-					nosCmdBeginParams beginParams {
-					.Name = NOS_NAME("ReadImage Load"),
-					.AssociatedNodeId = this->NodeId,
-					.OutCmdHandle = &cmd
-				};
-				nosVulkan->Begin(&beginParams);
-				nosVulkan->ImageLoad(cmd, img, nosVec2u(w, h), NOS_FORMAT_R8G8B8A8_SRGB, &outRes, nullptr);
-				nosCmdEndParams endParams{ .ForceSubmit = true };
-				nosVulkan->End(cmd, &endParams);
-
-				nosEngine.SetPinValue(outPinId, outRes.ToPinData());
-
-				{
-					std::lock_guard<std::mutex> lock(this->OutImageDecRefCallbacksMutex);
-					OutPendingImageRefs.push_back(std::move(outRes));
-				}
-
-				nosEngine.CallNodeFunction(this->NodeId, NOS_NAME_STATIC("OnImageLoaded"));
-
-				free(img);
-					UpdateStatus(State::Idle);
-				}
-				catch (const std::exception& e)
-				{
-					nosEngine.LogE("Error while loading image: %s", e.what());
-					UpdateStatus(State::Failed);
-				}
-
-		}).detach();
-		return NOS_RESULT_SUCCESS;
-	}
-
-	static nosResult OnImageLoaded(void* ctx, nosFunctionExecuteParams* params)
-	{
-		auto c = (ReadImageContext*)ctx;
-		c->FlushImageDecRefCallbacks();
-		return NOS_RESULT_SUCCESS;
-	}
-	
-	static nosResult Load(void* ctx, nosFunctionExecuteParams* params)
-	{
-		auto c = (ReadImageContext*)ctx;
-		if (c->CurrentState == State::Loading)
+		std::string pathUtf8 = nos::PathToUtf8(path);
+		try
 		{
-			nosEngine.LogE("Read Image is already loading an image.");
-			return NOS_RESULT_FAILED;
+			int w, h, n;
+			uint8_t* img = stbi_load(pathUtf8.c_str(), &w, &h, &n, 4);
+			if (!img)
+			{
+				nosEngine.LogE("Couldn't load image from %s.", path.c_str());
+				UpdateStatus(State::Failed);
+				return NOS_RESULT_FAILED;
+			}
+
+			nosResourceShareInfo outResInfo = {
+				.Info = {.Type = NOS_RESOURCE_TYPE_TEXTURE,
+							.Texture = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}} };
+
+			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
+			if (sRGB)
+				outResInfo.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
+
+			auto outResOpt = vkss::Resource::Create(outResInfo, "ReadImage Texture");
+			if (!outResOpt)
+			{
+				nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());
+				UpdateStatus(State::Failed);
+				return NOS_RESULT_FAILED;
+			}
+			auto outRes = std::move(*outResOpt);
+
+			nosCmd cmd{};
+			nosCmdBeginParams beginParams{
+			.Name = NOS_NAME("ReadImage Load"),
+			.AssociatedNodeId = this->NodeId,
+			.OutCmdHandle = &cmd
+			};
+			nosVulkan->Begin(&beginParams);
+			nosVulkan->ImageLoad(cmd, img, nosVec2u(w, h), NOS_FORMAT_R8G8B8A8_SRGB, &outRes, nullptr);
+			nosCmdEndParams endParams{ .ForceSubmit = true };
+			nosVulkan->End(cmd, &endParams);
+
+			nosEngine.SetPinValue(outPinId, outRes.ToPinData());
+
+			{
+				std::lock_guard<std::mutex> lock(this->OutImageDecRefCallbacksMutex);
+				OutPendingImageRefs.push_back(std::move(outRes));
+			}
+
+			FlushImageDecRefCallbacks();
+			free(img);
+			UpdateStatus(State::Idle);
 		}
-
-		nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-		std::filesystem::path path = nos::Utf8ToPath(InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data));
-		auto outPinId = nodeParams[NSN_Out].Id;
-		auto sRGB = *InterpretPinValue<bool>(nodeParams[NSN_sRGB].Data->Data);
-
-		return c->LoadImage(path, outPinId, sRGB);
-	}
-
-	static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
-	{
-		*count = 2;
-		if (!names || !fns)
-			return NOS_RESULT_SUCCESS;
-
-		names[0] = NOS_NAME_STATIC("ReadImage_Load");
-		names[1] = NOS_NAME_STATIC("OnImageLoaded");
-
-		fns[0] = &Load;
-		fns[1] = &OnImageLoaded;
-
+		catch (const std::exception& e)
+		{
+			nosEngine.LogE("Error while loading image: %s", e.what());
+			UpdateStatus(State::Failed);
+		}
 		return NOS_RESULT_SUCCESS;
 	}
+
 };
 
 nosResult RegisterReadImage(nosNodeFunctions* fn)

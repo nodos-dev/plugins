@@ -37,20 +37,6 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 					}
-				],
-				"functions": [ 
-					{
-						"class_name": "ReadImage_Load",
-						"display_name": "Load",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "OnImageLoaded",
-						"display_name": "(Internal) OnImageLoaded",
-						"contents_type": "Job",
-						"pins": []
-					}
 				]
 			}
 		},
