@@ -226,6 +226,8 @@ struct TestPluginFunctions : PluginFunctions
 		msg.UpdateType = NOS_MODULE_STATUS_MESSAGE_UPDATE_TYPE_REPLACE;
 		msg.Details = "You can now use the test module and use nosUri references here in MarkdownLink format";
 		msg.PopupTimeoutSeconds = 0;
+		msg.Popup = true;
+		msg.Dismissable = true;
 		nosEngine.SendModuleStatusMessageUpdate(&msg);
 
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.NodeTest"), TestNode, outFunctions[0]);
