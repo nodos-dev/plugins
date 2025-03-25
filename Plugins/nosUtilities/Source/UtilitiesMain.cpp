@@ -50,6 +50,7 @@ enum Utilities : int
 	TriggerOnAnyInput,
 	SwitchTrigger,
 	PrintLog,
+	ScheduleOnRequest,
 	Count
 };
 
@@ -79,6 +80,7 @@ nosResult RegisterConditionalTrigger(nosNodeFunctions*);
 nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
+nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -124,6 +126,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TriggerOnAnyInput)
 			GEN_CASE_NODE(SwitchTrigger)
 			GEN_CASE_NODE(PrintLog)
+			GEN_CASE_NODE(ScheduleOnRequest)
 		}
 	}
 	return NOS_RESULT_SUCCESS;

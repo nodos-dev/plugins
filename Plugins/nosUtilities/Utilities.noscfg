@@ -55,7 +55,8 @@
 		"Config/TriggerOnAnyInput.nosdef",
 		"Config/TextureMonitor.nosdef",
 		"Config/SwitchTrigger.nosdef",
-		"Config/PrintLog.nosdef"
+		"Config/PrintLog.nosdef",
+		"Config/ScheduleOnRequest.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

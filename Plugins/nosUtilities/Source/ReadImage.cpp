@@ -38,7 +38,6 @@ struct ReadImageContext : NodeContext
 {
     std::atomic<State> CurrentState;
     decltype(Clock::now()) TimeStarted;
-	std::filesystem::path FilePath;
 
 	std::mutex OutImageDecRefCallbacksMutex;
 	std::vector<vkss::Resource> OutPendingImageRefs;
@@ -72,34 +71,20 @@ struct ReadImageContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) {
 		nos::NodeExecuteParams execParams(params);
-		nos::uuid outPinId = {};
-		bool sRGB = false;
-		for (auto& pin : execParams)
-		{
-			if (pin.first == NSN_Out)
-			{
-				outPinId = pin.second.Id;
-			}
-			else if (pin.first == NSN_sRGB)
-			{
-				sRGB = *InterpretPinValue<bool>(pin.second.Data->Data);
-			}
-			else if (pin.first == NSN_Path)
-			{
-				FilePath = nos::Utf8ToPath(InterpretPinValue<const char>(pin.second.Data->Data));
-			}
-		}
+		nos::uuid outPinId = execParams[NSN_Out].Id;
+		bool sRGB = *InterpretPinValue<bool>(execParams[NSN_sRGB].Data->Data);
+		std::filesystem::path FilePath = nos::Utf8ToPath(InterpretPinValue<const char>(execParams[NSN_Path].Data->Data));
 		return LoadImage(FilePath, outPinId, sRGB);
 	}
 
-	void UpdateStatus(State newState)
+	void UpdateStatus(State newState, std::filesystem::path path)
 	{
         if(newState == CurrentState.exchange(newState))
         {
             return;
         }
 
-		auto messageDetailsFileRef = std::string("[File](") + NOS_URI_EXPLORER_PREFIX + nos::PathToUtf8(FilePath) + ")";
+		auto messageDetailsFileRef = std::string("[File](") + NOS_URI_EXPLORER_PREFIX + nos::PathToUtf8(path) + ")";
         switch(newState)
         {
         case State::Loading:
@@ -110,7 +95,7 @@ struct ReadImageContext : NodeContext
         {
 			std::stringstream ss;
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
-			std::string fileName = nos::PathToUtf8(FilePath.filename());
+			std::string fileName = nos::PathToUtf8(path.filename());
 			auto messageDetails = messageDetailsFileRef + " is loaded in " + std::to_string(dt) + "ms";
 			SetNodeStatusMessages({{{}, "Image loaded", fb::NodeStatusMessageType::INFO, messageDetails, 5, true, true}});
             break;
@@ -132,8 +117,7 @@ struct ReadImageContext : NodeContext
 
 	nosResult LoadImage(std::filesystem::path path, nosUUID outPinId, bool sRGB)
 	{
-		UpdateStatus(State::Loading);
-		FilePath = path;
+		UpdateStatus(State::Loading, path);
 		std::string pathUtf8 = nos::PathToUtf8(path);
 		try
 		{
@@ -142,7 +126,7 @@ struct ReadImageContext : NodeContext
 			if (!img)
 			{
 				nosEngine.LogE("Couldn't load image from %s.", path.c_str());
-				UpdateStatus(State::Failed);
+				UpdateStatus(State::Failed, path);
 				return NOS_RESULT_FAILED;
 			}
 
@@ -158,7 +142,7 @@ struct ReadImageContext : NodeContext
 			if (!outResOpt)
 			{
 				nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());
-				UpdateStatus(State::Failed);
+				UpdateStatus(State::Failed, path);
 				return NOS_RESULT_FAILED;
 			}
 			auto outRes = std::move(*outResOpt);
@@ -183,12 +167,12 @@ struct ReadImageContext : NodeContext
 
 			FlushImageDecRefCallbacks();
 			free(img);
-			UpdateStatus(State::Idle);
+			UpdateStatus(State::Idle, path);
 		}
 		catch (const std::exception& e)
 		{
 			nosEngine.LogE("Error while loading image: %s", e.what());
-			UpdateStatus(State::Failed);
+			UpdateStatus(State::Failed, path);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
