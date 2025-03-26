@@ -158,8 +158,8 @@
                 "id": "043f14dc-4671-472d-bcc8-a8af1f8910c9",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Texture",
-                "show_as": "PROPERTY_PIN",
-                "can_show_as": "PROPERTY_ONLY",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_ONLY",
                 "visualizer": {
                 },
                 "data": {
