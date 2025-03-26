@@ -74,9 +74,9 @@
         },
         {
           "id": "eb0f2a1a-a4de-4e8f-9ac0-4970b5ebe488",
-          "name": "OutExe",
+          "name": "OnLoaded",
           "type_name": "nos.exe",
-          "show_as": "OUTPUT_PIN",
+          "show_as": "PROPERTY",
           "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
           "visualizer": {
           },
@@ -158,8 +158,8 @@
                 "id": "043f14dc-4671-472d-bcc8-a8af1f8910c9",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Texture",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_ONLY",
+                "show_as": "PROPERTY_PIN",
+                "can_show_as": "PROPERTY_ONLY",
                 "visualizer": {
                 },
                 "data": {
@@ -570,7 +570,7 @@
           },
           {
             "id": "5780cd5f-cf4c-47fd-8f3b-43cb2290c987",
-            "name": "OutExe",
+            "name": "On_Loaded",
             "class_name": "nos.internal.GraphOutput",
             "pins": [
               {
@@ -708,7 +708,7 @@
           "pins": [
             {
               "id": "4f0e6e94-5318-43d6-bac7-aa06fde2d0a0",
-              "name": "InExe",
+              "name": "Load",
               "type_name": "nos.exe",
               "show_as": "PROPERTY",
               "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -742,6 +742,10 @@
                 {
                   "key": "AdvancedProperty",
                   "value": "false"
+                },
+                {
+                  "key": "PinHidden",
+                  "value": "true"
                 }
               ],
               "contents_type": "JobPin",

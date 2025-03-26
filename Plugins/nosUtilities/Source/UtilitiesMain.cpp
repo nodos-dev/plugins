@@ -179,29 +179,59 @@ static nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer
 	graphBuffer->As<nos::fb::NodeDefinitions>()->UnPackTo(&read);
 	nos::fb::TNode outNode;
 	outNode = *read.nodes[0]->node;
-	auto matchPinIds = [&](const char* pinName, bool copyData) {
-		bool isFound = false;
-		for (auto& targetPin : outNode.pins)
-			if (targetPin->name == pinName && !isFound)
-				for (auto const& sourcePin : cur.pins)
-					if (sourcePin->name == pinName) {
-						auto prevId = targetPin->id;
-						targetPin->id = sourcePin->id;
+	auto matchPinIds = [&](const char* fromPinName, const char* toPinName, bool copyData) {
+		auto matchWithSourcePin = [&](nos::fb::TPin* targetPin) -> bool {
+			auto copyFromSourceToTargetPin = [&](nos::fb::TPin* sourcePin) {
+				auto prevId = targetPin->id;
+				targetPin->id = sourcePin->id;
 
-						if (auto targetPinPortal = targetPin->contents.AsPortalPin()) {
-							UpdateEveryReferredBy(outNode.contents.AsGraph(), prevId, targetPin->id);
-							UpdateSourcePinData(outNode.contents.AsGraph(), targetPinPortal->source_id, sourcePin->data);
-						}
-						else if (targetPin->type_name == sourcePin->type_name)
-							targetPin->data = sourcePin->data;
-						isFound = true;
+				if (auto targetPinPortal = targetPin->contents.AsPortalPin()) {
+					UpdateEveryReferredBy(outNode.contents.AsGraph(), prevId, targetPin->id);
+					if(copyData)
+						UpdateSourcePinData(outNode.contents.AsGraph(), targetPinPortal->source_id, sourcePin->data);
+				}
+				else if (copyData && targetPin->type_name == sourcePin->type_name)
+					targetPin->data = sourcePin->data;
+				};
+
+			for (auto const& sourcePin : cur.pins)
+				if (sourcePin->name == fromPinName) {
+					copyFromSourceToTargetPin(sourcePin.get());
+					return true;
+				}
+			for (auto const& sourceFunc : cur.functions) {
+				for (auto const& sourceFuncPin : sourceFunc->pins)
+					if (sourceFuncPin->name == fromPinName) {
+						copyFromSourceToTargetPin(sourceFuncPin.get());
+						return true;
+					}
+			}
+			return false;
+		};
+		bool isFound = false;
+		for (auto& targetPin : outNode.pins) {
+			if (isFound)
+				break;
+			if (targetPin->name == toPinName) {
+				isFound = matchWithSourcePin(targetPin.get());
+			}
+		}
+
+		if (!isFound) {
+			for (auto& targetFunc : outNode.functions)
+				for (auto& targetFuncPin : targetFunc->pins)
+					if (targetFuncPin->name == toPinName) {
+						isFound = matchWithSourcePin(targetFuncPin.get());
 						break;
 					}
+		}
 		assert(isFound);
 	};
-	matchPinIds("Path", true);
-	matchPinIds("sRGB", true);
-	matchPinIds("Out", false);
+	matchPinIds("Path", "Path", true);
+	matchPinIds("sRGB", "sRGB", true);
+	matchPinIds("Out", "Out", false);
+	matchPinIds("OutExe", "OnLoaded", false);
+	matchPinIds("InExe", "Load", false);
 	auto nodeBuffer = EngineBuffer::CopyFrom(outNode);
 	*outBuffer = nodeBuffer.Release();
 	return NOS_RESULT_SUCCESS;
