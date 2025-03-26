@@ -3,7 +3,7 @@
 		{
 			"class_name": "StbiLoad",
 			"menu_info": {
-				"category": "Media",
+				"category": "Advanced",
 				"display_name": "STBI Load",
 				"name_aliases": [ "Load", "Texture", "Image", "JPEG", "JPG", "PNG", "TGA", "BMP", "PSD", "GIF", "HDR", "PIC" ]
 			},
