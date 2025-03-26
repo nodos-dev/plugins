@@ -12,6 +12,12 @@
 namespace nos::utilities
 {
 
+NOS_REGISTER_NAME(Request);
+NOS_REGISTER_NAME(Input);
+NOS_REGISTER_NAME(Output);
+NOS_REGISTER_NAME(ScheduleWhenNodeCreated);
+NOS_REGISTER_NAME(OnResponse);
+
 struct ScheduleOnRequestNode : NodeContext
 {
 	ScheduleOnRequestNode(nosFbNodePtr node) :
@@ -20,9 +26,9 @@ struct ScheduleOnRequestNode : NodeContext
 		{
 			auto name = pin->name()->c_str();
 			if (pin->data() && pin->data()->size()) {
-				if (strcmp(name, "ScheduleWhenNodeCreated") == 0)
+				if (strcmp(name, NSN_ScheduleWhenNodeCreated.AsCStr()) == 0)
 					if ((*(bool*)pin->data()->data()))
-						nosEngine.CallNodeFunction(NodeId, NOS_NAME("Request"));
+						nosEngine.CallNodeFunction(NodeId, NSN_Request);
 			}
 		}
 	}
@@ -45,6 +51,7 @@ struct ScheduleOnRequestNode : NodeContext
 	}
 
 	nosResult Request(nosFunctionExecuteParams* params) {
+		nosEngine.SetPinValueByName(NodeId, NSN_ScheduleWhenNodeCreated, nos::Buffer::From(true));
 		ScheduleNode();
 		return NOS_RESULT_SUCCESS;
 	}
@@ -52,13 +59,13 @@ struct ScheduleOnRequestNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams execParams(params);
-		nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), *execParams[NOS_NAME("Input")].Data);
-		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("OnResponse"));
+		nosEngine.SetPinValueByName(NodeId, NSN_Output, *execParams[NSN_Input].Data);
+		nosEngine.TriggerNodeEvent(NodeId, NSN_Output);
 		return NOS_RESULT_SUCCESS;
 	}
 
 	NOS_DECLARE_FUNCTIONS(
-		NOS_ADD_FUNCTION(NOS_NAME("Request"), Request))
+		NOS_ADD_FUNCTION(NSN_Request, Request))
 };
 
 nosResult RegisterScheduleOnRequest(nosNodeFunctions* fn)
