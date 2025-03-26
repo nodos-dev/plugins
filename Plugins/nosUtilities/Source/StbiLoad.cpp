@@ -39,9 +39,6 @@ struct StbiLoadContext : NodeContext
     std::atomic<State> CurrentState;
     decltype(Clock::now()) TimeStarted;
 
-	std::mutex OutImageDecRefCallbacksMutex;
-	std::vector<vkss::Resource> OutPendingImageRefs;
-
 	StbiLoadContext(nosFbNodePtr node) :
 		NodeContext(node), 
 		CurrentState(State::Idle), 
@@ -66,7 +63,6 @@ struct StbiLoadContext : NodeContext
 
 	~StbiLoadContext()
 	{
-		FlushImageDecRefCallbacks();
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
@@ -107,12 +103,6 @@ struct StbiLoadContext : NodeContext
 			break;
 		}
         }
-	}
-
-	void FlushImageDecRefCallbacks()
-	{
-		std::lock_guard<std::mutex> lock(OutImageDecRefCallbacksMutex);
-		OutPendingImageRefs.clear();
 	}
 
 	nosResult LoadImage(std::filesystem::path path, nosUUID outPinId, bool sRGB)
@@ -160,12 +150,6 @@ struct StbiLoadContext : NodeContext
 
 			nosEngine.SetPinValue(outPinId, outRes.ToPinData());
 
-			{
-				std::lock_guard<std::mutex> lock(this->OutImageDecRefCallbacksMutex);
-				OutPendingImageRefs.push_back(std::move(outRes));
-			}
-
-			FlushImageDecRefCallbacks();
 			free(img);
 			UpdateStatus(State::Idle, path);
 		}
