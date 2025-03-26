@@ -1,0 +1,83 @@
+{ "nodes": [
+    {
+      "class_name": "nos.test.TestGraph",
+      "node": {
+        "id": "b0b721eb-6d48-4810-9521-da045bc84270",
+        "name": "Collapsed Graph",
+        "class_name": "nos.test.TestGraph",
+        "pins": [
+          {
+            "id": "5b865f55-fd9a-4010-a4cb-2571f4ee7ad3",
+            "name": "Out",
+            "type_name": "nos.exe",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "visualizer": {
+            },
+            "data": { },
+            "def": { },
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "false" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "b77214de-72f2-41bc-b9d9-1281bdddc427" }
+          }
+        ],
+        "pos": { "x": 0.0, "y": 0.0 },
+        "contents_type": "Graph",
+        "contents": { "nodes": [
+            {
+              "id": "615a8762-6233-4bd8-bbf1-d374f3cd8bff",
+              "name": "Out",
+              "class_name": "nos.internal.GraphOutput",
+              "pins": [
+                {
+                  "id": "49123512-1685-4dc7-b377-2ec453e61e6f",
+                  "name": "Input",
+                  "type_name": "nos.exe",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { },
+                  "def": { },
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "false" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "b77214de-72f2-41bc-b9d9-1281bdddc427",
+                  "name": "Output",
+                  "type_name": "nos.exe",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { },
+                  "referred_by": [
+                    "5b865f55-fd9a-4010-a4cb-2571f4ee7ad3"
+                  ],
+                  "def": { },
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "false" },
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 197.0, "y": 598.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            }
+          ] },
+        "function_category": "Default Node",
+        "display_name": "TestGraph",
+        "plugin_version": { "major": 0, "minor": 2, "patch": 0 }
+      }
+    }
+  ] }

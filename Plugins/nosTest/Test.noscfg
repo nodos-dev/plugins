@@ -22,7 +22,8 @@
   "node_definitions": [
     "Config/Test.nosdef",
     "Config/FrameInterpolator.nosdef",
-    "Config/Window.nosdef"
+    "Config/Window.nosdef",
+	"Config/TestGraph.nosdef"
   ],
   "binary_path": "Binaries/nosTest"
 }
