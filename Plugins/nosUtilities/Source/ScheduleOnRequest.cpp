@@ -20,10 +20,9 @@ struct ScheduleOnRequestNode : NodeContext
 		{
 			auto name = pin->name()->c_str();
 			if (pin->data() && pin->data()->size()) {
-				nos::Buffer data = { pin->data()->data(), pin->data()->size() };
 				if (strcmp(name, "ScheduleWhenNodeCreated") == 0)
-					if (*InterpretPinValue<bool>(data))
-						ScheduleNode();
+					if ((*(bool*)pin->data()->data()))
+						nosEngine.CallNodeFunction(NodeId, NOS_NAME("Request"));
 			}
 		}
 	}
@@ -53,9 +52,6 @@ struct ScheduleOnRequestNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams execParams(params);
-		if (*InterpretPinValue<bool>(execParams[NOS_NAME("ScheduleWhenNodeCreated")].Data->Data) == false) {
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME("ScheduleWhenNodeCreated"), nos::Buffer::From(true));
-		}
 		nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), *execParams[NOS_NAME("Input")].Data);
 		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("OnResponse"));
 		return NOS_RESULT_SUCCESS;
