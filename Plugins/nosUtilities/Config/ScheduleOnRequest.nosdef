@@ -31,7 +31,7 @@
 					{
 						"name": "ScheduleWhenNodeCreated",
 						"type_name": "bool",
-						"show_as": "PROPERTY_PIN",
+						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY"
 					}
 				],
