@@ -27,6 +27,12 @@
 						"type_name": "nos.Generic",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "ScheduleWhenNodeCreated",
+						"type_name": "bool",
+						"show_as": "PROPERTY_PIN",
+						"can_show_as": "PROPERTY_ONLY"
 					}
 				],
 				"functions": [
