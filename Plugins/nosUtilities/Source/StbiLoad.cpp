@@ -36,12 +36,10 @@ enum State
 
 struct StbiLoadContext : NodeContext
 {
-    std::atomic<State> CurrentState;
     decltype(Clock::now()) TimeStarted;
 
 	StbiLoadContext(nosFbNodePtr node) :
-		NodeContext(node), 
-		CurrentState(State::Idle), 
+		NodeContext(node),
 		TimeStarted(Clock::now())
 	{
 		std::string path;
@@ -75,11 +73,6 @@ struct StbiLoadContext : NodeContext
 
 	void UpdateStatus(State newState, std::filesystem::path path)
 	{
-        if(newState == CurrentState.exchange(newState))
-        {
-            return;
-        }
-
 		auto messageDetailsFileRef = std::string("[File](") + NOS_URI_EXPLORER_PREFIX + nos::PathToUtf8(path) + ")";
         switch(newState)
         {
