@@ -29,6 +29,26 @@ static nosResult UpdateSourcePinData(nos::fb::TGraph* graph, nos::fb::UUID pinId
 	return NOS_RESULT_FAILED;
 }
 
+void CopyMetadataMap(std::vector<std::unique_ptr<fb::TMetaDataEntry>>& dst, std::vector<std::unique_ptr<fb::TMetaDataEntry>>const& src) {
+	for (auto const& srcMeta : src)
+	{
+		bool isFound = false;
+		for (auto& dstMeta : dst) {
+			if (dstMeta->key == srcMeta->key) {
+				dstMeta->value = srcMeta->value;
+				isFound = true;
+				break;
+			}
+		}
+		if (!isFound) {
+			auto newMeta = std::make_unique<fb::TMetaDataEntry>();
+			newMeta->key = srcMeta->key;
+			newMeta->value = srcMeta->value;
+			dst.push_back(std::move(newMeta));
+		}
+	}
+}
+
 nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 	auto pluginVersion = node->plugin_version();
 	bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 || (pluginVersion->major() == 3 && pluginVersion->minor() < 10);
@@ -48,17 +68,19 @@ nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 	nos::fb::TNode outNode;
 	outNode = *read.nodes[0]->node;
 	outNode.pos = cur.pos;
-	outNode.meta_data_map.clear();
-	for (auto const& meta : cur.meta_data_map)
-		outNode.meta_data_map.push_back(std::make_unique<fb::TMetaDataEntry>(*meta));
+	CopyMetadataMap(outNode.meta_data_map, cur.meta_data_map);
 	outNode.display_name = cur.display_name;
 	outNode.name = cur.name;
-	auto matchPinIds = [&](const char* fromPinName, const char* toPinName, bool copyData, const char* sourceFuncName = nullptr) {
+	auto matchPin = [&](const char* fromPinName, const char* toPinName, bool copyData, const char* sourceFuncName = nullptr) {
 		auto matchWithSourcePin = [&](nos::fb::TPin* targetPin) -> bool {
 			auto copyFromSourceToTargetPin = [&](nos::fb::TPin* sourcePin) {
 				auto prevId = targetPin->id;
 				targetPin->id = sourcePin->id;
 				targetPin->show_as = sourcePin->show_as;
+				CopyMetadataMap(targetPin->meta_data_map, sourcePin->meta_data_map);
+				if(!sourcePin->display_name.empty())
+					targetPin->display_name = sourcePin->display_name;
+
 
 				if (auto targetPinPortal = targetPin->contents.AsPortalPin()) {
 					UpdateEveryReferredBy(outNode.contents.AsGraph(), prevId, targetPin->id);
@@ -103,11 +125,11 @@ nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 		}
 		assert(isFound);
 		};
-	matchPinIds("Path", "Path", true);
-	matchPinIds("sRGB", "sRGB", true);
-	matchPinIds("Out", "Out", false);
-	matchPinIds("OutExe", "OnLoaded", false, "OnImageLoaded");
-	matchPinIds("InExe", "Load", false, "ReadImage_Load");
+	matchPin("Path", "Path", true);
+	matchPin("sRGB", "sRGB", true);
+	matchPin("Out", "Out", false);
+	matchPin("OutExe", "OnLoaded", false, "OnImageLoaded");
+	matchPin("InExe", "Load", false, "ReadImage_Load");
 	auto nodeBuffer = EngineBuffer::CopyFrom(outNode);
 	*outBuffer = nodeBuffer.Release();
 	return NOS_RESULT_SUCCESS;
