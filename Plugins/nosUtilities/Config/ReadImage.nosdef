@@ -1,6 +1,11 @@
 { "nodes": [
     {
       "class_name": "nos.utilities.ReadImage",
+			"menu_info": {
+				"category": "Media",
+				"class_name": "nos.utilities.ReadImage",
+				"display_name": "Read Image"
+			},
       "node": {
         "id": "e1e25a0d-0511-41ac-961f-4872f444af99",
         "name": "Read Image",
