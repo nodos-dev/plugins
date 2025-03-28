@@ -60,7 +60,7 @@ struct ScheduleOnRequestNode : NodeContext
 	{
 		nos::NodeExecuteParams execParams(params);
 		nosEngine.SetPinValueByName(NodeId, NSN_Output, *execParams[NSN_Input].Data);
-		nosEngine.TriggerNodeEvent(NodeId, NSN_Output);
+		nosEngine.TriggerNodeEvent(NodeId, NSN_OnResponse);
 		return NOS_RESULT_SUCCESS;
 	}
 
