@@ -15,22 +15,20 @@ namespace nos::utilities
 NOS_REGISTER_NAME(Request);
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Output);
-NOS_REGISTER_NAME(ScheduleWhenNodeCreated);
 NOS_REGISTER_NAME(OnResponse);
+NOS_REGISTER_NAME(ScheduleWhenNodeCreated);
 
 struct ScheduleOnRequestNode : NodeContext
 {
+	// This variable is only used to execute the node if the ScheduleWhenNodeCreated pin is set to true at construction
+	bool ExecuteForOnceAtCreation = false;
 	ScheduleOnRequestNode(nosFbNodePtr node) :
 		NodeContext(node) {
-		for (auto* pin : *node->pins())
-		{
-			auto name = pin->name()->c_str();
-			if (pin->data() && pin->data()->size()) {
-				if (strcmp(name, NSN_ScheduleWhenNodeCreated.AsCStr()) == 0)
-					if ((*(bool*)pin->data()->data()))
-						nosEngine.CallNodeFunction(NodeId, NSN_Request);
-			}
-		}
+		// Listen to the ScheduleWhenNodeCreated pin only at construction
+		AddPinValueWatcher(NSN_ScheduleWhenNodeCreated, [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
+			if (!oldVal)
+				ExecuteForOnceAtCreation = *InterpretPinValue<bool>(newVal);
+		});
 	}
 
 	void ScheduleNode()
@@ -56,11 +54,17 @@ struct ScheduleOnRequestNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
+	void OnPathStart() override {
+		if (ExecuteForOnceAtCreation)
+			ScheduleNode();
+	}
+
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams execParams(params);
 		nosEngine.SetPinValueByName(NodeId, NSN_Output, *execParams[NSN_Input].Data);
 		nosEngine.TriggerNodeEvent(NodeId, NSN_OnResponse);
+		ExecuteForOnceAtCreation = false;
 		return NOS_RESULT_SUCCESS;
 	}
 
