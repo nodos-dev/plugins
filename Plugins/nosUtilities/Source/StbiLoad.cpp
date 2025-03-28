@@ -55,8 +55,6 @@ struct StbiLoadContext : NodeContext
 			else if (strcmp(name, "sRGB") == 0)
 				sRGB = *reinterpret_cast<const bool*>(data->data());
 		}
-		if (!path.empty())
-			LoadImage(nos::Utf8ToPath(path), *GetPinId(NSN_Out), sRGB);
 	}
 
 	~StbiLoadContext()
