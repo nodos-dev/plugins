@@ -31,7 +31,7 @@ static nosResult UpdateSourcePinData(nos::fb::TGraph* graph, nos::fb::UUID pinId
 
 nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 	auto pluginVersion = node->plugin_version();
-	bool needsMigration = !pluginVersion || pluginVersion->major() <= 3 && pluginVersion->minor() < 10;
+	bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 || (pluginVersion->major() == 3 && pluginVersion->minor() < 10);
 	if (!needsMigration)
 		return NOS_RESULT_SUCCESS;
 	fb::TNode cur;
