@@ -83,7 +83,7 @@ nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
-nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer);
+nosResult RegisterReadImage(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -130,13 +130,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(SwitchTrigger)
 			GEN_CASE_NODE(PrintLog)
 			GEN_CASE_NODE(ScheduleOnRequest)
+			GEN_CASE_NODE(ReadImage)
 		}
 	}
 	
-	*outList[(int)Utilities::ReadImage] = nosNodeFunctions{
-		.ClassName = NOS_NAME("nos.utilities.ReadImage"),
-		.MigrateNode = MigrateReadImageToGraph
-	};
 	return NOS_RESULT_SUCCESS;
 }
 

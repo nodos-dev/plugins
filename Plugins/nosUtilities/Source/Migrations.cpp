@@ -106,4 +106,12 @@ nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 	*outBuffer = nodeBuffer.Release();
 	return NOS_RESULT_SUCCESS;
 }
+
+nosResult RegisterReadImage(nosNodeFunctions* outFuncs) {
+	*outFuncs = nosNodeFunctions{
+		.ClassName = NOS_NAME("nos.utilities.ReadImage"),
+		.MigrateNode = MigrateReadImageToGraph
+	};
+	return NOS_RESULT_SUCCESS;
+}
 }
