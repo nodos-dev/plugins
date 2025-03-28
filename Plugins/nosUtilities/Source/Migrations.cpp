@@ -48,8 +48,11 @@ nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 	nos::fb::TNode outNode;
 	outNode = *read.nodes[0]->node;
 	outNode.pos = cur.pos;
-	outNode.meta_data_map = cur.meta_data_map;
+	outNode.meta_data_map.clear();
+	for (auto const& meta : cur.meta_data_map)
+		outNode.meta_data_map.push_back(std::make_unique<fb::TMetaDataEntry>(*meta));
 	outNode.display_name = cur.display_name;
+	outNode.name = cur.name;
 	auto matchPinIds = [&](const char* fromPinName, const char* toPinName, bool copyData, const char* sourceFuncName = nullptr) {
 		auto matchWithSourcePin = [&](nos::fb::TPin* targetPin) -> bool {
 			auto copyFromSourceToTargetPin = [&](nos::fb::TPin* sourcePin) {
