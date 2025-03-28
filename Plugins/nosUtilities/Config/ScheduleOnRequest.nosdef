@@ -1,0 +1,56 @@
+{
+	"nodes": [
+		{
+			"class_name": "ScheduleOnRequest",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Schedule on Request"
+			},
+			"node": {
+				"class_name": "ScheduleOnRequest",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "InExe",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "ScheduleWhenNodeCreated",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY"
+					}
+				],
+				"functions": [
+					{
+						"class_name": "Request",
+						"display_name": "Request",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "OnResponse",
+						"display_name": "On Response",
+						"contents_type": "Job",
+						"pins": [],
+						"scheduling_type": "Event"
+					}
+				]
+			}
+		}
+	]
+}

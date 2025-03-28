@@ -4,6 +4,7 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <glm/glm.hpp>
 #include <Builtins_generated.h>
+#include <Module_generated.h>
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
@@ -30,7 +31,7 @@ enum Utilities : int
 	ChannelViewer,
 	Merge,
 	Time,
-	ReadImage,
+	StbiLoad,
 	WriteImage,
 	CPUSleep,
 	UploadBuffer,
@@ -50,12 +51,14 @@ enum Utilities : int
 	TriggerOnAnyInput,
 	SwitchTrigger,
 	PrintLog,
+	ScheduleOnRequest,
+	ReadImage,
 	Count
 };
 
 nosResult RegisterMerge(nosNodeFunctions*);
 nosResult RegisterTime(nosNodeFunctions*);
-nosResult RegisterReadImage(nosNodeFunctions*);
+nosResult RegisterStbiLoad(nosNodeFunctions*);
 nosResult RegisterWriteImage(nosNodeFunctions*);
 nosResult RegisterChannelViewer(nosNodeFunctions*);
 nosResult RegisterResize(nosNodeFunctions*);
@@ -79,6 +82,8 @@ nosResult RegisterConditionalTrigger(nosNodeFunctions*);
 nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
+nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
+nosResult RegisterReadImage(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -102,7 +107,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			break;
 			GEN_CASE_NODE(Merge)
 			GEN_CASE_NODE(Time)
-			GEN_CASE_NODE(ReadImage)
+			GEN_CASE_NODE(StbiLoad)
 			GEN_CASE_NODE(WriteImage)
 			GEN_CASE_NODE(ChannelViewer)
 			GEN_CASE_NODE(Resize)
@@ -124,8 +129,11 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TriggerOnAnyInput)
 			GEN_CASE_NODE(SwitchTrigger)
 			GEN_CASE_NODE(PrintLog)
+			GEN_CASE_NODE(ScheduleOnRequest)
+			GEN_CASE_NODE(ReadImage)
 		}
 	}
+	
 	return NOS_RESULT_SUCCESS;
 }
 
