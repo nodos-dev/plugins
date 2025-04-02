@@ -28,7 +28,7 @@ struct VariableNodeBase : NodeContext
 	~VariableNodeBase() override
 	{
 		auto res = nosVariables->DeleteNodeReference(Name, NodeId);
-		NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS);
+		NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Failed to delete node reference");
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override

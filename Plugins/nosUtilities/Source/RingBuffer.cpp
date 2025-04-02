@@ -20,8 +20,7 @@ struct RingBufferNodeContext : RingNodeBase
 	{
 	}
 	~RingBufferNodeContext()
-	{
-		NOS_SOFT_CHECK(LastPopped == nullptr);
+	{ NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
 	}
 
 	ResourceInterface::ResourceBase* LastPopped = nullptr;
@@ -32,7 +31,7 @@ struct RingBufferNodeContext : RingNodeBase
 	}
 
 	nosResult CopyFrom(nosCopyInfo* cpy) override {
-		NOS_SOFT_CHECK(LastPopped == nullptr);
+		NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
 		ResourceInterface::ResourceBase* slot = nullptr;
 		auto beginResult = CommonCopyFrom(cpy, &slot);
 		if (beginResult != NOS_RESULT_SUCCESS || !slot)
