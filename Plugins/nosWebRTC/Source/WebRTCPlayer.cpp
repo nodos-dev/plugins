@@ -76,7 +76,10 @@ public:
 	void StartConnection(std::string server_port) {
 
 		if(!RTCThread.joinable())
-			RTCThread = std::thread([this]() {this->StartRTCThread(); });
+			RTCThread = std::thread([this]()
+			{
+				this->StartRTCThread();
+			});
 		try {
 			client.ConnectToServer(server_port);
 		}
@@ -106,6 +109,7 @@ private:
 		rtc::Win32SocketServer w32_ss;
 		rtc::Win32Thread w32_thread(&w32_ss);
 		rtc::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+		rtc::SetCurrentThreadName("WebRTC Player Thread");
 
 		while (isAlive) {
 			client.Update();

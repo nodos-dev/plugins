@@ -36,9 +36,7 @@ private:
 	std::queue<std::string> sendQueue;
 	std::queue<std::string> receivedQueue;
 	struct lws_context* pContext;
-	std::string serverAddres;
-	std::string path;
-	int port;
+	std::string FullAddress;
 	lws_protocols Protocols[3];
 	std::atomic<bool> shouldUpdate = true;
 	void StartWebSocket();

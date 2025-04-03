@@ -106,6 +106,7 @@ private:
 		rtc::Win32SocketServer w32_ss;
 		rtc::Win32Thread w32_thread(&w32_ss);
 		rtc::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+		rtc::SetCurrentThreadName("WebRTC Streamer Thread");
 
 		while (isAlive) {
 			client.Update();
@@ -349,23 +350,27 @@ struct WebRTCNodeContext : nos::NodeContext {
 	}
 
 	void OnConnectedToServer() {
+		nosEngine.LogI("WebRTC Streamer connected to server.");
 		currentState = EWebRTCPlayerStates::eCONNECTED_TO_SERVER;
 		WebRTCCallbacksCV.notify_one();
 	}
 
 	void OnDisconnectedFromServer() {
+		nosEngine.LogI("WebRTC Streamer disconnected from server.");
 		currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_SERVER;
 		WebRTCCallbacksCV.notify_one();
 		//p_nosWebRTC.reset(new nosWebRTCInterface());
 	}
 
 	void OnPeerConnected() {
+		nosEngine.LogI("WebRTC Streamer peer connected.");
 		++PeerCount;
 		currentState = EWebRTCPlayerStates::eCONNECTED_TO_PEER;
 		WebRTCCallbacksCV.notify_one();
 	}
 
 	void OnPeerDisconnected() {
+		nosEngine.LogI("WebRTC Streamer peer disconnected.");
 		--PeerCount;
 		currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_PEER;
 		WebRTCCallbacksCV.notify_one();
