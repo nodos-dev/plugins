@@ -148,13 +148,13 @@ struct ArithmeticNodeContext : NodeContext
 				if ("string" == templateParam->name()->string_view() ||
 					NSN_Type == templateParam->name()->string_view())
 				{
-					newTypeName = nos::Name((const char*)templateParam->value()->Data());
+					newTypeName = nos::Name(InterpretPinValue<const char*>((void*)templateParam->value()->Data()));
 					continue;
 				}
 				if ("nos.reflect.BinaryOperator" == templateParam->name()->string_view() ||
 					NSN_Operator == templateParam->name()->string_view())
 				{
-					Operator = *(reflect::BinaryOperator*)templateParam->value()->Data();
+					Operator = *InterpretPinValue<reflect::BinaryOperator>((void*)templateParam->value()->Data());
 					continue;
 				}
 			}
@@ -248,7 +248,7 @@ struct ArithmeticNodeContext : NodeContext
 		if constexpr (IsScalarArithmetic)
 			displayNameStr += " (Scalar)";
 		auto displayName = fbb.CreateString(displayNameStr);
-		std::vector<uint8_t> opData = nos::Buffer::From(*Operator);
+		std::vector<uint8_t> opData = PackPinData(*Operator);
 		std::vector params = {
 			fb::CreateTemplateParameterDirect(fbb, NSN_Operator.AsCStr(), "nos.reflect.BinaryOperator", &opData)
 		};
@@ -363,19 +363,19 @@ struct ArithmeticNodeContext : NodeContext
 			if ((*Type)->BaseType == NOS_BASE_TYPE_STRING)
 			{
 				std::stringstream ss;
-				ss << (const char*)A.Data->Data << (const char*)B.Data->Data;
+				ss << InterpretPinValue<const char*>(*A.Data) << InterpretPinValue<const char*>(*B.Data);
 				auto str = ss.str();
-				nosEngine.SetPinValue(Output.Id, nosBuffer{ (void*)str.c_str(), str.size() + 1 });
+				nosEngine.SetPinValue(Output.Id, PackPinData(str.c_str()));
 			}
 			else
 			{
-				DoOp<void>(*Operator, *Type, (uint8_t*)A.Data->Data, (uint8_t*)B.Data->Data, (uint8_t*)Output.Data->Data);
+				DoOp<void>(*Operator, *Type, InterpretPinValue<uint8_t>(*A.Data), InterpretPinValue<uint8_t>(*B.Data), InterpretPinValue<uint8_t>(*Output.Data));
 			}
 		}
 		else
 		{
 			auto& scalar = pins[NSN_Scalar];
-			DoScalarOp(*Operator, *Type, (uint8_t*)A.Data->Data, *ScalarType, static_cast<void*>(scalar.Data->Data), (uint8_t*)Output.Data->Data);
+			DoScalarOp(*Operator, *Type, InterpretPinValue<uint8_t>(*A.Data), *ScalarType, InterpretPinValue<void>(*scalar.Data), InterpretPinValue<uint8_t>(*Output.Data));
 		}
 
 		return NOS_RESULT_SUCCESS;
@@ -436,7 +436,7 @@ struct ArithmeticNodeContext : NodeContext
 		}
 		auto& templateParam2 = tNode.template_parameters.emplace_back(std::make_unique<fb::TTemplateParameter>());
 		templateParam2->name = NSN_Type.AsString();
-		templateParam2->value = std::vector<uint8_t>(type.c_str(), type.c_str() + type.size() + 1);
+		templateParam2->value = std::vector<uint8_t>(PackPinData(type.c_str()));
 		templateParam2->type_name = "string";
 		*outBuffer = EngineBuffer::CopyFrom(tNode).Release();
 		return NOS_RESULT_SUCCESS;
@@ -490,10 +490,9 @@ void RegisterArithmeticNodePresets() {
 			info.category = "Math|" + binaryOpStr;
 			info.display_name = binaryOpStr + " " + name.substr(idx);
 			preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
-			std::vector<uint8_t> data(1 + name.size());
-			memcpy(data.data(), name.data(), name.size());
+			std::vector<uint8_t> data = PackPinData(name.c_str());
 			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Type.AsString(), "string", std::move(data) });
-			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Operator.AsString(), "nos.reflect.BinaryOperator", std::move(nos::Buffer::From(binaryOp)) });
+			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Operator.AsString(), "nos.reflect.BinaryOperator", PackPinData(binaryOp) });
 			flatbuffers::FlatBufferBuilder fbb;
 			fbb.Finish(CreateNodePreset(fbb, &preset));
 			nos::Buffer buf = fbb.Release();

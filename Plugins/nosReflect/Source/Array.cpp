@@ -119,9 +119,7 @@ struct ArrayNode : NodeContext
 		if (!outPin || !Type)
 			return false;
 
-		auto outval = GenerateVector(*Type, values);
-
-		nosEngine.SetPinValue(outPin->Id, {outval.data(), outval.size()});
+		nosEngine.SetPinValue(outPin->Id, GenerateVector(*Type, values));
 		return true;
 	}
 
@@ -145,7 +143,6 @@ struct ArrayNode : NodeContext
 	{
 		if (!Type)
 			return;
-
 
 		if (auto buf = GetDefaultValueOfType(Type->TypeName))
 		{

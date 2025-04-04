@@ -32,7 +32,7 @@ struct BreakNode : NodeContext
 		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
 		auto pin = GetPin(pinName);
-		auto* vec = (flatbuffers::Vector<uint8_t>*)value.Data;
+		auto* vec = InterpretPinValue<VectorPinData<uint8_t>>(value);
 		if (vec->size() != ArraySize)
 		{
 			ArraySize = vec->size();
@@ -207,12 +207,11 @@ struct BreakNode : NodeContext
         if(!buf)
 			return;
 
-		auto data = (const uint8_t*)buf->Data;
         auto& type = *Type;
         switch (type->BaseType)
         {
         case NOS_BASE_TYPE_ARRAY: {
-        	const flatbuffers::Vector<uint8_t>* vec = (flatbuffers::Vector<uint8_t>*)(data);
+        	const flatbuffers::Vector<uint8_t>* vec = InterpretPinValue<VectorPinData<uint8_t>>(*buf);
         	for (int i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
@@ -243,7 +242,7 @@ struct BreakNode : NodeContext
         }
         case NOS_BASE_TYPE_STRUCT:
         {
-            auto root = type->ByteSize ? (flatbuffers::Table*)data : flatbuffers::GetRoot<flatbuffers::Table>(data);
+            auto root = type->ByteSize ? (flatbuffers::Table*)buf->Data : InterpretPinValue<flatbuffers::Table>(*buf);
             for (int i = 0; i < type->FieldCount; ++i)
             {
 				auto& field = type->Fields[i];

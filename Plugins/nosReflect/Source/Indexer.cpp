@@ -133,10 +133,7 @@ struct Indexer : NodeContext
 		if (!inPin || !Type)
 			return false;
 
-		auto outval = GenerateVector(*Type, datas);
-
-		auto vec = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*)(outval.data());
-		nosEngine.SetPinValue(inPin->Id, { outval.data(), outval.size() });
+		nosEngine.SetPinValue(inPin->Id, GenerateVector(*Type, datas));
 		return true;
 	}
 	
@@ -151,7 +148,7 @@ struct Indexer : NodeContext
 			UpdateInputVectorSize();
 		}
 
-		auto vec = (flatbuffers::Vector<uint8_t>*)(pins[NSN_Input].Data->Data);
+		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_Input].Data);
     	ArraySize = vec->size();
 		if (!SetIndex(*(uint32_t*)pins[NSN_Index].Data->Data))
 			return NOS_RESULT_FAILED;
@@ -168,7 +165,7 @@ struct Indexer : NodeContext
 			if (type->BaseType == NOS_BASE_TYPE_STRING)
 			{
 				flatbuffers::FlatBufferBuilder fbb;
-				auto vect = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>*)(pins[NSN_Input].Data->Data);
+				auto vect = InterpretPinValue<VectorPinData<flatbuffers::Offset<flatbuffers::String>>>(*pins[NSN_Input].Data);
 				auto elem = vect->Get(Index);
 				buf = nos::Buffer(elem->c_str(), elem->size() + 1);
 				nosEngine.SetPinValue(ID, buf);
@@ -176,7 +173,7 @@ struct Indexer : NodeContext
 			else
 			{
 				flatbuffers::FlatBufferBuilder fbb;
-				auto vect = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*)(pins[NSN_Input].Data->Data);
+				auto vect = InterpretPinValue<VectorPinData<flatbuffers::Offset<flatbuffers::Table>>>(*pins[NSN_Input].Data);
 				auto elem = vect->Get(Index);
 				fbb.Finish(flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, type, elem)));
 				buf = fbb.Release();
@@ -196,7 +193,7 @@ struct Indexer : NodeContext
         {
 			if (!Type)
 				return;
-            ArraySize = ((flatbuffers::Vector<uint8_t>*)(value.Data))->size();
+            ArraySize = InterpretPinValue<VectorPinData<uint8_t>>(value)->size();
 			SetIndex(Index);
 		}
 	}

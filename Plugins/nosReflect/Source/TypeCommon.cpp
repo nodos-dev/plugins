@@ -620,12 +620,11 @@ flatbuffers::uoffset_t GenerateVector(
 }
 
 
-std::vector<uint8_t> GenerateVector(const nosTypeInfo* type, std::vector<const void*> inputs)
+nos::Buffer GenerateVector(const nosTypeInfo* type, std::vector<const void*> inputs)
 {
-	flatbuffers::FlatBufferBuilder fbb;
-	fbb.Finish(flatbuffers::Offset<flatbuffers::Vector<uint8_t>>(GenerateVector(fbb, type, std::move(inputs))));
-	auto buf = fbb.Release();
-	return std::vector<uint8_t>{flatbuffers::GetMutableRoot<uint8_t>(buf.data()), buf.data()+buf.size()};
+	auto builder = PinData<flatbuffers::Vector<uint8_t>>::Builder();
+	builder.Finish(flatbuffers::Offset<flatbuffers::Vector<uint8_t>>(GenerateVector(builder, type, std::move(inputs))));
+	return builder.Pack();
 }
 
 } // namespace nos::engine
