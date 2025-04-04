@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/NodeHelpers.hpp>
 
 #include "Names.h"
 
@@ -48,7 +48,7 @@ std::vector<uint8_t> GenerateBuffer(
 	const nosTypeInfo* type,
 	const void* data);
 
-std::vector<uint8_t> GenerateVector(
+nos::Buffer GenerateVector(
 	const nosTypeInfo* type, 
 	std::vector<const void*> inputs);
 

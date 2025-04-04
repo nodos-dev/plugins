@@ -44,8 +44,8 @@ struct ComparisonNode : NodeContext
 		void* aPtr, *bPtr;
 		if (!type->ByteSize && type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			aPtr = (void*)flatbuffers::GetRoot<flatbuffers::Table>(A.Data->Data);
-			bPtr = (void*)flatbuffers::GetRoot<flatbuffers::Table>(B.Data->Data);
+			aPtr = (void*)InterpretPinValue<flatbuffers::Table>(*A.Data);
+			bPtr = (void*)InterpretPinValue<flatbuffers::Table>(*B.Data);
 		}
 		else
 		{

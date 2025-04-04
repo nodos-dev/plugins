@@ -123,10 +123,10 @@ struct IndexOfNode : NodeContext
 		auto pins = NodeExecuteParams(params);
 		auto indexPinId = *GetPinId(NSN_Index);
 
-		auto vec = static_cast<flatbuffers::Vector<uint8_t>*>(pins[NSN_InputArray].Data->Data);
+		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_InputArray].Data);
 		void* value = pins[NSN_Value].Data->Data;
 		if (!type->ByteSize && type->BaseType != NOS_BASE_TYPE_STRING)
-			value = (void*)flatbuffers::GetRoot<flatbuffers::Table>(value);
+			value = (void*)InterpretPinValue<flatbuffers::Table>(value);
 		int index =	-1;
 		if (type->ByteSize)
 		{
