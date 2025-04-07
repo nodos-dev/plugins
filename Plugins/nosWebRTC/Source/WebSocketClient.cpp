@@ -214,14 +214,14 @@ void nosWebSocketClient::StartWebSocket()
 
 	struct lws_client_connect_info connect_info = {};
 	connect_info.context = pContext;
-	connect_info.address = addressInfo.Address.c_str();
+	connect_info.address = addressInfo.Host.c_str();
 	connect_info.port = addressInfo.Port;
 	connect_info.path = addressInfo.Path.c_str();
 	connect_info.host = addressInfo.Host.c_str();
 	connect_info.origin = "Nodos";
 	connect_info.protocol = Protocols[0].name;
 
-	connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED;
+	connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED | LCCSCF_ALLOW_INSECURE;
 	pWSI = lws_client_connect_via_info(&connect_info);
 	if (!pWSI)
 	{
@@ -282,6 +282,7 @@ static int mz_ws_callback(struct lws* WSI, enum lws_callback_reasons Reason, voi
 		break;
 		case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
 		{
+			lwsl_err("Connection failed: %s\n", (const char*)In);
 			//Unsuccesful connection
 			if (Socket && Socket->pWSI == WSI && Socket->ConnectionErrorCallback) {
 				Socket->ConnectionErrorCallback();
