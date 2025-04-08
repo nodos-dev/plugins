@@ -36,6 +36,7 @@
 #include "WebRTCManager.h"
 #include "CustomVideoSource.h"
 #include "WebRTCJsonConfig.h"
+#include "Nodos/Modules.h"
 
 using json = nlohmann::json;
 
@@ -492,9 +493,11 @@ void nosWebRTCManager::OnICECandidateReceived(std::string&& iceCandidate)
     int peerID = std::stoi(jsonICE[nosWebRTCJsonConfig::peerIDKey].get<std::string>());
     int internalID;
     if (!ReadInternalIDFromPeerID(internalID, peerID)) {
-        std::cerr << "No corresponding peer connection found for the ICE candidate from peer: " << peerID;
+        nosEngine.LogI("No corresponding peer connection found for the ICE candidate from peer: %d", peerID);
         return;
     }
+    nosEngine.LogI("Received ICE candidate for peerID: %d", peerID);
+
     int sdpMidLineIdx = jsonICE[nosWebRTCJsonConfig::candidateKey][nosWebRTCJsonConfig::sdpMidLineIndexKey].get<int>();
     std::string sdpMid = jsonICE[nosWebRTCJsonConfig::candidateKey][nosWebRTCJsonConfig::sdpMidKey].get<std::string>();
     std::string candidateStr = jsonICE[nosWebRTCJsonConfig::candidateKey][nosWebRTCJsonConfig::candidateKey].get<std::string>();
@@ -502,9 +505,10 @@ void nosWebRTCManager::OnICECandidateReceived(std::string&& iceCandidate)
 
     std::unique_ptr<webrtc::IceCandidateInterface> candidate(webrtc::CreateIceCandidate(sdpMid, sdpMidLineIdx, candidateStr, &error));
     if (!candidate) {
-        std::cerr << "Received candidate message parse failed: " << error.description;
+        nosEngine.LogI("Received candidate message parse failed: %s", error.description.c_str());
         return;
     }
+    nosEngine.LogI("Adding ICE candidate to peer connection for peerID: %d", peerID);
     p_PeerConnections[internalID]->AddIceCandidate(candidate.get());
     //check for error when adding?
 }

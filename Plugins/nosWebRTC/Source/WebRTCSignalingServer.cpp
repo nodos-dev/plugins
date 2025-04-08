@@ -61,11 +61,13 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 	}
 
 	void OnServerCreated() {
+		nosEngine.LogI("WebRTC Signaling Server created.");
 		SetNodeOrphanState(StartServerUUID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
 		SetNodeOrphanState(StopServerUUID, NOS_ORPHAN_STATE_TYPE_ACTIVE);
 	}
 
 	void OnServerDestroyed() {
+		nosEngine.LogI("WebRTC Signaling Server destroyed.");
 		SetNodeOrphanState(StartServerUUID, NOS_ORPHAN_STATE_TYPE_ACTIVE);
 		SetNodeOrphanState(StopServerUUID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
 	}

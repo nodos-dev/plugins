@@ -44,6 +44,14 @@
 						"data": 59.94,
 						"min": 5,
 						"max": 300
+					},
+					{
+						"name": "UseHttps",
+						"display_name": "Use HTTPS",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false
 					}
 				],
 				"functions": [

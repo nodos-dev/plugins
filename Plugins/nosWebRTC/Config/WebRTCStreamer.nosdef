@@ -50,6 +50,14 @@
 						"data": 8000,
 						"min": 1000,
 						"max": 50000
+					},
+					{
+						"name": "UseHttps",
+            "display_name": "Use HTTPS",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false
 					}
 				],
 				"functions": [
