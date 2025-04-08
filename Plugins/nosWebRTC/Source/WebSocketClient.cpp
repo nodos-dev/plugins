@@ -3,6 +3,8 @@
 #include "WebSocketClient.h"
 #include <iostream>
 #include <exception>
+#include "ssl-cert/cert.h"
+#include "ssl-cert/key.h"
 
 #include <Nodos/Modules.h>
 
@@ -150,10 +152,10 @@ void nosWebSocketClient::StartWebSocket()
 	if (UseHttps) {
 		Info.options |= LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
 
-	// Set the paths to your self-signed certificate and private key files
-	std::string certPath = std::string(nosEngine.Module->RootFolderPath) + "/cert.pem";
-	std::string keyPath = std::string(nosEngine.Module->RootFolderPath) + "/key.pem";
-	Info.client_ssl_cert_filepath = certPath.c_str();
+		Info.client_ssl_cert_mem = cert_pem;
+		Info.client_ssl_cert_mem_len = cert_pem_len;
+		Info.client_ssl_key_mem = key_pem;
+		Info.client_ssl_key_mem_len = key_pem_len;
 	}
 
 	pContext = lws_create_context(&Info);
