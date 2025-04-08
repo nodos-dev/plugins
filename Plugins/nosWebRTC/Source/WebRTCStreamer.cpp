@@ -73,12 +73,12 @@ public:
 		Dispose();
 	}
 	
-	void StartConnection(std::string server_port) {
+	void StartConnection(std::string server_port, bool useHttps) {
 
 		if(!RTCThread.joinable())
 			RTCThread = std::thread([this]() {this->StartRTCThread(); });
 		try {
-			client.ConnectToServer(server_port);
+			client.ConnectToServer(server_port, useHttps);
 		}
 		catch (std::exception& E) {
 			nosEngine.LogE(E.what());
@@ -106,6 +106,7 @@ private:
 		rtc::Win32SocketServer w32_ss;
 		rtc::Win32Thread w32_thread(&w32_ss);
 		rtc::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+		rtc::SetCurrentThreadName("WebRTC Streamer Thread");
 
 		while (isAlive) {
 			client.Update();
@@ -178,6 +179,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 	float FPS;
 	std::atomic_int PeerCount = 0;
 	std::string server;
+	bool UseHttps;
 	uint32_t LastFrameID = 0;
 
 	nos::uuid OutputPinUUID;
@@ -349,23 +351,27 @@ struct WebRTCNodeContext : nos::NodeContext {
 	}
 
 	void OnConnectedToServer() {
+		nosEngine.LogI("WebRTC Streamer connected to server.");
 		currentState = EWebRTCPlayerStates::eCONNECTED_TO_SERVER;
 		WebRTCCallbacksCV.notify_one();
 	}
 
 	void OnDisconnectedFromServer() {
+		nosEngine.LogI("WebRTC Streamer disconnected from server.");
 		currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_SERVER;
 		WebRTCCallbacksCV.notify_one();
 		//p_nosWebRTC.reset(new nosWebRTCInterface());
 	}
 
 	void OnPeerConnected() {
+		nosEngine.LogI("WebRTC Streamer peer connected.");
 		++PeerCount;
 		currentState = EWebRTCPlayerStates::eCONNECTED_TO_PEER;
 		WebRTCCallbacksCV.notify_one();
 	}
 
 	void OnPeerDisconnected() {
+		nosEngine.LogI("WebRTC Streamer peer disconnected.");
 		--PeerCount;
 		currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_PEER;
 		WebRTCCallbacksCV.notify_one();
@@ -385,7 +391,8 @@ struct WebRTCNodeContext : nos::NodeContext {
 
 				streamerNode->InitializeNodeInternals();
 				streamerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
-				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server);
+				streamerNode->UseHttps = *nos::GetPinValue<bool>(values, NSN_UseHttps);
+				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server, streamerNode->UseHttps);
 			}
 			return NOS_RESULT_SUCCESS;
 		};
@@ -588,7 +595,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 				}
 				case EWebRTCPlayerStates::eREQUESTED_TO_CONNECT_SERVER:
 				{
-					p_nosWebRTC->StartConnection(server);
+					p_nosWebRTC->StartConnection(server, UseHttps);
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}

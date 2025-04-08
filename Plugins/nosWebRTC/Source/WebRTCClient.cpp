@@ -16,9 +16,9 @@ nosWebRTCClient::nosWebRTCClient(std::string name) :
 {
 }
 
-void nosWebRTCClient::ConnectToServer(std::string fullAddres)
+void nosWebRTCClient::ConnectToServer(std::string fullAddres, bool useHttps)
 {
-	p_nosWebSocketClient.reset(new nosWebSocketClient(fullAddres));
+	p_nosWebSocketClient.reset(new nosWebSocketClient(fullAddres, useHttps));
 	RegisterWebSocketCallbacks();
 }
 

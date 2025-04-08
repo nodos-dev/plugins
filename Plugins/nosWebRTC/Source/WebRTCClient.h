@@ -33,7 +33,7 @@ public:
 	nosWebRTCClient(std::string name);
 	~nosWebRTCClient() = default;
 
-	void ConnectToServer(std::string fullAddres);
+	void ConnectToServer(std::string fullAddres, bool useHttps);
 	EClientState GetCurrentState() const;
 	const Peers& GetPeers() const;
 	void SendMessageToServer(std::string&& message);

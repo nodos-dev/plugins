@@ -8,6 +8,8 @@
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include "Names.h"
 
+#include "rtc_base/ssl_adapter.h"
+
 NOS_INIT()
 NOS_VULKAN_INIT()
 
@@ -35,12 +37,27 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	return NOS_RESULT_SUCCESS;
 }
 
+nosResult NOSAPI_CALL Initialize()
+{
+	if (!rtc::InitializeSSL())
+		nosEngine.LogE("Failed to initialize SSL");
+	return NOS_RESULT_SUCCESS;
+}
+
+nosResult NOSAPI_CALL OnPreUnload()
+{
+	if (!rtc::CleanupSSL())
+		nosEngine.LogE("Failed to cleanup SSL");
+	return NOS_RESULT_SUCCESS;
+}
+
 extern "C"
 {
 
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	outFunctions->Initialize = Initialize;
 	return NOS_RESULT_SUCCESS;
 }
 

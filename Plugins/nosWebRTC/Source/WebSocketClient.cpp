@@ -3,14 +3,38 @@
 #include "WebSocketClient.h"
 #include <iostream>
 #include <exception>
+#include "ssl-cert/cert.h"
+#include "ssl-cert/key.h"
 
-nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
+#include <Nodos/Modules.h>
+
+void WebSocketsLogCallback(int level, const char *line) {
+	switch (level)
+	{
+	case LLL_ERR:
+		nosEngine.LogE(line);
+		break;
+	case LLL_WARN:
+		nosEngine.LogW(line);
+		break;
+	case LLL_INFO:
+		nosEngine.LogI(line);
+		break;
+	default:
+		nosEngine.LogD(line);
+		break;
+	}
+}
+
+nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) : UseHttps(useHttps), FullAddress(fullIP)
 {
+	static bool logCallbackSet = false;
+	if (!logCallbackSet)
+	{
+		lws_set_log_level(LLL_ERR | LLL_WARN | LLL_NOTICE | LLL_INFO, WebSocketsLogCallback);
+		logCallbackSet = true;
+	}
 	try {
-		auto [_server, _port, _path] = ResolveAddres(fullIP);
-		serverAddres = _server;
-		port = _port;
-		path = _path;
 		StartWebSocket();
 	}
 	catch (std::exception& E) {
@@ -18,9 +42,9 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
 	}
 }
 
-nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path)
-	:serverAddres(server), port(_port), path(_path)
-{	
+nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path, bool useHttps)
+	: FullAddress(server + ":" + std::to_string(_port) + _path), UseHttps(useHttps)
+{
 	StartWebSocket();
 }
 
@@ -96,16 +120,54 @@ void nosWebSocketClient::Send()
 	}
 }
 
+struct ParsedAddress {
+	std::string Host;
+	std::string Path;
+	int Port;
+};
+
+ParsedAddress ParseFullAddress(const std::string& fullAddress) {
+	ParsedAddress result = { "", "/", 80 }; // Default values
+
+	// Find the protocol separator "://"
+	size_t protocolSeparatorPos = fullAddress.find("://");
+	size_t addressStartPos = (protocolSeparatorPos != std::string::npos) ? protocolSeparatorPos + 3 : 0;
+
+	// Extract Address (with protocol if it exists)
+	size_t portSeparatorPos = fullAddress.find(':', addressStartPos);
+	size_t pathSeparatorPos = fullAddress.find('/', addressStartPos);
+
+	// Extract Host
+	if (protocolSeparatorPos != std::string::npos) {
+		size_t protocolEndPos = protocolSeparatorPos + 3;
+		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Host = fullAddress.substr(protocolEndPos, hostEndPos - protocolEndPos);
+	}
+	else {
+		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Host = fullAddress.substr(0, hostEndPos);
+	}
+
+	// Extract Port
+	if (portSeparatorPos != std::string::npos && (pathSeparatorPos == std::string::npos || portSeparatorPos < pathSeparatorPos)) {
+		size_t portStartPos = portSeparatorPos + 1;
+		size_t portEndPos = (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Port = std::stoi(fullAddress.substr(portStartPos, portEndPos - portStartPos));
+	}
+
+	// Extract Path
+	if (pathSeparatorPos != std::string::npos) {
+		result.Path = fullAddress.substr(pathSeparatorPos);
+	}
+
+	return result;
+}
+
 void nosWebSocketClient::StartWebSocket()
 {
-	//Library handles http handshake?
 	pContext = nullptr;
 	memset(&Protocols, 0, sizeof(lws_protocols) * 3);
 
-	//Protocols refers to subprotocols, they agreed upon conventions for how the client and server will communicate.
-	//This subprotocols can define the format of the messages whether data should be cmpressed or how to interpret different types of messages
-	//etc. When the clien establishes a WebSocket connection it can send a list of supported subprotocols then the server selects one it supports
-	//and includes this in its handshake response then the both client and server know which protocol to use for their communication.
 	Protocols[0].name = "mz-ws";
 	Protocols[0].callback = mz_ws_callback;
 	Protocols[0].per_session_data_size = 0;
@@ -123,56 +185,44 @@ void nosWebSocketClient::StartWebSocket()
 	Info.gid = -1;
 	Info.uid = -1;
 	Info.user = this;
+	Info.timeout_secs = 30;
 
 	Info.options |= LWS_SERVER_OPTION_DISABLE_IPV6;
+	if (UseHttps) {
+		Info.options |= LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
+
+		Info.client_ssl_cert_mem = cert_pem;
+		Info.client_ssl_cert_mem_len = cert_pem_len;
+		Info.client_ssl_key_mem = key_pem;
+		Info.client_ssl_key_mem_len = key_pem_len;
+	}
+
 	pContext = lws_create_context(&Info);
 	if (!pContext)
-		throw std::exception("Port not found in the addres!");
+		throw std::exception("Port not found in the address!");
 
-	if (!path.starts_with('/')) {
-		path = '/' + path;
+	auto addressInfo = ParseFullAddress(FullAddress);
+
+	if (!addressInfo.Path.starts_with('/')) {
+		addressInfo.Path = '/' + addressInfo.Path;
 	}
+
 	struct lws_client_connect_info connect_info = {};
-
 	connect_info.context = pContext;
-	connect_info.address = serverAddres.c_str(); // The address of the WebSocket server
-	connect_info.port = port; // Port of the WebSocket server
-	connect_info.path = path.c_str(); // The path of the WebSocket resource
-	connect_info.host = serverAddres.c_str(); // Set the hostname
-	connect_info.origin = "Nodos"; // Origin might be used by server for security checks to prevent possible attacks
-	connect_info.protocol = Protocols[0].name; // The first protocol we've defined
-
+	connect_info.address = addressInfo.Host.c_str();
+	connect_info.port = addressInfo.Port;
+	connect_info.path = addressInfo.Path.c_str();
+	connect_info.host = addressInfo.Host.c_str();
+	connect_info.origin = "Nodos";
+	connect_info.protocol = Protocols[0].name;
+	if(UseHttps)
+		connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED | LCCSCF_ALLOW_INSECURE;
 	pWSI = lws_client_connect_via_info(&connect_info);
 	if (!pWSI)
-		throw std::exception("LWS connection failed!");
-
-}
-
-std::tuple<std::string, int, std::string> nosWebSocketClient::ResolveAddres(std::string fullAddress)
-{
-	std::string server;
-	int port;
-	std::string path;
-	if ("ws://" == fullAddress.substr(0, 5)) {
-		fullAddress = fullAddress.substr(5, fullAddress.size() - 5);
+	{
+		lws_context_destroy(pContext); // Clean up
+		throw std::runtime_error("Failed to connect to server");
 	}
-	size_t portIdx = fullAddress.find(':');
-	size_t pathIdx = fullAddress.find('/');
-	
-	if (portIdx == std::string::npos)
-		throw std::invalid_argument("Invalid format, port not not found");
-	
-	if (pathIdx == std::string::npos)
-		path = '/';
-	else {
-		path = fullAddress.substr(pathIdx, fullAddress.size() - pathIdx);
-	}
-
-	server = fullAddress.substr(0, portIdx);
-	port = std::atoi(fullAddress.substr(portIdx + 1, (pathIdx - portIdx)).c_str());
-	
-
-	return { server, port, path };
 }
 
 //TODO: make it so that it can handle large chunks
@@ -200,6 +250,7 @@ static int mz_ws_callback(struct lws* WSI, enum lws_callback_reasons Reason, voi
 		break;
 		case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
 		{
+			lwsl_err("Connection failed: %s\n", (const char*)In);
 			//Unsuccesful connection
 			if (Socket && Socket->pWSI == WSI && Socket->ConnectionErrorCallback) {
 				Socket->ConnectionErrorCallback();

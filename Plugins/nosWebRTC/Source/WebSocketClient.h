@@ -14,8 +14,8 @@ static int mz_ws_callback(struct lws* WSI, enum lws_callback_reasons reason, voi
 
 class nosWebSocketClient {
 public:
-	nosWebSocketClient(const std::string fullIP);
-	nosWebSocketClient(const std::string server,const int port, const std::string path);
+	nosWebSocketClient(const std::string fullIP, bool useHttps);
+	nosWebSocketClient(const std::string server,const int port, const std::string path, bool useHttps);
 
 	~nosWebSocketClient();
 
@@ -36,17 +36,15 @@ private:
 	std::queue<std::string> sendQueue;
 	std::queue<std::string> receivedQueue;
 	struct lws_context* pContext;
-	std::string serverAddres;
-	std::string path;
-	int port;
+	std::string FullAddress;
 	lws_protocols Protocols[3];
 	std::atomic<bool> shouldUpdate = true;
+	bool UseHttps;
 	void StartWebSocket();
 	//This method is for ultimate sending.
 	void Send();
 	void ProcessReceivedData(void* data, size_t lenght);
 
-	std::tuple<std::string, int, std::string> ResolveAddres(std::string fullAddress);
 	std::function<void()> ConnectionErrorCallback;
 	std::function<void(void*, size_t)> MessageReceivedCallback;
 	std::function<void()> ConnectionSuccesfulCallback;
