@@ -73,12 +73,12 @@ public:
 		Dispose();
 	}
 	
-	void StartConnection(std::string server_port) {
+	void StartConnection(std::string server_port, bool useHttps) {
 
 		if(!RTCThread.joinable())
 			RTCThread = std::thread([this]() {this->StartRTCThread(); });
 		try {
-			client.ConnectToServer(server_port);
+			client.ConnectToServer(server_port, useHttps);
 		}
 		catch (std::exception& E) {
 			nosEngine.LogE(E.what());
@@ -179,6 +179,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 	float FPS;
 	std::atomic_int PeerCount = 0;
 	std::string server;
+	bool UseHttps;
 	uint32_t LastFrameID = 0;
 
 	nos::uuid OutputPinUUID;
@@ -390,7 +391,8 @@ struct WebRTCNodeContext : nos::NodeContext {
 
 				streamerNode->InitializeNodeInternals();
 				streamerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
-				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server);
+				streamerNode->UseHttps = *nos::GetPinValue<bool>(values, NSN_UseHttps);
+				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server, streamerNode->UseHttps);
 			}
 			return NOS_RESULT_SUCCESS;
 		};
@@ -593,7 +595,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 				}
 				case EWebRTCPlayerStates::eREQUESTED_TO_CONNECT_SERVER:
 				{
-					p_nosWebRTC->StartConnection(server);
+					p_nosWebRTC->StartConnection(server, UseHttps);
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}

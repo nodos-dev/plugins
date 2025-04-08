@@ -24,7 +24,7 @@ void WebSocketsLogCallback(int level, const char *line) {
 	}
 }
 
-nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
+nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) : UseHttps(useHttps)
 {
 	static bool logCallbackSet = false;
 	if (!logCallbackSet)
@@ -44,8 +44,8 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
 	}
 }
 
-nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path)
-	:serverAddres(server), port(_port), path(_path)
+nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path, bool useHttps)
+	:serverAddres(server), port(_port), path(_path), UseHttps(useHttps)
 {	
 	StartWebSocket();
 }
@@ -147,13 +147,14 @@ void nosWebSocketClient::StartWebSocket()
 	Info.timeout_secs = 30;
 
 	Info.options |= LWS_SERVER_OPTION_DISABLE_IPV6;
-	Info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
+	if (UseHttps) {
+		Info.options |= LWS_SERVER_OPTION_ALLOW_NON_SSL_ON_SSL_PORT;
 
 	// Set the paths to your self-signed certificate and private key files
 	std::string certPath = std::string(nosEngine.Module->RootFolderPath) + "/cert.pem";
 	std::string keyPath = std::string(nosEngine.Module->RootFolderPath) + "/key.pem";
 	Info.client_ssl_cert_filepath = certPath.c_str();
-	Info.client_ssl_private_key_filepath = keyPath.c_str();
+	}
 
 	pContext = lws_create_context(&Info);
 	if (!pContext)
@@ -171,7 +172,7 @@ void nosWebSocketClient::StartWebSocket()
 	connect_info.host = serverAddres.c_str();
 	connect_info.origin = "Nodos";
 	connect_info.protocol = Protocols[0].name;
-
+	if(UseHttps)
 	connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED | LCCSCF_ALLOW_INSECURE;
 	pWSI = lws_client_connect_via_info(&connect_info);
 	if (!pWSI)
