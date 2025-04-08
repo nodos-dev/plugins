@@ -26,7 +26,7 @@ void WebSocketsLogCallback(int level, const char *line) {
 	}
 }
 
-nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) : UseHttps(useHttps)
+nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) : UseHttps(useHttps), FullAddress(fullIP)
 {
 	static bool logCallbackSet = false;
 	if (!logCallbackSet)
@@ -35,10 +35,6 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) 
 		logCallbackSet = true;
 	}
 	try {
-		auto [_server, _port, _path] = ResolveAddres(fullIP);
-		serverAddres = _server;
-		port = _port;
-		path = _path;
 		StartWebSocket();
 	}
 	catch (std::exception& E) {
@@ -47,8 +43,8 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP, bool useHttps) 
 }
 
 nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path, bool useHttps)
-	:serverAddres(server), port(_port), path(_path), UseHttps(useHttps)
-{	
+	: FullAddress(server + ":" + std::to_string(_port) + _path), UseHttps(useHttps)
+{
 	StartWebSocket();
 }
 
@@ -124,6 +120,49 @@ void nosWebSocketClient::Send()
 	}
 }
 
+struct ParsedAddress {
+	std::string Host;
+	std::string Path;
+	int Port;
+};
+
+ParsedAddress ParseFullAddress(const std::string& fullAddress) {
+	ParsedAddress result = { "", "/", 80 }; // Default values
+
+	// Find the protocol separator "://"
+	size_t protocolSeparatorPos = fullAddress.find("://");
+	size_t addressStartPos = (protocolSeparatorPos != std::string::npos) ? protocolSeparatorPos + 3 : 0;
+
+	// Extract Address (with protocol if it exists)
+	size_t portSeparatorPos = fullAddress.find(':', addressStartPos);
+	size_t pathSeparatorPos = fullAddress.find('/', addressStartPos);
+
+	// Extract Host
+	if (protocolSeparatorPos != std::string::npos) {
+		size_t protocolEndPos = protocolSeparatorPos + 3;
+		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Host = fullAddress.substr(protocolEndPos, hostEndPos - protocolEndPos);
+	}
+	else {
+		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Host = fullAddress.substr(0, hostEndPos);
+	}
+
+	// Extract Port
+	if (portSeparatorPos != std::string::npos && (pathSeparatorPos == std::string::npos || portSeparatorPos < pathSeparatorPos)) {
+		size_t portStartPos = portSeparatorPos + 1;
+		size_t portEndPos = (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
+		result.Port = std::stoi(fullAddress.substr(portStartPos, portEndPos - portStartPos));
+	}
+
+	// Extract Path
+	if (pathSeparatorPos != std::string::npos) {
+		result.Path = fullAddress.substr(pathSeparatorPos);
+	}
+
+	return result;
+}
+
 void nosWebSocketClient::StartWebSocket()
 {
 	pContext = nullptr;
@@ -162,53 +201,28 @@ void nosWebSocketClient::StartWebSocket()
 	if (!pContext)
 		throw std::exception("Port not found in the address!");
 
-	if (!path.starts_with('/')) {
-		path = '/' + path;
+	auto addressInfo = ParseFullAddress(FullAddress);
+
+	if (!addressInfo.Path.starts_with('/')) {
+		addressInfo.Path = '/' + addressInfo.Path;
 	}
 
 	struct lws_client_connect_info connect_info = {};
 	connect_info.context = pContext;
-	connect_info.address = serverAddres.c_str();
-	connect_info.port = port;
-	connect_info.path = path.c_str();
-	connect_info.host = serverAddres.c_str();
+	connect_info.address = addressInfo.Host.c_str();
+	connect_info.port = addressInfo.Port;
+	connect_info.path = addressInfo.Path.c_str();
+	connect_info.host = addressInfo.Host.c_str();
 	connect_info.origin = "Nodos";
 	connect_info.protocol = Protocols[0].name;
 	if(UseHttps)
-	connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED | LCCSCF_ALLOW_INSECURE;
+		connect_info.ssl_connection = LCCSCF_USE_SSL | LCCSCF_ALLOW_SELFSIGNED | LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK | LCCSCF_ALLOW_EXPIRED | LCCSCF_ALLOW_INSECURE;
 	pWSI = lws_client_connect_via_info(&connect_info);
 	if (!pWSI)
 	{
 		lws_context_destroy(pContext); // Clean up
 		throw std::runtime_error("Failed to connect to server");
 	}
-}
-
-std::tuple<std::string, int, std::string> nosWebSocketClient::ResolveAddres(std::string fullAddress)
-{
-	std::string server;
-	int port;
-	std::string path;
-	if ("ws://" == fullAddress.substr(0, 5))
-		fullAddress = fullAddress.substr(5, fullAddress.size() - 5);
-	else if ("wss://" == fullAddress.substr(0, 6))
-		fullAddress = fullAddress.substr(6, fullAddress.size() - 6);
-	size_t portIdx = fullAddress.find(':');
-	size_t pathIdx = fullAddress.find('/');
-	
-	if (portIdx == std::string::npos)
-		throw std::invalid_argument("Invalid format, port not not found");
-	
-	if (pathIdx == std::string::npos)
-		path = '/';
-	else {
-		path = fullAddress.substr(pathIdx, fullAddress.size() - pathIdx);
-	}
-
-	server = fullAddress.substr(0, portIdx);
-	port = std::atoi(fullAddress.substr(portIdx + 1, (pathIdx - portIdx)).c_str());
-
-	return { server, port, path };
 }
 
 //TODO: make it so that it can handle large chunks

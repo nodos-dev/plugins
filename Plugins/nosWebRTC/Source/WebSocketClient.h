@@ -36,9 +36,7 @@ private:
 	std::queue<std::string> sendQueue;
 	std::queue<std::string> receivedQueue;
 	struct lws_context* pContext;
-	std::string serverAddres;
-	std::string path;
-	int port;
+	std::string FullAddress;
 	lws_protocols Protocols[3];
 	std::atomic<bool> shouldUpdate = true;
 	bool UseHttps;
@@ -47,7 +45,6 @@ private:
 	void Send();
 	void ProcessReceivedData(void* data, size_t lenght);
 
-	std::tuple<std::string, int, std::string> ResolveAddres(std::string fullAddress);
 	std::function<void()> ConnectionErrorCallback;
 	std::function<void(void*, size_t)> MessageReceivedCallback;
 	std::function<void()> ConnectionSuccesfulCallback;
