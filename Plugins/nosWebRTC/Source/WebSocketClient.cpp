@@ -25,7 +25,6 @@ void WebSocketsLogCallback(int level, const char *line) {
 }
 
 nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
-	: FullAddress(fullIP)
 {
 	static bool logCallbackSet = false;
 	if (!logCallbackSet)
@@ -34,6 +33,10 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
 		logCallbackSet = true;
 	}
 	try {
+		auto [_server, _port, _path] = ResolveAddres(fullIP);
+		serverAddres = _server;
+		port = _port;
+		path = _path;
 		StartWebSocket();
 	}
 	catch (std::exception& E) {
@@ -42,7 +45,7 @@ nosWebSocketClient::nosWebSocketClient(const std::string fullIP)
 }
 
 nosWebSocketClient::nosWebSocketClient(const std::string server, const int _port, const std::string _path)
-	: FullAddress(server + ":" + std::to_string(_port) + _path)
+	:serverAddres(server), port(_port), path(_path)
 {	
 	StartWebSocket();
 }
@@ -119,56 +122,6 @@ void nosWebSocketClient::Send()
 	}
 }
 
-struct ParsedAddress {
-	std::string Address;
-	std::string Path;
-	std::string Host;
-	int Port;
-};
-
-ParsedAddress ParseFullAddress(const std::string& fullAddress) {
-	ParsedAddress result = {"", "/", "", 80}; // Default values
-
-	// Find the protocol separator "://"
-	size_t protocolSeparatorPos = fullAddress.find("://");
-	size_t addressStartPos = (protocolSeparatorPos != std::string::npos) ? protocolSeparatorPos + 3 : 0;
-
-	// Extract Address (with protocol if it exists)
-	size_t portSeparatorPos = fullAddress.find(':', addressStartPos);
-	size_t pathSeparatorPos = fullAddress.find('/', addressStartPos);
-
-	if (protocolSeparatorPos != std::string::npos) {
-		result.Address = fullAddress.substr(0, pathSeparatorPos == std::string::npos ? fullAddress.length() : pathSeparatorPos);
-	} else {
-		result.Address = fullAddress.substr(0, pathSeparatorPos == std::string::npos ? fullAddress.length() : pathSeparatorPos);
-	}
-
-	// Extract Host
-	if (protocolSeparatorPos != std::string::npos) {
-		size_t protocolEndPos = protocolSeparatorPos + 3;
-		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
-		result.Host = fullAddress.substr(protocolEndPos, hostEndPos - protocolEndPos);
-	} else {
-		size_t hostEndPos = (portSeparatorPos != std::string::npos) ? portSeparatorPos : (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
-		result.Host = fullAddress.substr(0, hostEndPos);
-	}
-
-	// Extract Port
-	if (portSeparatorPos != std::string::npos && (pathSeparatorPos == std::string::npos || portSeparatorPos < pathSeparatorPos)) {
-		size_t portStartPos = portSeparatorPos + 1;
-		size_t portEndPos = (pathSeparatorPos != std::string::npos) ? pathSeparatorPos : fullAddress.length();
-		result.Port = std::stoi(fullAddress.substr(portStartPos, portEndPos - portStartPos));
-	}
-
-	// Extract Path
-	if (pathSeparatorPos != std::string::npos) {
-		result.Path = fullAddress.substr(pathSeparatorPos);
-	}
-
-	return result;
-}
-
-
 void nosWebSocketClient::StartWebSocket()
 {
 	pContext = nullptr;
@@ -206,18 +159,16 @@ void nosWebSocketClient::StartWebSocket()
 	if (!pContext)
 		throw std::exception("Port not found in the address!");
 
-	auto addressInfo = ParseFullAddress(FullAddress);
-
-	if (!addressInfo.Path.starts_with('/')) {
-		addressInfo.Path = '/' + addressInfo.Path;
+	if (!path.starts_with('/')) {
+		path = '/' + path;
 	}
 
 	struct lws_client_connect_info connect_info = {};
 	connect_info.context = pContext;
-	connect_info.address = addressInfo.Host.c_str();
-	connect_info.port = addressInfo.Port;
-	connect_info.path = addressInfo.Path.c_str();
-	connect_info.host = addressInfo.Host.c_str();
+	connect_info.address = serverAddres.c_str();
+	connect_info.port = port;
+	connect_info.path = path.c_str();
+	connect_info.host = serverAddres.c_str();
 	connect_info.origin = "Nodos";
 	connect_info.protocol = Protocols[0].name;
 
