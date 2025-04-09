@@ -48,6 +48,7 @@
 					{
 						"name": "UseHttps",
 						"display_name": "Use HTTPS",
+						"description": "If ServerIP doesn't specify the encryption, use this pin",
 						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
