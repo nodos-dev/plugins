@@ -882,6 +882,7 @@ struct RingNodeBase : NodeContext
 
 		if (isFillComplete)
 		{
+			std::unique_lock lock(ModeMutex);
 			Mode = RingMode::CONSUME;
 			ModeCV.notify_all();
 		}
@@ -902,14 +903,17 @@ struct RingNodeBase : NodeContext
 		if (!IsOutLive)
 			return NOS_RESULT_SUCCESS;
 
-		if (Mode == RingMode::FILL)
+		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL && RepeatWhenFilling)
 		{
-			//Sleep for 100 ms & if still Fill, return pending
-			if (RepeatWhenFilling && RemainingRepeatableCount > 0)
+			if (RemainingRepeatableCount > 0)
 			{
 				RemainingRepeatableCount--;
 				return NOS_RESULT_SUCCESS;
 			}
+		}
+		else if (Mode == RingMode::FILL)
+		{
+			//Sleep for 100 ms & if still Fill, return pending
 			std::unique_lock lock(ModeMutex);
 			if (!ModeCV.wait_for(lock, std::chrono::milliseconds(100), [this] { return Mode != RingMode::FILL; }))
 				return NOS_RESULT_PENDING;
@@ -976,11 +980,14 @@ struct RingNodeBase : NodeContext
 
 	void OnPathStart() override
 	{
-		if (!Ring) { return; }
-		if (Ring && OnRestart == OnRestartType::RESET)
+		if (!Ring) return;
+		// Reset read pool for Queues(OnRestart::RESET) and Rings(OnRestart::WAIT_UNTIL_FULL) with Repeat too, if repeat, then size-1 CopyFroms will be repeated from the last buffer.
+		if (OnRestart == OnRestartType::RESET || RepeatWhenFilling)
+		{
 			Ring->Reset(false);
+		}
 		// We must wait for at least a frame to be sure that providing path is started and running smoothly
-		if (Ring && OnRestart == OnRestartType::WAIT_UNTIL_FULL && Ring->IsFull())
+		else if (Ring->IsFull())
 		{
 			Ring->Write.Pool.push_back(Ring->Read.Pool.front());
 			Ring->Read.Pool.pop_front();
@@ -997,14 +1004,13 @@ struct RingNodeBase : NodeContext
 			NeedsRecreation = false;
 		}
 		auto emptySlotCount = Ring->Write.Pool.size();
-		RemainingRepeatableCount = emptySlotCount - 1;
+		if (RepeatWhenFilling)
+			RemainingRepeatableCount = emptySlotCount - 1;
 		nosScheduleNodeParams schedule{ .NodeId = NodeId, .AddScheduleCount = emptySlotCount };
 		nosEngine.ScheduleNode(&schedule);
 		Ring->Exit = false;
 		if (Ring)
-		{
 			Ring->ResInterface->OnPathStart();
-		}
 	}
 
 	void SendPathRestart()
