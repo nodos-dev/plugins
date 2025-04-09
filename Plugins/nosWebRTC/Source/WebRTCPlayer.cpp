@@ -73,7 +73,7 @@ public:
 		Dispose();
 	}
 	
-	void StartConnection(std::string server_port, bool useHttps) {
+	bool StartConnection(std::string server_port, bool useHttps) {
 
 		if(!RTCThread.joinable())
 			RTCThread = std::thread([this]()
@@ -81,11 +81,16 @@ public:
 				this->StartRTCThread();
 			});
 		try {
+			if (server_port.starts_with("ws://") || server_port.starts_with("http://"))
+				useHttps = false;
+			else if (server_port.starts_with("https://") || server_port.starts_with("wss://"))
+				useHttps = true;
 			client.ConnectToServer(server_port, useHttps);
 		}
 		catch (std::exception& E) {
 			nosEngine.LogE(E.what());
 		}
+		return useHttps;
 	}
 
 	void SendOffer(int streamerID) {
@@ -453,7 +458,11 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 				playerNode->InitializeNodeInternals();
 				playerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
 				playerNode->UseHttps = *nos::GetPinValue<bool>(values, NSN_UseHttps);
-				playerNode->p_nosWebRTC->StartConnection(playerNode->server, playerNode->UseHttps);
+				bool shouldUseHttps = playerNode->p_nosWebRTC->StartConnection(playerNode->server, playerNode->UseHttps);
+				if (shouldUseHttps != playerNode->UseHttps) {
+					nosEngine.LogW("WebRTC Player: Server connection protocol mismatch! Server is using %s, but player's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", playerNode->UseHttps ? "HTTPS" : "HTTP");
+					nosEngine.SetPinValueByName(params->ParentNodeExecuteParams->NodeId, NSN_UseHttps, nos::Buffer::From(shouldUseHttps));
+				}
 			}
 			return NOS_RESULT_SUCCESS;
 			};
@@ -496,7 +505,11 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 				}
 				case EWebRTCPlayerStates::eREQUESTED_TO_CONNECT_SERVER:
 				{
-					p_nosWebRTC->StartConnection(server, UseHttps);
+					bool shouldUseHttps = p_nosWebRTC->StartConnection(server, UseHttps);
+					if (shouldUseHttps != UseHttps) {
+						nosEngine.LogW("WebRTC Player: Server connection protocol mismatch! Server is using %s, but player's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", UseHttps ? "HTTPS" : "HTTP");
+						nosEngine.SetPinValueByName(NodeId, NSN_UseHttps, nos::Buffer::From(shouldUseHttps));
+					}
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}

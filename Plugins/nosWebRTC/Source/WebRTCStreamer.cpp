@@ -73,16 +73,21 @@ public:
 		Dispose();
 	}
 	
-	void StartConnection(std::string server_port, bool useHttps) {
-
+	// Returns true if the connection should be in https
+	bool StartConnection(std::string server_port, bool useHttps) {
 		if(!RTCThread.joinable())
 			RTCThread = std::thread([this]() {this->StartRTCThread(); });
 		try {
+			if (server_port.starts_with("ws://") || server_port.starts_with("http://"))
+				useHttps = false;
+			else if (server_port.starts_with("https://") || server_port.starts_with("wss://"))
+				useHttps = true;
 			client.ConnectToServer(server_port, useHttps);
 		}
 		catch (std::exception& E) {
 			nosEngine.LogE(E.what());
 		}
+		return useHttps;
 	}
 
 	void SetTargetBitrate(int kbps) {
@@ -343,6 +348,9 @@ struct WebRTCNodeContext : nos::NodeContext {
 			int targetKbps = *(static_cast<int*>(value.Data));
 			p_nosWebRTC->SetTargetBitrate(targetKbps);
 		}
+		if (pinName == NSN_UseHttps) {
+			UseHttps = *nos::InterpretPinValue<bool>(value.Data);
+		}
 	}
 
 	void OnPinConnected(nos::Name pinName, nos::uuid const& connectedPin) override
@@ -392,7 +400,11 @@ struct WebRTCNodeContext : nos::NodeContext {
 				streamerNode->InitializeNodeInternals();
 				streamerNode->server = nos::GetPinValue<const char>(values, NSN_ServerIP);
 				streamerNode->UseHttps = *nos::GetPinValue<bool>(values, NSN_UseHttps);
-				streamerNode->p_nosWebRTC->StartConnection(streamerNode->server, streamerNode->UseHttps);
+				bool shouldUseHttps = streamerNode->p_nosWebRTC->StartConnection(streamerNode->server, streamerNode->UseHttps);
+				if (shouldUseHttps != streamerNode->UseHttps) {
+					nosEngine.LogW("WebRTC Streamer: Server connection protocol mismatch! Server is using %s, but streamer's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", streamerNode->UseHttps ? "HTTPS" : "HTTP");
+					nosEngine.SetPinValueByName(params->ParentNodeExecuteParams->NodeId, NSN_UseHttps, nos::Buffer::From(shouldUseHttps));
+				}
 			}
 			return NOS_RESULT_SUCCESS;
 		};
@@ -595,7 +607,11 @@ struct WebRTCNodeContext : nos::NodeContext {
 				}
 				case EWebRTCPlayerStates::eREQUESTED_TO_CONNECT_SERVER:
 				{
-					p_nosWebRTC->StartConnection(server, UseHttps);
+					bool shouldUseHttps = p_nosWebRTC->StartConnection(server, UseHttps);
+					if (shouldUseHttps != UseHttps) {
+						nosEngine.LogW("WebRTC Streamer: Server connection protocol mismatch! Server is using %s, but streamer's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", UseHttps ? "HTTPS" : "HTTP");
+						nosEngine.SetPinValueByName(NodeId, NSN_UseHttps, nos::Buffer::From(shouldUseHttps));
+					}
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}
