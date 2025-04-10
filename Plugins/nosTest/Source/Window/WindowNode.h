@@ -15,7 +15,6 @@ void RegisterWindowNode(nosNodeFunctions* out);
 class WindowNode : public nos::NodeContext
 {
 public:
-	WindowNode(const nos::fb::Node* node);
 	~WindowNode();
 	bool CreateSwapchain();
 	void Clear();

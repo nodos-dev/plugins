@@ -18,10 +18,10 @@ NOS_REGISTER_NAME(FrameInterpolator_BasicInterpolationPass)
 
 struct FrameInterpolatorNode : NodeContext
 {
-	FrameInterpolatorNode(nosFbNodePtr node)
-		: NodeContext(node), DeltaNanosec(0)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		Thread = std::jthread([this]() { InterpolatorThread(); });
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~FrameInterpolatorNode()

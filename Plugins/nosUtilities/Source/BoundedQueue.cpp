@@ -16,7 +16,7 @@ namespace nos::utilities
 
 struct BoundedQueueNodeContext : RingNodeBase
 {
-	BoundedQueueNodeContext(nosFbNodePtr node) : RingNodeBase(node, RingNodeBase::OnRestartType::RESET)
+	BoundedQueueNodeContext() : RingNodeBase(RingNodeBase::OnRestartType::RESET)
 	{
 	}
 	std::string GetName() const override

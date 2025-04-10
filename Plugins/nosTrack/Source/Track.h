@@ -92,7 +92,7 @@ public:
   TransformMapping Args = {};
 
 public:
-	TrackNodeContext(nos::fb::Node const* node);
+	nosResult OnCreate(nos::fb::Node const* node) override;
 	virtual ~TrackNodeContext() {}
 	virtual bool Parse(std::vector<uint8_t> const& data, track::TTrack& out) = 0;
 	void OnPathStart() override;	

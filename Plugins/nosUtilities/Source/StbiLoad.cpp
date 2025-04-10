@@ -36,30 +36,7 @@ enum State
 
 struct StbiLoadContext : NodeContext
 {
-    decltype(Clock::now()) TimeStarted;
-
-	StbiLoadContext(nosFbNodePtr node) :
-		NodeContext(node),
-		TimeStarted(Clock::now())
-	{
-		std::string path;
-		bool sRGB = false;
-		for (auto* pin : *node->pins())
-		{
-			auto name = pin->name()->c_str();
-			auto data = pin->data();
-			if (!data || !data->size())
-				continue;
-			if (strcmp(name, "Path") == 0)
-				path = reinterpret_cast<const char*>(data->data());
-			else if (strcmp(name, "sRGB") == 0)
-				sRGB = *reinterpret_cast<const bool*>(data->data());
-		}
-	}
-
-	~StbiLoadContext()
-	{
-	}
+	decltype(Clock::now()) TimeStarted = Clock::now();
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
 		nos::NodeExecuteParams execParams(params);

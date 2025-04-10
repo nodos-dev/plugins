@@ -16,7 +16,7 @@ struct SyncMultiOutletNode : NodeContext
 		uint64_t ProcessedFrameNumber = 0;
 	};
 
-	SyncMultiOutletNode(nosFbNodePtr node) : NodeContext(node), InputPin{}
+	nosResult OnCreate(nosFbNodePtr node) override
 	{ 
 		for (auto* pin : *node->pins())
 			if (pin->show_as() == nos::fb::ShowAs::OUTPUT_PIN)
@@ -25,6 +25,7 @@ struct SyncMultiOutletNode : NodeContext
 				OutPins[uuid(*pin->id())];
 				OutPinIdsOrdered.push_back(uuid(*pin->id()));
 			}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnNodeUpdated(nosNodeUpdate const* update) override
@@ -58,7 +59,7 @@ struct SyncMultiOutletNode : NodeContext
 		const nosBuffer* Data = nullptr;
 		uint64_t FrameNumber = 0;
 		bool Requested = false;
-	} InputPin;
+	} InputPin{};
 
 	std::shared_mutex OutPinsMutex;
 	std::unordered_map<uuid, SyncOutPin> OutPins;

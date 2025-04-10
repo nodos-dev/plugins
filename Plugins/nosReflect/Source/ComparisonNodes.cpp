@@ -11,16 +11,13 @@ struct ComparisonNode : NodeContext
 
 	nos::Buffer Value;
 	
-	ComparisonNode(nosFbNodePtr inNode) : NodeContext(inNode)
+	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto pin : *inNode->pins())
-		{
-			if(pin->name()->string_view() == NSN_A)
-			{
+			if (pin->name()->string_view() == NSN_A)
 				if (pin->type_name()->string_view() != NSN_TypeNameGeneric)
 					Type = nos::TypeInfo(nos::Name(pin->type_name()->string_view()));
-			}
-		}
+		return NOS_RESULT_SUCCESS;
 	}
 	
 	void OnPinUpdated(nosPinUpdate const* update) override

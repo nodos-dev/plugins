@@ -21,10 +21,6 @@ void RegisterWindowNode(nosNodeFunctions* out)
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.Window"), WindowNode, out);
 }
 
-WindowNode::WindowNode(const nos::fb::Node* node) : nos::NodeContext(node) 
-{ 
-}
-
 WindowNode::~WindowNode() 
 { 
 	assert(Window == nullptr);

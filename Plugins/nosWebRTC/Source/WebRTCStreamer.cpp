@@ -190,7 +190,12 @@ struct WebRTCNodeContext : nos::NodeContext {
 	nos::uuid OutputPinUUID;
 
 	//On Node Created
-	WebRTCNodeContext(nos::fb::Node const* node) :NodeContext(node), currentState(EWebRTCPlayerStates::eNONE), encodeLogger("WebRTC Streamer Encode"), copyToLogger("WebRTC Stramer BeginCopyTo") {
+	WebRTCNodeContext()
+		: NodeContext(), currentState(EWebRTCPlayerStates::eNONE), encodeLogger("WebRTC Streamer Encode"),
+		  copyToLogger("WebRTC Stramer BeginCopyTo")
+	{
+	}
+	nosResult OnCreate(nos::fb::Node const* node) override {
 		InputRGBA8.Info.Texture.Format = NOS_FORMAT_B8G8R8A8_SRGB;
 		InputRGBA8.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
 		InputRGBA8.Info.Texture.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST);
@@ -272,6 +277,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		nosVec2u deltaSec{10'000u, (uint32_t)std::floor(FPS * 10'000)};
 
 		SetNodeOrphanState(DisconnectFromServerID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~WebRTCNodeContext() override {

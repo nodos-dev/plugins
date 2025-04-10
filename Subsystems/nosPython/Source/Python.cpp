@@ -325,9 +325,10 @@ nosResult NOSAPI_CALL OnPyNodeRegistered(nosModuleIdentifier pluginId, nosName c
 class PyNativeNode : public nos::NodeContext
 {
 public:
-	PyNativeNode(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		GInterpreter->CreateNodeInstance(node);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~PyNativeNode()

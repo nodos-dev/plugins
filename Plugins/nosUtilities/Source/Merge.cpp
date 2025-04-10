@@ -43,7 +43,7 @@ struct MergeContext : NodeContext
 		return MergeContext::GetTextureCount(Pins.size());
 	}
 
-	MergeContext(nosFbNodePtr node) : NodeContext(node) 
+	nosResult OnCreate(nosFbNodePtr node) override 
 	{
 		auto textureCount = GetTextureCount();
 		if (textureCount > 2)
@@ -91,6 +91,7 @@ struct MergeContext : NodeContext
 						0,
 						&updatePins)));
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override

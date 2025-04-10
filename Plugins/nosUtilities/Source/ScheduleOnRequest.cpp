@@ -22,13 +22,14 @@ struct ScheduleOnRequestNode : NodeContext
 {
 	// This variable is only used to execute the node if the ScheduleWhenNodeCreated pin is set to true at construction
 	bool ExecuteForOnceAtCreation = false;
-	ScheduleOnRequestNode(nosFbNodePtr node) :
-		NodeContext(node) {
+	nosResult OnCreate(nosFbNodePtr node) 
+	{
 		// Listen to the ScheduleWhenNodeCreated pin only at construction
 		AddPinValueWatcher(NSN_ScheduleWhenNodeCreated, [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
 			if (!oldVal)
 				ExecuteForOnceAtCreation = *InterpretPinValue<bool>(newVal);
 		});
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void ScheduleNode()

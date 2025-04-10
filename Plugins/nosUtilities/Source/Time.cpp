@@ -8,18 +8,16 @@ NOS_REGISTER_NAME(Seconds);
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_Time, "nos.utilities.Time")
 struct TimeNodeContext : NodeContext
 {
-	TimeNodeContext(nosFbNodePtr node) : NodeContext(node) {}
-
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		NodeExecuteParams execParams(params);
-		float time = execParams.GetTotalTime(frameCount);
+		float time = execParams.GetTotalTime(FrameCount);
 		nosEngine.SetPinValue(execParams[NOS_NAME("Seconds")].Id, {.Data = &time, .Size = sizeof(float)});
-		frameCount++;
+		FrameCount++;
 		return NOS_RESULT_SUCCESS;
 	}
 
-	uint64_t frameCount = 0;
+	uint64_t FrameCount = 0;
 };
 
 

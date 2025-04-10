@@ -202,7 +202,7 @@ struct HostInfo
 
 struct HostNode : NodeContext
 {
-	HostNode(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		HostInfoPins pins {
 			.HostNamePinId = *GetPinId(NOS_NAME("HostName")),
@@ -210,16 +210,13 @@ struct HostNode : NodeContext
 			.UptimeSecondsPinId = *GetPinId(NOS_NAME("UptimeSeconds"))
 		};
 		GHostInfo.AddListener(NodeId, std::move(pins));
+		return NOS_RESULT_SUCCESS;
 	}
+
 
 	~HostNode() override
 	{
 		GHostInfo.RemoveListener(NodeId);
-	}
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
-	{
-		return NOS_RESULT_SUCCESS;
 	}
 };
 

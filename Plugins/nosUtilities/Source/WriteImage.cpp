@@ -30,7 +30,8 @@ struct WriteImage : NodeContext {
     std::atomic_bool Write = false;
     std::atomic_bool ShouldStop = false;
 
-    WriteImage(nosFbNodePtr node) : NodeContext(node){
+    nosResult OnCreate(nosFbNodePtr node) override
+    {
         Worker = std::thread([this] {
             while (!ShouldStop) {
                 std::unique_lock<std::mutex> lock(Mutex);
@@ -52,6 +53,7 @@ struct WriteImage : NodeContext {
                 OnPinValueChanged(nos::Name(pin->name()->c_str()), *pin->id(), value);
             }
         }
+		return NOS_RESULT_SUCCESS;
     }
 
     ~WriteImage() {

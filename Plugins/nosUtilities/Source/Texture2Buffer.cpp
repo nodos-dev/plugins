@@ -17,7 +17,7 @@ nosBufferElementType GetBufferElementTypeFromVulkanFormat(nosFormat format);
 struct Texture2BufferNode : nos::NodeContext
 {
 	uuid InputPinId = {}, OutputBufferPinId = {};
-	Texture2BufferNode(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		for (const auto& pin : *node->pins()) {
 			const char* currentPinName = pin->name()->c_str();
@@ -28,6 +28,7 @@ struct Texture2BufferNode : nos::NodeContext
 				OutputBufferPinId = *pin->id();
 			}
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 	
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override

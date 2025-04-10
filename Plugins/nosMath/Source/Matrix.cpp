@@ -71,7 +71,7 @@ enum class MatOp
 template <MatOp OpType>
 struct MatrixOperationNodeContext : NodeContext
 {
-	MatrixOperationNodeContext(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		for (auto& [id, pin] : Pins)
 		{
@@ -81,6 +81,7 @@ struct MatrixOperationNodeContext : NodeContext
 				break;
 			}
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 	
 	std::optional<nos::Name> TypeName = std::nullopt;

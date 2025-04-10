@@ -5,7 +5,7 @@
 namespace nos::track
 {
 
-TrackNodeContext::TrackNodeContext(nos::fb::Node const* node) : NodeContext(node)
+nosResult TrackNodeContext::OnCreate(nos::fb::Node const* node)
 {
 	bool enable = 0;
 	for (auto* pin : *node->pins())
@@ -33,6 +33,7 @@ TrackNodeContext::TrackNodeContext(nos::fb::Node const* node) : NodeContext(node
 	Restart();
 	if (enable)
 		Start();
+	return NOS_RESULT_SUCCESS;
 }
 
 void TrackNodeContext::OnPathCommand(const nosPathCommand* command)

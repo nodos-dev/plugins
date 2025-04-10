@@ -16,7 +16,7 @@ namespace nos::utilities
 
 struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
 {
-	DeinterlacedBoundedTextureQueueNode(nosFbNodePtr node) : RingNodeBase(node, RingNodeBase::OnRestartType::RESET)
+	DeinterlacedBoundedTextureQueueNode() : RingNodeBase(RingNodeBase::OnRestartType::RESET)
 	{
 	}
 

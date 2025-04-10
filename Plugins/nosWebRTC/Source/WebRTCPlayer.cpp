@@ -176,9 +176,12 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 
 
 	//On Node Created
-	WebRTCPlayerNodeContext(nos::fb::Node const* node)
-		: NodeContext(node), currentState(EWebRTCPlayerStates::eNONE),
+	WebRTCPlayerNodeContext()
+		: NodeContext(), currentState(EWebRTCPlayerStates::eNONE),
 		  PlayerBeginCopyToLogger("WebRTC Player BeginCopyFrom"), PlayerOnFrameLogger("WebRTC Player OnVideoFrame")
+	{
+	}
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		OutputRGBA8.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
 		OutputRGBA8.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
@@ -232,10 +235,10 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 				DisconnectFromServerID = *func->id();
 			}
 		}
-		NodeID = *node->id();
 		
 		checkCallbacks = true;
 		SetNodeOrphanState(DisconnectFromServerID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~WebRTCPlayerNodeContext() override {

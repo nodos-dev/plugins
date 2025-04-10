@@ -10,7 +10,7 @@ struct IndexOfNode : NodeContext
 
 	nos::Buffer Value;
 	
-	IndexOfNode(nosFbNodePtr inNode) : NodeContext(inNode)
+	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto pin : *inNode->pins())
 		{
@@ -34,6 +34,7 @@ struct IndexOfNode : NodeContext
 				}
 			}
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override

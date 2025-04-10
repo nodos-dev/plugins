@@ -20,9 +20,10 @@ enum class VariableStatusItem
 
 struct VariableNodeBase : NodeContext
 {
-	VariableNodeBase(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		TypeName = GetPin(NSN_Value)->TypeName;
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~VariableNodeBase() override
@@ -93,8 +94,9 @@ struct VariableNodeBase : NodeContext
 	
 struct SetVariableNode : VariableNodeBase
 {
-	SetVariableNode(nosFbNodePtr node) : VariableNodeBase(node)
+	nosResult OnCreate(nosFbNodePtr node) override 
 	{
+		VariableNodeBase::OnCreate(node);
 		CheckType();
 		// For editor to show changes without a scheduled node, we use pin value change callbacks.
 		// Once we support this in the engine, we can move these to ExecuteNode function.
@@ -153,6 +155,7 @@ struct SetVariableNode : VariableNodeBase
 			nosVariables->Set(Name, TypeName, Value->GetInternal());
 			nosVariables->AddNodeReference(Name, NodeId);
 		});
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~SetVariableNode() override
@@ -280,8 +283,9 @@ struct SetVariableNode : VariableNodeBase
 
 struct GetVariableNode : VariableNodeBase
 {
-	GetVariableNode(nosFbNodePtr node) : VariableNodeBase(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
+		VariableNodeBase::OnCreate(node);
 		nos::Buffer initialValue;
 		for (auto* pin : *node->pins())
 		{
@@ -291,8 +295,10 @@ struct GetVariableNode : VariableNodeBase
 				break;
 			}
 		}
-		AddPinValueWatcher(NOS_NAME("Name"), [this, initialValue = std::move(initialValue)](const nos::Buffer& value, std::optional<nos::Buffer> oldValue)
-			{
+		AddPinValueWatcher(
+			NOS_NAME("Name"),
+			[this, initialValue = std::move(initialValue)](const nos::Buffer& value,
+														   std::optional<nos::Buffer> oldValue) {
 				if (oldValue)
 				{
 					nos::Name oldName(static_cast<const char*>(oldValue->Data()));
@@ -303,7 +309,12 @@ struct GetVariableNode : VariableNodeBase
 				auto newName = static_cast<const char*>(value.Data());
 				if (strlen(newName) == 0)
 				{
-					SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name", "", 5, true);
+					SetStatus(VariableStatusItem::VariableName,
+							  fb::NodeStatusMessageType::WARNING,
+							  "Provide a name",
+							  "",
+							  5,
+							  true);
 					return;
 				}
 				if (newName == Name)
@@ -321,18 +332,31 @@ struct GetVariableNode : VariableNodeBase
 					}
 					else
 					{
-						SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to get variable " + std::string(newName), "", 5, true);
+						SetStatus(VariableStatusItem::VariableName,
+								  fb::NodeStatusMessageType::FAILURE,
+								  "Failed to get variable " + std::string(newName),
+								  "",
+								  5,
+								  true);
 						SetPinValue(NOS_NAME("Name"), "");
 					}
 					return;
 				}
 				nosVariables->AddNodeReference(Name, NodeId);
-				CallbackId = nosVariables->RegisterVariableUpdateCallback(Name, &GetVariableNode::VariableUpdateCallback, this);
+				CallbackId =
+					nosVariables->RegisterVariableUpdateCallback(Name, &GetVariableNode::VariableUpdateCallback, this);
 				ClearStatus(VariableStatusItem::VariableName);
 				SetPinType(NOS_NAME("Value"), outTypeName);
 				SetPinValue(NOS_NAME("Value"), outValue);
-				SetNodeStatusMessages({{{}, Name.AsString(), fb::NodeStatusMessageType::INFO, "Variable type and value set", 3, true, false}});
+				SetNodeStatusMessages({{{},
+										Name.AsString(),
+										fb::NodeStatusMessageType::INFO,
+										"Variable type and value set",
+										3,
+										true,
+										false}});
 			});
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~GetVariableNode() override

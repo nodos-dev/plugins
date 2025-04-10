@@ -16,11 +16,12 @@ namespace nos::utilities
 
 struct RingBufferNodeContext : RingNodeBase
 {
-	RingBufferNodeContext(nosFbNodePtr node) : RingNodeBase(node, RingNodeBase::OnRestartType::WAIT_UNTIL_FULL)
+	RingBufferNodeContext() : RingNodeBase(RingNodeBase::OnRestartType::WAIT_UNTIL_FULL)
 	{
 	}
 	~RingBufferNodeContext()
-	{ NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
+	{ 
+		NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
 	}
 
 	ResourceInterface::ResourceBase* LastPopped = nullptr;

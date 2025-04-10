@@ -137,7 +137,7 @@ struct ArithmeticNodeContext : NodeContext
 			return std::tuple<>{};
 		}();
 
-	ArithmeticNodeContext(const fb::Node* node) : NodeContext(node)
+	nosResult OnCreate(const fb::Node* node) override
 	{
 		std::optional<nosName> newTypeName;
 
@@ -186,6 +186,7 @@ struct ArithmeticNodeContext : NodeContext
 
 		if (Operator)
 			SetOperator(*Operator, false);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void ResolvePinsForArithmeticDynamic(const fb::Node* node) {

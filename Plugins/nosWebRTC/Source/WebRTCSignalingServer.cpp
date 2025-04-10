@@ -23,7 +23,8 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 	std::unique_ptr<nosSignalingServer> p_server;
 	int StreamerCount = 0;
 	int PlayerCount = 0;
-	WebRTCSignalingServerNodeContext(nos::fb::Node const* node) {
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
 		//lws_set_log_level(LLL_ERR | LLL_WARN | LLL_INFO | LLL_DEBUG, nullptr);
 
 		for (auto func : *node->functions()) {
@@ -36,6 +37,7 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 		}
 
 		SetNodeOrphanState(StopServerUUID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~WebRTCSignalingServerNodeContext() {

@@ -62,7 +62,7 @@ namespace nos::utilities
 
 		size_t CurrentIndex = 0;
 
-		UploadBufferProviderNodeContext(nosFbNodePtr node) : NodeContext(node)
+		nosResult OnCreate(nosFbNodePtr node) override
 		{
 			AddPinValueWatcher(NSN_QueueSize, [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) 
 				{
@@ -134,6 +134,7 @@ namespace nos::utilities
 					for (size_t i = 0; i < QueueSize; i++)
 						Buffers.emplace_back(SampleBuffer);
 				});
+			return NOS_RESULT_SUCCESS;
 		}
 
 		nosResult ExecuteNode(nosNodeExecuteParams* params) override

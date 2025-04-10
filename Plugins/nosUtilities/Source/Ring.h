@@ -731,7 +731,7 @@ struct RingNodeBase : NodeContext
 	std::atomic_bool RepeatWhenFilling = false;
 	TypeInfo TypeInfo;
 
-	void Init() {
+	void TypeResolved() {
 		std::shared_ptr<ResourceInterface> resource;
 		if (TypeInfo->TypeName == vulkanBufferTypeName)
 			resource = std::make_unique<GPUBufferResource>();
@@ -784,23 +784,22 @@ struct RingNodeBase : NodeContext
 		});
 	}
 
-	RingNodeBase(nosFbNodePtr node, OnRestartType onRestart) : NodeContext(node), OnRestart(onRestart), TypeInfo(voidTypeName) {
+	RingNodeBase(OnRestartType onRestart) : OnRestart(onRestart), TypeInfo(voidTypeName) {}
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
 		nosName typeName = voidTypeName;
 		if(auto* pins = node->pins())
 			for (auto* pin : *pins)
 				if (pin->name()->c_str() == outputPinName)
 					IsOutLive = pin->live();
 		for (auto& pin : Pins | std::views::values)
-		{
 			if (pin.TypeName != voidTypeName && (pin.Name == outputPinName || pin.Name == inputPinName))
-			{
 				typeName = pin.TypeName;
-			}
-		}
 		if (typeName != voidTypeName) {
 			TypeInfo = nos::TypeInfo(typeName);
-			Init();
+			TypeResolved();
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	virtual std::string GetName() const = 0;
@@ -836,7 +835,7 @@ struct RingNodeBase : NodeContext
 		if (TypeInfo->TypeName == voidTypeName || Ring)
 			return;
 
-		Init();
+		TypeResolved();
 	}
 
 	nosResult ExecuteRingNode(nosNodeExecuteParams* params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)

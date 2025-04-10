@@ -11,7 +11,7 @@ struct Indexer : NodeContext
     uint32_t Index = 0;
 	uint32_t ArraySize = 0;
     
-    Indexer(nosFbNodePtr inNode) : NodeContext(inNode)
+    nosResult OnCreate(nosFbNodePtr inNode) override
     {
         for (auto pin : *inNode->pins())
         {
@@ -28,6 +28,7 @@ struct Indexer : NodeContext
 			        Index = *(uint32_t*)pin->data()->Data();
             }
         }
+		return NOS_RESULT_SUCCESS;
     }
 
     nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override

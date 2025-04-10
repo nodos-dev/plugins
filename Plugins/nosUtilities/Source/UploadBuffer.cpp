@@ -10,11 +10,6 @@ namespace nos::utilities
 {
 struct UploadBufferNodeContext : NodeContext
 {
-	UploadBufferNodeContext(nosFbNodePtr node) : NodeContext(node)
-	{
-
-	}
-
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto execParams = nos::NodeExecuteParams(params);

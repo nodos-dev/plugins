@@ -24,10 +24,6 @@ struct SinkNode : NodeContext
 	clock::time_point LastCopy = clock::now();
 	utilities::SinkMode Mode = utilities::SinkMode::Periodic;
 
-	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode)
-	{
-	}
-
 	~SinkNode() override
 	{
 		StopThread();

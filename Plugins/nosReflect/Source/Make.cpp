@@ -13,7 +13,7 @@ struct MakeNode : NodeContext
     std::optional<nos::TypeInfo> Type = {};
     nos::Name VisualizerName = {};
 
-    MakeNode(const fb::Node* node) : NodeContext(node)
+    nosResult OnCreate(const fb::Node* node) override
     {
         if (flatbuffers::IsFieldPresent(node, fb::Node::VT_TEMPLATE_PARAMETERS) && 1 == node->template_parameters()->size())
         {
@@ -26,6 +26,7 @@ struct MakeNode : NodeContext
                 updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
             LoadPins(updateDisplayName ? updateDisplayName->c_str() : nullptr);
         }
+		return NOS_RESULT_SUCCESS;
     }
 
     void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override

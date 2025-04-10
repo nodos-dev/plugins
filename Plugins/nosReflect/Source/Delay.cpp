@@ -124,16 +124,15 @@ struct ResourceSlot : AnySlot
 struct DelayNode : NodeContext
 {
     nosName TypeName = NSN_TypeNameGeneric;
-	RingBuffer<std::unique_ptr<AnySlot>> Ring;
+	RingBuffer<std::unique_ptr<AnySlot>> Ring = RingBuffer<std::unique_ptr<AnySlot>>(0);
 
-	DelayNode(nosFbNodePtr node) : NodeContext(node), Ring(0) {
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
 		for (auto pin : *node->pins())
 		{
 			auto name = nos::Name(pin->name()->c_str());
 			if (NSN_Delay == name)
-			{
 				Ring.Size = *(uint32_t*)pin->data()->data();
-			}
 			if (NSN_Output == name)
 			{
 				if (pin->type_name()->c_str() == NSN_TypeNameGeneric.AsString())
@@ -141,8 +140,8 @@ struct DelayNode : NodeContext
 				TypeName = nos::Name(pin->type_name()->c_str());
 			}
 		}
+		return NOS_RESULT_SUCCESS;
 	}
-
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{

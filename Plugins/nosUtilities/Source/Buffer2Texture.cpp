@@ -10,9 +10,6 @@ namespace nos::utilities
 
 struct Buffer2TextureNodeContext : NodeContext
 {
-	Buffer2TextureNodeContext(nosFbNodePtr node) : NodeContext(node)
-	{
-	}
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams execParams(params);

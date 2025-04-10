@@ -31,7 +31,7 @@ struct EvalNodeContext : NodeContext
 
 	std::vector<uuid> Inputs;
 	
-	EvalNodeContext(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		auto pinCount = node->pins()->size();
 		std::list<uuid> pinsToUnorphan;
@@ -53,6 +53,7 @@ struct EvalNodeContext : NodeContext
 		Compile();
 		for (auto const& pinId : pinsToUnorphan)
 			SetPinOrphanState(pinId, fb::PinOrphanStateType::ACTIVE);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnNodeUpdated(nosNodeUpdate const* update) override

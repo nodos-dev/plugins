@@ -7,7 +7,6 @@ NOS_REGISTER_NAME(t)
 NOS_REGISTER_NAME(AnimationFrame)
 struct AnimateNode : NodeContext
 {
-	using NodeContext::NodeContext;
 	bool StartNextFrame = false;
 	bool Running = false;
 	bool TransientReverse = false;

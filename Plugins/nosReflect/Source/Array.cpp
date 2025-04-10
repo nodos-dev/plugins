@@ -8,7 +8,7 @@ struct ArrayNode : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	bool invalidNode = false;
-	ArrayNode(nosFbNodePtr inNode) : NodeContext(inNode)
+	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto& pin : Pins | std::views::values)
 		{
@@ -34,6 +34,7 @@ struct ArrayNode : NodeContext
 		}
 		LoadPins();
 		UpdateOutputVectorSize();
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnNodeUpdated(const nosNodeUpdate* update) override

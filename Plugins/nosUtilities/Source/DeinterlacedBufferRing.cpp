@@ -16,7 +16,7 @@ namespace nos::utilities
 
 struct DeinterlacedBufferRingNode : RingNodeBase
 {
-	DeinterlacedBufferRingNode(nosFbNodePtr node) : RingNodeBase(node, RingNodeBase::OnRestartType::WAIT_UNTIL_FULL)
+	DeinterlacedBufferRingNode() : RingNodeBase(RingNodeBase::OnRestartType::WAIT_UNTIL_FULL)
 	{
 	}
 	~DeinterlacedBufferRingNode()

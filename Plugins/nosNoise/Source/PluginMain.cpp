@@ -23,13 +23,8 @@ enum Nodes : int
     Count
 };
 
-class DynamicSizedNoiseNode : public NodeContext
+struct DynamicSizedNoiseNode : public NodeContext
 {
-public:
-    DynamicSizedNoiseNode(nosFbNodePtr node) : NodeContext(node)
-    {
-    }
-
     nosResult ExecuteNode(nosNodeExecuteParams* params) override
     {
         auto pins = GetPinValues(params);

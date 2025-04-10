@@ -6,7 +6,7 @@ namespace nos::utilities
 NOS_REGISTER_NAME(Switch)
 struct SwitchTrigger : NodeContext
 {
-	SwitchTrigger(nosFbNodePtr inNode) : NodeContext(inNode) 
+	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto* func : *inNode->functions())
 		{
@@ -17,6 +17,7 @@ struct SwitchTrigger : NodeContext
 				if (pin->show_as() == fb::ShowAs::OUTPUT_PIN)
 					AddFbPin(pin);
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	nos::uuid SwitchFuncId;

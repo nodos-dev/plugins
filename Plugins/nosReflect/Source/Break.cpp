@@ -9,7 +9,7 @@ struct BreakNode : NodeContext
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	size_t ArraySize = 0;
 
-	BreakNode(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		for (auto* pin : *node->pins())
 		{
@@ -20,11 +20,13 @@ struct BreakNode : NodeContext
 				break;
 			auto ty = nos::TypeInfo(typeName);
 			if (!ty)
-				return;
+				// Has typename but not a valid type
+				return NOS_RESULT_FAILED;
 			Type = std::move(ty);
 			LoadPins(false);
             break;
         }
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override

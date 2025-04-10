@@ -212,9 +212,9 @@ static NOS_REGISTER_NAME(InvertFocus);
 struct FreeDNodeContext : public TrackNodeContext
 {
 	public:
-		FreeDNodeContext(nos::fb::Node const* node) :
-			TrackNodeContext(node)
+		nosResult OnCreate(nos::fb::Node const* node) override
 		{
+			TrackNodeContext::OnCreate(node);
 			for (auto* pin : *node->pins())
 			{
 				LoadField<glm::vec2>(pin, NSN_ZoomRange, ZoomRange);
@@ -223,6 +223,7 @@ struct FreeDNodeContext : public TrackNodeContext
 				LoadField<bool>(pin, NSN_InvertZoom, InvertZoom);
 				LoadField<bool>(pin, NSN_InvertFocus, InvertFocus);
 			}
+			return NOS_RESULT_SUCCESS;
 		}
 
         glm::vec2 ZoomRange = {0, 60000};

@@ -8,7 +8,7 @@ namespace nos::math
 {
 struct RandomNode : NodeContext
 {
-	RandomNode(nosFbNodePtr node) : NodeContext(node)
+	nosResult OnCreate(nosFbNodePtr) override
 	{
 		AddPinValueWatcher(NOS_NAME("Seed"), [this](nos::Buffer const& newVal, auto const& oldVal) {
 			auto& seed = *newVal.As<int>();
@@ -22,6 +22,7 @@ struct RandomNode : NodeContext
 			auto& maxVal = *newVal.As<float>();
 			Dist = std::uniform_real_distribution(Dist.a(), maxVal);
 		});
+		return NOS_RESULT_SUCCESS;
 	}	
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
