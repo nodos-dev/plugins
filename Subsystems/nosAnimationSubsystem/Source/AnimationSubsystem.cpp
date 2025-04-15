@@ -152,7 +152,7 @@ void BroadcastAnimationTypesToEditors()
 	for (auto& name : names)
 		types.types.push_back(name.AsString());
 	flatbuffers::FlatBufferBuilder fbb;
-	fbb.Finish(editor::MakeFromAnimation(fbb, editor::CreateAnimatableTypes(fbb, &types)));
+	fbb.Finish(editor::MakeFromAnimationOffset(fbb, editor::CreateAnimatableTypes(fbb, &types)));
 	nos::Buffer buf = fbb.Release();
 	nosSendEditorMessageParams params{.Message = buf, .DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST};
 	nosEngine.SendEditorMessage(&params);
