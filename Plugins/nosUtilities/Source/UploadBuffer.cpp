@@ -10,6 +10,14 @@ namespace nos::utilities
 {
 struct UploadBufferNodeContext : NodeContext
 {
+	nosSemaphore TransferSem;
+	uint64_t FrameNumber = 1;
+	nosResult OnCreate(nosFbNodePtr node) {
+		nosSemaphoreCreateInfo semCreateInfo{
+			.Type = NOS_SEMAPHORE_TYPE_TIMELINE
+		};
+		return nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem);
+	}
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto execParams = nos::NodeExecuteParams(params);
@@ -48,12 +56,24 @@ struct UploadBufferNodeContext : NodeContext
 		auto OutputBuffer = vkss::ConvertToResourceInfo(output);
 		auto InputBuffer = vkss::ConvertToResourceInfo(input);
 
-		nosCmd cmd = vkss::BeginCmd(NOS_NAME("UploadBuffer Staging Copy"), NodeId);
-		nosVulkan->Copy(cmd, &InputBuffer, &OutputBuffer, 0);
-		nosCmdEndParams endParams{.ForceSubmit = false, .OutGPUEventHandle = event};
-		nosVulkan->End(cmd, &endParams);
-		//nosVulkan->End(cmd, &params);
+		{
+			nosCmd cmd;
+			nosCmdBeginParams cmdParams = { .Name = NOS_NAME("UploadBuffer Staging Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd,
+				.PreferredQueueType = NOS_CMD_QUEUE_TYPE_TRANSFER,
+			};
+			auto res = nosVulkan->Begin(&cmdParams);
+			nosVulkan->Copy(cmd, &InputBuffer, &OutputBuffer, 0);
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, FrameNumber);
+			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = event };
+			nosVulkan->End(cmd, &endParams);
+			//nosVulkan->End(cmd, &params);
+		}
 		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
+		{
+			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, FrameNumber++);
+			nosVulkan->End(cmd, nullptr);
+		}
 
 		return NOS_RESULT_SUCCESS;
 	}
