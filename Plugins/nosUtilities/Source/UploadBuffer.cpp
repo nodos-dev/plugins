@@ -18,6 +18,14 @@ struct UploadBufferNodeContext : NodeContext
 		};
 		return nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem);
 	}
+	nosResult OnDestroy() {
+		if (TransferSem)
+		{
+			nosVulkan->DestroySemaphore(&TransferSem);
+			TransferSem = 0;
+		}
+		return NOS_RESULT_SUCCESS;
+	}
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto execParams = nos::NodeExecuteParams(params);
@@ -66,9 +74,7 @@ struct UploadBufferNodeContext : NodeContext
 			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, FrameNumber);
 			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = event };
 			nosVulkan->End(cmd, &endParams);
-			//nosVulkan->End(cmd, &params);
 		}
-		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 		{
 			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
 			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, FrameNumber++);
