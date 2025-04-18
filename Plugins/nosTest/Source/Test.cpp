@@ -12,7 +12,7 @@
 #include "Window/WindowNode.h"
 #include <cstdint>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
+NOS_INIT()
 
 NOS_REGISTER_NAME(in1)
 NOS_REGISTER_NAME(in2)
@@ -220,16 +220,16 @@ struct TestPluginFunctions : PluginFunctions
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
-		nosModuleStatusMessage msg;
-		msg.ModuleId = nosEngine.Module->Id;
+		nosPluginStatusMessage msg;
+		msg.PluginId = nosEngine.Plugin->Id;
 		msg.Message = "Test module loaded";
-		msg.MessageType = NOS_MODULE_STATUS_MESSAGE_TYPE_INFO;
-		msg.UpdateType = NOS_MODULE_STATUS_MESSAGE_UPDATE_TYPE_REPLACE;
+		msg.MessageType = NOS_PLUGIN_STATUS_MESSAGE_TYPE_INFO;
+		msg.UpdateType = NOS_PLUGIN_STATUS_MESSAGE_UPDATE_TYPE_REPLACE;
 		msg.Details = "You can now use the test module and use nosUri references here in MarkdownLink format";
 		msg.PopupTimeoutSeconds = 0;
 		msg.Popup = true;
 		msg.Dismissable = true;
-		nosEngine.SendModuleStatusMessageUpdate(&msg);
+		nosEngine.SendPluginStatusMessageUpdate(&msg);
 
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.NodeTest"), TestNode, outFunctions[0]);
 		outFunctions[1]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCategories");

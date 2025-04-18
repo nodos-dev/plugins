@@ -148,14 +148,14 @@ void InterpolatorManager::AddBuiltinInterpolator(nos::Name name, std::function<n
 		};
 }
 
-void InterpolatorManager::AddCustomInterpolator(nos::fb::TModuleIdentifier moduleId, nos::Name name, InterpolatorFn fn)
+void InterpolatorManager::AddCustomInterpolator(nos::fb::TPluginIdentifier moduleId, nos::Name name, InterpolatorFn fn)
 {
 	std::unique_lock lock(InterpolatorsMutex);
 	Interpolators[name] = std::move(fn);
 	ModuleToAnimators[moduleId].push_back(name);
 }
 
-bool InterpolatorManager::ModuleUnloaded(nos::fb::TModuleIdentifier moduleId)
+bool InterpolatorManager::PluginUnloaded(nos::fb::TPluginIdentifier moduleId)
 {
 	std::unique_lock lock(InterpolatorsMutex);
 	auto it = ModuleToAnimators.find(moduleId);

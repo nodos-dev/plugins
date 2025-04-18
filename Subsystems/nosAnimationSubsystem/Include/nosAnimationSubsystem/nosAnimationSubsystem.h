@@ -28,13 +28,13 @@ typedef struct nosAnimationSubsystem
 #define NOS_ANIMATION_SUBSYSTEM_NAME "nos.sys.animation"
 
 #define NOS_ANIMATION_SUBSYSTEM_VERSION_MAJOR 1
-#define NOS_ANIMATION_SUBSYSTEM_VERSION_MINOR 10
+#define NOS_ANIMATION_SUBSYSTEM_VERSION_MINOR 11
 
-extern struct nosModuleInfo nosAnimationModuleInfo;
+extern struct nosPluginInfo nosAnimationModuleInfo;
 extern nosAnimationSubsystem* nosAnimation;
 
 #define NOS_ANIMATION_INIT()                                                                                              \
-	nosModuleInfo nosAnimationModuleInfo;                                                                                 \
+	nosPluginInfo nosAnimationModuleInfo;                                                                                 \
 	nosAnimationSubsystem* nosAnimation = nullptr;
 
 #define NOS_ANIMATION_IMPORT() NOS_IMPORT_DEP(NOS_ANIMATION_SUBSYSTEM_NAME, nosAnimationModuleInfo, nosAnimation)

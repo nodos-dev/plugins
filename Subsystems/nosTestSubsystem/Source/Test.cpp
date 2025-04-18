@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include <nosTestSubsystem/TestSubsystem.h>
-#include <Nodos/SubsystemAPI.h>
+#include <Nodos/PluginAPI.h>
 #include <Nodos/Helpers.hpp>
 NOS_INIT()
 
@@ -17,7 +17,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL OnRequest(uint32_t minor, void** outSubsystemC
 	return NOS_RESULT_SUCCESS;
 }
 
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
 	subsystemFunctions->OnRequest = OnRequest;
 	return NOS_RESULT_SUCCESS;

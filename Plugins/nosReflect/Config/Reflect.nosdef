@@ -84,7 +84,7 @@
             "can_show_as": "OUTPUT_PIN_ONLY",
             "connection_conditions": "!resource"
           }
-        ]
+        ]   
       }
     },
     {

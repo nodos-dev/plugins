@@ -6,7 +6,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/ext/quaternion_common.hpp>
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
+NOS_INIT()
 NOS_ANIMATION_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()

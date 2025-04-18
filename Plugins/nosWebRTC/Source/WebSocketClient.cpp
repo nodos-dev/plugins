@@ -6,7 +6,7 @@
 #include "ssl-cert/cert.h"
 #include "ssl-cert/key.h"
 
-#include <Nodos/Modules.h>
+#include <Nodos/PluginAPI.h>
 
 void WebSocketsLogCallback(int level, const char *line) {
 	switch (level)

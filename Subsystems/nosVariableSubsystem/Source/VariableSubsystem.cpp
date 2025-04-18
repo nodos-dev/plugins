@@ -1,12 +1,12 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include <Nodos/SubsystemAPI.h>
+#include <Nodos/PluginAPI.h>
 #include <Nodos/Name.hpp>
 #include <Nodos/Helpers.hpp>
 
 #include "nosVariableSubsystem/nosVariableSubsystem.h"
-#include "./EditorEvents_generated.h"
+#include "nosVariableSubsystem/EditorEvents_generated.h"
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0); // APITransition: Reminder that this should be reset after next major!
+NOS_INIT() // APITransition: Reminder that this should be reset after next major!
 
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
@@ -357,11 +357,11 @@ void NOSAPI_CALL OnMessageFromEditor(uint64_t editorId, nosBuffer message)
 
 extern "C"
 {
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
 	subsystemFunctions->OnRequest = Export;
 	subsystemFunctions->Initialize = Initialize;
-	subsystemFunctions->OnPreUnloadSubsystem = UnloadSubsystem;
+	subsystemFunctions->OnPreUnloadPlugin = UnloadSubsystem;
 	subsystemFunctions->OnEditorConnected = [](uint64_t editorId)
 	{
 		VariableManager::GetInstance().OnEditorConnected(editorId);

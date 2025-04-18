@@ -2,18 +2,18 @@
     "info": {
         "id": {
             "name": "nos.reflect",
-            "version": "1.10.1"
+            "version": "1.11.0"
         },
         "display_name": "Reflect",
         "description": "Collection of type reflection nodes",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version":  "6.21"
+				"version":  "6.22"
 			},
 			{
 				"name": "nos.sys.variables",
-				"version":  "1.10"
+				"version":  "1.11"
 			}
 		]
     },

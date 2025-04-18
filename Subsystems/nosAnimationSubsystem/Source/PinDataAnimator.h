@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Nodos/SubsystemAPI.h>
+#include <Nodos/PluginAPI.h>
 #include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
 #include <Nodos/Helpers.hpp>
 #include "nosAnimationSubsystem/nosAnimationSubsystem.h"
@@ -25,10 +25,10 @@ struct InterpolatorManager
 	using InterpolatorFn = std::function<nosResult(const nosBuffer from, const nosBuffer to, const double t, nosBuffer* outBuf)>;
 	void AddBuiltinInterpolator(nos::Name name, std::function<nos::Buffer(const nosBuffer from, const nosBuffer to, const double t)> fn);
 
-	void AddCustomInterpolator(nos::fb::TModuleIdentifier moduleId, nos::Name name, InterpolatorFn fn);
+	void AddCustomInterpolator(nos::fb::TPluginIdentifier moduleId, nos::Name name, InterpolatorFn fn);
 
 	// Returns true if any interpolator was removed
-	bool ModuleUnloaded(nos::fb::TModuleIdentifier moduleId);
+	bool PluginUnloaded(nos::fb::TPluginIdentifier moduleId);
 
 	bool HasInterpolator(nos::Name name)
 	{
@@ -42,7 +42,7 @@ struct InterpolatorManager
 
 	std::shared_mutex InterpolatorsMutex;
 	std::unordered_map<nos::Name, InterpolatorFn> Interpolators;
-	std::unordered_map<nos::fb::TModuleIdentifier, std::vector<nos::Name>> ModuleToAnimators;
+	std::unordered_map<nos::fb::TPluginIdentifier, std::vector<nos::Name>> ModuleToAnimators;
 };
 
 struct AnimationData
