@@ -59,7 +59,13 @@ struct BreakNode : NodeContext
 		switch (info->BaseType)
 		{
 		case NOS_BASE_TYPE_ARRAY:
-		case NOS_BASE_TYPE_STRUCT: return NOS_RESULT_SUCCESS;
+		case NOS_BASE_TYPE_STRUCT:
+		{
+			for (int i = 0; i < info->AttributeCount; ++i)
+				if (info->Attributes[i].Name == NOS_NAME_STATIC("skip_break"))
+					return NOS_RESULT_FAILED;
+			return NOS_RESULT_SUCCESS;
+		}
 		default: return NOS_RESULT_FAILED;
 		}
 	};

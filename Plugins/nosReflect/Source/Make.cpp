@@ -27,6 +27,33 @@ struct MakeNode : NodeContext
             LoadPins(updateDisplayName ? updateDisplayName->c_str() : nullptr);
         }
     }
+	
+	// Strict mode: only builtin types are supported
+	static bool IsTypeSupported(nos::TypeInfo& info, bool strict) {
+		if (info->BaseType == NOS_BASE_TYPE_NONE)
+			return false;
+		// If has 'skip_make' attribute
+		if (info->BaseType == NOS_BASE_TYPE_STRUCT || info->BaseType == NOS_BASE_TYPE_UNION
+			|| info->BaseType == NOS_BASE_TYPE_ARRAY)
+		{
+
+			bool skip = strict;
+			for (int i = 0; i < info->AttributeCount; ++i)
+			{
+				if (info->Attributes[i].Name == NOS_NAME_STATIC("builtin") ||
+					info->Attributes[i].Name == NOS_NAME_STATIC("force_make"))
+					skip = false;
+				else if (info->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
+				{
+					skip = true;
+					break;
+				}
+			}
+			if (skip)
+				return false;
+		}
+		return true;
+	}
 
     void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
     {
@@ -139,7 +166,7 @@ struct MakeNode : NodeContext
     nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
     { 
         nos::TypeInfo incomingType(params->IncomingTypeName);
-        if (incomingType->BaseType == NOS_BASE_TYPE_NONE)
+        if (!IsTypeSupported(incomingType, false))
         {
             strcpy(params->OutErrorMessage, "Type not supported for make.");
             return NOS_RESULT_FAILED;
@@ -337,27 +364,8 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 	for (auto& typeName : typeNames)
 	{
 		nos::TypeInfo typeInfo(typeName);
-		if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
+		if (!MakeNode::IsTypeSupported(typeInfo, true))
 			continue;
-		// If has 'skip_make' attribute
-		if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || typeInfo->BaseType == NOS_BASE_TYPE_UNION
-			|| typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
-		{
-
-			bool skip = true;
-			for (int i = 0; i < typeInfo->AttributeCount; ++i)
-			{
-				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin") || typeInfo->Attributes[i].Name == NOS_NAME_STATIC("force_make"))
-					skip = false;
-				else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
-				{
-					skip = true;
-					break;
-				}
-			}
-			if (skip)
-				continue;
-		}
 		std::string name = nos::Name(typeInfo.TypeName).AsString();
 		auto idx = name.find_last_of(".");
 		idx = idx == std::string::npos ? 0 : 1+idx;
