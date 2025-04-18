@@ -4,7 +4,7 @@
 #include <Nodos/Helpers.hpp>
 
 #include "nosVariableSubsystem/nosVariableSubsystem.h"
-#include "./EditorEvents_generated.h"
+#include "nosVariableSubsystem/EditorEvents_generated.h"
 
 NOS_INIT() // APITransition: Reminder that this should be reset after next major!
 
