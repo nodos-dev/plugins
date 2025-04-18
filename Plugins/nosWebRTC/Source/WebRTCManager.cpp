@@ -37,7 +37,7 @@
 #include "CustomVideoSource.h"
 #include "WebRTCJsonConfig.h"
 #include "VideoEncoderFactory.h"
-#include "Nodos/Modules.h"
+#include "Nodos/PluginAPI.h"
 
 using json = nlohmann::json;
 

@@ -50,7 +50,7 @@ nosResult RegisterChannelViewer(nosNodeFunctions* out)
 	out->ClassName = NSN_Nos_Utilities_ChannelViewer;
 	out->ExecuteNode = ExecuteNode;
 
-	fs::path root = nosEngine.Module->RootFolderPath;
+	fs::path root = nosEngine.Plugin->RootFolderPath;
 	auto chViewerPath = (root / "Shaders" / "ChannelViewer.frag").generic_string();
 
 	nosShaderInfo shader = {

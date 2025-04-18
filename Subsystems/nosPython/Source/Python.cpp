@@ -1,5 +1,5 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include <Nodos/SubsystemAPI.h>
+#include <Nodos/PluginAPI.h>
 #include <Nodos/NodeHelpers.hpp>
 
 #include <nosPython/Python_generated.h>
@@ -299,10 +299,10 @@ void Deinit()
 	delete GInterpreter;
 }
 
-nosResult NOSAPI_CALL OnPyNodeRegistered(nosModuleIdentifier pluginId, nosName className, nosBuffer options)
+nosResult NOSAPI_CALL OnPyNodeRegistered(nosPluginIdentifier pluginId, nosName className, nosBuffer options)
 {
 	char path[2048];
-	nosEngine.GetModuleFolderPath(pluginId, 2048, path);
+	nosEngine.GetPluginFolderPath(pluginId, 2048, path);
 	fs::path moduleRoot = std::string(path);
 
 	auto* pyNodeOptions = flatbuffers::GetRoot<PythonNode>(options.Data);
@@ -408,7 +408,7 @@ public:
 	}
 };
 
-nosResult NOSAPI_CALL ExportSubsystemNodeFunctions(size_t* outSize, nosSubsystemNodeFunctions** outList)
+nosResult NOSAPI_CALL ExportNodeTypeFunctions(size_t* outSize, nosNodeTypeFunctions** outList)
 {
 	*outSize = 1;
 	if (!outList)
@@ -421,7 +421,7 @@ nosResult NOSAPI_CALL ExportSubsystemNodeFunctions(size_t* outSize, nosSubsystem
 	return NOS_RESULT_SUCCESS;
 }
 
-nosResult NOSAPI_CALL OnPreUnloadSubsystem()
+nosResult NOSAPI_CALL OnPreUnloadPlugin()
 {
 	nos::py::Deinit();
 	// Python DLL might not be released when nos.py is unloaded, due to some third party python module (like numpy).
@@ -443,11 +443,11 @@ nosResult NOSAPI_CALL OnPreUnloadSubsystem()
 extern "C"
 {
 
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
 	nos::py::Init();
-	subsystemFunctions->OnPreUnloadSubsystem = nos::py::OnPreUnloadSubsystem;
-	subsystemFunctions->ExportSubsystemNodeFunctions = nos::py::ExportSubsystemNodeFunctions;
+	subsystemFunctions->OnPreUnloadPlugin = nos::py::OnPreUnloadPlugin;
+	subsystemFunctions->ExportNodeTypeFunctions = nos::py::ExportNodeTypeFunctions;
 	return NOS_RESULT_SUCCESS;
 }
 

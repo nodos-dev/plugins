@@ -260,7 +260,7 @@ nosResult RegisterMerge(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NSN_Merge, MergeContext, out);
 
-	fs::path root = nosEngine.Module->RootFolderPath;
+	fs::path root = nosEngine.Plugin->RootFolderPath;
 	auto mergePath = (root / "Shaders" / "Merge.frag").generic_string();
 
 	// Register shaders

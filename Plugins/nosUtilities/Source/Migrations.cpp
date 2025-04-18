@@ -56,7 +56,7 @@ nosResult MigrateReadImageToGraph(nosFbNodePtr node, nosBuffer* outBuffer) {
 		return NOS_RESULT_SUCCESS;
 	fb::TNode cur;
 	node->UnPackTo(&cur);
-	std::string ReadImageGraphFile = ReadToString(std::string(nosEngine.Module->RootFolderPath) + "/Config/ReadImage.nosdef");
+	std::string ReadImageGraphFile = ReadToString(std::string(nosEngine.Plugin->RootFolderPath) + "/Config/ReadImage.nosdef");
 	auto graphBuffer = GenerateBufferFromJson(NOS_NAME(nos::fb::NodeDefinitions::GetFullyQualifiedName()), ReadImageGraphFile.c_str());
 	if (!graphBuffer) {
 		// Failed to read graph file

@@ -1,12 +1,12 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/SubsystemAPI.h>
+#include <Nodos/PluginAPI.h>
 
 #include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
 #include <PinDataAnimator.h>
 
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(4)
+NOS_INIT()
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()
 
@@ -23,8 +23,8 @@ struct AnimationSubsystemCtx
 	AnimationSubsystemCtx() : InterpolatorManager(), Animator(InterpolatorManager), AnimationSubsystem{}
 	{
 		AnimationSubsystem.RegisterInterpolator = [](nosAnimationInterpolator const* interpolator) {
-			nosModuleInfo callingModule{};
-			auto res = nosEngine.GetCallingModule(&callingModule);
+			nosPluginInfo callingModule{};
+			auto res = nosEngine.GetCallingPlugin(&callingModule);
 			if (res != NOS_RESULT_SUCCESS)
 			{
 				nosEngine.LogE("Failed to get calling module info.");
@@ -163,15 +163,15 @@ void OnEditorConnected(uint64_t editorId)
 	BroadcastAnimationTypesToEditors();
 }
 
-nosResult NOSAPI_CALL OnPreUnloadSubsystem()
+nosResult NOSAPI_CALL OnPreUnloadPlugin()
 {
 	GAnimationSysContext = nullptr;
 	return NOS_RESULT_SUCCESS;
 }
 
-void NOSAPI_CALL OnPostOtherModuleUnloaded(nosModuleIdentifier moduleId)
+void NOSAPI_CALL OnPostOtherPluginUnloaded(nosPluginIdentifier moduleId)
 {
-	bool typesChanged = GAnimationSysContext->InterpolatorManager.ModuleUnloaded(
+	bool typesChanged = GAnimationSysContext->InterpolatorManager.PluginUnloaded(
 		{ .name = nos::Name(moduleId.Name).AsString(), .version = nos::Name(moduleId.Version).AsString() });
 	if (!typesChanged)
 		return;
@@ -181,7 +181,7 @@ void NOSAPI_CALL OnPostOtherModuleUnloaded(nosModuleIdentifier moduleId)
 
 extern "C"
 {
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subsystemFunctions)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
 	subsystemFunctions->OnRequest = nos::sys::animation::OnRequest;
 	subsystemFunctions->OnPreExecuteNode = nos::sys::animation::OnPreExecuteNode;
@@ -194,9 +194,9 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subs
 	subsystemFunctions->OnMessageFromEditor = nos::sys::animation::OnMessageFromEditor;
 	subsystemFunctions->OnEditorConnected = nos::sys::animation::OnEditorConnected;
 
-	subsystemFunctions->OnPreUnloadSubsystem = nos::sys::animation::OnPreUnloadSubsystem;
+	subsystemFunctions->OnPreUnloadPlugin = nos::sys::animation::OnPreUnloadPlugin;
 
-	subsystemFunctions->OnPostOtherModuleUnloaded = nos::sys::animation::OnPostOtherModuleUnloaded;
+	subsystemFunctions->OnPostOtherPluginUnloaded = nos::sys::animation::OnPostOtherPluginUnloaded;
 	
 	nos::sys::animation::GAnimationSysContext = std::make_unique<nos::sys::animation::AnimationSubsystemCtx>();
 	return NOS_RESULT_SUCCESS;

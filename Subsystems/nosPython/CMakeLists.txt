@@ -16,7 +16,7 @@ add_subdirectory(External/pybind11 EXCLUDE_FROM_ALL)
 
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Include/nosPython" "cpp" "" nosPython_generated)
 
-nos_add_subsystem("nosPython" "${NOS_SUBSYSTEM_SDK_TARGET};nosPython_generated;python3;python312;pybind11::embed" "${CMAKE_CURRENT_SOURCE_DIR}/Include")
+nos_add_plugin("nosPython" "${NOS_PLUGIN_SDK_TARGET};nosPython_generated;python3;python312;pybind11::embed" "${CMAKE_CURRENT_SOURCE_DIR}/Include")
 
 nos_get_targets(NOSPY_EXTERNAL_TARGETS "./External/pybind11")
 nos_group_targets("${NOSPY_EXTERNAL_TARGETS}" "External")
