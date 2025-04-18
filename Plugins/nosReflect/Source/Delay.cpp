@@ -153,6 +153,17 @@ struct DelayNode : NodeContext
 		}
 	}
 
+	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
+	{
+		if (TypeName != NSN_TypeNameGeneric)
+			return NOS_RESULT_FAILED;
+		nos::TypeInfo incomingType(params->IncomingTypeName);
+		for (int i = 0; i < incomingType->AttributeCount; ++i)
+			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("skip_delay"))
+				return NOS_RESULT_FAILED;
+		return NOS_RESULT_SUCCESS;
+	}
+
 	void OnPinUpdated(nosPinUpdate const* update) override
 	{
 		if (TypeName != NSN_TypeNameGeneric)
