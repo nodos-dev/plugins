@@ -81,7 +81,8 @@
             "name": "Output",
             "type_name": "nos.Generic",
             "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "connection_conditions": "!resource"
           }
         ]
       }
