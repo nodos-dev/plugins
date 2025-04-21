@@ -12,7 +12,8 @@ struct UploadBufferNodeContext : NodeContext
 {
 	nosSemaphore TransferSem;
 	uint64_t FrameNumber = 1;
-	nosResult OnCreate(nosFbNodePtr node) {
+	nosResult OnCreate(nosFbNodePtr node)
+	{
 		nosSemaphoreCreateInfo semCreateInfo{
 			.Type = NOS_SEMAPHORE_TYPE_TIMELINE
 		};

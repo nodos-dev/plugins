@@ -70,11 +70,14 @@ struct GPUTextureResource : ResourceInterface {
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosGPUEvent WaitEvent = 0;
 		} Params{};
-		Resource(vkss::Resource res) : VkRes(std::move(res)) { ResourceType = RESOURCE_TYPE; }
+		Resource(vkss::Resource res) : VkRes(std::move(res))
+		{
+			ResourceType = RESOURCE_TYPE;
+		}
 		~Resource()
-		{ 
+		{
 			if (Params.WaitEvent)
-				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);  
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
 		}
 	};
 	typedef nosResourceShareInfo PinData;
@@ -243,7 +246,10 @@ struct GPUBufferResource : ResourceInterface {
 	typedef nosResourceShareInfo PinData;
 	struct Resource : ResourceBase
 	{
-		Resource(vkss::Resource bufferRes) : VkRes(std::move(bufferRes)) { ResourceType = RESOURCE_TYPE; }
+		Resource(vkss::Resource bufferRes) : VkRes(std::move(bufferRes))
+		{
+			ResourceType = RESOURCE_TYPE;
+		}
 		~Resource()
 		{
 			if (Params.WaitEvent)
@@ -262,12 +268,23 @@ struct GPUBufferResource : ResourceInterface {
 					  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER),
 					  .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE) };
 
+	nosSemaphore TransferSem = 0;
+	std::atomic_uint64_t SemValue = 1;
 
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
 		nosResourceShareInfo shareInfo;
 		shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
 		shareInfo.Info.Buffer = SampleBuffer;
 		Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
+		nosSemaphoreCreateInfo semCreateInfo {
+			.Type = NOS_SEMAPHORE_TYPE_TIMELINE,
+		};
+		nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem);
+	}
+	~GPUBufferResource()
+	{
+		if (TransferSem)
+			nosVulkan->DestroySemaphore(&TransferSem);
 	}
 	rc<ResourceBase> CreateResource() override {
 		nosResourceShareInfo bufInfo = vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)Sample.Data());
@@ -306,12 +323,20 @@ struct GPUBufferResource : ResourceInterface {
 	void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) override {
 		auto r = GetResource<GPUBufferResource>(res);
 		nosResourceShareInfo outputResource = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(cpy->PinData->Data));
-		nosCmd cmd;
-		nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd };
-		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &r->VkRes, &outputResource, 0);
-		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &r->Params.WaitEvent };
-		nosVulkan->End(cmd, &end);
+		{
+			nosCmd cmd;
+			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
+			nosVulkan->Begin(&beginParams);
+			nosVulkan->Copy(cmd, &r->VkRes, &outputResource, 0);
+			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &r->Params.WaitEvent };
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
+			nosVulkan->End(cmd, &end);
+		}
+		{
+			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
+			nosVulkan->End(cmd, nullptr);
+		}
 
 		nosTextureFieldType outFieldType = r->VkRes.Info.Buffer.FieldType;
 		auto outputBufferDesc = *static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
@@ -361,14 +386,21 @@ struct GPUBufferResource : ResourceInterface {
 			nosEngine.WatchLog((ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
-		nosCmd cmd;
-		nosCmdBeginParams beginParams;
-		beginParams = { ringExecuteName, params->NodeId, &cmd };
-
-		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
-		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
-		nosVulkan->End(cmd, &end);
+		{
+			nosCmd cmd;
+			nosCmdBeginParams beginParams;
+			beginParams = { ringExecuteName, params->NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
+			nosVulkan->Begin(&beginParams);
+			nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
+			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
+			nosVulkan->End(cmd, &end);
+		}
+		{
+			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), params->NodeId);
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
+			nosVulkan->End(cmd, nullptr);
+		}
 		return NOS_RESULT_SUCCESS;
 	}
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) {

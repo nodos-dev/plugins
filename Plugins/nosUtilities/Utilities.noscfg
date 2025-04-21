@@ -9,7 +9,7 @@
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "6.22"
+				"version": "6.23"
 			},
 			{
 				"name": "nos.math",
