@@ -9,15 +9,15 @@
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "6.22.0"
+                "version": "6.22"
             },
             {
                 "name": "nos.math",
-                "version": "1.21.0"
+                "version": "1.21"
             },
             {
                 "name": "nos.mediaio",
-                "version": "2.11.0"
+                "version": "2.11"
             }
         ],
         "category": "Image Processing"

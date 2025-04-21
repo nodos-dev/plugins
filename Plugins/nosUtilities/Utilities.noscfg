@@ -9,11 +9,11 @@
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "6.22.0"
+				"version": "6.22"
 			},
 			{
 				"name": "nos.math",
-				"version": "1.21.0"
+				"version": "1.21"
 			}
 		],
 		"category": "Utilities"
