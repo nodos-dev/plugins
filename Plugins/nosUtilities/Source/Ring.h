@@ -60,6 +60,7 @@ struct ResourceInterface {
 	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
 	virtual void OnPathStart() {}
+	virtual void OnFrameBegin() {}
 };
 
 struct GPUTextureResource : ResourceInterface {
@@ -269,7 +270,7 @@ struct GPUBufferResource : ResourceInterface {
 					  .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE) };
 
 	nosSemaphore TransferSem = 0;
-	std::atomic_uint64_t SemValue = 1;
+	std::atomic_uint64_t SemValue = 0;
 
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
 		nosResourceShareInfo shareInfo;
@@ -338,6 +339,7 @@ struct GPUBufferResource : ResourceInterface {
 		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(outputBufferDesc));
 	}
 
+
 	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override{
 		nosResourceShareInfo input = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(pin.Data->Data));
 
@@ -380,13 +382,11 @@ struct GPUBufferResource : ResourceInterface {
 			nosEngine.WatchLog((ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
+
 		{
-			nosCmd cmd;
-			nosCmdBeginParams beginParams;
-			beginParams = { ringExecuteName, params->NodeId, &cmd };
-			nosVulkan->Begin(&beginParams);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
-			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE };
+			auto cmd = vkss::BeginCmd(NOS_NAME("Signal for Transfer"), params->NodeId);
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, ++SemValue);
+			nosCmdEndParams end{ .ForceSubmit = true };
 			nosVulkan->End(cmd, &end);
 		}
 		{
@@ -395,18 +395,23 @@ struct GPUBufferResource : ResourceInterface {
 			beginParams = { ringExecuteName, params->NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue);
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, ++SemValue);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
 			nosVulkan->End(cmd, &end);
 		}
+		return NOS_RESULT_SUCCESS;
+	}
+
+	void OnFrameBegin() override
+	{
+		if (TransferSem)
 		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), params->NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
+			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), {});
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosCmdEndParams end{};
 			nosVulkan->End(cmd, &end);
 		}
-		return NOS_RESULT_SUCCESS;
 	}
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) {
 		bool needsRecreation = false;
@@ -908,7 +913,7 @@ struct RingNodeBase : NodeContext
 			slot = Ring->BeginPush();
 			nosEngine.WatchLog((GetName() + " Begin Push").c_str(), nos::util::Stopwatch::ElapsedString(sw.Elapsed()).c_str());
 		}
-
+		LastPushed = slot;
 		Ring->ResInterface->Push(slot, input, params, ringExecuteName, pushEventForCopyFrom);
 		
 		bool isFillComplete = false;
@@ -1009,6 +1014,7 @@ struct RingNodeBase : NodeContext
 		{
 			Ring->Stop();
 		}
+		LastPushed = nullptr;
 	}
 
 	void OnPathStart() override
@@ -1047,6 +1053,15 @@ struct RingNodeBase : NodeContext
 	void SendPathRestart()
 	{
 		nosEngine.SendPathRestart(PinName2Id[NOS_NAME_STATIC("Input")]);
+	}
+
+	ResourceInterface::ResourceBase* LastPushed = nullptr;
+	void OnBeginFrame(uuid const& pinId) override
+	{
+		if (pinId == PinName2Id[NOS_NAME_STATIC("Output")] || !LastPushed)
+			return;
+		Ring->ResInterface->OnFrameBegin();
+		LastPushed = nullptr;
 	}
 
 	void OnEndFrame(uuid const& pinId, nosEndFrameCause cause) override
