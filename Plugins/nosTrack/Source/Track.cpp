@@ -127,7 +127,7 @@ void TrackNodeContext::PerformAutoSpare(uint64_t firstVBLTime)
 		//Assume 1 track is coming
 		auto defaultTrack = GetDefaultOrFirstTrack();
 		std::unique_lock guard(QMutex);
-		while (DataQueue.size() < SpareCount - 1)
+		while (DataQueue.size() + 1 < SpareCount)
 			DataQueue.push({ defaultTrack, 0 });
 	}
 }
