@@ -307,23 +307,14 @@ struct GPUBufferResource : ResourceInterface {
 					  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER),
 					  .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE) };
 
-	nosSemaphore TransferSem = 0;
-	std::atomic_uint64_t SemValue = 1;
-
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
 		nosResourceShareInfo shareInfo = {};
 		shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
 		shareInfo.Info.Buffer = SampleBuffer;
 		Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
-		nosSemaphoreCreateInfo semCreateInfo {
-			.Type = NOS_SEMAPHORE_TYPE_TIMELINE,
-		};
-		nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem);
 	}
 	~GPUBufferResource()
 	{
-		if (TransferSem)
-			nosVulkan->DestroySemaphore(&TransferSem);
 	}
 	rc<ResourceBase> CreateResource() override {
 		nosResourceShareInfo bufInfo = vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)Sample.Data());
@@ -424,27 +415,10 @@ struct GPUBufferResource : ResourceInterface {
 		{
 			nosCmd cmd;
 			nosCmdBeginParams beginParams;
-			beginParams = { ringExecuteName, params->NodeId, &cmd };
-			nosVulkan->Begin(&beginParams);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
-			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE };
-			nosVulkan->End(cmd, &end);
-		}
-		{
-			nosCmd cmd;
-			nosCmdBeginParams beginParams;
 			beginParams = { ringExecuteName, params->NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
-			nosVulkan->End(cmd, &end);
-		}
-		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), params->NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosCmdEndParams end{};
 			nosVulkan->End(cmd, &end);
 		}
 		return NOS_RESULT_SUCCESS;
