@@ -325,17 +325,11 @@ struct GPUBufferResource : ResourceInterface {
 		nosResourceShareInfo outputResource = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(cpy->PinData->Data));
 		{
 			nosCmd cmd;
-			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
+			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, &r->VkRes, &outputResource, 0);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &r->Params.WaitEvent };
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosVulkan->End(cmd, &end);
-		}
-		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->End(cmd, nullptr);
 		}
 
 		nosTextureFieldType outFieldType = r->VkRes.Info.Buffer.FieldType;
@@ -389,9 +383,19 @@ struct GPUBufferResource : ResourceInterface {
 		{
 			nosCmd cmd;
 			nosCmdBeginParams beginParams;
+			beginParams = { ringExecuteName, params->NodeId, &cmd };
+			nosVulkan->Begin(&beginParams);
+			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
+			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE };
+			nosVulkan->End(cmd, &end);
+		}
+		{
+			nosCmd cmd;
+			nosCmdBeginParams beginParams;
 			beginParams = { ringExecuteName, params->NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
+			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
 			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
 			nosVulkan->End(cmd, &end);
@@ -399,7 +403,8 @@ struct GPUBufferResource : ResourceInterface {
 		{
 			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), params->NodeId);
 			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->End(cmd, nullptr);
+			nosCmdEndParams end{};
+			nosVulkan->End(cmd, &end);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
