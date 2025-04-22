@@ -1,6 +1,6 @@
 include "Builtins.fbs";
 
-
+attribute "force_make";
 
 namespace nos.track;
 
@@ -10,7 +10,7 @@ struct LensDistortion {
     distortion_scale:   float(id: 2);
 }
 
-table Track
+table Track (force_make)
 {
     location:               nos.fb.vec3     (native_inline, id: 0);
     rotation:               nos.fb.vec3     (native_inline, id: 1);

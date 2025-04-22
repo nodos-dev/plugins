@@ -41,7 +41,7 @@ struct MakeNode : NodeContext
 			bool skip = strict;
 			for (int i = 0; i < info->AttributeCount; ++i)
 			{
-				if (info->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+				if (info->Attributes[i].Name == NOS_NAME_STATIC("builtin") || info->Attributes[i].Name == NOS_NAME_STATIC("force_make"))
 					skip = false;
 				else if (info->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
 				{
