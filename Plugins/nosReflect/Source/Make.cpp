@@ -347,7 +347,7 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 			bool skip = true;
 			for (int i = 0; i < typeInfo->AttributeCount; ++i)
 			{
-				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin"))
+				if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("builtin") || typeInfo->Attributes[i].Name == NOS_NAME_STATIC("force_make"))
 					skip = false;
 				else if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("skip_make"))
 				{
