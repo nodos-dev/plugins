@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.21.1"
+			"version": "3.21.2"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -69,9 +69,9 @@
 		"Config/Sink.fbs"
 	],
 	"binary_path": "Binaries/nosUtilities",
-	"subsystem_options": [
+	"plugin_options": [
 		{
-			"subsystem": "nos.sys.vulkan",
+			"plugin": "nos.sys.vulkan",
 			"type": "nos.sys.vulkan.Resources",
 			"path": "Config/Resources.json"
 		}
