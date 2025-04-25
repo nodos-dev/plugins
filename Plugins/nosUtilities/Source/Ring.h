@@ -1035,6 +1035,7 @@ struct RingNodeBase : NodeContext
 		if (RequestedRingSize)
 		{
 			Ring->Resize(*RequestedRingSize);
+			RequestedRingSize = std::nullopt;
 			NeedsRecreation = false;
 		}
 		if (NeedsRecreation)
