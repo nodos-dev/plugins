@@ -272,7 +272,7 @@ struct GPUBufferResource : ResourceInterface {
 	std::atomic_uint64_t SemValue = 1;
 
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
-		nosResourceShareInfo shareInfo;
+		nosResourceShareInfo shareInfo = {};
 		shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
 		shareInfo.Info.Buffer = SampleBuffer;
 		Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
@@ -294,6 +294,10 @@ struct GPUBufferResource : ResourceInterface {
 		if (buffer)
 			return MakeShared<Resource>(std::move(*buffer));
 		else{
+			nosResourceShareInfo shareInfo = {};
+			shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
+			shareInfo.Info.Buffer = SampleBuffer;
+			Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
 			return nullptr;
 		}
 	}
@@ -530,6 +534,14 @@ struct TRing
         for (uint32_t i = 0; i < size; ++i)
 		{
 			auto res = ResInterface->CreateResource();
+			if (!res) {
+				nosEngine.LogE("Failed to create resource for ring buffer.");
+				Resources.clear();
+				Write.Pool = {};
+				Read.Pool = {};
+				Size = 0;
+				return;
+			}
 
 			Resources.push_back(res);
             Write.Pool.push_back(res.get());
@@ -1031,13 +1043,21 @@ struct RingNodeBase : NodeContext
 		if (RequestedRingSize)
 		{
 			Ring->Resize(*RequestedRingSize);
-			RequestedRingSize = std::nullopt;
+			if (Ring->Size) {
+				RequestedRingSize = std::nullopt;
+				NeedsRecreation = false;
+			}
 		}
 		if (NeedsRecreation)
 		{
+			std::optional<uint32_t> RingSize = Ring->Size;
 			Ring = std::make_unique<TRing>(Ring->Size, Ring->ResInterface);
-			Ring->Exit = true;
-			NeedsRecreation = false;
+			if (Ring->Size) {
+				Ring->Exit = true;
+				NeedsRecreation = false;
+			}
+			else
+				RequestedRingSize = RingSize;
 		}
 		auto emptySlotCount = Ring->Write.Pool.size();
 		if (RepeatWhenFilling)
