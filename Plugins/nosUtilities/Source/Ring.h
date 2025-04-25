@@ -97,7 +97,9 @@ struct GPUTextureResource : ResourceInterface {
 	}
 	rc<ResourceBase> CreateResource() override
 	{
-		return MakeShared<Resource>(*vkss::Resource::CreateWithSameInfo(vkss::DeserializeTextureInfo(Sample.Data()), "Texture Ring Resource"));
+		if (auto texture = vkss::Resource::CreateWithSameInfo(vkss::DeserializeTextureInfo(Sample.Data()), "Texture Ring Resource"))
+			return MakeShared<Resource>(std::move(*texture));
+		return nullptr;
 	}
 	void Reset(ResourceBase* r) override
 	{
@@ -290,16 +292,9 @@ struct GPUBufferResource : ResourceInterface {
 		nosResourceShareInfo bufInfo = vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)Sample.Data());
 		bufInfo.Memory = {};
 		bufInfo.Info.Buffer.Usage = nosBufferUsage(bufInfo.Info.Buffer.Usage | NOS_BUFFER_USAGE_STORAGE_BUFFER);
-		auto buffer = vkss::Resource::Create(bufInfo, "");
-		if (buffer)
+		if (auto buffer = vkss::Resource::Create(bufInfo, "Buffer Ring Resource"))
 			return MakeShared<Resource>(std::move(*buffer));
-		else{
-			nosResourceShareInfo shareInfo = {};
-			shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-			shareInfo.Info.Buffer = SampleBuffer;
-			Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
-			return nullptr;
-		}
+		return nullptr;
 	}
 	void Reset(ResourceBase* res) override
 	{
@@ -413,12 +408,11 @@ struct GPUBufferResource : ResourceInterface {
 		return NOS_RESULT_SUCCESS;
 	}
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) {
-		bool needsRecreation = false;
 		auto sampleInfo = vkss::ConvertBufferInfo(vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)(Sample.Data())));
 		if (updateName == NOS_NAME_STATIC("Input")) {
 			auto info = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(newVal.Data)).Info.Buffer;
 			if (sampleInfo.size_in_bytes() == info.Size)
-				return needsRecreation;
+				return false;
 
 			sampleInfo.mutate_size_in_bytes(info.Size);
 			sampleInfo.mutate_element_type((sys::vulkan::BufferElementType)info.ElementType);
@@ -426,21 +420,19 @@ struct GPUBufferResource : ResourceInterface {
 			sampleInfo.mutate_alignment(info.Alignment);
 			sampleInfo.mutate_usage((sys::vulkan::BufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST));
 			sampleInfo.mutate_memory_flags((sys::vulkan::MemoryFlags)(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE));
-			needsRecreation = true;
 		}
 		else if (updateName == NOS_NAME_STATIC("Alignment")) {
 			nos::Buffer newAlignment = newVal;
 			uint32_t alignment = *newAlignment.As<uint32_t>();
 			if (sampleInfo.alignment() == alignment)
-				return needsRecreation;
+				return false;
 
 			sampleInfo.mutate_alignment(alignment);
-			needsRecreation = true;
 		}
-		if (updateSample && needsRecreation) {
+		if (updateSample) {
 			Sample = Buffer::From(sampleInfo);
 		}
-		return needsRecreation;
+		return true;
 	}
 
 	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override{
@@ -528,6 +520,7 @@ struct TRing
 
     void Resize(uint32_t size)
     {
+        Size = size;
         Write.Pool = {};
         Read.Pool = {};
         Resources.clear();
@@ -539,14 +532,12 @@ struct TRing
 				Resources.clear();
 				Write.Pool = {};
 				Read.Pool = {};
-				Size = 0;
+				Exit = true;
 				return;
 			}
-
 			Resources.push_back(res);
             Write.Pool.push_back(res.get());
         }
-        Size = size;
     }
     
 	TRing(uint32_t ringSize, std::shared_ptr<ResourceInterface> resourceManager) : ResInterface(std::move(resourceManager))
@@ -573,6 +564,11 @@ struct TRing
         Stop();
         Resources.clear();
     }
+
+	bool IsResourcesValid()
+	{ 
+		return Resources.size();
+	}
 
     void Stop()
     {
@@ -889,7 +885,7 @@ struct RingNodeBase : NodeContext
 
 	nosResult ExecuteRingNode(nosNodeExecuteParams* params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
 	{
-		if (Ring->Exit || Ring->Size == 0 || !TypeInfo)
+		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
 			return NOS_RESULT_FAILED;
 
 		NodeExecuteParams pins(params);
@@ -1021,9 +1017,7 @@ struct RingNodeBase : NodeContext
 		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL)
 			Mode = RingMode::FILL;
 		if (Ring)
-		{
 			Ring->Stop();
-		}
 	}
 
 	void OnPathStart() override
@@ -1031,11 +1025,9 @@ struct RingNodeBase : NodeContext
 		if (!Ring) return;
 		// Reset read pool for Queues(OnRestart::RESET) and Rings(OnRestart::WAIT_UNTIL_FULL) with Repeat too, if repeat, then size-1 CopyFroms will be repeated from the last buffer.
 		if (OnRestart == OnRestartType::RESET || RepeatWhenFilling)
-		{
 			Ring->Reset(false);
-		}
 		// We must wait for at least a frame to be sure that providing path is started and running smoothly
-		else if (Ring->IsFull())
+		else if (Ring->IsFull() && !Ring->Read.Pool.empty())
 		{
 			Ring->Write.Pool.push_back(Ring->Read.Pool.front());
 			Ring->Read.Pool.pop_front();
@@ -1043,30 +1035,26 @@ struct RingNodeBase : NodeContext
 		if (RequestedRingSize)
 		{
 			Ring->Resize(*RequestedRingSize);
-			if (Ring->Size) {
-				RequestedRingSize = std::nullopt;
-				NeedsRecreation = false;
-			}
+			NeedsRecreation = false;
 		}
 		if (NeedsRecreation)
 		{
-			std::optional<uint32_t> RingSize = Ring->Size;
 			Ring = std::make_unique<TRing>(Ring->Size, Ring->ResInterface);
-			if (Ring->Size) {
-				Ring->Exit = true;
-				NeedsRecreation = false;
-			}
-			else
-				RequestedRingSize = RingSize;
+			NeedsRecreation = false;
+		}
+		if (!Ring->IsResourcesValid())
+		{
+			// This is here since invalid state might be solved after execution
+			SendScheduleRequest(1);
+			return;
 		}
 		auto emptySlotCount = Ring->Write.Pool.size();
 		if (RepeatWhenFilling)
-			RemainingRepeatableCount = emptySlotCount - 1;
+			RemainingRepeatableCount = std::max(emptySlotCount, (size_t)1) - 1;
 		nosScheduleNodeParams schedule{ .NodeId = NodeId, .AddScheduleCount = emptySlotCount };
 		nosEngine.ScheduleNode(&schedule);
 		Ring->Exit = false;
-		if (Ring)
-			Ring->ResInterface->OnPathStart();
+		Ring->ResInterface->OnPathStart();
 	}
 
 	void SendPathRestart()
