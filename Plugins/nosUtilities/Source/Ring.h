@@ -57,7 +57,7 @@ struct ResourceInterface {
 	virtual nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) = 0;
 	virtual void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) = 0;
 	// Returns false if resource is compatible with the current sample
-	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) = 0;
+	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
 	virtual void OnPathStart() {}
 };
@@ -200,24 +200,22 @@ struct GPUTextureResource : ResourceInterface {
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) override {
+	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) override {
 		bool needsRecreation = false;
 		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
-		if (updateName == NOS_NAME_STATIC("Input")) {
+		if (updateName == NOS_NAME_STATIC("Input"))
+		{
 			auto info = vkss::DeserializeTextureInfo(newVal.Data);
-			if (textureInfo.format != (nos::sys::vulkan::Format)info.Info.Texture.Format ||
-				textureInfo.height != info.Info.Texture.Height ||
-				textureInfo.width != info.Info.Texture.Width)
-			{
-				textureInfo.format = (nos::sys::vulkan::Format)info.Info.Texture.Format;
-				textureInfo.width = info.Info.Texture.Width;
-				textureInfo.height = info.Info.Texture.Height;
-				needsRecreation = true;
-			}
+			if (textureInfo.format == (nos::sys::vulkan::Format)info.Info.Texture.Format &&
+				textureInfo.height == info.Info.Texture.Height && textureInfo.width == info.Info.Texture.Width)
+				return false;
+			textureInfo.format = (nos::sys::vulkan::Format)info.Info.Texture.Format;
+			textureInfo.width = info.Info.Texture.Width;
+			textureInfo.height = info.Info.Texture.Height;
 		}
-		if (updateSample) {
-			Sample = Buffer::From(textureInfo);
-		}
+		else
+			return false;
+		Sample = Buffer::From(textureInfo);
 		return needsRecreation;
 	}
 
@@ -407,9 +405,10 @@ struct GPUBufferResource : ResourceInterface {
 		}
 		return NOS_RESULT_SUCCESS;
 	}
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) {
+	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
 		auto sampleInfo = vkss::ConvertBufferInfo(vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)(Sample.Data())));
-		if (updateName == NOS_NAME_STATIC("Input")) {
+		if (updateName == NOS_NAME_STATIC("Input"))
+		{
 			auto info = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(newVal.Data)).Info.Buffer;
 			if (sampleInfo.size_in_bytes() == info.Size)
 				return false;
@@ -418,10 +417,13 @@ struct GPUBufferResource : ResourceInterface {
 			sampleInfo.mutate_element_type((sys::vulkan::BufferElementType)info.ElementType);
 			sampleInfo.mutate_field_type((sys::vulkan::FieldType)info.FieldType);
 			sampleInfo.mutate_alignment(info.Alignment);
-			sampleInfo.mutate_usage((sys::vulkan::BufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST));
-			sampleInfo.mutate_memory_flags((sys::vulkan::MemoryFlags)(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE));
+			sampleInfo.mutate_usage(
+				(sys::vulkan::BufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST));
+			sampleInfo.mutate_memory_flags(
+				(sys::vulkan::MemoryFlags)(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE));
 		}
-		else if (updateName == NOS_NAME_STATIC("Alignment")) {
+		else if (updateName == NOS_NAME_STATIC("Alignment"))
+		{
 			nos::Buffer newAlignment = newVal;
 			uint32_t alignment = *newAlignment.As<uint32_t>();
 			if (sampleInfo.alignment() == alignment)
@@ -429,9 +431,9 @@ struct GPUBufferResource : ResourceInterface {
 
 			sampleInfo.mutate_alignment(alignment);
 		}
-		if (updateSample) {
-			Sample = Buffer::From(sampleInfo);
-		}
+		else
+			return false;
+		Sample = Buffer::From(sampleInfo);
 		return true;
 	}
 
@@ -498,10 +500,8 @@ struct CPUTrivialResource : ResourceInterface {
 
 		return NOS_RESULT_SUCCESS;
 	}
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal, bool updateSample) {
-		if (updateSample) {
-			Sample = newVal;
-		}
+	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
+		Sample = newVal;
 		return false;
 	}
 
@@ -805,7 +805,7 @@ struct RingNodeBase : NodeContext
 			}
 		});
 		AddPinValueWatcher(NOS_NAME_STATIC("Input"), [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
-			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Input"), newBuf, oldVal, true);
+			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Input"), newBuf, oldVal);
 
 			if (needsRecreation)
 			{
@@ -815,7 +815,7 @@ struct RingNodeBase : NodeContext
 			}
 		});
 		AddPinValueWatcher(NOS_NAME_STATIC("Alignment"), [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
-			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Alignment"), newAlignment, oldVal, true);
+			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Alignment"), newAlignment, oldVal);
 
 			if (needsRecreation)
 			{
