@@ -10,7 +10,7 @@ NOS_END_IMPORT_DEPS()
 extern "C"
 {
 
-NOSAPI_ATTR nosResult NOSAPI_CALL OnRequest(uint32_t minor, void** outSubsystemContext)
+NOSAPI_ATTR nosResult NOSAPI_CALL OnRequestAPI(uint32_t minor, void** outSubsystemContext)
 {
 	static TestSubsystem testSubsystem = {};
 	*outSubsystemContext = &testSubsystem;
@@ -19,7 +19,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL OnRequest(uint32_t minor, void** outSubsystemC
 
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
-	subsystemFunctions->OnRequest = OnRequest;
+	subsystemFunctions->OnRequestAPI = OnRequestAPI;
 	return NOS_RESULT_SUCCESS;
 }
 

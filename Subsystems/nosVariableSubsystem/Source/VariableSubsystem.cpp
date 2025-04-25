@@ -13,7 +13,7 @@ NOS_END_IMPORT_DEPS()
 
 namespace nos::sys::variables
 {
-std::unordered_map<uint32_t, nosVariableSubsystem*> GExportedSubsystemVersions;
+std::unordered_map<uint32_t, nosVariableSubsystem*> GExportedAPIVersions;
 
 struct VariableInfo
 {
@@ -292,8 +292,8 @@ nosResult NOSAPI_CALL DeleteNodeReference(nosName name, nosUUID nodeId)
 	
 nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 {
-	auto it = GExportedSubsystemVersions.find(minorVersion);
-	if (it != GExportedSubsystemVersions.end())
+	auto it = GExportedAPIVersions.find(minorVersion);
+	if (it != GExportedAPIVersions.end())
 	{
 		*outSubsystemContext = it->second;
 		return NOS_RESULT_SUCCESS;
@@ -306,7 +306,7 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	subsystem->AddNodeReference = AddNodeReference;
 	subsystem->DeleteNodeReference = DeleteNodeReference;
 	*outSubsystemContext = subsystem;
-	GExportedSubsystemVersions[minorVersion] = subsystem;
+	GExportedAPIVersions[minorVersion] = subsystem;
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -359,7 +359,7 @@ extern "C"
 {
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
-	subsystemFunctions->OnRequest = Export;
+	subsystemFunctions->OnRequestAPI = Export;
 	subsystemFunctions->Initialize = Initialize;
 	subsystemFunctions->OnPreUnloadPlugin = UnloadSubsystem;
 	subsystemFunctions->OnEditorConnected = [](uint64_t editorId)

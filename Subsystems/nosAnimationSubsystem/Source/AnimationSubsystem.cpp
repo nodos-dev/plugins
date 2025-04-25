@@ -56,9 +56,9 @@ struct AnimationSubsystemCtx
 	nosAnimationSubsystem AnimationSubsystem;
 };
 
-nosResult OnRequest(uint32_t minorVersion, void** outSubsystemCtx)
+nosResult OnRequestAPI(uint32_t minorVersion, void** outPluginAPI)
 {
-	*outSubsystemCtx = &GAnimationSysContext->AnimationSubsystem;
+	*outPluginAPI = &GAnimationSysContext->AnimationSubsystem;
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -183,7 +183,7 @@ extern "C"
 {
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemFunctions)
 {
-	subsystemFunctions->OnRequest = nos::sys::animation::OnRequest;
+	subsystemFunctions->OnRequestAPI = nos::sys::animation::OnRequestAPI;
 	subsystemFunctions->OnPreExecuteNode = nos::sys::animation::OnPreExecuteNode;
 	subsystemFunctions->ShouldExecuteNodeWithoutDirty = nos::sys::animation::ShouldExecuteNodeWithoutDirty;
 	subsystemFunctions->OnPathStart = nos::sys::animation::OnPathStart;
