@@ -281,7 +281,12 @@ struct GPUBufferResource : ResourceInterface {
 		nosResourceShareInfo bufInfo = vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)Sample.Data());
 		bufInfo.Memory = {};
 		bufInfo.Info.Buffer.Usage = nosBufferUsage(bufInfo.Info.Buffer.Usage | NOS_BUFFER_USAGE_STORAGE_BUFFER);
-		return MakeShared<Resource>(*vkss::Resource::Create(bufInfo, ""));
+		auto buffer = vkss::Resource::Create(bufInfo, "");
+		if (buffer)
+			return MakeShared<Resource>(std::move(*buffer));
+		else{
+			return nullptr;
+		}
 	}
 	void Reset(ResourceBase* res) override
 	{
