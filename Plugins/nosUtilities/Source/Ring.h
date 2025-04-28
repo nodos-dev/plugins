@@ -10,11 +10,11 @@
 
 #include "nosUtil/Stopwatch.hpp"
 
-#define inputPinName NOS_NAME_STATIC("Input")
-#define outputPinName NOS_NAME_STATIC("Output")
-#define voidTypeName NOS_NAME_STATIC("nos.Generic")
-#define vulkanBufferTypeName NOS_NAME_STATIC("nos.sys.vulkan.Buffer")
-#define vulkanTextureTypeName NOS_NAME_STATIC("nos.sys.vulkan.Texture")
+NOS_REGISTER_NAME(Input)
+NOS_REGISTER_NAME(Output)
+NOS_REGISTER_NAME(Size)
+NOS_REGISTER_NAME_SPACED(Generic, "nos.Generic")
+NOS_REGISTER_NAME(Alignment)
 
 namespace nos
 {
@@ -201,22 +201,18 @@ struct GPUTextureResource : ResourceInterface {
 	}
 
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) override {
-		bool needsRecreation = false;
 		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
-		if (updateName == NOS_NAME_STATIC("Input"))
-		{
-			auto info = vkss::DeserializeTextureInfo(newVal.Data);
-			if (textureInfo.format == (nos::sys::vulkan::Format)info.Info.Texture.Format &&
-				textureInfo.height == info.Info.Texture.Height && textureInfo.width == info.Info.Texture.Width)
-				return false;
-			textureInfo.format = (nos::sys::vulkan::Format)info.Info.Texture.Format;
-			textureInfo.width = info.Info.Texture.Width;
-			textureInfo.height = info.Info.Texture.Height;
-		}
-		else
+		if (updateName != NSN_Input)
 			return false;
+		auto info = vkss::DeserializeTextureInfo(newVal.Data);
+		if (textureInfo.format == (nos::sys::vulkan::Format)info.Info.Texture.Format &&
+			textureInfo.height == info.Info.Texture.Height && textureInfo.width == info.Info.Texture.Width)
+			return false;
+		textureInfo.format = (nos::sys::vulkan::Format)info.Info.Texture.Format;
+		textureInfo.width = info.Info.Texture.Width;
+		textureInfo.height = info.Info.Texture.Height;
 		Sample = Buffer::From(textureInfo);
-		return needsRecreation;
+		return true;
 	}
 
 	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override{
@@ -407,7 +403,7 @@ struct GPUBufferResource : ResourceInterface {
 	}
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
 		auto sampleInfo = vkss::ConvertBufferInfo(vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)(Sample.Data())));
-		if (updateName == NOS_NAME_STATIC("Input"))
+		if (updateName == NSN_Input)
 		{
 			auto info = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(newVal.Data)).Info.Buffer;
 			if (sampleInfo.size_in_bytes() == info.Size)
@@ -422,7 +418,7 @@ struct GPUBufferResource : ResourceInterface {
 			sampleInfo.mutate_memory_flags(
 				(sys::vulkan::MemoryFlags)(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE));
 		}
-		else if (updateName == NOS_NAME_STATIC("Alignment"))
+		else if (updateName == NSN_Alignment)
 		{
 			nos::Buffer newAlignment = newVal;
 			uint32_t alignment = *newAlignment.As<uint32_t>();
@@ -464,7 +460,7 @@ struct CPUTrivialResource : ResourceInterface {
 	};
 
 	CPUTrivialResource() : ResourceInterface(RESOURCE_TYPE) {
-		auto defaultVal = GetDefaultValueOfType(voidTypeName);
+		auto defaultVal = GetDefaultValueOfType(NSN_Generic);
 		if (defaultVal)
 			Sample = defaultVal->GetBuffer();
 	}
@@ -778,9 +774,9 @@ struct RingNodeBase : NodeContext
 
 	void TypeResolved() {
 		std::shared_ptr<ResourceInterface> resource;
-		if (TypeInfo->TypeName == vulkanBufferTypeName)
+		if (TypeInfo->TypeName == NOS_NAME(sys::vulkan::Buffer::GetFullyQualifiedName()))
 			resource = std::make_unique<GPUBufferResource>();
-		else if (TypeInfo->TypeName == vulkanTextureTypeName)
+		else if (TypeInfo->TypeName == NOS_NAME(sys::vulkan::Texture::GetFullyQualifiedName()))
 			resource = std::make_unique<GPUTextureResource>();
 		else
 			resource = std::make_unique<CPUTrivialResource>();
@@ -788,7 +784,7 @@ struct RingNodeBase : NodeContext
 		Ring = std::make_unique<TRing>(1, std::move(resource));
 
 		Ring->Stop();
-		AddPinValueWatcher(NOS_NAME_STATIC("Size"), [this](nos::Buffer const& newSize, std::optional<nos::Buffer> oldVal) {
+		AddPinValueWatcher(NSN_Size, [this](nos::Buffer const& newSize, std::optional<nos::Buffer> oldVal) {
 			uint32_t size = *newSize.As<uint32_t>();
 			if (size == 0)
 			{
@@ -798,26 +794,22 @@ struct RingNodeBase : NodeContext
 			if (Ring->Size != size && (!RequestedRingSize.has_value() || *RequestedRingSize != size))
 			{
 				nosPathCommand ringSizeChange{ .Event = NOS_RING_SIZE_CHANGE, .RingSize = size };
-				nosEngine.SendPathCommand(PinName2Id[NOS_NAME_STATIC("Input")], ringSizeChange);
+				nosEngine.SendPathCommand(PinName2Id[NSN_Input], ringSizeChange);
 				SendPathRestart();
 				RequestedRingSize = size;
 				Ring->Stop();
 			}
 		});
-		AddPinValueWatcher(NOS_NAME_STATIC("Input"), [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
-			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Input"), newBuf, oldVal);
-
-			if (needsRecreation)
+		AddPinValueWatcher(NSN_Input, [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
+			if (Ring->ResInterface->CheckNewResource(NSN_Input, newBuf, oldVal))
 			{
 				SendPathRestart();
 				Ring->Stop();
 				NeedsRecreation = true;
 			}
 		});
-		AddPinValueWatcher(NOS_NAME_STATIC("Alignment"), [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
-			bool needsRecreation = Ring->ResInterface->CheckNewResource(NOS_NAME_STATIC("Alignment"), newAlignment, oldVal);
-
-			if (needsRecreation)
+		AddPinValueWatcher(NSN_Alignment, [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
+			if (Ring->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
 			{
 				SendPathRestart();
 				Ring->Stop();
@@ -829,18 +821,18 @@ struct RingNodeBase : NodeContext
 		});
 	}
 
-	RingNodeBase(OnRestartType onRestart) : OnRestart(onRestart), TypeInfo(voidTypeName) {}
+	RingNodeBase(OnRestartType onRestart) : OnRestart(onRestart), TypeInfo(NSN_Generic) {}
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
-		nosName typeName = voidTypeName;
+		nos::Name typeName = NSN_Generic;
 		if(auto* pins = node->pins())
 			for (auto* pin : *pins)
-				if (pin->name()->c_str() == outputPinName)
+				if (pin->name()->c_str() == NSN_Output)
 					IsOutLive = pin->live();
 		for (auto& pin : Pins | std::views::values)
-			if (pin.TypeName != voidTypeName && (pin.Name == outputPinName || pin.Name == inputPinName))
+			if (pin.TypeName != NSN_Generic && (pin.Name == NSN_Output || pin.Name == NSN_Input))
 				typeName = pin.TypeName;
-		if (typeName != voidTypeName) {
+		if (typeName != NSN_Generic) {
 			TypeInfo = nos::TypeInfo(typeName);
 			TypeResolved();
 		}
@@ -860,7 +852,7 @@ struct RingNodeBase : NodeContext
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
 	{
-		if (TypeInfo.TypeName != voidTypeName)
+		if (TypeInfo.TypeName != NSN_Generic)
 			return NOS_RESULT_FAILED;
 
 		TypeInfo = nos::TypeInfo(params->IncomingTypeName);
@@ -877,7 +869,7 @@ struct RingNodeBase : NodeContext
 	}
 
 	void OnPinUpdated(const nosPinUpdate* pinUpdate) {
-		if (TypeInfo->TypeName == voidTypeName || Ring)
+		if (TypeInfo->TypeName == NSN_Generic || Ring)
 			return;
 
 		TypeResolved();
@@ -890,12 +882,12 @@ struct RingNodeBase : NodeContext
 
 		NodeExecuteParams pins(params);
 
-		auto it = pins.find(inputPinName);
+		auto it = pins.find(NSN_Input);
 		assert(it != pins.end());
 		auto& inputPin = it->second;
 		assert(inputPin.Data);
 
-		void* input = Ring->ResInterface->GetPinInfo(pins[inputPinName], rejectFieldMismatch);
+		void* input = Ring->ResInterface->GetPinInfo(pins[NSN_Input], rejectFieldMismatch);
 		if (input == nullptr) {
 			SendScheduleRequest(0);
 			return NOS_RESULT_FAILED;
@@ -932,7 +924,7 @@ struct RingNodeBase : NodeContext
 		}
 		if (!IsOutLive)
 		{
-			ChangePinLiveness(NOS_NAME_STATIC("Output"), true);
+			ChangePinLiveness(NSN_Output, true);
 			IsOutLive = true;
 		}
 
@@ -978,7 +970,7 @@ struct RingNodeBase : NodeContext
 		nos::Buffer outPinVal;
 		bool changePinValue = Ring->ResInterface->BeginCopyFrom(slot, *cpy->PinData, outPinVal);
 		if (changePinValue) {
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), outPinVal);
+			nosEngine.SetPinValueByName(NodeId, NSN_Output, outPinVal);
 		}
 		*foundSlot = slot;
 		return NOS_RESULT_SUCCESS;
@@ -995,7 +987,7 @@ struct RingNodeBase : NodeContext
 				return;
 			}
 			RequestedRingSize = command->RingSize;
-			nosEngine.SetPinValue(*GetPinId(NOS_NAME("Size")), nos::Buffer::From(command->RingSize));
+			nosEngine.SetPinValue(*GetPinId(NSN_Size), nos::Buffer::From(command->RingSize));
 			break;
 		}
 		default: return;
@@ -1060,18 +1052,18 @@ struct RingNodeBase : NodeContext
 
 	void SendPathRestart()
 	{
-		nosEngine.SendPathRestart(PinName2Id[NOS_NAME_STATIC("Input")]);
+		nosEngine.SendPathRestart(PinName2Id[NSN_Input]);
 	}
 
 	void OnEndFrame(uuid const& pinId, nosEndFrameCause cause) override
 	{
 		if (cause != NOS_END_FRAME_FAILED)
 			return;
-		if (pinId == PinName2Id[NOS_NAME_STATIC("Output")])
+		if (pinId == PinName2Id[NSN_Output])
 			return;
 		if(!IsOutLive)
 			return;
-		ChangePinLiveness(NOS_NAME_STATIC("Output"), false);
+		ChangePinLiveness(NSN_Output, false);
 		IsOutLive = false;
 	}
 
