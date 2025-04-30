@@ -28,6 +28,9 @@ struct VariableNodeBase : NodeContext
 
 	~VariableNodeBase() override
 	{
+		if (!HasName()) {
+			return;
+		}
 		auto res = nosVariables->DeleteNodeReference(Name, NodeId);
 		NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Failed to delete node reference");
 	}
