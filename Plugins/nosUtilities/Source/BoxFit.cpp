@@ -26,8 +26,9 @@ struct BoxFitNode : NodeContext
 						.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_SAMPLED),
 						.FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN
 					}}};
-			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
+			auto textureDesc = vkss::ConvertTextureInfo(bufInfo);
+			textureDesc.unscaled = true;
+			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(textureDesc));
 		}
 
 		return nosVulkan->ExecuteGPUNode(this, params);
