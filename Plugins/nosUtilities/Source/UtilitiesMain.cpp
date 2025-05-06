@@ -53,6 +53,7 @@ enum Utilities : int
 	PrintLog,
 	ScheduleOnRequest,
 	ReadImage,
+	BoxFit,
 	Count
 };
 
@@ -84,6 +85,7 @@ nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 nosResult RegisterReadImage(nosNodeFunctions*);
+nosResult RegisterBoxFit(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -131,6 +133,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(PrintLog)
 			GEN_CASE_NODE(ScheduleOnRequest)
 			GEN_CASE_NODE(ReadImage)
+			GEN_CASE_NODE(BoxFit)
 		}
 	}
 	
