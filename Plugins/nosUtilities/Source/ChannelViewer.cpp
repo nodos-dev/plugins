@@ -41,7 +41,9 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
 		.Output = output,
 		.Wireframe = false,
 	};
-	nosVulkan->RunPass(0, &pass);
+	auto cmd = vkss::BeginCmd(NOS_NAME("ChannelViewer"), pins->NodeId);
+	nosVulkan->RunPass(cmd, &pass);
+	vkss::EndCmd(cmd, false, nullptr);
 	return NOS_RESULT_SUCCESS;
 }
 
