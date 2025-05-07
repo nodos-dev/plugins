@@ -915,14 +915,17 @@ struct RingNodeBase : NodeContext
 		if (!IsOutLive)
 			return NOS_RESULT_SUCCESS;
 
-		if (Mode == RingMode::FILL)
+		if (OnRestart == OnRestartType::WAIT_UNTIL_FULL && RepeatWhenFilling)
 		{
-			//Sleep for 100 ms & if still Fill, return pending
-			if (RepeatWhenFilling && RemainingRepeatableCount > 0)
+			if (RemainingRepeatableCount > 0)
 			{
 				RemainingRepeatableCount--;
 				return NOS_RESULT_SUCCESS;
 			}
+		}
+		else if (Mode == RingMode::FILL)
+		{
+			//Sleep for 100 ms & if still Fill, return pending
 			std::unique_lock lock(ModeMutex);
 			if (!ModeCV.wait_for(lock, std::chrono::milliseconds(100), [this] { return Mode != RingMode::FILL; }))
 				return NOS_RESULT_PENDING;
