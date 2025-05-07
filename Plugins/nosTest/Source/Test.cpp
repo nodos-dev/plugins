@@ -106,7 +106,7 @@ public:
 		auto a = *GetPinValue<double>(args, NSN_in1);
 		auto b = *GetPinValue<double>(args, NSN_in2);
 		auto c = a + b;
-		nosEngine.SetPinValue(params->FunctionNodeExecuteParams->Pins[2].Id, { .Data = &c, .Size = sizeof(c) });
+		nosEngine.SetPinValue(params->FunctionNodeExecuteParams->Pins[2]->Id, { .Data = &c, .Size = sizeof(c) });
 		
 		TestNode* node = static_cast<TestNode*>(ctx);
 		if (node->SecondFunc)
@@ -298,7 +298,7 @@ struct TestPluginFunctions : PluginFunctions
 				out.Info.Buffer.Usage = nosBufferUsage(out.Info.Buffer.Usage | NOS_BUFFER_USAGE_TRANSFER_DST);
 				auto outRes = vkss::Resource::CreateWithSameInfo(out, "CopyBuffer");
 				out = *outRes;
-				nosEngine.SetPinValue(params->Pins[1].Id, outRes->ToPinData());
+				nosEngine.SetPinValue(params->Pins[1]->Id, outRes->ToPinData());
 			}
 			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.test.CopyBuffer) Copy"), params->NodeId);
 			nosVulkan->Copy(cmd, &in, &out, 0);

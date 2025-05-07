@@ -6,7 +6,12 @@
         },
         "display_name": "Animation Subsystem",
         "description": "",
-        "dependencies": [],
+        "dependencies": [
+            {
+                "name": "nos.sys.settings",
+                "version": "0.10"
+            }
+        ],
         "category": "Animation"
     },
     "binary_path": "./Binaries/nosAnimationSubsystem",

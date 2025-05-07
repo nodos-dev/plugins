@@ -161,9 +161,9 @@ struct ArrayNode : NodeContext
 		std::vector<const void*> values;
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			if (params->Pins[i].Name == NSN_Output)
+			if (params->Pins[i]->Name == NSN_Output)
 				continue;
-			values.push_back(params->Pins[i].Data->Data);
+			values.push_back(params->Pins[i]->Data->Data);
 		}
 		return SendOutputArray(values) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}

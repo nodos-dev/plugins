@@ -110,17 +110,17 @@ struct MergeContext : NodeContext
 		
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			if(NSN_Out == params->Pins[i].Name)
+			if(NSN_Out == params->Pins[i]->Name)
 				continue;
 
-			auto val = params->Pins[i].Data;
-			if (NSN_Background_Color == params->Pins[i].Name)
+			auto val = params->Pins[i]->Data;
+			if (NSN_Background_Color == params->Pins[i]->Name)
 			{
-				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i].Name), .Data = val->Data, .Size = val->Size });
+				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i]->Name), .Data = val->Data, .Size = val->Size });
 				continue;
 			}
 
-			std::string name = Name(params->Pins[i].Name).AsString();
+			std::string name = Name(params->Pins[i]->Name).AsString();
 			uint32_t idx = std::stoi(name.substr(name.find_last_of('_') + 1));
 		
 			switch (name[0])
