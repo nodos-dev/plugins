@@ -33,7 +33,7 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 		auto texFb = vkss::ConvertTextureInfo(prevTex);
 		texFb.unscaled = true;
 		auto texFbBuf = nos::Buffer::From(texFb);
-		nosEngine.SetPinValue(params->Pins[1].Id, {.Data = texFbBuf.Data(), .Size = texFbBuf.Size()});
+		nosEngine.SetPinValue(params->Pins[1]->Id, {.Data = texFbBuf.Data(), .Size = texFbBuf.Size()});
 	}
     
 	std::vector bindings = {vkss::ShaderBinding(NSN_Input, inputTex), vkss::ShaderBinding(NSN_Method, method)};

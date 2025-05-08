@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.math",
-      "version": "1.21.0"
+      "version": "1.21.1"
     },
     "description": "Nodes for math operations.",
     "display_name": "Math",

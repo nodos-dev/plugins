@@ -110,17 +110,17 @@ struct MergeContext : NodeContext
 		
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			if(NSN_Out == params->Pins[i].Name)
+			if(NSN_Out == params->Pins[i]->Name)
 				continue;
 
-			auto val = params->Pins[i].Data;
-			if (NSN_Background_Color == params->Pins[i].Name)
+			auto val = params->Pins[i]->Data;
+			if (NSN_Background_Color == params->Pins[i]->Name)
 			{
-				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i].Name), .Data = val->Data, .Size = val->Size });
+				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i]->Name), .Data = val->Data, .Size = val->Size });
 				continue;
 			}
 
-			std::string name = Name(params->Pins[i].Name).AsString();
+			std::string name = Name(params->Pins[i]->Name).AsString();
 			uint32_t idx = std::stoi(name.substr(name.find_last_of('_') + 1));
 		
 			switch (name[0])
@@ -205,15 +205,13 @@ struct MergeContext : NodeContext
 				                    texPinName.c_str(),
 				                    "nos.sys.vulkan.Texture",
 				                    fb::ShowAs::INPUT_PIN,
-				                    fb::CanShowAs::INPUT_PIN_ONLY,
-				                    pinCategory.c_str()),
+				                    fb::CanShowAs::INPUT_PIN_ONLY),
 				fb::CreatePinDirect(fbb,
 				                    &opacityId,
 				                    opacityPinName.c_str(),
 				                    "float",
 				                    fb::ShowAs::PROPERTY,
 				                    fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY,
-				                    pinCategory.c_str(),
 				                    0,
 				                    &opacityData,
 				                    0,
@@ -225,7 +223,6 @@ struct MergeContext : NodeContext
 				                    "nos.utilities.BlendMode",
 				                    fb::ShowAs::PROPERTY,
 				                    fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY,
-				                    pinCategory.c_str(),
 				                    0,
 				                    &blendModeData),
 			};

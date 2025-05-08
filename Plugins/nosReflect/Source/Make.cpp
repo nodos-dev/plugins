@@ -251,7 +251,7 @@ struct MakeNode : NodeContext
                 {
                     data = std::vector<uint8_t>(1, 0);
                 }
-                pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(NSN_Value).AsCStr(), nos::Name(type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, 0, &data));
+                pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(NSN_Value).AsCStr(), nos::Name(type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
             }
             break;
         case NOS_BASE_TYPE_NONE: break;
@@ -289,7 +289,7 @@ struct MakeNode : NodeContext
 					{
                         data = GenerateBuffer(field.Type, rootIftable->GetStruct<uint8_t*>(field.Offset));
                     }
-                    pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, 0, &data));
+                    pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
                 }
             }
         }

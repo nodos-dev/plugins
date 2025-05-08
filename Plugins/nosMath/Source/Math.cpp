@@ -190,10 +190,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 				constexpr uint32_t PIN_MIN = 1;
 				constexpr uint32_t PIN_MAX = 2;
 				constexpr uint32_t PIN_OUT = 3;
-				auto valueBuf = params->Pins[PIN_IN].Data;
-				auto minBuf = params->Pins[PIN_MIN].Data;
-				auto maxBuf = params->Pins[PIN_MAX].Data;
-				auto outBuf = params->Pins[PIN_OUT].Data;
+				auto valueBuf = params->Pins[PIN_IN]->Data;
+				auto minBuf = params->Pins[PIN_MIN]->Data;
+				auto maxBuf = params->Pins[PIN_MAX]->Data;
+				auto outBuf = params->Pins[PIN_OUT]->Data;
 				float value = *static_cast<float*>(valueBuf->Data);
 				float min = *static_cast<float*>(minBuf->Data);
 				float max = *static_cast<float*>(maxBuf->Data);
@@ -207,8 +207,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_OUT = 1;
-				auto valueBuf = params->Pins[PIN_IN].Data;
-				auto outBuf = params->Pins[PIN_OUT].Data;
+				auto valueBuf = params->Pins[PIN_IN]->Data;
+				auto outBuf = params->Pins[PIN_OUT]->Data;
 				float value = *static_cast<float*>(valueBuf->Data);
 				*(static_cast<float*>(outBuf->Data)) = std::abs(value);
 				return NOS_RESULT_SUCCESS;

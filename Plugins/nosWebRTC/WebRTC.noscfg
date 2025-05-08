@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.webrtc",
-            "version": "1.11.0"
+            "version": "1.11.1"
         },
         "description": "WebRTC Nodes",
         "display_name": "WebRTC",

@@ -4,10 +4,14 @@
 
 #include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
 #include <PinDataAnimator.h>
+#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 
 
 NOS_INIT()
+NOS_SETTINGS_INIT()
+
 NOS_BEGIN_IMPORT_DEPS()
+	NOS_SETTINGS_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 namespace nos::sys::animation
@@ -16,7 +20,11 @@ namespace editor
 {
 	NOS_FBS_CREATE_FUNCTION_MAKE_FOR_UNION(nos::sys::animation::editor, FromAnimation)
 }
-static std::unique_ptr<struct AnimationSubsystemCtx> GAnimationSysContext;
+static std::unique_ptr<struct AnimationSubsystemCtx> GAnimation;
+static constexpr auto SETTINGS_FILE_DIRECTORY = NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE;
+
+static constexpr char SETTINGS_KEY_FREE_RUN_DELTA_SECS[] = "Free Run Delta Seconds";
+nosResult UpdateSettings(const char* entryName, nosBuffer entryValue);
 
 struct AnimationSubsystemCtx
 {
@@ -30,7 +38,7 @@ struct AnimationSubsystemCtx
 				nosEngine.LogE("Failed to get calling module info.");
 				return res;
 			}
-			GAnimationSysContext->InterpolatorManager.AddCustomInterpolator(
+			GAnimation->InterpolatorManager.AddCustomInterpolator(
 				{.name = nos::Name(callingModule.Id.Name).AsString(),
 				 .version = nos::Name(callingModule.Id.Version).AsString()},
 				interpolator->TypeName,
@@ -38,27 +46,85 @@ struct AnimationSubsystemCtx
 			return NOS_RESULT_SUCCESS;
 		};
 		AnimationSubsystem.HasInterpolator = [](nosName typeName, bool* hasHandler) {
-			*hasHandler = GAnimationSysContext->InterpolatorManager.HasInterpolator(typeName);
+			*hasHandler = GAnimation->InterpolatorManager.HasInterpolator(typeName);
 			return NOS_RESULT_SUCCESS;
 		};
 		AnimationSubsystem.Interpolate =
 			[](nosName typeName, const nosBuffer from, const nosBuffer to, const double t, nosBuffer* outBuf) {
 				std::optional<EngineBuffer> buf;
-				auto res = GAnimationSysContext->InterpolatorManager.Interpolate(typeName, from, to, t, buf);
+				auto res = GAnimation->InterpolatorManager.Interpolate(typeName, from, to, t, buf);
 				if (res == NOS_RESULT_SUCCESS)
 					*outBuf = buf->Release();
 				return res;
 			};
 	}
 
+	void InitSettings()
+	{
+		nosSettingsEntryParams params = {};
+		params.Directory = SETTINGS_FILE_DIRECTORY;
+		params.EntryName = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
+		params.TypeName = NOS_NAME("nos.fb.vec2u");
+		if (nosSettings->ReadSettingsEntry(&params) == NOS_RESULT_SUCCESS && params.Buffer.Data) {
+			auto deltaSec = static_cast<nosVec2u*>(params.Buffer.Data);
+			FreeRunDeltaSecs = *deltaSec;
+			nosEngine.FreeBuffer(&params.Buffer);
+		}
+		
+		{
+			auto buf = nos::Buffer::From(FreeRunDeltaSecs);
+			params.Buffer = buf;
+			auto ret = nosSettings->WriteSettingsEntry(&params);
+			if (ret != NOS_RESULT_SUCCESS) {
+				nosEngine.LogE("Failed to write animation subsystem settings, changes reverted");
+				return;
+			}
+		}
+
+		nos::Buffer itemFreeRunDeltaSec;
+		{
+			nos::sys::settings::editor::TSettingsEditorItem item;
+			item.item_display_name = "Free Run Delta Seconds";
+			item.entry.reset(new nos::sys::settings::TSettingsEntry());
+			item.entry->type_name = "nos.fb.vec2u";
+			item.entry->entry_name = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
+			item.entry->data = nos::Buffer::From(FreeRunDeltaSecs);
+			itemFreeRunDeltaSec = nos::Buffer::From(item);
+		}
+		std::vector editorItems = {
+			itemFreeRunDeltaSec.As<const nosSettingsEditorItem>(),
+		};
+		nosSettings->RegisterEditorSettings(editorItems.size(), editorItems.data(), UpdateSettings, SETTINGS_FILE_DIRECTORY);
+	}
+
+	void DeinitSettings()
+	{
+		nosSettings->UnregisterEditorSettings();
+	}
+
 	InterpolatorManager InterpolatorManager;
 	PinDataAnimator Animator;
 	nosAnimationSubsystem AnimationSubsystem;
+
+	nosVec2u FreeRunDeltaSecs = {1, 60};
 };
+
+
+nosResult UpdateSettings(const char* entryName, nosBuffer entryValue)
+{
+	if (strcmp(SETTINGS_KEY_FREE_RUN_DELTA_SECS, entryName) == 0)
+	{
+		auto* newVal = static_cast<const nosVec2u*>(entryValue.Data);
+		GAnimation->FreeRunDeltaSecs = *newVal;
+		return NOS_RESULT_SUCCESS;
+	}
+	nosEngine.LogW("Settings item not found: %s", entryName);
+	return NOS_RESULT_FAILED;
+}
 
 nosResult OnRequestAPI(uint32_t minorVersion, void** outPluginAPI)
 {
-	*outPluginAPI = &GAnimationSysContext->AnimationSubsystem;
+	*outPluginAPI = &GAnimation->AnimationSubsystem;
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -68,31 +134,33 @@ nosResult OnPreExecuteNode(nosNodeExecuteParams* params)
 	if (nosEngine.GetCurrentRunnerPathInfo(&scheduledNodeId, nullptr) == NOS_RESULT_FAILED)
 		return NOS_RESULT_FAILED;
 
-	auto pathInfo = GAnimationSysContext->Animator.GetPathInfo(scheduledNodeId);
+	auto pathInfo = GAnimation->Animator.GetPathInfo(scheduledNodeId);
 
 	if(!pathInfo)
 		return NOS_RESULT_FAILED;
 
 	uint64_t curFrame = pathInfo->StartFSM + pathInfo->CurFrame;
-
+	nosVec2u deltaSec = GAnimation->FreeRunDeltaSecs;
+	if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
+		deltaSec = params->TimingInfo.FixedStepTiming.DeltaSeconds;
 	for (size_t i = 0; i < params->PinCount; ++i)
-		GAnimationSysContext->Animator.UpdatePin(params->Pins[i].Id, params->DeltaSeconds_Deprecated, curFrame, params->Pins[i].Data);
+		GAnimation->Animator.UpdatePin(params->Pins[i]->Id, deltaSec, curFrame, params->Pins[i]->Data);
 	return NOS_RESULT_SUCCESS;
 }
 
 void NOSAPI_CALL OnPinDeleted(nosUUID pinId)
 {
-	GAnimationSysContext->Animator.OnPinDeleted(pinId);
+	GAnimation->Animator.OnPinDeleted(pinId);
 }
 
 nosResult ShouldExecuteNodeWithoutDirty(nosNodeExecuteParams* params)
 {
 	for (size_t i = 0; i < params->PinCount; ++i)
 	{
-		auto const& pinId = params->Pins[i].Id;
-		if(params->Pins[i].ShowAs == fb::ShowAs::OUTPUT_PIN)
+		auto const& pinId = params->Pins[i]->Id;
+		if(params->Pins[i]->ShowAs == fb::ShowAs::OUTPUT_PIN)
 			continue;
-		if(GAnimationSysContext->Animator.IsPinAnimating(pinId))
+		if(GAnimation->Animator.IsPinAnimating(pinId))
 			return NOS_RESULT_SUCCESS;
 	}
 	return NOS_RESULT_NOT_FOUND;
@@ -102,19 +170,19 @@ void NOSAPI_CALL OnPathStart(nosUUID scheduledPinId)
 {
 	nosVec2u deltaSec;
 	nosEngine.GetCurrentRunnerPathInfo(nullptr, &deltaSec);
-	GAnimationSysContext->Animator.CreatePathInfo(scheduledPinId, deltaSec);
+	GAnimation->Animator.CreatePathInfo(scheduledPinId, deltaSec);
 }
 
 void NOSAPI_CALL OnPathStop(nosUUID scheduledPinId)
 {
-	GAnimationSysContext->Animator.DeletePathInfo(scheduledPinId);
+	GAnimation->Animator.DeletePathInfo(scheduledPinId);
 }
 
 void NOSAPI_CALL OnEndFrame(nosUUID scheduledPinId, nosEndFrameCause cause)
 {
 	if (cause != NOS_END_FRAME_FINISHED)
 		return;
-	GAnimationSysContext->Animator.PathExecutionFinished(scheduledPinId);
+	GAnimation->Animator.PathExecutionFinished(scheduledPinId);
 }
 
 void OnMessageFromEditor(uint64_t editorId, nosBuffer blob)
@@ -131,7 +199,7 @@ void OnMessageFromEditor(uint64_t editorId, nosBuffer blob)
 		{
 			nosUUID sourceId{};
 			if (nosEngine.GetSourcePinId(pinId, &sourceId) == NOS_RESULT_SUCCESS)
-				GAnimationSysContext->Animator.AddAnimation(sourceId, *animatePin);
+				GAnimation->Animator.AddAnimation(sourceId, *animatePin);
 		}
 		else
 		{
@@ -146,7 +214,7 @@ void OnMessageFromEditor(uint64_t editorId, nosBuffer blob)
 
 void BroadcastAnimationTypesToEditors()
 {
-	auto names = GAnimationSysContext->InterpolatorManager.GetAnimatableTypes();
+	auto names = GAnimation->InterpolatorManager.GetAnimatableTypes();
 
 	editor::TAnimatableTypes types;
 	for (auto& name : names)
@@ -165,17 +233,23 @@ void OnEditorConnected(uint64_t editorId)
 
 nosResult NOSAPI_CALL OnPreUnloadPlugin()
 {
-	GAnimationSysContext = nullptr;
+	GAnimation->DeinitSettings();
+	GAnimation = nullptr;
 	return NOS_RESULT_SUCCESS;
 }
 
 void NOSAPI_CALL OnPostOtherPluginUnloaded(nosPluginIdentifier moduleId)
 {
-	bool typesChanged = GAnimationSysContext->InterpolatorManager.PluginUnloaded(
+	bool typesChanged = GAnimation->InterpolatorManager.PluginUnloaded(
 		{ .name = nos::Name(moduleId.Name).AsString(), .version = nos::Name(moduleId.Version).AsString() });
 	if (!typesChanged)
 		return;
 	BroadcastAnimationTypesToEditors();
+}
+nosResult NOSAPI_CALL OnInitialize()
+{
+	GAnimation->InitSettings();
+	return NOS_RESULT_SUCCESS;
 }
 }
 
@@ -198,7 +272,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* subsystemF
 
 	subsystemFunctions->OnPostOtherPluginUnloaded = nos::sys::animation::OnPostOtherPluginUnloaded;
 	
-	nos::sys::animation::GAnimationSysContext = std::make_unique<nos::sys::animation::AnimationSubsystemCtx>();
+	nos::sys::animation::GAnimation = std::make_unique<nos::sys::animation::AnimationSubsystemCtx>();
+	subsystemFunctions->Initialize = nos::sys::animation::OnInitialize;
 	return NOS_RESULT_SUCCESS;
 }
 }
