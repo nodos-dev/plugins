@@ -311,8 +311,6 @@ nosResult RegisterTextureGrid(nosNodeFunctions* fn)
 
 	ret = nosVulkan->RegisterPasses(1, &pass);
 	return ret;
-
-	return NOS_RESULT_SUCCESS;
 }
 
 }
