@@ -60,14 +60,19 @@ struct TextureGridNode : nos::NodeContext
 		std::map<uint32_t, GridTexture> tempGridTextures;
 		nos::TPartialNodeUpdate partialUpdate{};
 		partialUpdate.node_id = NodeId;
-		for (auto const& [id, pin] : Pins)
+		for (auto const& [_, pin] : Pins)
 		{
 			if (pin.ShowAs != nos::fb::ShowAs::OUTPUT_PIN)
 			{
 				if (auto typeAndIndex = GetTypeAndIndexFromStr(pin.Name.AsString()))
-					if (tempGridTextures[typeAndIndex->second].Ids[static_cast<size_t>(typeAndIndex->first)].is_nil())
-						tempGridTextures[typeAndIndex->second].Ids[static_cast<size_t>(typeAndIndex->first)] = id;
+				{
+					auto& writeId = tempGridTextures[typeAndIndex->second].Ids[static_cast<size_t>(typeAndIndex->first)];
+					if (writeId)
+					{
+						writeId = id;
 						continue;
+					}
+				}
 				partialUpdate.pins_to_delete.push_back(id);
 			}
 		}
