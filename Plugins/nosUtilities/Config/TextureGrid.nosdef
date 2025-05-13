@@ -1,0 +1,70 @@
+{
+	"nodes": [
+		{
+			"class_name": "TextureGrid",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Texture Grid"
+			},
+			"node": {
+				"contents_type": "Job",
+				"description": "Combines input textures to a single texture",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": {
+							"unscaled": true
+						}
+					},
+					{
+						"name": "OutputSize",
+						"display_name": "Output Size",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "Input_0",
+						"display_name": "Input 1",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Offset_0",
+						"display_name": "Offset 1",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Size_0",
+						"display_name": "Size 1",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "KeepAspectRatio_0",
+						"display_name": "Keep Aspect Ratio 1",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": true
+					}
+				]
+			}
+		}
+	]
+}

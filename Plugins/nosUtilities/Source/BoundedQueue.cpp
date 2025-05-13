@@ -34,7 +34,6 @@ struct BoundedQueueNodeContext : RingNodeBase
 
 		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = slot->FrameNumber;
-
 		Ring->EndPop(slot);
 		SendRingStats("End Copy From");
 		SendScheduleRequest(1);

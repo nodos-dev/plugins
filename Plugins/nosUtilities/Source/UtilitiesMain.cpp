@@ -54,6 +54,7 @@ enum Utilities : int
 	ScheduleOnRequest,
 	ReadImage,
 	BoxFit,
+	TextureGrid,
 	Count
 };
 
@@ -86,6 +87,7 @@ nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 nosResult RegisterReadImage(nosNodeFunctions*);
 nosResult RegisterBoxFit(nosNodeFunctions*);
+nosResult RegisterTextureGrid(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -134,6 +136,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(ScheduleOnRequest)
 			GEN_CASE_NODE(ReadImage)
 			GEN_CASE_NODE(BoxFit)
+			GEN_CASE_NODE(TextureGrid)
 		}
 	}
 	

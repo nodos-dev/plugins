@@ -2,14 +2,14 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.22.1"
+			"version": "3.23.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "6.23"
+				"version": "6.26"
 			},
 			{
 				"name": "nos.math",
@@ -58,7 +58,8 @@
 		"Config/PrintLog.nosdef",
 		"Config/ScheduleOnRequest.nosdef",
 		"Config/ReadImage.nosdef",
-		"Config/BoxFit.nosdef"
+		"Config/BoxFit.nosdef",
+		"Config/TextureGrid.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
