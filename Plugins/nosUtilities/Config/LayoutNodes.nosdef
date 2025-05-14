@@ -1,0 +1,81 @@
+{
+	"nodes": [
+		{
+			"class_name": "FreeLayout",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Free Layout"
+			},
+			"node": {
+				"class_name": "FreeLayout",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "OutputSize",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "Items",
+						"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": [
+							{
+								"position": {
+									"x": 0,
+									"y": 0
+								},
+								"size": {
+									"x": 1920,
+									"y": 1080
+								}
+							}
+
+						]
+					},
+					{
+						"name": "OutLayout",
+						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "QuadLayout",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Quad Layout"
+			},
+			"node": {
+				"class_name": "QuadLayout",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "OutputSize",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "OutLayout",
+						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN"
+					}
+				]
+			}
+		}
+	]
+}

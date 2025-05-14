@@ -1,0 +1,37 @@
+include "Builtins.fbs";
+
+namespace nos.utilities.layout;
+
+enum LayoutType : uint
+{
+	Free,
+	Quad,
+	Grid,
+	Vertical,
+	Horizontal
+}
+
+struct FreeLayoutItem
+{
+	position: nos.fb.vec2i;
+	size: nos.fb.vec2i;
+}
+
+struct GridLayoutItem
+{
+	columns: int;
+	rows: int;
+}
+
+struct LayoutTexturedQuadDrawItem
+{
+	// This can be just a mat2 too
+	position: nos.fb.vec2;
+	size: nos.fb.vec2;
+	texture_id: uint; // Texture ID
+}
+
+table LayoutDrawList
+{
+	items: [LayoutTexturedQuadDrawItem]; // In the future, we can add other types of items, such as text, lines etc.
+}

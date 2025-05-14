@@ -1,0 +1,50 @@
+{
+	"nodes": [
+		{
+			"class_name": "LayoutDrawer",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Layout Drawer"
+			},
+			"node": {
+				"class_name": "LayoutDrawer",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "InputTextures",
+						"display_name": "Input Textures",
+						"type_name": "[nos.sys.vulkan.Texture]",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "LayoutDrawList",
+						"display_name": "Layout Draw List",
+						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "OutputSize",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN",
+						"data": {
+							"unscaled": true
+						}
+					}
+				]
+			}
+		}
+	]
+}

@@ -55,7 +55,9 @@
 		"Config/TriggerOnAnyInput.nosdef",
 		"Config/TextureMonitor.nosdef",
 		"Config/SwitchTrigger.nosdef",
-		"Config/PrintLog.nosdef"
+		"Config/PrintLog.nosdef",
+		"Config/LayoutNodes.nosdef",
+		"Config/LayoutDrawer.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
@@ -64,7 +66,8 @@
 		"Config/Swizzle.fbs",
 		"Config/TextureSwitcher.fbs",
 		"Config/ChannelViewer.fbs",
-		"Config/Sink.fbs"
+		"Config/Sink.fbs",
+		"Config/Layout.fbs"
 	],
 	"binary_path": "Binaries/nosUtilities",
 	"subsystem_options": [
