@@ -476,8 +476,8 @@ flatbuffers::uoffset_t CopyArgs(
 			}
 									FLATBUFFERS_FALLTHROUGH();  // fall thru
 			default: {                    // Scalars and structs.
-				fbb.StartVector(vec->size(), field->Type->ByteSize, field->Type->Alignment);
-				fbb.PushBytes(vec->Data(), field->Type->ByteSize * vec->size());
+				fbb.StartVector(vec->size(), field->Type->ElementType->ByteSize, field->Type->Alignment);
+				fbb.PushBytes(vec->Data(), field->Type->ElementType->ByteSize * vec->size());
 				offset = fbb.EndVector(vec->size());
 				break;
 			}
