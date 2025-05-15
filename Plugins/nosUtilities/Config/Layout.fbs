@@ -23,15 +23,22 @@ struct GridLayoutItem
 	rows: int;
 }
 
-struct LayoutTexturedQuadDrawItem
+struct LayoutDrawItem
 {
-	// This can be just a mat2 too
 	position: nos.fb.vec2;
 	size: nos.fb.vec2;
 	texture_id: uint; // Texture ID
 }
 
-table LayoutDrawList
+struct LayoutOutputInfo
 {
-	items: [LayoutTexturedQuadDrawItem]; // In the future, we can add other types of items, such as text, lines etc.
+	resolution: nos.fb.vec2u;
+	size: nos.fb.vec2;
+	pos: nos.fb.vec2;
+}
+
+table LayoutDrawInfo
+{
+	draw_items: [LayoutDrawItem]; // In the future, we can add other types of items, such as text, lines etc.
+	outputs: [LayoutOutputInfo];
 }

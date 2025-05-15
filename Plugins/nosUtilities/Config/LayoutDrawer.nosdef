@@ -18,30 +18,17 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
-						"name": "LayoutDrawList",
-						"display_name": "Layout Draw List",
-						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"name": "LayoutDrawInfo",
+						"display_name": "Layout Draw Info",
+						"type_name": "nos.utilities.layout.LayoutDrawInfo",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
-						"name": "OutputSize",
-						"type_name": "nos.fb.vec2u",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": {
-							"x": 1920,
-							"y": 1080
-						}
-					},
-					{
-						"name": "Output",
-						"type_name": "nos.sys.vulkan.Texture",
+						"name": "OutputTextures",
+						"type_name": "[nos.sys.vulkan.Texture]",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN",
-						"data": {
-							"unscaled": true
-						}
+						"can_show_as": "OUTPUT_PIN"
 					}
 				]
 			}

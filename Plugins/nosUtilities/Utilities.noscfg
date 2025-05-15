@@ -57,8 +57,7 @@
 		"Config/SwitchTrigger.nosdef",
 		"Config/PrintLog.nosdef",
 		"Config/LayoutNodes.nosdef",
-		"Config/LayoutDrawer.nosdef",
-		"Config/Layout.nosdef"
+		"Config/LayoutDrawer.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

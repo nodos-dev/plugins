@@ -5,6 +5,7 @@
 
 NOS_REGISTER_NAME(FreeLayout)
 NOS_REGISTER_NAME(QuadLayout)
+NOS_REGISTER_NAME(OutDrawItems)
 namespace nos::utilities
 {
 	nosResult NOSAPI_CALL ExecuteFreeLayout(void* _, nosNodeExecuteParams* params)
@@ -13,21 +14,25 @@ namespace nos::utilities
 		auto& outSize = *args.GetPinData<nos::fb::vec2u>(NOS_NAME("OutputSize"));
 		auto items = args.GetPinData<flatbuffers::Vector<const layout::FreeLayoutItem*>>(NOS_NAME("Items"));
 
-		layout::TLayoutDrawList drawList{};
-		drawList.items.reserve(items->size());
-
 		int textureId = 0;
+		std::vector<layout::LayoutDrawItem> drawItems;
+		drawItems.reserve(items->size());
 		for (auto itemPtr : *items)
 		{
 			auto& item = *itemPtr;
-			layout::LayoutTexturedQuadDrawItem drawItem{};
+			layout::LayoutDrawItem drawItem{};
 			drawItem.mutable_position() = nos::fb::vec2(item.position().x() / (float) outSize.x(), item.position().y() / (float) outSize.y());
 			drawItem.mutable_size() = nos::fb::vec2(item.size().x() / (float)outSize.x(), item.size().y() / (float)outSize.y());
 			drawItem.mutate_texture_id(textureId);
-			drawList.items.push_back(std::move(drawItem));
+			drawItems.push_back(std::move(drawItem));
 			textureId++;
 		}
-		nosEngine.SetPinValueByName(args.NodeId, NOS_NAME("OutLayout"), nos::Buffer::From(drawList));
+		flatbuffers::FlatBufferBuilder fbb;
+		fbb.Finish(fbb.CreateVectorOfStructs(drawItems));
+		auto buf = fbb.Release();
+		auto drawInfo = flatbuffers::GetRoot<layout::LayoutDrawInfo>(buf.data());
+
+		nosEngine.SetPinValueByName(args.NodeId, NSN_OutDrawItems, nosBuffer{.Data = (void*)drawInfo, .Size = buf.size() - ((uint8_t*)drawInfo - buf.data())});
 		return NOS_RESULT_SUCCESS;
 	}
 	nosResult RegisterFreeLayout(nosNodeFunctions* fn)
@@ -39,19 +44,28 @@ namespace nos::utilities
 	nosResult NOSAPI_CALL ExecuteQuadLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);
-		layout::TLayoutDrawList drawList{};
-		drawList.items.reserve(4);
+		std::vector<layout::LayoutDrawItem> drawItems;
+		drawItems.reserve(4);
 		for (size_t i = 0; i < 4; i++)
 		{
 			float x = 0.0f + (i % 2) * 0.5f;
 			float y = 0.0f + (i / 2) * 0.5f;
-			layout::LayoutTexturedQuadDrawItem drawItem{};
+			layout::LayoutDrawItem drawItem{};
 			drawItem.mutable_position() = nos::fb::vec2(x, y);
 			drawItem.mutable_size() = nos::fb::vec2(0.5f, 0.5f);
 			drawItem.mutate_texture_id(i);
-			drawList.items.push_back(std::move(drawItem));
+			drawItems.push_back(std::move(drawItem));
 		}
-		nosEngine.SetPinValueByName(args.NodeId, NOS_NAME("OutLayout"), nos::Buffer::From(drawList));
+		
+		flatbuffers::FlatBufferBuilder fbb;
+		fbb.Finish(fbb.CreateVectorOfStructs(drawItems));
+		auto buf = fbb.Release();
+		auto drawInfo = flatbuffers::GetRoot<layout::LayoutDrawInfo>(buf.data());
+
+		nosEngine.SetPinValueByName(
+			args.NodeId,
+			NSN_OutDrawItems,
+			nosBuffer{.Data = (void*)drawInfo, .Size = buf.size() - ((uint8_t*)drawInfo - buf.data())});
 		return NOS_RESULT_SUCCESS;
 	}
 	nosResult RegisterQuadLayout(nosNodeFunctions* fn)

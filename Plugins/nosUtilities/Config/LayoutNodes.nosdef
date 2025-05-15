@@ -40,8 +40,9 @@
 						]
 					},
 					{
-						"name": "OutLayout",
-						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"name": "OutDrawItems",
+						"display_name": "Out Draw Items",
+						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN"
 					}
@@ -59,8 +60,9 @@
 				"contents_type": "Job",
 				"pins": [
 					{
-						"name": "OutLayout",
-						"type_name": "nos.utilities.layout.LayoutDrawList",
+						"name": "OutDrawItems",
+						"display_name": "Out Draw Items",
+						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN"
 					}
