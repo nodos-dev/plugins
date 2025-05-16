@@ -23,6 +23,18 @@ struct GridLayoutItem
 	span: nos.fb.vec2i;   // column_span, row_span
 }
 
+struct FreeOutputItem
+{
+	item: FreeLayoutItem;
+	resolution: nos.fb.vec2u;
+}
+
+struct GridOutputItem
+{
+	item: GridLayoutItem;
+	resolution: nos.fb.vec2u;
+}
+
 struct LayoutDrawItem
 {
 	position: nos.fb.vec2;

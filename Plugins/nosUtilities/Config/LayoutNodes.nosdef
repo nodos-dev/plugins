@@ -110,6 +110,102 @@
 					}
 				]
 			}
+		},
+		{
+			"class_name": "FreeOutputLayout",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Free Output Layout"
+			},
+			"node": {
+				"class_name": "FreeOutputLayout",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "Items",
+						"type_name": "[nos.utilities.layout.FreeOutputItem]",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": [
+							{
+								"item": {
+									"position": {
+										"x": 0,
+										"y": 0
+									},
+									"size": {
+										"x": 1920,
+										"y": 1080
+									}
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							}
+						]
+					},
+					{
+						"name": "OutputInfos",
+						"display_name": "Output Infos",
+						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "GridOutputLayout",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Grid Output Layout"
+			},
+			"node": {
+				"class_name": "GridOutputLayout",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Columns",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2,
+						"min": 1
+					},
+					{
+						"name": "Rows",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2,
+						"min": 1
+					},
+					{
+						"name": "Items",
+						"type_name": "[nos.utilities.layout.GridOutputItem]",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "OutputInfos",
+						"display_name": "Output Infos",
+						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN"
+					}
+				]
+			}
 		}
 	]
 }
