@@ -72,7 +72,6 @@ struct Vec {
 };
 
 enum class MathNodeTypes : int {
-	SineWave,
 	Clamp,
 	Absolute,
 	AddTransform,
@@ -121,26 +120,6 @@ nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 	return NOS_RESULT_SUCCESS;
 }
 
-struct SineWaveNodeContext : NodeContext
-{
-	using NodeContext::NodeContext;
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
-	{
-		NodeExecuteParams execParams(params);
-		auto amplitude = *execParams.GetPinData<float>(NOS_NAME_STATIC("Amplitude"));
-		auto offset = *execParams.GetPinData<float>(NOS_NAME_STATIC("Offset"));
-		auto frequency = *execParams.GetPinData<float>(NOS_NAME_STATIC("Frequency"));
-		double time = execParams.GetTotalTime(frameCount++);
-		double sec = glm::mod(time * (double)frequency, glm::pi<double>() * 2.0);
-		float result = (amplitude * glm::sin(sec)) + offset;
-		nosEngine.SetPinValue(execParams[NOS_NAME_STATIC("Out")].Id, {.Data = &result, .Size = sizeof(float)});
-		return NOS_RESULT_SUCCESS;
-	}
-
-	uint64_t frameCount = 0;
-};
-
 void RegisterEval(nosNodeFunctions*);
 void RegisterTransform(nosNodeFunctions*);
 void RegisterToTransformMatrix(nosNodeFunctions*);
@@ -161,10 +140,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		auto node = outList[i];
 		switch ((MathNodeTypes)i)
 		{
-		case MathNodeTypes::SineWave: {
-			NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.math.SineWave"), SineWaveNodeContext, node);
-			break;
-		}
 		case MathNodeTypes::Clamp: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.Clamp");
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
