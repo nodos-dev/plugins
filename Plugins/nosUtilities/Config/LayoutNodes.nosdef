@@ -68,6 +68,48 @@
 					}
 				]
 			}
+		},
+		{
+			"class_name": "GridLayout",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Grid Layout"
+			},
+			"node": {
+				"class_name": "GridLayout",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Columns",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2,
+						"min": 1
+					},
+					{
+						"name": "Rows",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2,
+						"min": 1
+					},
+					{
+						"name": "Items",
+						"type_name": "[nos.utilities.layout.GridLayoutItem]",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "OutDrawItems",
+						"display_name": "Out Draw Items",
+						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN"
+					}
+				]
+			}
 		}
 	]
 }

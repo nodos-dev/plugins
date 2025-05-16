@@ -53,6 +53,7 @@ enum Utilities : int
 	LayoutDrawer,
 	FreeLayout,
 	QuadLayout,
+	GridLayout,
 	Count
 };
 
@@ -85,6 +86,7 @@ nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterLayoutDrawer(nosNodeFunctions*);
 nosResult RegisterFreeLayout(nosNodeFunctions*);
 nosResult RegisterQuadLayout(nosNodeFunctions*);
+nosResult RegisterGridLayout(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -133,6 +135,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(LayoutDrawer)
 			GEN_CASE_NODE(FreeLayout)
 			GEN_CASE_NODE(QuadLayout)
+			GEN_CASE_NODE(GridLayout)
 		}
 	}
 	return NOS_RESULT_SUCCESS;

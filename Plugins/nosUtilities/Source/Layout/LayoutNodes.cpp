@@ -6,6 +6,7 @@
 NOS_REGISTER_NAME(FreeLayout)
 NOS_REGISTER_NAME(QuadLayout)
 NOS_REGISTER_NAME(OutDrawItems)
+NOS_REGISTER_NAME(GridLayout)
 namespace nos::utilities
 {
 	nosResult NOSAPI_CALL ExecuteFreeLayout(void* _, nosNodeExecuteParams* params)
@@ -72,6 +73,46 @@ namespace nos::utilities
 	{
 		fn->ClassName = NSN_QuadLayout;
 		fn->ExecuteNode = ExecuteQuadLayout;
+		return NOS_RESULT_SUCCESS;
+	}
+	nosResult NOSAPI_CALL ExecuteGridLayout(void* _, nosNodeExecuteParams* params)
+	{
+		nos::NodeExecuteParams args(params);
+		// Get grid size from input pins
+		uint32_t columns = *args.GetPinData<uint32_t>(NOS_NAME("Columns"));
+		uint32_t rows = *args.GetPinData<uint32_t>(NOS_NAME("Rows"));
+		if (columns == 0 || rows == 0) return NOS_RESULT_SUCCESS;
+
+		// Get items array
+		auto items = args.GetPinData<flatbuffers::Vector<const layout::GridLayoutItem*>>(NOS_NAME("Items"));
+		std::vector<layout::LayoutDrawItem> drawItems;
+		drawItems.reserve(items->size());
+		int textureId = 0;
+		for (auto itemPtr : *items)
+		{
+			auto& item = *itemPtr;
+			float x = (float)item.start().x() / columns;
+			float y = (float)item.start().y() / rows;
+			float w = (float)item.span().x() / columns;
+			float h = (float)item.span().y() / rows;
+			layout::LayoutDrawItem drawItem{};
+			drawItem.mutable_position() = nos::fb::vec2(x, y);
+			drawItem.mutable_size() = nos::fb::vec2(w, h);
+			drawItem.mutate_texture_id(textureId);
+			drawItems.push_back(std::move(drawItem));
+			textureId++;
+		}
+		flatbuffers::FlatBufferBuilder fbb;
+		fbb.Finish(fbb.CreateVectorOfStructs(drawItems));
+		auto buf = fbb.Release();
+		auto vec = flatbuffers::GetRoot<flatbuffers::Vector<layout::LayoutDrawItem>>(buf.data());
+		nosEngine.SetPinValueByName(args.NodeId, NSN_OutDrawItems, nosBuffer{.Data = (void*)vec, .Size = buf.size() - ((uint8_t*)vec - buf.data())});
+		return NOS_RESULT_SUCCESS;
+	}
+	nosResult RegisterGridLayout(nosNodeFunctions* fn)
+	{
+		fn->ClassName = NSN_GridLayout;
+		fn->ExecuteNode = ExecuteGridLayout;
 		return NOS_RESULT_SUCCESS;
 	}
 }
