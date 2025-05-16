@@ -143,7 +143,7 @@ struct LayoutDrawerNode : NodeContext
 										   NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST),
 				};
 				if (nosVulkan->CreateResource(&tex, "LayoutDrawerOut") != NOS_RESULT_SUCCESS)
-					nosEngine.LogE("Failed to create output texture for output %ull!", i);
+					nosEngine.LogE("Failed to create output texture for output %zu!", i);
 				OutTextures.emplace_back(tex);
 			}
 		}
