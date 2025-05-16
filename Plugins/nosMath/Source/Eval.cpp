@@ -44,8 +44,10 @@ struct EvalNodeContext : NodeContext
 			{
 				Variables[*pin->id()] = 0.0;
 				Inputs.push_back(*pin->id());
-				if (auto orphanState = pin->orphan_state()) {
-					if (orphanState->type() == fb::PinOrphanStateType::ORPHAN)
+				if (auto orphanState = pin->orphan_state())
+				{
+					if (orphanState->type() == fb::PinOrphanStateType::PASSIVE ||
+						orphanState->type() == fb::PinOrphanStateType::ORPHAN)
 						pinsToUnorphan.push_back(*pin->id());
 				}
 			}
@@ -109,7 +111,7 @@ struct EvalNodeContext : NodeContext
 		nosEngine.LogD("Eval: Setting node status");
 		if (type == fb::NodeStatusMessageType::FAILURE)
 		{
-			SetPinOrphanState(NOS_NAME("Result"), fb::PinOrphanStateType::ORPHAN, message.c_str());
+			SetPinOrphanState(NOS_NAME("Result"), fb::PinOrphanStateType::PASSIVE, message.c_str());
 			SetNodeStatusMessages({{{}, message, type, details, timeout, true, popup} });
 		}
 		else

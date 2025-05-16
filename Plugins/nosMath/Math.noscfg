@@ -15,6 +15,7 @@
     ]
   },
   "custom_types": [],
+  "named_values": [],
   "node_definitions": [
     "Config/Math.nosdef",
     "Config/Eval.nosdef",

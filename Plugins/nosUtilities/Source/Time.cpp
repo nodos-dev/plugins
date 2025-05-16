@@ -24,18 +24,6 @@ struct TimeNodeContext : NodeContext
 nosResult RegisterTime(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_Time, TimeNodeContext, fn);
-	// functions["nos.CalculateNodalPoint"].EntryPoint = [](nos::Args& args, void* ctx){
-	// 	auto pos = args.Get<glm::dvec3>("Camera Position");
-	// 	auto rot = args.Get<glm::dvec3>("Camera Orientation");
-	// 	auto sca = args.Get<f64>("Nodal Offset");
-	// 	auto out = args.Get<glm::dvec3>("Nodal Point");
-	// 	glm::dvec2 ANG = glm::radians(glm::dvec2(rot->z, rot->y));
-	// 	glm::dvec2 COS = cos(ANG);
-	// 	glm::dvec2 SIN = sin(ANG);
-	// 	glm::dvec3 f = glm::dvec3(COS.y * COS.x, COS.y * SIN.x, SIN.y);
-	// 	*out = *pos + f **sca;
-	// 	return true;
-	// };
 	return NOS_RESULT_SUCCESS;
 }
 
