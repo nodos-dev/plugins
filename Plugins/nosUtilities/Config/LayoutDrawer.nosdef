@@ -29,6 +29,19 @@
 						"type_name": "[nos.sys.vulkan.Texture]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN"
+					},
+					{
+						"name": "Preview",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "PreviewEnabled",
+						"display_name": "Preview Enabled",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					}
 				]
 			}

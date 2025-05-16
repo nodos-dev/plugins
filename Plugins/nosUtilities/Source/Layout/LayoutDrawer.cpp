@@ -9,7 +9,11 @@ NOS_REGISTER_NAME(LayoutDrawer)
 NOS_REGISTER_NAME(TexturedQuad_Pass)
 NOS_REGISTER_NAME(TexturedQuad_Frag)
 NOS_REGISTER_NAME(TexturedQuad_Vert)
+NOS_REGISTER_NAME(QuadOutline_Pass)
+NOS_REGISTER_NAME(QuadOutline_Frag)
+NOS_REGISTER_NAME(QuadOutline_Vert)
 NOS_REGISTER_NAME(OutputTextures)
+NOS_REGISTER_NAME(Preview)
 namespace nos::utilities
 {
 inline nosResourceShareInfo DeserializeTextureInfo(sys::vulkan::Texture const& tex)
@@ -195,6 +199,35 @@ struct LayoutDrawerNode : NodeContext
 			}
 			DrawOut(cmd, inTextures, drawItemsForOut, outTex);
 		}
+
+
+		bool previewEnabled = *args.GetPinData<bool>(NOS_NAME("PreviewEnabled"));
+		if (GetPin(NSN_Preview)->IsOrphan == previewEnabled)
+		{
+			SetPinOrphanState(NSN_Preview,
+							  previewEnabled ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
+							  "Preview disabled.");
+		}
+		if (previewEnabled)
+		{
+			auto preview = vkss::DeserializeTextureInfo(args[NSN_Preview].Data->Data);
+			if (preview.Memory.Handle != 0)
+			{
+				nosVulkan->Clear(cmd, &preview, {0.0f, 0.0f, 0.0f, 1.0f});
+				std::vector<layout::LayoutDrawItem> drawItemsForPreview;
+				drawItemsForPreview.reserve(drawInfo.draw_items()->size());
+				for (auto* drawItem : *drawInfo.draw_items())
+					drawItemsForPreview.emplace_back(*drawItem);
+				DrawOut(cmd, inTextures, drawItemsForPreview, preview);
+
+				std::vector<layout::LayoutOutputInfo> outlinesForPreview;
+				outlinesForPreview.reserve(drawInfo.outputs()->size());
+				for (auto* output : *drawInfo.outputs())
+					outlinesForPreview.emplace_back(*output);
+				DrawOutlines(cmd, outlinesForPreview, preview);
+			}
+		}
+
 		vkss::EndCmd(cmd, false, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -235,6 +268,50 @@ struct LayoutDrawerNode : NodeContext
 			nosVulkan->RunPass(cmd, &runPassParams);
 		}
 	}
+
+	void DrawOutlines(nosCmd cmd,
+				 std::span<layout::LayoutOutputInfo> outputInfos,
+				 nosResourceShareInfo const& output)
+	{
+		// random color generator, but it should be the same if i call it multiple times
+		std::mt19937_64 rng{}; // seed engine with index
+		std::uniform_real_distribution<> dist(0.0, 1.0);
+
+
+
+		for (auto const& item : outputInfos)
+		{
+			auto pos = item.pos();
+			auto size = item.size();
+			float aspectRatio = output.Info.Texture.Width / (float) output.Info.Texture.Height;
+			float outlineWidth = 20.0f / (float) output.Info.Texture.Width;
+
+			glm::vec4 color = {dist(rng), dist(rng), dist(rng), 1.0f};
+
+			std::array bindings = {
+				vkss::ShaderBinding(NOS_NAME("Offset"), pos),
+				vkss::ShaderBinding(NOS_NAME("Size"), size),
+				vkss::ShaderBinding(NOS_NAME("AspectRatio"), aspectRatio),
+				vkss::ShaderBinding(NOS_NAME("OutlineWidth"), outlineWidth),
+				vkss::ShaderBinding(NOS_NAME("Color"), color),
+			};
+
+			nosVertexData vertexData = {
+				.DepthFunc = NOS_DEPTH_FUNCTION_ALWAYS,
+				.DepthWrite = NOS_FALSE,
+				.DepthTest = NOS_FALSE,
+			};
+			nosRunPassParams runPassParams{.Key = NSN_QuadOutline_Pass,
+										   .Bindings = bindings.data(),
+										   .BindingCount = bindings.size(),
+										   .Output = output,
+										   .Vertices = vertexData,
+										   .Wireframe = NOS_FALSE,
+										   .Benchmark = NOS_FALSE,
+										   .DoNotClear = true};
+			nosVulkan->RunPass(cmd, &runPassParams);
+		}
+	}
 };
 
 nosResult RegisterLayoutDrawer(nosNodeFunctions* fn)
@@ -244,28 +321,45 @@ nosResult RegisterLayoutDrawer(nosNodeFunctions* fn)
 	fs::path root = nosEngine.Module->RootFolderPath;
 	auto fragPath = (root / "Shaders" / "TexturedQuad.frag").generic_string();
 	auto vertPath = (root / "Shaders" / "TexturedQuad.vert").generic_string();
+	auto outlineFragPath = (root / "Shaders" / "QuadOutline.frag").generic_string();
+	auto outlineVertPath = (root / "Shaders" / "QuadOutline.vert").generic_string();
 
 	// Register shaders
-	std::array shaders = {nosShaderInfo{.ShaderName = NSN_TexturedQuad_Frag,
-										.Source = {.Stage = NOS_SHADER_STAGE_FRAG, .GLSLPath = fragPath.c_str()},
-										.AssociatedNodeClassName = NSN_LayoutDrawer},
-						  nosShaderInfo{.ShaderName = NSN_TexturedQuad_Vert,
-										.Source = {.Stage = NOS_SHADER_STAGE_VERT, .GLSLPath = vertPath.c_str()},
-										.AssociatedNodeClassName = NSN_LayoutDrawer}};
+	std::array shaders = {
+		nosShaderInfo{.ShaderName = NSN_TexturedQuad_Frag,
+					  .Source = {.Stage = NOS_SHADER_STAGE_FRAG, .GLSLPath = fragPath.c_str()},
+					  .AssociatedNodeClassName = NSN_LayoutDrawer},
+		nosShaderInfo{.ShaderName = NSN_TexturedQuad_Vert,
+					  .Source = {.Stage = NOS_SHADER_STAGE_VERT, .GLSLPath = vertPath.c_str()},
+					  .AssociatedNodeClassName = NSN_LayoutDrawer},
+		nosShaderInfo{.ShaderName = NSN_QuadOutline_Frag,
+					  .Source = {.Stage = NOS_SHADER_STAGE_FRAG, .GLSLPath = outlineFragPath.c_str()},
+					  .AssociatedNodeClassName = NSN_LayoutDrawer},
+
+		nosShaderInfo{.ShaderName = NSN_QuadOutline_Vert,
+					  .Source = {.Stage = NOS_SHADER_STAGE_VERT, .GLSLPath = outlineVertPath.c_str()},
+					  .AssociatedNodeClassName = NSN_LayoutDrawer},
+	};
 	auto ret = nosVulkan->RegisterShaders(shaders.size(), shaders.data());
 	if (NOS_RESULT_SUCCESS != ret)
 		return ret;
 
-	nosPassInfo pass = {
-		.Key = NSN_TexturedQuad_Pass,
-		.Shader = NSN_TexturedQuad_Frag,
-		.VertexShader = NSN_TexturedQuad_Vert,
-		.MultiSample = 1,
+	std::array passes = {
+		nosPassInfo{
+			.Key = NSN_TexturedQuad_Pass,
+			.Shader = NSN_TexturedQuad_Frag,
+			.VertexShader = NSN_TexturedQuad_Vert,
+			.MultiSample = 1,
+		},
+		nosPassInfo{
+			.Key = NSN_QuadOutline_Pass,
+			.Shader = NSN_QuadOutline_Frag,
+			.VertexShader = NSN_QuadOutline_Vert,
+			.MultiSample = 1,
+		},
 	};
 
-	ret = nosVulkan->RegisterPasses(1, &pass);
+	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
 	return ret;
-
-	return NOS_RESULT_SUCCESS;
 }
 } // namespace nos::utilities

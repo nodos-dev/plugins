@@ -7,6 +7,9 @@ layout (binding = 0, std430) uniform UBO
 {
     vec2 Offset;
     vec2 Size;
+	float AspectRatio;
+	float OutlineWidth;
+	vec4 Color;
 } ubo;
 
 const vec2 pos[6] =
