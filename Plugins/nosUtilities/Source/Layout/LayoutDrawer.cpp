@@ -112,7 +112,7 @@ struct LayoutDrawerNode : NodeContext
 				tex.Info.Texture.Width = outInfo.resolution().x();
 				tex.Info.Texture.Height = outInfo.resolution().y();
 				if (nosVulkan->CreateResource(&tex, "LayoutDrawerOut") != NOS_RESULT_SUCCESS)
-					nosEngine.LogE("Failed to create output texture for output %ull!", i);
+					nosEngine.LogE("Failed to create output texture for output %zu!", i);
 				outsChanged = true;
 			}
 			OutTextures.emplace_back(tex);
