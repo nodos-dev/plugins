@@ -24,70 +24,52 @@ NOS_REGISTER_NAME(FOV);
 
 namespace nos::math
 {
+
 #define NO_ARG
 
 #define DEF_OP0(o, n, t) nos::fb::vec##n##t operator o(nos::fb::vec##n##t l, nos::fb::vec##n##t r) { (glm::t##vec##n&)l += (glm::t##vec##n&)r; return (nos::fb::vec##n##t&)l; }
 #define DEF_OP1(n, t) DEF_OP0(+, n, t) DEF_OP0(-, n, t) DEF_OP0(*, n, t) DEF_OP0(/, n, t)
 #define DEF_OP(t) DEF_OP1(2, t) DEF_OP1(3, t) DEF_OP1(4, t)
 
-	DEF_OP(u);
-	DEF_OP(i);
-	DEF_OP(d);
-	DEF_OP(NO_ARG);
-	template<class T> T Add(T x, T y) { return x + y; }
-	template<class T> T Sub(T x, T y) { return x - y; }
-	template<class T> T Mul(T x, T y) { return x * y; }
-	template<class T> T Div(T x, T y) { return x / y; }
+DEF_OP(u);
+DEF_OP(i);
+DEF_OP(d);
+DEF_OP(NO_ARG);
 
-	template<class T, T F(T, T)>
-	nosResult ScalarBinopExecute(void* ctx, nosNodeExecuteParams* params)
+template<class T> T Add(T x, T y) { return x + y; }
+template<class T> T Sub(T x, T y) { return x - y; }
+template<class T> T Mul(T x, T y) { return x * y; }
+template<class T> T Div(T x, T y) { return x / y; }
+
+template<class T, int N>
+struct Vec {
+	T C[N] = {};
+
+	Vec() = default;
+
+	template<class P>
+	Vec(const P* p) : C{}
 	{
-		auto X = static_cast<T*>(params->Pins[0].Data->Data);
-		auto Y = static_cast<T*>(params->Pins[1].Data->Data);
-		auto Z = static_cast<T*>(params->Pins[2].Data->Data);
-		*Z = F(*X, *Y);
-		return NOS_RESULT_SUCCESS;
+		C[0] = p->x();
+		C[1] = p->y();
+		if constexpr (N > 2) C[2] = p->z();
+		if constexpr (N > 3) C[3] = p->w();
 	}
 
-	template<class T, int N>
-	struct Vec {
-		T C[N] = {};
-
-		Vec() = default;
-
-		template<class P>
-		Vec(const P* p) : C{}
-		{
-			C[0] = p->x();
-			C[1] = p->y();
-			if constexpr (N > 2) C[2] = p->z();
-			if constexpr (N > 3) C[3] = p->w();
-		}
-
-		template<T F(T, T)>
-		Vec Binop(Vec r) const
-		{
-			Vec<T, N> result = {};
-			for (int i = 0; i < N; i++)
-				result.C[i] = F(C[i], r.C[i]);
-			return result;
-		}
-
-		Vec operator +(Vec r) const { return Binop<Add>(r); }
-		Vec operator -(Vec r) const { return Binop<Sub>(r); }
-		Vec operator *(Vec r) const { return Binop<Mul>(r); }
-		Vec operator /(Vec r) const { return Binop<Div>(r); }
-	};
-
-	template<class T, int Dim, Vec<T, Dim>F(Vec<T, Dim>, Vec<T, Dim>)>
-	nosResult VecBinopExecute(void* ctx, nosNodeExecuteParams* params)
+	template<T F(T, T)>
+	Vec Binop(Vec r) const
 	{
-		auto X = static_cast<Vec<T, Dim>*>(params->Pins[0].Data->Data);
-		auto Y = static_cast<Vec<T, Dim>*>(params->Pins[1].Data->Data);
-		auto Z = static_cast<Vec<T, Dim>*>(params->Pins[2].Data->Data);
-		*Z = F(*X, *Y);
-		return NOS_RESULT_SUCCESS;
+		Vec<T, N> result = {};
+		for (int i = 0; i < N; i++)
+			result.C[i] = F(C[i], r.C[i]);
+		return result;
 	}
+
+	Vec operator +(Vec r) const { return Binop<Add>(r); }
+	Vec operator -(Vec r) const { return Binop<Sub>(r); }
+	Vec operator *(Vec r) const { return Binop<Mul>(r); }
+	Vec operator /(Vec r) const { return Binop<Div>(r); }
+};
 
 enum class MathNodeTypes : int {
 	SineWave,
