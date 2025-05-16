@@ -99,7 +99,49 @@
 						"name": "Items",
 						"type_name": "[nos.utilities.layout.GridLayoutItem]",
 						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": [
+							{
+								"start": {
+									"x": 0,
+									"y": 0
+								},
+								"span": {
+									"x": 1,
+									"y": 1
+								}
+							},
+							{
+								"start": {
+									"x": 1,
+									"y": 0
+								},
+								"span": {
+									"x": 1,
+									"y": 1
+								}
+							},
+							{
+								"start": {
+									"x": 0,
+									"y": 1
+								},
+								"span": {
+									"x": 1,
+									"y": 1
+								}
+							},
+							{
+								"start": {
+									"x": 1,
+									"y": 1
+								},
+								"span": {
+									"x": 1,
+									"y": 1
+								}
+							}
+						]
 					},
 					{
 						"name": "OutDrawItems",
@@ -195,7 +237,73 @@
 						"name": "Items",
 						"type_name": "[nos.utilities.layout.GridOutputItem]",
 						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": [
+							{
+								"item": {
+									"start": {
+										"x": 0,
+										"y": 0
+									},
+									"span": {
+										"x": 1,
+										"y": 1
+									}
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							},
+							{
+								"item": {
+									"start": {
+										"x": 1,
+										"y": 0
+									},
+									"span": {
+										"x": 1,
+										"y": 1
+									}
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							},
+							{
+								"item": {
+									"start": {
+										"x": 0,
+										"y": 1
+									},
+									"span": {
+										"x": 1,
+										"y": 1
+									}
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							},
+							{
+								"item": {
+									"start": {
+										"x": 1,
+										"y": 1
+									},
+									"span": {
+										"x": 1,
+										"y": 1
+									}
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							}
+						]
 					},
 					{
 						"name": "OutputInfos",

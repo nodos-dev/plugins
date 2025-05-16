@@ -69,6 +69,9 @@
 		"Config/Sink.fbs",
 		"Config/Layout.fbs"
 	],
+	"defaults": [
+		"Config/Defaults.json"
+	],
 	"binary_path": "Binaries/nosUtilities",
 	"subsystem_options": [
 		{
