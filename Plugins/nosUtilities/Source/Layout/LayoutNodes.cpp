@@ -168,7 +168,7 @@ namespace nos::utilities
 			float u0 = (float)layoutItem.start().x() / columns;
 			float v0 = (float)layoutItem.start().y() / rows;
 			float u1 = (float)(layoutItem.start().x() + layoutItem.span().x()) / columns;
-			float v1 = (float)(layoutItem.start().x() + layoutItem.span().y()) / rows;
+			float v1 = (float)(layoutItem.start().y() + layoutItem.span().y()) / rows;
 
 			layout::LayoutOutputInfo output{};
 			output.mutable_resolution() = resolution;
