@@ -75,6 +75,12 @@ struct LayoutDrawerNode : NodeContext
 	LayoutDrawerNode(nosFbNodePtr node) : NodeContext(node) 
 	{
 		UpdateOutputTexturesPin();
+		AddPinValueWatcher(NOS_NAME("PreviewEnabled"), [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			bool previewEnabled = *InterpretPinValue<bool>(newVal);
+			SetPinOrphanState(NSN_Preview,
+							previewEnabled ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
+							"Preview disabled.");
+		});
 	}
 	~LayoutDrawerNode()
 	{
@@ -200,15 +206,7 @@ struct LayoutDrawerNode : NodeContext
 			DrawOut(cmd, inTextures, drawItemsForOut, outTex);
 		}
 
-
-		bool previewEnabled = *args.GetPinData<bool>(NOS_NAME("PreviewEnabled"));
-		if (GetPin(NSN_Preview)->IsOrphan == previewEnabled)
-		{
-			SetPinOrphanState(NSN_Preview,
-							  previewEnabled ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
-							  "Preview disabled.");
-		}
-		if (previewEnabled)
+		if (*args.GetPinData<bool>(NOS_NAME("PreviewEnabled")))
 		{
 			auto preview = vkss::DeserializeTextureInfo(args[NSN_Preview].Data->Data);
 			if (preview.Memory.Handle != 0)
