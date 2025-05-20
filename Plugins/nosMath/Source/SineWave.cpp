@@ -10,22 +10,32 @@ void RegisterSineWave(nosNodeFunctions* node)
 	node->MigrateNode = [](nosFbNodePtr node, nosBuffer* outBuffer) {
 		// TODO: Remove these when automatic migration is sufficiently comprehensive in Nodos
 		auto pluginVersion = node->plugin_version();
-		bool needsMigration = !pluginVersion || pluginVersion->major() <= 1 && pluginVersion->minor() < 22;
+		bool needsMigration = !pluginVersion || (pluginVersion->major() <= 1 && pluginVersion->minor() < 22);
 		if (!needsMigration)
 			return NOS_RESULT_SUCCESS;
 		fb::TNode oldNode;
 		node->UnPackTo(&oldNode);
 		
-		nosBuffer newNodeDefinitionBuffer;
-		nosEngine.GetAssetAsType(nosEngine.Plugin->Id,
-			"Config/SineWave.nosdef",
-			NOS_NAME("nos.fb.NodeDefinitions"),
-			&newNodeDefinitionBuffer);
+		auto newNodeDefBuffer = nos::GetAssetAsType("Config/SineWave.nosdef",
+			NOS_NAME(nos::fb::NodeDefinitions::GetFullyQualifiedName()));
+		NOS_SOFT_CHECK(newNodeDefBuffer.has_value(), "Failed to load SineWave node definition: Unable to get file contents");
+		if (!newNodeDefBuffer)
+			return NOS_RESULT_FAILED;
 
-		auto newNodeDefs = flatbuffers::GetRoot<fb::NodeDefinitions>(newNodeDefinitionBuffer.Data);
-		// Get the first node definition
-		auto nodeDef = newNodeDefs->nodes()->Get(0);
+		auto newNodeDefs = newNodeDefBuffer->As<fb::NodeDefinitions>();
+		auto newNodeDefList = newNodeDefs->nodes();
+		if (!newNodeDefList || newNodeDefList->size() == 0 || !newNodeDefList->Get(0))
+		{
+			NOS_SOFT_CHECK(false, "Failed to load SineWave node definition: No definition found in file");
+			return NOS_RESULT_FAILED;
+		}
+		auto nodeDef = newNodeDefList->Get(0);
 		auto newNodeFb = nodeDef->node();
+		if (!newNodeFb)
+		{
+			NOS_SOFT_CHECK(false, "Failed to load SineWave node definition: Node definition must contain 'node' field");
+			return NOS_RESULT_FAILED;
+		}
 		fb::TNode newNode;
 		newNodeFb->UnPackTo(&newNode);
 
