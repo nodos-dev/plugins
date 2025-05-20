@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.math",
-      "version": "1.21.1"
+      "version": "1.22.0"
     },
     "description": "Nodes for math operations.",
     "display_name": "Math",
@@ -15,6 +15,7 @@
     ]
   },
   "custom_types": [],
+  "named_values": [],
   "node_definitions": [
     "Config/Math.nosdef",
     "Config/Eval.nosdef",
@@ -23,7 +24,8 @@
     "Config/Boolean.nosdef",
     "Config/Xor.nosdef",
     "Config/Random.nosdef",
-    "Config/Lerp.nosdef"
+    "Config/Lerp.nosdef",
+    "Config/SineWave.nosdef"
   ],
   "binary_path": "Binaries/nosMath",
   "third_party_software": [

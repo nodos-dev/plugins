@@ -1,0 +1,532 @@
+{
+  "nodes": [
+    {
+      "class_name": "nos.math.SineWave",
+			"menu_info": {
+				"category": "Math",
+				"display_name": "Sine Wave"
+			},
+      "node": {
+        "id": "7b44275d-bb0f-4485-9b07-272fffcf6781",
+        "name": "Sine Wave",
+        "class_name": "nos.math.SineWave",
+        "pins": [
+          {
+            "id": "68c7c1e5-f4cf-4beb-b21b-0d30cff7e4b8",
+            "name": "Frequency",
+            "type_name": "double",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {},
+            "data": 1.0,
+            "contents_type": "PortalPin",
+            "contents": {
+              "source_id": "86ff7f69-dd7e-479e-af6e-7259abd16761"
+            }
+          },
+          {
+            "id": "a6a3b557-d7bb-4ca3-9962-29c934362e8e",
+            "name": "Amplitude",
+            "type_name": "double",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {},
+            "data": 1.0,
+            "contents_type": "PortalPin",
+            "contents": {
+              "source_id": "5f87243b-82db-4644-9bea-aa49035e14bb"
+            }
+          },
+          {
+            "id": "42cb6223-d267-40d9-a64e-19be0a28ae42",
+            "name": "Offset",
+            "type_name": "double",
+            "show_as": "PROPERTY",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {},
+            "data": 0.0,
+            "contents_type": "PortalPin",
+            "contents": {
+              "source_id": "98fc506e-d142-487f-b731-2f4088580f5c"
+            }
+          },
+          {
+            "id": "0f942d71-6e04-4582-80b3-f11dff3d7540",
+            "name": "Out",
+            "type_name": "double",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "visualizer": {},
+            "data": 0.0,
+            "contents_type": "PortalPin",
+            "contents": {
+              "source_id": "648ba409-8dc4-4d0f-bf80-84a9bdf71700"
+            }
+          }
+        ],
+        "pos": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "contents_type": "Graph",
+        "contents": {
+          "nodes": [
+            {
+              "id": "a06ac36b-3429-4c56-92bb-9dd150d96c88",
+              "name": "Eval",
+              "class_name": "nos.math.Eval",
+              "pins": [
+                {
+                  "id": "d097e76f-0a0d-476d-830b-146f62571144",
+                  "name": "Expression",
+                  "type_name": "string",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": "Amp * sin(Freq * x) + Offset",
+                  "def": "",
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "d88db448-1e95-4142-9897-7418e69d980b",
+                  "name": "Result",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "145ae87c-c5c0-4c15-9f36-395eac495ff3",
+                  "name": "Show_Expression",
+                  "type_name": "bool",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": true,
+                  "def": true,
+                  "contents_type": "JobPin",
+                  "contents": {},
+                  "display_name": "Show Expression In Node"
+                },
+                {
+                  "id": "0d1af484-1fa3-4d22-a668-98010731f6a0",
+                  "name": "A",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {},
+                  "display_name": "Freq"
+                },
+                {
+                  "id": "8b8869e0-95ca-4d1a-ba57-e462baeaaf1a",
+                  "name": "B",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {},
+                  "display_name": "Offset"
+                },
+                {
+                  "id": "67def732-d065-4dd1-a090-ff8a23f95e4d",
+                  "name": "C",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {},
+                  "display_name": "x"
+                },
+                {
+                  "id": "b6337d7c-9212-4f1f-b7c8-38b20124e7da",
+                  "name": "D",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {},
+                  "display_name": "Amp"
+                }
+              ],
+              "pos": {
+                "x": 324.0,
+                "y": 480.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "status_messages": [
+                {
+                  "text": "Amp * sin(Freq * x) + Offset",
+                  "popup_timeout_seconds": 5
+                }
+              ],
+              "description": "Evaluates a string expression",
+              "plugin_version": {
+                "major": 1,
+                "minor": 22,
+                "patch": 0
+              }
+            },
+            {
+              "id": "746350d9-a7d6-4a27-8e0d-113cfc32ae3f",
+              "name": "Time",
+              "class_name": "nos.utilities.Time",
+              "always_execute": true,
+              "pins": [
+                {
+                  "id": "1b8f60dd-34fb-4f09-8f53-41ec49932992",
+                  "name": "Seconds",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 34.099998,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 21.0,
+                "y": 501.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "plugin_version": {
+                "major": 3,
+                "minor": 22,
+                "patch": 1
+              }
+            },
+            {
+              "id": "71f94069-4696-4d07-9509-743a7cf01d71",
+              "name": "A",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "136f84a5-9b24-40d1-aa2b-f22bdbf835f0",
+                  "name": "Output",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "86ff7f69-dd7e-479e-af6e-7259abd16761",
+                  "name": "Input",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 1.0,
+                  "referred_by": [
+                    "68c7c1e5-f4cf-4beb-b21b-0d30cff7e4b8"
+                  ],
+                  "meta_data_map": [
+                    {
+                      "key": "PinHidden",
+                      "value": "true"
+                    }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 23.0,
+                "y": 404.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "display_name": "Frequency",
+              "plugin_version": {
+                "major": 0,
+                "minor": 0,
+                "patch": 0
+              }
+            },
+            {
+              "id": "48f8e75d-b2be-48b3-8a11-4095f04abd6a",
+              "name": "D",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "5f6c74c5-a411-49fe-b0dd-b34c317e5bdb",
+                  "name": "Output",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "5f87243b-82db-4644-9bea-aa49035e14bb",
+                  "name": "Input",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 1.0,
+                  "referred_by": [
+                    "a6a3b557-d7bb-4ca3-9962-29c934362e8e"
+                  ],
+                  "meta_data_map": [
+                    {
+                      "key": "PinHidden",
+                      "value": "true"
+                    }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 25.0,
+                "y": 557.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "display_name": "Amplitude",
+              "plugin_version": {
+                "major": 0,
+                "minor": 0,
+                "patch": 0
+              }
+            },
+            {
+              "id": "e8b9c51e-bb59-4655-904c-9cfd650a6e39",
+              "name": "float to double",
+              "class_name": "cast.float-double",
+              "pins": [
+                {
+                  "id": "ddd80df7-60f4-4123-9e71-17c9652aa131",
+                  "name": "float",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 34.099998,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "325098fc-47d8-4ca8-90c1-ffa459751a7f",
+                  "name": "double",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 153.0,
+                "y": 506.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "plugin_version": {
+                "major": 0,
+                "minor": 0,
+                "patch": 0
+              }
+            },
+            {
+              "id": "0540aaec-2357-424f-8743-166ff7dab495",
+              "name": "B",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "ff19c49e-421b-47d0-8a4a-90fec5c61327",
+                  "name": "Output",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "98fc506e-d142-487f-b731-2f4088580f5c",
+                  "name": "Input",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "referred_by": [
+                    "42cb6223-d267-40d9-a64e-19be0a28ae42"
+                  ],
+                  "def": 0.0,
+                  "meta_data_map": [
+                    {
+                      "key": "PinHidden",
+                      "value": "true"
+                    }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 35.0,
+                "y": 442.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "display_name": "Offset",
+              "plugin_version": {
+                "major": 0,
+                "minor": 0,
+                "patch": 0
+              }
+            },
+            {
+              "id": "8054e9a3-8963-497b-ace4-314a033d3ff3",
+              "name": "Result",
+              "class_name": "nos.internal.GraphOutput",
+              "pins": [
+                {
+                  "id": "81c1a62e-ee88-49a1-bbca-0f769120670a",
+                  "name": "Input",
+                  "type_name": "double",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": {}
+                },
+                {
+                  "id": "648ba409-8dc4-4d0f-bf80-84a9bdf71700",
+                  "name": "Output",
+                  "type_name": "double",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {},
+                  "data": 0.0,
+                  "referred_by": [
+                    "0f942d71-6e04-4582-80b3-f11dff3d7540"
+                  ],
+                  "def": 0.0,
+                  "meta_data_map": [
+                    {
+                      "key": "PinHidden",
+                      "value": "true"
+                    }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": {}
+                }
+              ],
+              "pos": {
+                "x": 558.0,
+                "y": 402.0
+              },
+              "contents_type": "Job",
+              "contents": {
+                "type": ""
+              },
+              "function_category": "Default Node",
+              "display_name": "Out",
+              "plugin_version": {
+                "major": 0,
+                "minor": 0,
+                "patch": 0
+              }
+            }
+          ],
+          "connections": [
+            {
+              "from": "136f84a5-9b24-40d1-aa2b-f22bdbf835f0",
+              "to": "0d1af484-1fa3-4d22-a668-98010731f6a0",
+              "id": "fefb2242-7953-45d4-b71b-3f4870c86d16"
+            },
+            {
+              "from": "5f6c74c5-a411-49fe-b0dd-b34c317e5bdb",
+              "to": "b6337d7c-9212-4f1f-b7c8-38b20124e7da",
+              "id": "c0e5402e-3ccf-4d5b-a8b6-0fb0b4df7837"
+            },
+            {
+              "from": "1b8f60dd-34fb-4f09-8f53-41ec49932992",
+              "to": "ddd80df7-60f4-4123-9e71-17c9652aa131",
+              "id": "1f3bd659-5b35-49f9-8e92-1607e7e26057"
+            },
+            {
+              "from": "325098fc-47d8-4ca8-90c1-ffa459751a7f",
+              "to": "67def732-d065-4dd1-a090-ff8a23f95e4d",
+              "id": "eb9da27e-829b-4e3e-b830-77eff2069c82"
+            },
+            {
+              "from": "ff19c49e-421b-47d0-8a4a-90fec5c61327",
+              "to": "8b8869e0-95ca-4d1a-ba57-e462baeaaf1a",
+              "id": "e1651bf2-80ba-4b90-b564-5290fc52e551"
+            },
+            {
+              "from": "d88db448-1e95-4142-9897-7418e69d980b",
+              "to": "81c1a62e-ee88-49a1-bbca-0f769120670a",
+              "id": "89a9e000-3592-404e-a531-1acf2d99b880"
+            }
+          ]
+        },
+        "function_category": "Default Node",
+        "display_name": "Sine Wave",
+        "plugin_version": {
+          "major": 1,
+          "minor": 22,
+          "patch": 0
+        }
+      }
+    }
+  ]
+}
