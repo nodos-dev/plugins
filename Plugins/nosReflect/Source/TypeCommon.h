@@ -39,11 +39,6 @@ flatbuffers::uoffset_t CopyArgs(
 	const nosTypeInfo* type,
 	NodeExecuteParams& table);
 
-flatbuffers::uoffset_t GenerateOffset(
-	flatbuffers::FlatBufferBuilder& fbb,
-	const nosTypeInfo* type,
-	const void* data);
-
 std::vector<uint8_t> GenerateBuffer(
 	const nosTypeInfo* type,
 	const void* data);

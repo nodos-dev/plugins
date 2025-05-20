@@ -533,27 +533,25 @@ flatbuffers::uoffset_t CopyArgs(
 	}
 }
 
-flatbuffers::uoffset_t GenerateOffset(
-	flatbuffers::FlatBufferBuilder& fbb,
-	const nosTypeInfo* type,
-	const void* data)
+flatbuffers::uoffset_t GenerateOffset(flatbuffers::FlatBufferBuilder& fbb,
+									  const nosTypeInfo* type,
+									  flatbuffers::Table const* root)
 {
-	if(type->ByteSize) 
+	if (type->ByteSize)
 		return 0;
 	switch (type->BaseType)
 	{
-	case NOS_BASE_TYPE_STRUCT:
-		return CopyTable(fbb, type, flatbuffers::GetRoot<flatbuffers::Table>(data));
-	case NOS_BASE_TYPE_STRING:
-		return fbb.CreateString(flatbuffers::GetRoot<flatbuffers::String>(data)->str()).o;
+	case NOS_BASE_TYPE_STRUCT: return CopyTable(fbb, type, root);
+	case NOS_BASE_TYPE_STRING: return fbb.CreateString(reinterpret_cast<flatbuffers::String const*>(root)->str()).o;
 	case NOS_BASE_TYPE_ARRAY: {
-		auto vec = flatbuffers::GetRoot<flatbuffers::Vector<const uint8_t*>>(data);
-		if(type->ElementType->ByteSize)
+		if (type->ElementType->ByteSize)
 		{
+			auto vec = reinterpret_cast<flatbuffers::Vector<const uint8_t*> const*>(root);
 			fbb.StartVector(vec->size(), type->ElementType->ByteSize, 1);
 			fbb.PushBytes(vec->Data(), type->ElementType->ByteSize * vec->size());
 			return fbb.EndVector(vec->size());
 		}
+		auto vec = reinterpret_cast<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>> const*>(root);
 		// This must be flatbuffers::Offset<...> instead of flatbuffers::uoffset_t since flatbuffer builder behaves
 		// differently if vector type is an flatbuffers::Offset
 		std::vector<flatbuffers::Offset<flatbuffers::Table>> elements(vec->size());
@@ -581,7 +579,8 @@ std::vector<uint8_t> GenerateBuffer(
 	{
 	case NOS_BASE_TYPE_ARRAY: {
 		auto builder = PinData<flatbuffers::Vector<uint8_t>>::Builder();
-		builder.Finish<flatbuffers::Vector<uint8_t>>(GenerateOffset(builder, type, data));
+		builder.Finish<flatbuffers::Vector<uint8_t>>(
+			GenerateOffset(builder, type, flatbuffers::GetRoot<flatbuffers::Table>(data)));
 		return builder.Pack();
 	}
 	case NOS_BASE_TYPE_STRING: {
@@ -590,7 +589,8 @@ std::vector<uint8_t> GenerateBuffer(
 	}
 	default: {
 		flatbuffers::FlatBufferBuilder fbb;
-		fbb.Finish(flatbuffers::Offset<uint8_t>(GenerateOffset(fbb, type, data)));
+		fbb.Finish(
+			flatbuffers::Offset<uint8_t>(GenerateOffset(fbb, type, flatbuffers::GetRoot<flatbuffers::Table>(data))));
 		return nos::Buffer(fbb.Release());
 	}
 	}
