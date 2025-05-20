@@ -85,6 +85,7 @@ enum class MathNodeTypes : int {
 	Or,
 	Not,
 	Random,
+	SineWave,
 	Count
 };
 
@@ -129,6 +130,7 @@ void RegisterAnd(nosNodeFunctions*);
 void RegisterOr(nosNodeFunctions*);
 void RegisterNot(nosNodeFunctions*);
 void RegisterRandom(nosNodeFunctions*);
+void RegisterSineWave(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
 {
@@ -140,6 +142,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		auto node = outList[i];
 		switch ((MathNodeTypes)i)
 		{
+		case MathNodeTypes::SineWave: {
+			RegisterSineWave(node);
+			break;
+		}
 		case MathNodeTypes::Clamp: {
 			node->ClassName = NOS_NAME_STATIC("nos.math.Clamp");
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
