@@ -554,8 +554,11 @@ flatbuffers::uoffset_t GenerateOffset(
 			fbb.PushBytes(vec->Data(), type->ElementType->ByteSize * vec->size());
 			return fbb.EndVector(vec->size());
 		}
+		// This must be flatbuffers::Offset<...> instead of flatbuffers::uoffset_t since flatbuffer builder behaves
+		// differently if vector type is an flatbuffers::Offset
 		std::vector<flatbuffers::Offset<flatbuffers::Table>> elements(vec->size());
-		for (int i = 0; i < vec->size(); i++) {
+		for (int i = 0; i < vec->size(); i++)
+		{
 			elements[i] = GenerateOffset(fbb, type->ElementType, vec->Get(i));
 		}
 		return fbb.CreateVector(elements).o;
