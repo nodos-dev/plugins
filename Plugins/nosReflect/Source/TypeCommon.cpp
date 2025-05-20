@@ -586,7 +586,7 @@ std::vector<uint8_t> GenerateBuffer(
 	}
 	case NOS_BASE_TYPE_STRING: {
 		auto str = flatbuffers::GetRoot<flatbuffers::String>(data);
-		return std::vector<uint8_t>{(uint8_t*)str->c_str(), (uint8_t*)str->c_str() + str->size() + 1};
+		return std::vector<uint8_t>{reinterpret_cast<const uint8_t*>(str->c_str()), reinterpret_cast<const uint8_t*>(str->c_str()) + str->size() + 1};
 	}
 	default: {
 		flatbuffers::FlatBufferBuilder fbb;
