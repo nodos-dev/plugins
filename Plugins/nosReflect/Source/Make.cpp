@@ -30,11 +30,10 @@ struct MakeNode : NodeContext
 	
 	// Strict mode: only builtin types are supported
 	static bool IsTypeSupported(nos::TypeInfo& info, bool strict) {
-		if (info->BaseType == NOS_BASE_TYPE_NONE)
+		if (info->BaseType == NOS_BASE_TYPE_NONE || info->BaseType == NOS_BASE_TYPE_ARRAY)
 			return false;
 		// If has 'skip_make' attribute
-		if (info->BaseType == NOS_BASE_TYPE_STRUCT || info->BaseType == NOS_BASE_TYPE_UNION
-			|| info->BaseType == NOS_BASE_TYPE_ARRAY)
+		if (info->BaseType == NOS_BASE_TYPE_STRUCT || info->BaseType == NOS_BASE_TYPE_UNION)
 		{
 
 			bool skip = strict;
