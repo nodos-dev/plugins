@@ -20,6 +20,7 @@ enum Nodes : int
 {
     SimplexNoise = 0,
     WorleyNoise = 1,
+    FBMNoise = 2,
     Count
 };
 
@@ -55,7 +56,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	}
 
 	NOS_BIND_NODE_CLASS(NOS_NAME("SimplexNoise"), DynamicSizedNoiseNode, outList[SimplexNoise])
-		NOS_BIND_NODE_CLASS(NOS_NAME("WorleyNoise"), DynamicSizedNoiseNode, outList[WorleyNoise]);
+	NOS_BIND_NODE_CLASS(NOS_NAME("WorleyNoise"), DynamicSizedNoiseNode, outList[WorleyNoise])
+	NOS_BIND_NODE_CLASS(NOS_NAME("FBMNoise"), DynamicSizedNoiseNode, outList[FBMNoise]);
 	return NOS_RESULT_SUCCESS;
 }
 
