@@ -51,6 +51,43 @@ struct LayoutDrawerNode : NodeContext
 	// textures.
 	std::vector<nosResourceShareInfo> OutTextures;
 
+	enum class StatusType
+	{
+		Preview,
+		InvalidInputTextures,
+	};
+	std::map<StatusType, fb::TNodeStatusMessage> StatusMessages;
+
+	void SendStatusMessages()
+	{
+		std::vector<fb::TNodeStatusMessage> messages;
+		for (auto& [type, message] : StatusMessages)
+			messages.push_back(message);
+		SetNodeStatusMessages(messages);
+	}
+
+	void SetStatusMessage(StatusType statusType, std::string_view message, fb::NodeStatusMessageType msgType)
+	{
+		if (auto it = StatusMessages.find(statusType); it != StatusMessages.end())
+		{
+			if (it->second.text == message && it->second.type == msgType)
+				return;
+		}
+		auto& msg = StatusMessages[statusType] = fb::TNodeStatusMessage{};
+		msg.text = message;
+		msg.type = msgType;
+		SendStatusMessages();
+	}
+
+	void ClearStatusMessage(StatusType statusType)
+	{
+		auto it = StatusMessages.find(statusType);
+		if (it == StatusMessages.end())
+			return;
+		StatusMessages.erase(statusType);
+		SendStatusMessages();
+	}
+
 	void UpdateOutputTexturesPin()
 	{
 		std::vector<flatbuffers::Offset<sys::vulkan::Texture>> newOutputsFb;
@@ -72,15 +109,21 @@ struct LayoutDrawerNode : NodeContext
 					nosBuffer{.Data = (void*)vecs, .Size = buf.size() - ((uint8_t*)vecs - buf.data())});
 	}
 
-	LayoutDrawerNode(nosFbNodePtr node) : NodeContext(node) 
+	LayoutDrawerNode(nosFbNodePtr node) : NodeContext(node)
 	{
 		UpdateOutputTexturesPin();
-		AddPinValueWatcher(NOS_NAME("PreviewEnabled"), [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			bool previewEnabled = *InterpretPinValue<bool>(newVal);
-			SetPinOrphanState(NSN_Preview,
-							previewEnabled ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
-							"Preview disabled.");
-		});
+		AddPinValueWatcher(
+			NOS_NAME("PreviewEnabled"), [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+				bool previewEnabled = *InterpretPinValue<bool>(newVal);
+				SetPinOrphanState(NSN_Preview,
+								  previewEnabled ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
+								  "Preview disabled.");
+				if (previewEnabled)
+					SetStatusMessage(StatusType::Preview, "Preview enabled.", fb::NodeStatusMessageType::INFO);
+				else
+					ClearStatusMessage(StatusType::Preview);
+			});
+		ClearNodeStatusMessages();
 	}
 	~LayoutDrawerNode()
 	{
@@ -94,22 +137,19 @@ struct LayoutDrawerNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams args(params);
-		auto const& drawInfo = *args.GetPinData<layout::LayoutDrawInfo>(NOS_NAME("LayoutDrawInfo"));
-		if (!drawInfo.draw_items())
-			return NOS_RESULT_SUCCESS;
-
-		auto outputs =
+		auto const& drawItems =
+			*args.GetPinData<flatbuffers::Vector<layout::LayoutDrawItem const*>>(NOS_NAME("LayoutDrawItems"));
+		auto const& outputInfos =
+			*args.GetPinData<flatbuffers::Vector<layout::LayoutOutputInfo const*>>(NOS_NAME("LayoutOutputInfos"));
+		auto* outputs =
 			args.GetPinData<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(NSN_OutputTextures);
-
-		if (!drawInfo.outputs())
-			return NOS_RESULT_SUCCESS;
 
 		OutTextures.clear();
 		bool outsChanged = false;
-		for (size_t i = 0; i < std::min(outputs->size(), drawInfo.outputs()->size()); ++i)
+		for (size_t i = 0; i < std::min(outputs->size(), outputInfos.size()); ++i)
 		{
 			auto tex = DeserializeTextureInfo(*(*outputs)[i]);
-			auto const& outInfo = *(*drawInfo.outputs())[i];
+			auto const& outInfo = *outputInfos[i];
 			if (tex.Info.Texture.Width != outInfo.resolution().x() ||
 				tex.Info.Texture.Height != outInfo.resolution().y())
 			{
@@ -124,10 +164,10 @@ struct LayoutDrawerNode : NodeContext
 			OutTextures.emplace_back(tex);
 		}
 
-		if (outputs->size() > drawInfo.outputs()->size())
+		if (outputs->size() > outputInfos.size())
 		{
 			outsChanged = true;
-			for (size_t i = drawInfo.outputs()->size(); i < outputs->size(); ++i)
+			for (size_t i = outputInfos.size(); i < outputs->size(); ++i)
 			{
 				auto tex = DeserializeTextureInfo(*(*outputs)[i]);
 				nosVulkan->DestroyResource(&tex);
@@ -136,9 +176,9 @@ struct LayoutDrawerNode : NodeContext
 		else
 		{
 			outsChanged = true;
-			for (size_t i = outputs->size(); i < drawInfo.outputs()->size(); ++i)
+			for (size_t i = outputs->size(); i < outputInfos.size(); ++i)
 			{
-				auto& output = *(*drawInfo.outputs())[i];
+				auto& output = *outputInfos[i];
 				nosResourceShareInfo tex{};
 				tex.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
 				tex.Info.Texture = {
@@ -168,10 +208,26 @@ struct LayoutDrawerNode : NodeContext
 		for (auto* texture : inTexturesFb)
 			inTextures.push_back(DeserializeTextureInfo(*texture));
 
-		auto cmd = vkss::BeginCmd(NOS_NAME("LayoutDrawer"), NodeId);
-		for (size_t outIndex = 0; outIndex < drawInfo.outputs()->size(); outIndex++)
+		bool unmatchedInputTextures = false;
+		for (auto* drawItem : drawItems)
 		{
-			auto const& outInfo = *(*drawInfo.outputs())[outIndex];
+			if (drawItem->texture_id() >= inTextures.size())
+			{
+				unmatchedInputTextures = true;
+				break;
+			}
+		}
+		if (unmatchedInputTextures)
+			SetStatusMessage(StatusType::InvalidInputTextures,
+							 "Layout contains draw items referencing invalid input textures",
+							 fb::NodeStatusMessageType::FAILURE);
+		else
+			ClearStatusMessage(StatusType::InvalidInputTextures);
+
+		auto cmd = vkss::BeginCmd(NOS_NAME("LayoutDrawer"), NodeId);
+		for (size_t outIndex = 0; outIndex < outputInfos.size(); outIndex++)
+		{
+			auto const& outInfo = *outputInfos[outIndex];
 			auto outTex = OutTextures[outIndex];
 			if (outTex.Memory.Handle == 0)
 				continue;
@@ -180,12 +236,12 @@ struct LayoutDrawerNode : NodeContext
 			auto outSize = outInfo.size();
 			auto outPos = outInfo.pos();
 			std::vector<layout::LayoutDrawItem> drawItemsForOut;
-			drawItemsForOut.reserve(drawInfo.draw_items()->size());
+			drawItemsForOut.reserve(drawItems.size());
 			// Calculate translation and scale matrix of the output texture
 			glm::vec2 translation = {outPos.x(), outPos.y()};
 			glm::vec2 scale = {outSize.x(), outSize.y()};
 			// Apply the transformation to each draw item
-			for (auto* drawItem : *drawInfo.draw_items())
+			for (auto* drawItem : drawItems)
 			{
 				auto drawItemPos = drawItem->position();
 				auto drawItemSize = drawItem->size();
@@ -213,14 +269,14 @@ struct LayoutDrawerNode : NodeContext
 			{
 				nosVulkan->Clear(cmd, &preview, {0.0f, 0.0f, 0.0f, 1.0f});
 				std::vector<layout::LayoutDrawItem> drawItemsForPreview;
-				drawItemsForPreview.reserve(drawInfo.draw_items()->size());
-				for (auto* drawItem : *drawInfo.draw_items())
+				drawItemsForPreview.reserve(drawItems.size());
+				for (auto* drawItem : drawItems)
 					drawItemsForPreview.emplace_back(*drawItem);
 				DrawOut(cmd, inTextures, drawItemsForPreview, preview);
 
 				std::vector<layout::LayoutOutputInfo> outlinesForPreview;
-				outlinesForPreview.reserve(drawInfo.outputs()->size());
-				for (auto* output : *drawInfo.outputs())
+				outlinesForPreview.reserve(outputInfos.size());
+				for (auto* output : outputInfos)
 					outlinesForPreview.emplace_back(*output);
 				DrawOutlines(cmd, outlinesForPreview, preview);
 			}

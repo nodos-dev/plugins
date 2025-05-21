@@ -44,27 +44,14 @@
 						"display_name": "Out Draw Items",
 						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "QuadLayout",
-			"menu_info": {
-				"category": "Layout",
-				"display_name": "Quad Layout"
-			},
-			"node": {
-				"class_name": "QuadLayout",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "OutDrawItems",
-						"display_name": "Out Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN"
+						"can_show_as": "OUTPUT_PIN",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
 					}
 				]
 			}
@@ -148,7 +135,14 @@
 						"display_name": "Out Draw Items",
 						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN"
+						"can_show_as": "OUTPUT_PIN",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
 					}
 				]
 			}
@@ -202,7 +196,14 @@
 						"display_name": "Output Infos",
 						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN"
+						"can_show_as": "OUTPUT_PIN",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
 					}
 				]
 			}
@@ -310,7 +311,14 @@
 						"display_name": "Output Infos",
 						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN"
+						"can_show_as": "OUTPUT_PIN",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
 					}
 				]
 			}

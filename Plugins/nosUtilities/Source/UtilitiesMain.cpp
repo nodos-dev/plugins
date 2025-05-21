@@ -52,7 +52,6 @@ enum Utilities : int
 	PrintLog,
 	LayoutDrawer,
 	FreeLayout,
-	QuadLayout,
 	GridLayout,
 	FreeOutputLayout,
 	GridOutputLayout,
@@ -87,7 +86,6 @@ nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterLayoutDrawer(nosNodeFunctions*);
 nosResult RegisterFreeLayout(nosNodeFunctions*);
-nosResult RegisterQuadLayout(nosNodeFunctions*);
 nosResult RegisterGridLayout(nosNodeFunctions*);
 nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
@@ -138,7 +136,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(PrintLog)
 			GEN_CASE_NODE(LayoutDrawer)
 			GEN_CASE_NODE(FreeLayout)
-			GEN_CASE_NODE(QuadLayout)
 			GEN_CASE_NODE(GridLayout)
 			GEN_CASE_NODE(FreeOutputLayout)
 			GEN_CASE_NODE(GridOutputLayout)

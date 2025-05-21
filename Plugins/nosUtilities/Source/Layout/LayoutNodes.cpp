@@ -50,33 +50,6 @@ namespace nos::utilities
 		fn->ExecuteNode = ExecuteFreeLayout;
 		return NOS_RESULT_SUCCESS;
 	}
-	nosResult NOSAPI_CALL ExecuteQuadLayout(void* _, nosNodeExecuteParams* params)
-	{
-		nos::NodeExecuteParams args(params);
-		std::vector<layout::LayoutDrawItem> drawItems;
-		drawItems.reserve(4);
-		for (size_t i = 0; i < 4; i++)
-		{
-			float x = 0.0f + (i % 2) * 0.5f;
-			float y = 0.0f + (i / 2) * 0.5f;
-			layout::LayoutDrawItem drawItem{};
-			drawItem.mutable_position() = nos::fb::vec2(x, y);
-			drawItem.mutable_size() = nos::fb::vec2(0.5f, 0.5f);
-			drawItem.mutate_texture_id(i);
-			drawItems.push_back(std::move(drawItem));
-		}
-		
-		nosEngine.SetPinValueByName(
-			args.NodeId,
-			NSN_OutDrawItems, PackPinVectorOfStructs(drawItems));
-		return NOS_RESULT_SUCCESS;
-	}
-	nosResult RegisterQuadLayout(nosNodeFunctions* fn)
-	{
-		fn->ClassName = NSN_QuadLayout;
-		fn->ExecuteNode = ExecuteQuadLayout;
-		return NOS_RESULT_SUCCESS;
-	}
 	nosResult NOSAPI_CALL ExecuteGridLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);

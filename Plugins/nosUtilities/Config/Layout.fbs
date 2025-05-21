@@ -48,9 +48,3 @@ struct LayoutOutputInfo
 	size: nos.fb.vec2;
 	pos: nos.fb.vec2;
 }
-
-table LayoutDrawInfo
-{
-	draw_items: [LayoutDrawItem]; // In the future, we can add other types of items, such as text, lines etc.
-	outputs: [LayoutOutputInfo];
-}
