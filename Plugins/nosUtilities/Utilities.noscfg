@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.22.1"
+			"version": "3.23.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -58,7 +58,11 @@
 		"Config/PrintLog.nosdef",
 		"Config/ScheduleOnRequest.nosdef",
 		"Config/ReadImage.nosdef",
-		"Config/BoxFit.nosdef"
+		"Config/BoxFit.nosdef",
+		"Config/PrintLog.nosdef",
+		"Config/LayoutNodes.nosdef",
+		"Config/LayoutDrawer.nosdef",
+		"Config/LayoutQuadCanvas.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
@@ -67,8 +71,12 @@
 		"Config/Swizzle.fbs",
 		"Config/TextureSwitcher.fbs",
 		"Config/ChannelViewer.fbs",
+		"Config/BoxFit.fbs",
 		"Config/Sink.fbs",
-		"Config/BoxFit.fbs"
+		"Config/Layout.fbs"
+	],
+	"defaults": [
+		"Config/Defaults.json"
 	],
 	"binary_path": "Binaries/nosUtilities",
 	"plugin_options": [

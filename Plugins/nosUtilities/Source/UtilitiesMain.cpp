@@ -51,6 +51,11 @@ enum Utilities : int
 	TriggerOnAnyInput,
 	SwitchTrigger,
 	PrintLog,
+	LayoutDrawer,
+	FreeLayout,
+	GridLayout,
+	FreeOutputLayout,
+	GridOutputLayout,
 	ScheduleOnRequest,
 	ReadImage,
 	BoxFit,
@@ -86,6 +91,11 @@ nosResult RegisterPrintLog(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 nosResult RegisterReadImage(nosNodeFunctions*);
 nosResult RegisterBoxFit(nosNodeFunctions*);
+nosResult RegisterLayoutDrawer(nosNodeFunctions*);
+nosResult RegisterFreeLayout(nosNodeFunctions*);
+nosResult RegisterGridLayout(nosNodeFunctions*);
+nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
+nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -134,6 +144,11 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(ScheduleOnRequest)
 			GEN_CASE_NODE(ReadImage)
 			GEN_CASE_NODE(BoxFit)
+			GEN_CASE_NODE(LayoutDrawer)
+			GEN_CASE_NODE(FreeLayout)
+			GEN_CASE_NODE(GridLayout)
+			GEN_CASE_NODE(FreeOutputLayout)
+			GEN_CASE_NODE(GridOutputLayout)
 		}
 	}
 	
