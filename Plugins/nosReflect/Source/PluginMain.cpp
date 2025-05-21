@@ -33,6 +33,8 @@ enum Nodes : size_t
 	LessThan,
 	SetVariable,
 	GetVariable,
+	EnumToUnderlyingValue,
+	EnumFromUnderlyingValue,
 	Count
 };
 
@@ -51,6 +53,8 @@ nosResult RegisterGreaterThan(nosNodeFunctions* node);
 nosResult RegisterLessThan(nosNodeFunctions* node);
 nosResult RegisterSetVariable(nosNodeFunctions* node);
 nosResult RegisterGetVariable(nosNodeFunctions* node);
+nosResult RegisterEnumToUnderlyingValue(nosNodeFunctions* node);
+nosResult RegisterEnumFromUnderlyingValue(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -86,6 +90,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(SetVariable)
 			GEN_CASE_NODE(GetVariable)
 			GEN_CASE_NODE(ArithmeticDynamic)
+			GEN_CASE_NODE(EnumToUnderlyingValue)
+			GEN_CASE_NODE(EnumFromUnderlyingValue)
 		}
 	}
 

@@ -1,0 +1,50 @@
+include "Builtins.fbs";
+
+namespace nos.utilities.layout;
+
+enum LayoutType : uint
+{
+	Free,
+	Quad,
+	Grid,
+	Vertical,
+	Horizontal
+}
+
+struct FreeLayoutItem
+{
+	position: nos.fb.vec2i;
+	size: nos.fb.vec2i;
+}
+
+struct GridLayoutItem
+{
+	start: nos.fb.vec2i;  // start_column, start_row
+	span: nos.fb.vec2i;   // column_span, row_span
+}
+
+struct FreeOutputItem
+{
+	item: FreeLayoutItem;
+	resolution: nos.fb.vec2u;
+}
+
+struct GridOutputItem
+{
+	item: GridLayoutItem;
+	resolution: nos.fb.vec2u;
+}
+
+struct LayoutDrawItem
+{
+	position: nos.fb.vec2;
+	size: nos.fb.vec2;
+	texture_id: uint; // Texture ID
+}
+
+struct LayoutOutputInfo
+{
+	resolution: nos.fb.vec2u;
+	size: nos.fb.vec2;
+	pos: nos.fb.vec2;
+}

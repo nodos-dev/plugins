@@ -50,6 +50,11 @@ enum Utilities : int
 	TriggerOnAnyInput,
 	SwitchTrigger,
 	PrintLog,
+	LayoutDrawer,
+	FreeLayout,
+	GridLayout,
+	FreeOutputLayout,
+	GridOutputLayout,
 	Count
 };
 
@@ -79,6 +84,11 @@ nosResult RegisterConditionalTrigger(nosNodeFunctions*);
 nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterPrintLog(nosNodeFunctions*);
+nosResult RegisterLayoutDrawer(nosNodeFunctions*);
+nosResult RegisterFreeLayout(nosNodeFunctions*);
+nosResult RegisterGridLayout(nosNodeFunctions*);
+nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
+nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -124,6 +134,11 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TriggerOnAnyInput)
 			GEN_CASE_NODE(SwitchTrigger)
 			GEN_CASE_NODE(PrintLog)
+			GEN_CASE_NODE(LayoutDrawer)
+			GEN_CASE_NODE(FreeLayout)
+			GEN_CASE_NODE(GridLayout)
+			GEN_CASE_NODE(FreeOutputLayout)
+			GEN_CASE_NODE(GridOutputLayout)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
