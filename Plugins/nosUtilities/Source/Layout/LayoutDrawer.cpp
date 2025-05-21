@@ -63,7 +63,10 @@ struct LayoutDrawerNode : NodeContext
 		std::vector<fb::TNodeStatusMessage> messages;
 		for (auto& [type, message] : StatusMessages)
 			messages.push_back(message);
-		SetNodeStatusMessages(messages);
+		if (messages.empty())
+			ClearNodeStatusMessages();
+		else
+			SetNodeStatusMessages(messages);
 	}
 
 	void SetStatusMessage(StatusType statusType, std::string_view message, fb::NodeStatusMessageType msgType)
