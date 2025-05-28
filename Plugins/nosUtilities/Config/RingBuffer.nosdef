@@ -22,7 +22,7 @@
 					{
 						"name": "Size",
 						"type_name": "uint",
-						"data": 2,
+						"data": 3,
 						"max": 120,
 						"min": 1,
 						"show_as": "INPUT_PIN",
@@ -62,8 +62,8 @@
 						"name": "RepeatWhenFilling",
 						"display_name": "Repeat When Filling",
 						"type_name": "bool",
-						"description": "Serves the last value while the buffer is being filled instead of waiting",
-						"def": false,
+						"description": "Serves the last value while the buffer is being filled instead of waiting & resets the ring on restart",
+						"def": true,
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					}
