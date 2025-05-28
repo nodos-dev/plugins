@@ -182,7 +182,7 @@ struct PrintNode : nos::NodeContext
 };
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions);
-
+nosResult RegisterPartialUpdateTest(nosNodeFunctions* nodeFunctions);
 struct TestPluginFunctions : PluginFunctions
 {
 	nosResult Initialize() override
@@ -216,7 +216,7 @@ struct TestPluginFunctions : PluginFunctions
 	}
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 16;
+		outCount = 17;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -353,6 +353,7 @@ struct TestPluginFunctions : PluginFunctions
 				*outBool = false;
 			return NOS_RESULT_SUCCESS;
 		};
+		RegisterPartialUpdateTest(outFunctions[16]);
 		return NOS_RESULT_SUCCESS;
 	}
 };

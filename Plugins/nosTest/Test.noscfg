@@ -23,7 +23,8 @@
     "Config/Test.nosdef",
     "Config/FrameInterpolator.nosdef",
     "Config/Window.nosdef",
-	"Config/TestGraph.nosdef"
+    "Config/PartialUpdateTest.nosdef",
+	  "Config/TestGraph.nosdef"
   ],
   "binary_path": "Binaries/nosTest"
 }

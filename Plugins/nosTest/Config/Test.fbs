@@ -1,4 +1,7 @@
+include "Config/Types.fbs";
+
 namespace nos.test;
+
 
 struct TestStruct {
 	test1:float;
@@ -19,4 +22,20 @@ enum TestEnum : uint32 {
 table TestTable {
 	test1:string;
 	test2:TestStruct2;
+}
+
+struct vec2test{
+    x:float;
+    y:float;
+}
+
+table FbTestTable{
+    table: nos.sys.vulkan.PassInfo;
+    tableArray: [nos.sys.vulkan.PassInfo];
+    structTest: vec2test;
+    structArray: [vec2test];
+    enumTest: nos.sys.vulkan.MemoryFlags;
+    enumArray: [nos.sys.vulkan.MemoryFlags];
+    stringTest: string;
+    stringArray: [string];
 }

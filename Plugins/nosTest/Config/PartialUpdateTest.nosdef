@@ -1,0 +1,96 @@
+{
+  "nodes": [
+    {
+      "class_name": "PartialUpdateTest",
+      "menu_info": {
+        "category": "TEST",
+        "display_name": "Test Partial Update"
+      },
+      "node": {
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Table",
+            "type_name": "nos.test.FbTestTable",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "TableArray",
+            "type_name": "[nos.test.FbTestTable]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Struct",
+            "type_name": "nos.test.vec2test",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "StructArray",
+            "type_name": "[nos.test.vec2test]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "String",
+            "type_name": "string",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "StringArray",
+            "type_name": "[string]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Enum",
+            "type_name": "nos.sys.vulkan.MemoryFlags",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumArray",
+            "type_name": "[nos.sys.vulkan.MemoryFlags]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Primitive",
+            "type_name": "bool",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "PrimitiveArray",
+            "type_name": "[bool]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          }
+        ],
+        "functions": [
+          {
+            "class_name": "2ElementArray",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          },
+          {
+            "class_name": "SetArraysFixedSizeField",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          },
+          {
+            "class_name": "RemoveElement1",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
