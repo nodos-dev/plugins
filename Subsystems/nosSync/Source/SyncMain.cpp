@@ -66,26 +66,16 @@ nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId)
 
 nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoomNs)
 {
-	{
-		std::unique_lock lock(GEventSync.Mutex);
-		auto it = GEventSync.NumConsensusRequestRcvd.find(eventGroupId);
-		if (it == GEventSync.NumConsensusRequestRcvd.end())
-			it = GEventSync.NumConsensusRequestRcvd.emplace(eventGroupId, 0).first;
-		auto& rcvd = it->second;
-		++rcvd;
-		auto numWaiting = GEventSync.Groups[eventGroupId].size();
-		if (numWaiting > 1)
-		{
-			if (rcvd > numWaiting)
-				rcvd = 0;
-			else
-				return NOS_RESULT_SUCCESS; // Already waited on this.
-		}
-		else
-		{
-			rcvd = 0;
-		}
-	}
+	std::unique_lock lock(GEventSync.Mutex);
+	auto it = GEventSync.NumConsensusRequestRcvd.find(eventGroupId);
+	if (it == GEventSync.NumConsensusRequestRcvd.end())
+		it = GEventSync.NumConsensusRequestRcvd.emplace(eventGroupId, 0).first;
+	auto& rcvd = it->second;
+	++rcvd;
+	auto numWaiting = GEventSync.Groups[eventGroupId].size();
+	if (numWaiting > 1 && (rcvd <= numWaiting))
+		return NOS_RESULT_SUCCESS; // Already waited on this.
+	rcvd = 0;
 
 	nosEngine.LogD("Attempting to achieve consensus on event group %lu", eventGroupId);
 	
@@ -93,34 +83,31 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 	while (maxAttempts-- > 0)
 	{
 		std::vector<std::pair<EventGroupEntry, uint64_t>> waiterTimestamps;
+		auto it = GEventSync.Groups.find(eventGroupId);
+		if (it == GEventSync.Groups.end() || it->second.empty())
 		{
-			std::shared_lock lock(GEventSync.Mutex);
-			auto it = GEventSync.Groups.find(eventGroupId);
-			if (it == GEventSync.Groups.end() || it->second.empty())
-			{
-				nosEngine.LogE("No one is waiting on event group %lu", eventGroupId);
-				return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
-			}
+			nosEngine.LogE("No one is waiting on event group %lu", eventGroupId);
+			return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
+		}
 
-			for (const auto& [waiterId, entry] : it->second)
+		for (const auto& [waiterId, entry] : it->second)
+		{
+			uint64_t ts = 0;
+			auto res = entry.PfnWait(entry.UserData, &ts);
+			if (res == NOS_RESULT_FAILED)
 			{
-				uint64_t ts = 0;
-				auto res = entry.PfnWait(entry.UserData, &ts);
-				if (res == NOS_RESULT_FAILED)
-				{
-					// Error when waiting for an event, consensus cannot be achieved
-					return res;
-				}
-				waiterTimestamps.emplace_back(entry, ts);
+				// Error when waiting for an event, consensus cannot be achieved
+				return res;
 			}
+			waiterTimestamps.emplace_back(entry, ts);
 		}
 
 		// Find min and max timestamps
 		uint64_t minTs = UINT64_MAX, maxTs = 0;
 		for (const auto& [entry, ts] : waiterTimestamps)
 		{
-			if (ts < minTs) minTs = ts;
-			if (ts > maxTs) maxTs = ts;
+			minTs = std::min(minTs, ts);
+			maxTs = std::max(maxTs, ts);
 		}
 		
 		auto diff = maxTs - minTs;
