@@ -20,12 +20,12 @@ typedef struct nosSyncSubsystem
 	/// Event Synchronization
 	/// ---------------------
 	/// 
-	/// Registers a wait function to wait for an event identified by `eventKey`.
-	/// Returns a unique `id` that can be used to unregister the callback.
-	void (NOSAPI_CALL* RegisterEventWaiter)(uint32_t eventGroupId, void* userData, nosEventWaitPfn waitFn, uint64_t* outId);
+	/// Registers an event that can be polled with `waitFn` in an event group specified by `eventGroupId`.
+	/// When WaitForConsensus is called, it will poll wait functions until they agree on the same event timestamp.
+	nosResult(NOSAPI_CALL* RegisterEvent)(uint32_t eventGroupId, void* userData, nosEventWaitPfn waitFn, uint64_t* outEventId);
 
-	/// Unregisters a previously registered event waiter using its unique identifier.
-	nosResult (NOSAPI_CALL* UnregisterEventWaiter)(uint64_t id);
+	/// Unregisters a previously registered event using its unique identifier.
+	nosResult (NOSAPI_CALL* UnregisterEvent)(uint64_t eventId);
 
 	/// Waits until all registered waiters agree on the same event timestamp,
 	/// indicating they're all synchronized on the same event occurrence.

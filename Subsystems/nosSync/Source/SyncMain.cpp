@@ -24,38 +24,38 @@ struct EventGroupEntry
 struct 
 {
 	std::shared_mutex Mutex;
-	uint64_t NextWaiterId = 0;
+	uint64_t NextEventId = 0;
 	std::unordered_map<uint32_t, std::unordered_map<uint64_t, EventGroupEntry>> Groups;
 	std::unordered_map<uint32_t, uint64_t> NumConsensusRequestRcvd;
 } GEventSync = {};
 
-/// Registers a callback to wait for an event identified by `eventKey`.
-/// Returns a unique `waiterId` that can be used to unregister the callback.
-void NOSAPI_CALL RegisterEventWaiter(
+nosResult NOSAPI_CALL RegisterEvent(
 	uint32_t eventGroupId,
 	void* userData,
 	nosEventWaitPfn waitFn,
 	uint64_t* outId)
 {
+	if (!waitFn || !outId)
+		return NOS_RESULT_INVALID_ARGUMENT; // Invalid parameters
 	std::unique_lock lock(GEventSync.Mutex);
-	GEventSync.NextWaiterId++;
-	GEventSync.Groups[eventGroupId][GEventSync.NextWaiterId] = {
-		.Id = GEventSync.NextWaiterId,
+	GEventSync.NextEventId++;
+	GEventSync.Groups[eventGroupId][GEventSync.NextEventId] = {
+		.Id = GEventSync.NextEventId,
 		.PfnWait = waitFn,
 		.UserData = userData
 	};
-	*outId = GEventSync.NextWaiterId;
+	*outId = GEventSync.NextEventId;
+	return NOS_RESULT_SUCCESS;
 }
 
-/// Unregisters a previously registered event waiter using its unique identifier.
-nosResult NOSAPI_CALL UnregisterEventWaiter(uint64_t waiterId)
+nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId)
 {
 	std::unique_lock lock(GEventSync.Mutex);
 	for (auto& [eventGroupId, entries] : GEventSync.Groups)
 	{
 		for (auto it = entries.begin(); it != entries.end(); )
 		{
-			if (it->first == waiterId)
+			if (it->first == eventId)
 				it = entries.erase(it);
 			else
 				++it;
@@ -64,9 +64,6 @@ nosResult NOSAPI_CALL UnregisterEventWaiter(uint64_t waiterId)
 	return NOS_RESULT_SUCCESS;
 }
 
-/// Waits until all registered waiters agree on the same event timestamp,
-/// indicating they're all synchronized on the same event occurrence.
-/// If outEventTimestampNs returned by nosEventWaitPfn is behind the others, it should be waited again. 
 nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoomNs)
 {
 	{
@@ -108,8 +105,12 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 			for (const auto& [waiterId, entry] : it->second)
 			{
 				uint64_t ts = 0;
-				if (entry.PfnWait)
-					entry.PfnWait(entry.UserData, &ts);
+				auto res = entry.PfnWait(entry.UserData, &ts);
+				if (res == NOS_RESULT_FAILED)
+				{
+					// Error when waiting for an event, consensus cannot be achieved
+					return res;
+				}
 				waiterTimestamps.emplace_back(entry, ts);
 			}
 		}
@@ -134,11 +135,13 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 		{
 			if (ts < maxTs)
 			{
-				if (entry.PfnWait)
+				nosEngine.LogD("Event group %lu entry %llu: Current TS %llu, waiting for %llu",
+					eventGroupId, entry.Id, ts, maxTs);
+				auto res = entry.PfnWait(entry.UserData, &ts);
+				if (res == NOS_RESULT_FAILED)
 				{
-					nosEngine.LogD("Event group %lu entry %llu: Current TS %llu, waiting for %llu",
-						eventGroupId, entry.Id, ts, maxTs);
-					entry.PfnWait(entry.UserData, &ts);
+					// Error when waiting for an event, consensus cannot be achieved
+					return res;
 				}
 			}
 		}
@@ -156,8 +159,8 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 		return NOS_RESULT_SUCCESS;
 	}
 	auto* subsystem = new nosSyncSubsystem();
-	subsystem->RegisterEventWaiter = RegisterEventWaiter;
-	subsystem->UnregisterEventWaiter = UnregisterEventWaiter;
+	subsystem->RegisterEvent = RegisterEvent;
+	subsystem->UnregisterEvent = UnregisterEvent;
 	subsystem->WaitForConsensus = WaitForConsensus;
 	*outSubsystemContext = subsystem;
 	GExportedSubsystemVersions[minorVersion] = subsystem;
