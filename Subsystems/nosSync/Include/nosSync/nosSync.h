@@ -29,7 +29,7 @@ typedef struct nosSyncSubsystem
 
 	/// Waits until all registered waiters agree on the same event timestamp,
 	/// indicating they're all synchronized on the same event occurrence.
-	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventGroupId, uint64_t wiggleRoomNs);
+	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventGroupId, uint64_t wiggleRoomNs, uint64_t timeoutMs);
 	/// 
 	/// ---------------------
 } nosSyncSubsystem;
@@ -38,8 +38,8 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 0
-#define NOS_SYNC_VERSION_MINOR 1
+#define NOS_SYNC_VERSION_MAJOR 1
+#define NOS_SYNC_VERSION_MINOR 0
 
 extern struct nosModuleInfo nosSyncSubsystemModuleInfo;
 extern nosSyncSubsystem* nosSync;

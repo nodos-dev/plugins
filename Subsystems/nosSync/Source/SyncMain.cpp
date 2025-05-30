@@ -14,7 +14,7 @@ namespace nos::sync
 {
 std::unordered_map<uint32_t, nosSyncSubsystem*> GExportedSubsystemVersions;
 
-struct EventGroupEntry
+struct Event
 {
 	uint64_t Id;
 	nosEventWaitPfn PfnWait;
@@ -25,7 +25,7 @@ struct
 {
 	std::shared_mutex Mutex;
 	uint64_t NextEventId = 0;
-	std::unordered_map<uint32_t, std::unordered_map<uint64_t, EventGroupEntry>> Groups;
+	std::unordered_map<uint32_t, std::unordered_map<uint64_t, Event>> Groups;
 	std::unordered_map<uint32_t, uint64_t> NumConsensusRequestRcvd;
 } GEventSync = {};
 
@@ -51,20 +51,30 @@ nosResult NOSAPI_CALL RegisterEvent(
 nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId)
 {
 	std::unique_lock lock(GEventSync.Mutex);
-	for (auto& [eventGroupId, entries] : GEventSync.Groups)
+	for (auto git = GEventSync.Groups.begin(); git != GEventSync.Groups.end(); )
 	{
-		for (auto it = entries.begin(); it != entries.end(); )
+		auto& [groupId, events] = *git;
+		for (auto eit = events.begin(); eit != events.end(); )
 		{
-			if (it->first == eventId)
-				it = entries.erase(it);
+			if (eit->first == eventId)
+				eit = events.erase(eit);
 			else
-				++it;
+				++eit;
+		}
+		if (events.empty())
+		{
+			git = GEventSync.Groups.erase(git); // Remove empty groups
+			GEventSync.NumConsensusRequestRcvd.erase(groupId); // Also remove request count for this group
+		}
+		else
+		{
+			++git;
 		}
 	}
 	return NOS_RESULT_SUCCESS;
 }
 
-nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoomNs)
+nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoomNs, uint64_t timeoutMs)
 {
 	std::unique_lock lock(GEventSync.Mutex);
 	auto it = GEventSync.NumConsensusRequestRcvd.find(eventGroupId);
@@ -79,10 +89,16 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 
 	nosEngine.LogD("Attempting to achieve consensus on event group %lu", eventGroupId);
 	
-	int maxAttempts = 3;
-	while (maxAttempts-- > 0)
+	uint64_t startTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	while (true)
 	{
-		std::vector<std::pair<EventGroupEntry, uint64_t>> waiterTimestamps;
+		uint64_t currentTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		if (currentTimeMs - startTimeMs >= timeoutMs)
+		{
+			nosEngine.LogE("Timeout waiting for consensus on event group %lu", eventGroupId);
+			return NOS_RESULT_TIMEOUT; // Timeout reached
+		}
+		std::vector<std::pair<Event, uint64_t>> eventTimestamps;
 		auto it = GEventSync.Groups.find(eventGroupId);
 		if (it == GEventSync.Groups.end() || it->second.empty())
 		{
@@ -90,21 +106,21 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 			return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
 		}
 
-		for (const auto& [waiterId, entry] : it->second)
+		for (const auto& [waiterId, event] : it->second)
 		{
 			uint64_t ts = 0;
-			auto res = entry.PfnWait(entry.UserData, &ts);
+			auto res = event.PfnWait(event.UserData, &ts);
 			if (res == NOS_RESULT_FAILED)
 			{
 				// Error when waiting for an event, consensus cannot be achieved
 				return res;
 			}
-			waiterTimestamps.emplace_back(entry, ts);
+			eventTimestamps.emplace_back(event, ts);
 		}
 
 		// Find min and max timestamps
 		uint64_t minTs = UINT64_MAX, maxTs = 0;
-		for (const auto& [entry, ts] : waiterTimestamps)
+		for (const auto& [event, ts] : eventTimestamps)
 		{
 			minTs = std::min(minTs, ts);
 			maxTs = std::max(maxTs, ts);
@@ -118,13 +134,13 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventGroupId, uint64_t wiggleRoo
 		}
 
 		// Wait again for those who are behind
-		for (auto& [entry, ts] : waiterTimestamps)
+		for (auto& [event, ts] : eventTimestamps)
 		{
 			if (ts < maxTs)
 			{
 				nosEngine.LogD("Event group %lu entry %llu: Current TS %llu, waiting for %llu",
-					eventGroupId, entry.Id, ts, maxTs);
-				auto res = entry.PfnWait(entry.UserData, &ts);
+					eventGroupId, event.Id, ts, maxTs);
+				auto res = event.PfnWait(event.UserData, &ts);
 				if (res == NOS_RESULT_FAILED)
 				{
 					// Error when waiting for an event, consensus cannot be achieved
