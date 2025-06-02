@@ -38,7 +38,7 @@
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 					}
 				],
-				"functions": [ 
+				"functions": [
 					{
 						"class_name": "ReadImage_Load",
 						"display_name": "Load",
@@ -47,7 +47,16 @@
 					},
 					{
 						"class_name": "OnImageLoaded",
-						"display_name": "(Internal) OnImageLoaded",
+						"display_name": "On Image Loaded",
+						"scheduling_type": "Event",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "Internal_ReleaseResource",
+						"meta_data_map": [
+							{ "key": "Hidden", "value": "true" }
+						],
 						"contents_type": "Job",
 						"pins": []
 					}
@@ -69,6 +78,7 @@
 				"functions": [
 					{
 						"class_name": "WriteImage_Save",
+						"display_name": "Save",
 						"contents_type": "Job",
 						"pins": [
 							{

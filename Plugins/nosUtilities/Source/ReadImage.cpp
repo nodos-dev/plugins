@@ -159,22 +159,22 @@ struct ReadImageContext : NodeContext
 					OutPendingImageRefs.push_back(std::move(outRes));
 				}
 
-				nosEngine.CallNodeFunction(this->NodeId, NOS_NAME_STATIC("OnImageLoaded"));
+				nosEngine.TriggerNodeEvent(this->NodeId, NOS_NAME_STATIC("OnImageLoaded"));
+				this->FlushImageDecRefCallbacks();
 
 				free(img);
-					UpdateStatus(State::Idle);
-				}
-				catch (const std::exception& e)
-				{
-					nosEngine.LogE("Error while loading image: %s", e.what());
-					UpdateStatus(State::Failed);
-				}
-
+				UpdateStatus(State::Idle);
+			}
+			catch (const std::exception& e)
+			{
+				nosEngine.LogE("Error while loading image: %s", e.what());
+				UpdateStatus(State::Failed);
+			}
 		}).detach();
 		return NOS_RESULT_SUCCESS;
 	}
 
-	static nosResult OnImageLoaded(void* ctx, nosFunctionExecuteParams* params)
+	static nosResult ReleaseResource(void* ctx, nosFunctionExecuteParams* params)
 	{
 		auto c = (ReadImageContext*)ctx;
 		c->FlushImageDecRefCallbacks();
@@ -205,10 +205,10 @@ struct ReadImageContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("ReadImage_Load");
-		names[1] = NOS_NAME_STATIC("OnImageLoaded");
+		names[1] = NOS_NAME_STATIC("Internal_ReleaseResource");
 
 		fns[0] = &Load;
-		fns[1] = &OnImageLoaded;
+		fns[1] = &ReleaseResource;
 
 		return NOS_RESULT_SUCCESS;
 	}
