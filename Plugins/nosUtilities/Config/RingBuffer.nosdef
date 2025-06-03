@@ -22,7 +22,7 @@
 					{
 						"name": "Size",
 						"type_name": "uint",
-						"data": 3,
+						"data": 2,
 						"max": 120,
 						"min": 1,
 						"show_as": "INPUT_PIN",
