@@ -261,6 +261,24 @@ struct ArithmeticNodeContext : NodeContext
 		HandleEvent(CreateAppEvent(fbb, update.Finish()));
 	}
 
+	bool IsTypeCompatible(TypeInfo& typeInfo)
+	{
+		if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT && !typeInfo->ByteSize)
+			return false;
+		if (typeInfo->BaseType == NOS_BASE_TYPE_ARRAY || typeInfo->BaseType == NOS_BASE_TYPE_UNION)
+			return false;
+
+		if (Operator != BinaryOperator::ADD && typeInfo->BaseType == NOS_BASE_TYPE_STRING)
+			return false;
+
+		if (typeInfo->AttributeCount == 0)
+			return false;
+		for (int i = 0; i < typeInfo->AttributeCount; ++i)
+			if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("resource"))
+				return false;
+		return true;
+	}
+
 	void SetType(nosName typeName)
 	{
 		Type = nos::TypeInfo(typeName);
@@ -273,6 +291,14 @@ struct ArithmeticNodeContext : NodeContext
 		update.add_node_id(&NodeId);
 		update.add_template_parameters(templateParamsOffset);
 		HandleEvent(CreateAppEvent(fbb, update.Finish()));
+		if (!IsTypeCompatible(*Type))
+		{
+			// Make pins orphan
+			SetPinOrphanState(NSN_A, nos::fb::PinOrphanStateType::ORPHAN, "Type not supported.");
+			if constexpr (!IsScalarArithmetic)
+				SetPinOrphanState(NSN_B, nos::fb::PinOrphanStateType::ORPHAN, "Type not supported.");
+			SetPinOrphanState(NSN_Output, nos::fb::PinOrphanStateType::ORPHAN, "Type not supported.");
+		}
 	}
 
 	void SetScalarType(nosName typeName)
@@ -320,6 +346,8 @@ struct ArithmeticNodeContext : NodeContext
 				return NOS_RESULT_SUCCESS;
 			}
 		}
+		/*
+		* This part is disabled since Interpolate node from nos.Animation uses this node in its path for non-suitable types, but it is not executed. Fix it gracefully later.
 		if (incomingType->BaseType == NOS_BASE_TYPE_STRUCT && !incomingType->ByteSize)
 			return NOS_RESULT_FAILED;
 		if (incomingType->BaseType == NOS_BASE_TYPE_ARRAY || incomingType->BaseType == NOS_BASE_TYPE_UNION)
@@ -332,11 +360,13 @@ struct ArithmeticNodeContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 		for (int i = 0; i < incomingType->AttributeCount; ++i)
 		{
-			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("resource")) {
+			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("resource"))
+			{
 				strcpy(params->OutErrorMessage, "Resource types are not supported");
 				return NOS_RESULT_FAILED;
 			}
 		}
+		*/
 		return NOS_RESULT_SUCCESS;
 	}
 
