@@ -134,8 +134,16 @@ struct Indexer : NodeContext
 		if (!inPin || !Type)
 			return false;
 
-		//nosEngine.SetPinValue(inPin->Id, GenerateVector(*Type, datas));
-		return true;
+		nosUpdateBufferParams updateParams = {};
+		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_INSERT;
+		updateParams.ActionParams.SetOrInsert.Value = { data.data(), data.size() };
+		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 };
+		updateParams.Path = &path;
+		updateParams.PathLength = 1;
+		updateParams.Target.PinId = inPin->Id;
+		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
+		
+		return nosEngine.UpdateBuffer(&updateParams) == NOS_RESULT_SUCCESS;
 	}
 	
     nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -156,7 +164,7 @@ struct Indexer : NodeContext
 		auto ID = pins[NSN_Output].Id;
 		auto& type = *Type;
 
-		nosQueryBufferParams queryParams;
+		nosQueryBufferParams queryParams = {};
 		{
 			queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
 			queryParams.Buffer = *pins[NSN_Input].Data;
