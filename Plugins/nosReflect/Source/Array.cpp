@@ -44,12 +44,18 @@ struct ArrayNode : NodeContext
 			UpdateOutputVectorSize();
 	}
 
-	static size_t GetInputElementIndexFromName(nos::Name name) {
+	size_t GetInputElementIndexFromName(nos::Name name) {
 		std::string nameStr = name.AsString();
 		if (nameStr.find(InputElementPrefix) == std::string::npos)
 			return std::numeric_limits<size_t>::max();
-		// Remove "Input "
-		return std::stoull(nameStr.substr(sizeof(InputElementPrefix) - 1));
+		try {
+			// Remove "Input "
+			return std::stoull(nameStr.substr(sizeof(InputElementPrefix) - 1));
+		}
+		catch (const std::exception&) {
+			nosEngine.LogE("Input pin's name is not in the 'Input <index>' format: %s", nameStr.c_str());
+			return std::numeric_limits<size_t>::max();
+		}
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
@@ -198,19 +204,6 @@ struct ArrayNode : NodeContext
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		/* Use this when partial pin data update supports multiple field change
-		std::unordered_map<size_t, nosBuffer> dirtyElements;
-		for (size_t i = 0; i < params->PinCount; ++i)
-		{
-			if (params->Pins[i]->Name == NSN_Output)
-				continue;
-			if (!params->Pins[i]->Dirty)
-				continue;
-			dirtyElements[GetInputElementIndexFromName(params->Pins[i]->Name)] = *params->Pins[i]->Data;
-		}
-		return UpdateOutputArrayElements(dirtyElements) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
-		*/
-
 		std::vector<nosBuffer> datas(params->PinCount - 1);
 		for (size_t i = 0, j = 0; i < params->PinCount; ++i)
 		{
@@ -231,7 +224,12 @@ struct ArrayNode : NodeContext
 		fields.push_back(nos::CreateContextMenuItemDirect(fbb, add.c_str(), 1));
 		if (inputs.size() > 0)
 		{
-			std::string remove = "Remove Input " + std::to_string(inputs.size() - 1);
+			std::string remove = "Remove ";
+			if (auto pin = GetPin(*request->item_id()))
+				remove += pin->DisplayName.AsString();
+			else
+				remove += "Last Input";
+
 			fields.push_back(nos::CreateContextMenuItemDirect(fbb, remove.c_str(), 2));
 		}
 		HandleEvent(CreateAppEvent(
