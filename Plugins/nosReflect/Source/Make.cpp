@@ -297,7 +297,7 @@ struct MakeNode : NodeContext
 					params.PathLength = 1;
 					params.TypeName = type->TypeName;
 					auto queriedField = QueryBuffer(params);
-					if (!queriedField && field.Type->BaseType != NOS_BASE_TYPE_ARRAY)
+					if (!queriedField && field.Type->ByteSize)
 					{
 						nosEngine.LogE("Failed to query field '%s' of type '%s'", nos::Name(field.Name).AsString(), nos::Name(type->TypeName).AsString());
 						continue;
