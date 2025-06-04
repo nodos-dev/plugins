@@ -1,0 +1,12 @@
+{
+    "info": {
+        "id": {
+            "name": "nos.sync",
+            "version": "1.0.0"
+        },
+        "display_name": "Synchronization",
+        "description": "Nodos subsystem for synchronization utilities",
+        "category": "Utilities"
+    },
+    "binary_path": "Binaries/nosSync"
+}
