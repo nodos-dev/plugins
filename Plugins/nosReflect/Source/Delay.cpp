@@ -7,67 +7,100 @@
 
 namespace nos::reflect
 {
-template <typename T>
-struct RingBuffer {
-	std::deque<T> Ring;
-	std::queue<T> FreeList;
-	uint32_t Size;
-	RingBuffer(uint32_t sz) : Size(sz) {}
-	RingBuffer(const RingBuffer&) = delete;
-	void Clear()
-	{
-		Ring.clear();
-		while (!FreeList.empty())
-			FreeList.pop();
-	}
 
-	bool GetLastPopped(T& out)
-	{
-		if (FreeList.empty())
-			return false;
-		out = std::move(FreeList.front());
-		FreeList.pop();
-		return true;
-	}
-	bool CanPush()
-	{
-		return Ring.size() < Size;
-	}
-	void Push(T val)
-	{
-		Ring.push_back(std::move(val));
-	}
-	bool BeginPop(T& out)
-	{
-		if (Ring.empty())
-			return false;
-		if (Ring.size() < Size)
-			return false;
-		out = std::move(Ring.front());
-		Ring.pop_front();
-		return true;
-	}
-	void EndPop(T popped)
-	{
-		if (FreeList.size() >= Size)
-			return;
-		FreeList.push(std::move(popped));
-	}
-};
-
-struct AnySlot
+struct SlotBase
 {
 	nos::Buffer Buffer;
-	virtual ~AnySlot() = default;
-	AnySlot(const AnySlot&) = delete;
-	AnySlot& operator=(const AnySlot&) = delete;
-	AnySlot(nosBuffer const& buf) : Buffer(buf) {}
+	virtual ~SlotBase() = default;
+	SlotBase(const SlotBase&) = delete;
+	SlotBase& operator=(const SlotBase&) = delete;
+	SlotBase(nosBuffer const& buf) : Buffer(buf) {}
 	virtual void CopyFrom(nosBuffer const& buf, uuid const& nodeId) = 0;
 };
 
-struct TriviallyCopyableSlot : AnySlot
+struct DelayQueue {
+	std::vector<std::unique_ptr<SlotBase>> Slots;
+	std::queue<Ref<SlotBase>> ReadyQueue;
+	SlotBase* ActiveSlot{};
+	std::queue<Ref<SlotBase>> FreeQueue;
+	uint32_t Delay;
+	DelayQueue(uint32_t delay) : Delay(delay) {}
+	DelayQueue(const DelayQueue&) = delete;
+	void Clear()
+	{
+		ActiveSlot = nullptr;
+		ReadyQueue = {};
+		FreeQueue = {};
+		Slots.clear(); 
+	}
+
+	bool HasFree() const { return !FreeQueue.empty(); }
+
+	SlotBase* BeginPush()
+	{
+		if (!HasFree())
+			return nullptr;
+		auto slotPtr = &*FreeQueue.front();
+		FreeQueue.pop();
+		return slotPtr;
+	}
+	void EndPush(SlotBase& slot)
+	{
+		ReadyQueue.push(slot);
+		while (ReadyQueue.size() > Delay)
+		{
+			auto slotPtr = ReadyQueue.front();
+			ReadyQueue.pop();
+			std::erase_if(Slots,
+						  [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
+		}
+	}
+	SlotBase* BeginPop()
+	{
+		if (ReadyQueue.size() < Delay)
+			return nullptr;
+		while (ReadyQueue.size() > Delay)
+		{
+			auto slotPtr = ReadyQueue.front();
+			ReadyQueue.pop();
+			std::erase_if(Slots, [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
+		}
+		if (ReadyQueue.empty())
+			return nullptr;
+		auto slotPtr = &*ReadyQueue.front();
+		ReadyQueue.pop();
+		return slotPtr;
+	}
+	void EndPop(SlotBase& popped)
+	{
+		if (ActiveSlot)
+		{
+			while (HasFree())
+			{
+				auto slotPtr = FreeQueue.front();
+				FreeQueue.pop();
+				std::erase_if(Slots,
+							  [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
+			}
+			FreeQueue.push(*ActiveSlot);
+		}
+		ActiveSlot = &popped;
+	}
+
+	void AddResource(std::unique_ptr<SlotBase> slot)
+	{
+		if (Slots.size() >= Delay + 1)
+			return;
+		FreeQueue.push(*slot);
+		Slots.push_back(std::move(slot));
+	}
+};
+
+
+
+struct TriviallyCopyableSlot : SlotBase
 {
-	using AnySlot::AnySlot;
+	using SlotBase::SlotBase;
 	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
 	{
 		Buffer = other;
@@ -76,11 +109,11 @@ struct TriviallyCopyableSlot : AnySlot
 
 template <typename T>
 requires std::is_same_v<T, nosTextureInfo> || std::is_same_v<T, nosBufferInfo>
-struct ResourceSlot : AnySlot
+struct ResourceSlot : SlotBase
 {
 	vkss::Resource Res;
 	ResourceSlot(nosBuffer const& buf)
-		: AnySlot(buf),
+		: SlotBase(buf),
 		  Res(*vkss::Resource::Create(
 			  [](nosBuffer const& buf) -> T {
 				  if constexpr (std::is_same_v<T, nosBufferInfo>)
@@ -114,8 +147,6 @@ struct ResourceSlot : AnySlot
 			src = vkss::DeserializeTextureInfo(other.Data);
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &src, &Res, nullptr);
-		//nosCmdEndParams endParams{.ForceSubmit = NOS_FALSE, .OutGPUEventHandle = &Texture->Params.WaitEvent};
-		//nosVulkan->End(cmd, &endParams);
 		nosVulkan->End(cmd, nullptr);
 		Buffer = Res.ToPinData();
 	}
@@ -124,16 +155,13 @@ struct ResourceSlot : AnySlot
 struct DelayNode : NodeContext
 {
     nosName TypeName = NSN_TypeNameGeneric;
-	RingBuffer<std::unique_ptr<AnySlot>> Ring;
+	DelayQueue Queue;
 
-	DelayNode(nosFbNodePtr node) : NodeContext(node), Ring(0) {
+	DelayNode(nosFbNodePtr node) : NodeContext(node), Queue(0)
+	{
 		for (auto pin : *node->pins())
 		{
 			auto name = nos::Name(pin->name()->c_str());
-			if (NSN_Delay == name)
-			{
-				Ring.Size = *(uint32_t*)pin->data()->data();
-			}
 			if (NSN_Output == name)
 			{
 				if (pin->type_name()->c_str() == NSN_TypeNameGeneric.AsString())
@@ -146,12 +174,12 @@ struct DelayNode : NodeContext
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{
-		if(NSN_TypeNameGeneric == TypeName)
-			return;
 		if (NSN_Delay == pinName)
 		{
-			Ring.Size = *static_cast<uint32_t*>(value.Data);
+			Queue.Delay = *static_cast<uint32_t*>(value.Data);
 		}
+		if(NSN_TypeNameGeneric == TypeName)
+			return;
 	}
 
 	void OnPinUpdated(nosPinUpdate const* update) override
@@ -168,6 +196,8 @@ struct DelayNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
+		if (NSN_TypeNameGeneric == TypeName)
+			return NOS_RESULT_FAILED;
 		nos::NodeExecuteParams execParams(params);
 
 		auto& inputBuffer = *execParams[NSN_Input].Data;
@@ -175,36 +205,32 @@ struct DelayNode : NodeContext
 
 		if (0 == delay)
 		{
-			Ring.Clear();
+			Queue.Clear();
 			SetPinValue(NSN_Output, inputBuffer);
 			return NOS_RESULT_SUCCESS;
 		}
 
-		std::unique_ptr<AnySlot> slot = nullptr;
-		if (!Ring.GetLastPopped(slot))
+		if (auto popSlot = Queue.BeginPop())
 		{
+			SetPinValue(NSN_Output, popSlot->Buffer);
+			Queue.EndPop(*popSlot);
+		}
+
+		if (!Queue.HasFree())
+		{
+			std::unique_ptr<SlotBase> slot;
 			if (TypeName == NSN_TextureTypeName)
 				slot = std::make_unique<ResourceSlot<nosTextureInfo>>(inputBuffer);
 			else if (TypeName == NSN_BufferTypeName)
 				slot = std::make_unique<ResourceSlot<nosBufferInfo>>(inputBuffer);
 			else
 				slot = std::make_unique<TriviallyCopyableSlot>(inputBuffer);
+			Queue.AddResource(std::move(slot));
 		}
-		slot->CopyFrom(inputBuffer, NodeId);
-		while (!Ring.CanPush())
+		if (auto pushSlot = Queue.BeginPush())
 		{
-			std::unique_ptr<AnySlot> popped;
-			if (!Ring.BeginPop(popped))
-				break;
-			Ring.EndPop(std::move(popped));
-		}
-		Ring.Push(std::move(slot));
-		std::unique_ptr<AnySlot> popped;
-		if (Ring.BeginPop(popped))
-		{
-			SetPinValue(NSN_Output, popped->Buffer);
-			Ring.EndPop(std::move(popped));
-			return NOS_RESULT_SUCCESS;
+			pushSlot->CopyFrom(inputBuffer, NodeId);
+			Queue.EndPush(*pushSlot);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
