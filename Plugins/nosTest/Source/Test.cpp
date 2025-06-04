@@ -321,7 +321,6 @@ struct TestPluginFunctions : PluginFunctions
 		};
 		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
 		outFunctions[10]->CopyFrom = [](void* ctx, nosCopyInfo* copyInfo) {
-			nosEngine.LogD("LiveOutWithInput: CopyFrom");
 			return NOS_RESULT_SUCCESS;
 		};
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);
