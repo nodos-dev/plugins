@@ -12,7 +12,9 @@ foreach(module_name_version ${MODULE_DEPENDENCIES})
     nos_get_module("${module_name}" "${module_version}" DEP_${dep_idx})
     list(APPEND MODULE_DEPENDENCIES_TARGETS ${DEP_${dep_idx}})
 endforeach()
-list(APPEND MODULE_DEPENDENCIES_TARGETS ${NOS_PLUGIN_SDK_TARGET} nosReflect_generated)
+
+nos_find_plugin_sdk("39.5.0" REFLECT_NOS_PLUGIN_SDK_TARGET REFLECT_NOS_SDK_DIR)
+list(APPEND MODULE_DEPENDENCIES_TARGETS ${REFLECT_NOS_PLUGIN_SDK_TARGET} nosReflect_generated)
 
 set(INCLUDE_FOLDERS "")
 nos_add_plugin("nosReflect" "${MODULE_DEPENDENCIES_TARGETS}" "${INCLUDE_FOLDERS}")

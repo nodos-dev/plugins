@@ -166,14 +166,13 @@ struct Indexer : NodeContext
 			queryParams.Path = &queryPath;
 			queryParams.PathLength = 1;
 		}
-		nosBuffer element;
-		if (auto queryRes = nosEngine.QueryBuffer(&queryParams, &element); queryRes != NOS_RESULT_SUCCESS)
+		auto element = QueryBuffer(queryParams);
+		if (!element)
 		{
 			SetNodeStatusMessages({ {{}, "Failed to query buffer", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
 			return NOS_RESULT_FAILED;
 		}
-		nosEngine.SetPinValue(ID, element);
-		nosEngine.FreeBuffer(&element);
+		nosEngine.SetPinValue(ID, *element);
 		return NOS_RESULT_SUCCESS;
     }
 

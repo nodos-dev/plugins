@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.test",
-      "version": "0.3.1"	
+      "version": "0.4.0"	
     },
     "display_name": "Test",
     "description": "Plugin for testing purposes.",

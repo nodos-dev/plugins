@@ -229,13 +229,12 @@ struct BreakNode : NodeContext
 				params.Path = &path;
 				params.PathLength = 1;
 				params.TypeName = GetPin(NSN_Input)->TypeName;
-				nosBuffer pinValue = {};
-				if (nosEngine.QueryBuffer(&params, &pinValue) != NOS_RESULT_SUCCESS) {
+				auto pinValue = QueryBuffer(params);
+				if (!pinValue) {
 					nosEngine.LogE("%s[%d] not found", nos::Name(params.TypeName).AsCStr(), i);
 					continue;
 				}
-				SetPinValueCached(*pinId, pinValue);
-				nosEngine.FreeBuffer(&pinValue);
+				SetPinValueCached(*pinId, *pinValue);
         	}
         	break;
         }
@@ -257,13 +256,12 @@ struct BreakNode : NodeContext
 				params.Path = &path;
 				params.PathLength = 1;
 				params.TypeName = GetPin(NSN_Input)->TypeName;
-				nosBuffer pinValue = {};
-				if (nosEngine.QueryBuffer(&params, &pinValue) != NOS_RESULT_SUCCESS) {
+				auto pinValue = QueryBuffer(params);
+				if (!pinValue) {
 					nosEngine.LogE("%s[%d] not found", nos::Name(params.TypeName).AsCStr(), i);
 					continue;
 				}
-				SetPinValueCached(pin->Id, pinValue);
-				nosEngine.FreeBuffer(&pinValue);
+				SetPinValueCached(pin->Id, *pinValue);
             }
         }
         }

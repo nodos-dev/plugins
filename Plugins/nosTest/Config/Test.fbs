@@ -1,5 +1,3 @@
-include "Config/Types.fbs";
-
 namespace nos.test;
 
 
@@ -32,7 +30,7 @@ table TestTable {
 
 table TestTable2 {
     table1:TestTable;
-    testEnum:TestEnumUint = TEST2;
+    test_enum:TestEnumUint = TEST2;
 }
 
 struct Vec2Test{
@@ -46,15 +44,15 @@ struct Mat2Test{
 
 table FbTestTable{
     table: TestTable2;
-    tableArray: [TestTable2];
-    structTest: Vec2Test;
-    structArray: [Vec2Test];
-    enumUintTest: TestEnumUint;
-    enumUintArray: [TestEnumUint];
-    enumUbyteTest: TestEnumUbyte;
-    enumUbyteArray: [TestEnumUbyte];
-    stringTest: string;
-    stringArray: [string];
-    fixedLengthArrayTest: Mat2Test;
-    fixedLengthArrayList: [Mat2Test];
+    table_array: [TestTable2];
+    string_test: string;
+    string_array: [string];
+    struct_test: Vec2Test;
+    struct_array: [Vec2Test];
+    fixed_length_array_test: Mat2Test;
+    fixed_length_array_list: [Mat2Test];
+    enum_uint_test: TestEnumUint;
+    enum_uint_array: [TestEnumUint];
+    enum_ubyte_test: TestEnumUbyte;
+    enum_ubyte_array: [TestEnumUbyte];
 }
