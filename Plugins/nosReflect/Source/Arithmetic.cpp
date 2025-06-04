@@ -271,8 +271,6 @@ struct ArithmeticNodeContext : NodeContext
 		if (Operator != BinaryOperator::ADD && typeInfo->BaseType == NOS_BASE_TYPE_STRING)
 			return false;
 
-		if (typeInfo->AttributeCount == 0)
-			return false;
 		for (int i = 0; i < typeInfo->AttributeCount; ++i)
 			if (typeInfo->Attributes[i].Name == NOS_NAME_STATIC("resource"))
 				return false;
