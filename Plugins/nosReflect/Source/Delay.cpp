@@ -21,9 +21,11 @@ struct SlotBase
 struct DelayQueue {
 	std::vector<std::unique_ptr<SlotBase>> Slots;
 	std::queue<Ref<SlotBase>> ReadyQueue;
+	// This is the actively used slot, which is the output pin's value, if AccountForActiveSlot is true.
 	SlotBase* ActiveSlot{};
 	std::queue<Ref<SlotBase>> FreeQueue;
 	uint32_t Delay;
+	bool AccountForActiveSlot = false;
 	DelayQueue(uint32_t delay) : Delay(delay) {}
 	DelayQueue(const DelayQueue&) = delete;
 	void Clear()
@@ -36,6 +38,16 @@ struct DelayQueue {
 
 	bool HasFree() const { return !FreeQueue.empty(); }
 
+	void DeleteSlotAndPopFromQueue(std::queue<Ref<SlotBase>>& queue)
+	{
+		if (!queue.empty())
+		{
+			auto slotPtr = queue.front();
+			queue.pop();
+			std::erase_if(Slots, [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
+		}
+	}
+
 	SlotBase* BeginPush()
 	{
 		if (!HasFree())
@@ -47,24 +59,17 @@ struct DelayQueue {
 	void EndPush(SlotBase& slot)
 	{
 		ReadyQueue.push(slot);
+		// If there are more than Delay slots in the queue, we need to delete the oldest ones.
 		while (ReadyQueue.size() > Delay)
-		{
-			auto slotPtr = ReadyQueue.front();
-			ReadyQueue.pop();
-			std::erase_if(Slots,
-						  [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
-		}
+			DeleteSlotAndPopFromQueue(ReadyQueue);
 	}
 	SlotBase* BeginPop()
 	{
 		if (ReadyQueue.size() < Delay)
 			return nullptr;
+		// If there are more than Delay slots in the queue, we need to delete the oldest ones.
 		while (ReadyQueue.size() > Delay)
-		{
-			auto slotPtr = ReadyQueue.front();
-			ReadyQueue.pop();
-			std::erase_if(Slots, [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
-		}
+			DeleteSlotAndPopFromQueue(ReadyQueue);
 		if (ReadyQueue.empty())
 			return nullptr;
 		auto slotPtr = &*ReadyQueue.front();
@@ -73,18 +78,18 @@ struct DelayQueue {
 	}
 	void EndPop(SlotBase& popped)
 	{
-		if (ActiveSlot)
+		// FreeQueue should be normally empty, but if Slot count is not enough in total, then we can keep FreeQueue non-empty
+		while (Slots.size() > GetRequiredSlotCount() && !FreeQueue.empty())
+			DeleteSlotAndPopFromQueue(FreeQueue);
+
+		if (AccountForActiveSlot)
 		{
-			while (HasFree())
-			{
-				auto slotPtr = FreeQueue.front();
-				FreeQueue.pop();
-				std::erase_if(Slots,
-							  [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
-			}
-			FreeQueue.push(*ActiveSlot);
+			if (ActiveSlot)
+				FreeQueue.push(*ActiveSlot);
+			ActiveSlot = &popped;
 		}
-		ActiveSlot = &popped;
+		else
+			FreeQueue.push(popped);
 	}
 
 	void AddResource(std::unique_ptr<SlotBase> slot)
@@ -93,6 +98,11 @@ struct DelayQueue {
 			return;
 		FreeQueue.push(*slot);
 		Slots.push_back(std::move(slot));
+	}
+
+	size_t GetRequiredSlotCount() 
+	{ 
+		return Delay + (AccountForActiveSlot ? 1 : 0); 
 	}
 };
 
@@ -131,6 +141,7 @@ struct ResourceSlot : SlotBase
 			  "Delay Resource"))
 	{
 	}
+
 	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
 	{
 		// TODO: Interlaced.
@@ -166,7 +177,7 @@ struct DelayNode : NodeContext
 			{
 				if (pin->type_name()->c_str() == NSN_TypeNameGeneric.AsString())
 					continue;
-				TypeName = nos::Name(pin->type_name()->c_str());
+				SetType(nos::Name(pin->type_name()->c_str()));
 			}
 		}
 	}
@@ -190,8 +201,14 @@ struct DelayNode : NodeContext
 		{
 			if (update->PinName != NSN_Input)
 				return;
-			TypeName = update->TypeName;
+			SetType(update->TypeName);
 		}
+	}
+
+	void SetType(nos::Name typeName)
+	{
+		TypeName = typeName;
+		Queue.AccountForActiveSlot = TypeName == NSN_TextureTypeName || TypeName == NSN_BufferTypeName;
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
