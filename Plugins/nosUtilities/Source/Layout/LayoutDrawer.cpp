@@ -297,10 +297,7 @@ struct LayoutDrawerNode : NodeContext
 		for (auto const& item : drawList)
 		{
 			if (item.texture_id() >= textures.size())
-			{
-				nosEngine.LogE("Invalid texture id: %d", item.texture_id());
 				continue;
-			}
 			auto const& inputTex = textures[item.texture_id()];
 			auto pos = item.position();
 			auto size = item.size();
