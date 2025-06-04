@@ -258,7 +258,6 @@ struct BreakNode : NodeContext
 				params.TypeName = GetPin(NSN_Input)->TypeName;
 				auto pinValue = QueryBuffer(params);
 				if (!pinValue) {
-					nosEngine.LogE("%s[%d] not found", nos::Name(params.TypeName).AsCStr(), i);
 					continue;
 				}
 				SetPinValueCached(pin->Id, *pinValue);
