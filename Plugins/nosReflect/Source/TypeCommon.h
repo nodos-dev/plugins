@@ -11,11 +11,6 @@
 namespace nos::reflect
 {
 
-const flatbuffers::StructDef* GetUnionType(
-	const flatbuffers::StructDef* parent,
-	const flatbuffers::FieldDef* unionfield, 
-	const flatbuffers::Table* table);
-
 bool AreFlatBuffersEqual(const nosTypeInfo* type,
 						 void* first,
 						 void* second);

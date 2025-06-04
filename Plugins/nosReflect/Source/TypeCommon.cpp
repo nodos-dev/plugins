@@ -16,20 +16,6 @@ EnumVal* EnumDef::ReverseLookup(int64_t enum_idx,
 namespace nos::reflect
 {
 
-const flatbuffers::StructDef* GetUnionType(
-	const flatbuffers::StructDef* parent,
-	const flatbuffers::FieldDef* unionfield, 
-	const flatbuffers::Table* table) {
-	auto enumdef = unionfield->value.type.enum_def;
-	// TODO: this is clumsy and slow, but no other way to find it?
-	auto type_field = parent->fields.Lookup(unionfield->name + "_type");
-	
-	FLATBUFFERS_ASSERT(type_field);
-	auto union_type = table->GetField<uint8_t>(type_field->value.offset, 0);
-	auto enumval = enumdef->ReverseLookup(union_type);
-	return enumval->union_type.struct_def;
-}
-
 bool AreFlatBuffersEqual(const nosTypeInfo* type,
 		                 void* first,
 		                 void* second)
