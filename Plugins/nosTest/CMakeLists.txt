@@ -1,8 +1,6 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-nos_find_module_path("nos.sys.vulkan" "6.22" NOS_VULKAN_PATH)
-
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_VULKAN_PATH}" nosTest_generated)
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "" nosTest_generated)
 
 if(NOT TARGET glfw)
 	set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" FORCE)
