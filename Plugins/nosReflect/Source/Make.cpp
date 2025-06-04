@@ -91,7 +91,7 @@ struct MakeNode : NodeContext
 			if (pin.first == NSN_Output)
 				continue;
 
-			nosUpdateBufferParams params;
+			nosUpdateBufferParams params = {};
 			params.Action = NOS_BUFFER_UPDATE_ACTION_SET;
 			params.ActionParams.SetOrInsert.Value = *pin.second.Data;
 			nosDataPathComponent path = {};
@@ -288,7 +288,7 @@ struct MakeNode : NodeContext
                 {
                     uuid id = nosEngine.GenerateID();
 					data = {};
-					nosQueryBufferParams params;
+					nosQueryBufferParams params = {};
 					params.Buffer = buf;
 					nosDataPathComponent path = {};
 					path.Component.FieldName = field.Name;
