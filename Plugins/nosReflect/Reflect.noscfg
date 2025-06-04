@@ -18,7 +18,7 @@
 		]
     },
     "binary_path": "Binaries/nosReflect",
-    "node_definitions": ["Config/Reflect.nosdef", "Config/Test.nosdef"],
+    "node_definitions": ["Config/Reflect.nosdef"],
     "defaults": [],
 	"custom_types": [
 		"Config/Reflect.fbs"

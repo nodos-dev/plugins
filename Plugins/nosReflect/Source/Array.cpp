@@ -8,6 +8,7 @@ struct ArrayNode : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	bool invalidNode = false;
+	static constexpr char InputElementPrefix[] = "Input ";
 	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto& pin : Pins | std::views::values)
@@ -41,6 +42,14 @@ struct ArrayNode : NodeContext
 	{
 		if (update->Type == NOS_NODE_UPDATE_PIN_DELETED || update->Type == NOS_NODE_UPDATE_PIN_CREATED)
 			UpdateOutputVectorSize();
+	}
+
+	static size_t GetInputElementIndexFromName(nos::Name name) {
+		std::string nameStr = name.AsString();
+		if (nameStr.find(InputElementPrefix) == std::string::npos)
+			return std::numeric_limits<size_t>::max();
+		// Remove "Input "
+		return std::stoull(nameStr.substr(sizeof(InputElementPrefix) - 1));
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
@@ -114,13 +123,43 @@ struct ArrayNode : NodeContext
 		return inputs;
 	}
 
-	bool SendOutputArray(std::vector<const void*> const& values)
+	bool SendOutputArray(std::vector<nosBuffer> const& values)
 	{
 		auto outPin = GetPin(NSN_Output);
 		if (!outPin || !Type)
 			return false;
 
-		nosEngine.SetPinValue(outPin->Id, GenerateVector(*Type, values));
+		uint32_t i = 0;
+		for (auto value : values) {
+			nosUpdateBufferParams updateParams = {};
+			updateParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
+			updateParams.ActionParams.SetOrInsert.Value = value;
+			nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ };
+			updateParams.Path = &path;
+			updateParams.PathLength = 1;
+			updateParams.Target.PinId = GetPin(NSN_Output)->Id;
+			updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
+			nosEngine.UpdateBuffer(&updateParams);
+		}
+		return true;
+	}
+
+	bool UpdateOutputArrayElements(std::unordered_map<size_t, nosBuffer> const& dirtyElements) {
+		auto outPin = GetPin(NSN_Output);
+		if (!outPin || !Type)
+			return false;
+
+		for (auto value : dirtyElements) {
+			nosUpdateBufferParams updateParams = {};
+			updateParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
+			updateParams.ActionParams.SetOrInsert.Value = value.second;
+			nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, value.first };
+			updateParams.Path = &path;
+			updateParams.PathLength = 1;
+			updateParams.Target.PinId = GetPin(NSN_Output)->Id;
+			updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
+			nosEngine.UpdateBuffer(&updateParams);
+		}
 		return true;
 	}
 
@@ -147,9 +186,9 @@ struct ArrayNode : NodeContext
 
 		if (auto buf = GetDefaultValueOfType(Type->TypeName))
 		{
-			std::vector<const void*> datas;
+			std::vector<nosBuffer> datas;
 			for (unsigned int i = 0; i < GetInputs().size(); i++)
-				datas.push_back(buf->Data());
+				datas.push_back(*buf);
 			SendOutputArray(datas);
 		}
 	}
@@ -158,14 +197,28 @@ struct ArrayNode : NodeContext
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
-		std::vector<const void*> values;
+
+		/* Use this when partial pin data update supports multiple field change
+		std::unordered_map<size_t, nosBuffer> dirtyElements;
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
 			if (params->Pins[i]->Name == NSN_Output)
 				continue;
-			values.push_back(params->Pins[i]->Data->Data);
+			if (!params->Pins[i]->Dirty)
+				continue;
+			dirtyElements[GetInputElementIndexFromName(params->Pins[i]->Name)] = *params->Pins[i]->Data;
 		}
-		return SendOutputArray(values) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+		return UpdateOutputArrayElements(dirtyElements) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+		*/
+
+		std::vector<nosBuffer> datas(params->PinCount - 1);
+		for (size_t i = 0, j = 0; i < params->PinCount; ++i)
+		{
+			if (params->Pins[i]->Name == NSN_Output)
+				continue;
+			datas[j++] = *params->Pins[i]->Data;
+		}
+		return SendOutputArray(datas) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}
 
 	void OnMenuRequested(nosContextMenuRequestPtr request) override
@@ -211,10 +264,19 @@ struct ArrayNode : NodeContext
 		};
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, 0, &pins)));
-		UpdateOutputVectorSize();
+
+		nosUpdateBufferParams updateParams = {};
+		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_INSERT;
+		updateParams.ActionParams.SetOrInsert.Value = { data.data(), data.size()};
+		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, inputs.size() };
+		updateParams.Path = &path;
+		updateParams.PathLength = 1;
+		updateParams.Target.PinId = GetPin(NSN_Output)->Id;
+		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
+		nosEngine.UpdateBuffer(&updateParams);
 	}
 
-	void SendRemoveElementRequest() {
+	void SendRemoveElementRequest(std::optional<size_t> elementIndx = std::nullopt) {
 		auto inputs = GetInputs();
 		if (inputs.size() == 0) {
 			nosEngine.LogE("You can't remove element from an empty array");
@@ -225,10 +287,18 @@ struct ArrayNode : NodeContext
 		std::vector<fb::UUID> id = { inputs.back()->Id };
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &id)));
-		UpdateOutputVectorSize();
+
+		nosUpdateBufferParams updateParams = {};
+		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_REMOVE;
+		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, elementIndx ? *elementIndx : inputs.size() - 1 };
+		updateParams.Path = &path;
+		updateParams.PathLength = 1;
+		updateParams.Target.PinId = GetPin(NSN_Output)->Id;
+		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
+		nosEngine.UpdateBuffer(&updateParams);
 	}
 
-	void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
+	void OnMenuCommand(uuid const& itemId, uint32_t cmd) override
 	{
 		switch (cmd)
 		{
@@ -239,7 +309,12 @@ struct ArrayNode : NodeContext
 		break;
 		case 2: // Remove Field
 		{
-			SendRemoveElementRequest();
+			std::optional<size_t> elementIndx = std::nullopt;
+			if (itemId != NodeId) {
+				if (auto pinName = GetPin(itemId)->DisplayName; pinName != NSN_Output)
+					elementIndx = GetInputElementIndexFromName(pinName);
+			}
+			SendRemoveElementRequest(elementIndx);
 		}
 		break;
 		}

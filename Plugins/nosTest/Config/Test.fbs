@@ -13,10 +13,16 @@ struct TestStruct2 {
 	test2:float;
 }
 
-enum TestEnum : uint32 {
+enum TestEnumUint : uint32 {
 	NONE = 0,
 	TEST1 = 1,
 	TEST2 = 2
+}
+
+enum TestEnumUbyte : ubyte {
+	NONE = 0,
+	TEST1U = 1,
+	TEST2U = 2
 }
 
 table TestTable {
@@ -24,18 +30,31 @@ table TestTable {
 	test2:TestStruct2;
 }
 
-struct vec2test{
+table TestTable2 {
+    table1:TestTable;
+    testEnum:TestEnumUint = TEST2;
+}
+
+struct Vec2Test{
     x:float;
     y:float;
 }
 
+struct Mat2Test{
+    vec2s: [Vec2Test:2];
+}
+
 table FbTestTable{
-    table: nos.sys.vulkan.PassInfo;
-    tableArray: [nos.sys.vulkan.PassInfo];
-    structTest: vec2test;
-    structArray: [vec2test];
-    enumTest: nos.sys.vulkan.MemoryFlags;
-    enumArray: [nos.sys.vulkan.MemoryFlags];
+    table: TestTable2;
+    tableArray: [TestTable2];
+    structTest: Vec2Test;
+    structArray: [Vec2Test];
+    enumUintTest: TestEnumUint;
+    enumUintArray: [TestEnumUint];
+    enumUbyteTest: TestEnumUbyte;
+    enumUbyteArray: [TestEnumUbyte];
     stringTest: string;
     stringArray: [string];
+    fixedLengthArrayTest: Mat2Test;
+    fixedLengthArrayList: [Mat2Test];
 }

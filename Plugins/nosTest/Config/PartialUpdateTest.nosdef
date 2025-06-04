@@ -22,18 +22,6 @@
             "can_show_as": "INPUT_PIN_OR_PROPERTY"
           },
           {
-            "name": "Struct",
-            "type_name": "nos.test.vec2test",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "StructArray",
-            "type_name": "[nos.test.vec2test]",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
             "name": "String",
             "type_name": "string",
             "show_as": "INPUT_PIN",
@@ -46,14 +34,50 @@
             "can_show_as": "INPUT_PIN_OR_PROPERTY"
           },
           {
-            "name": "Enum",
-            "type_name": "nos.sys.vulkan.MemoryFlags",
+            "name": "Struct",
+            "type_name": "nos.test.Vec2Test",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY"
           },
           {
-            "name": "EnumArray",
-            "type_name": "[nos.sys.vulkan.MemoryFlags]",
+            "name": "StructArray",
+            "type_name": "[nos.test.Vec2Test]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "FixedLengthArrayStruct",
+            "type_name": "nos.test.Mat2Test",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "FixedLengthArrayStructArray",
+            "type_name": "[nos.test.Mat2Test]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUint",
+            "type_name": "nos.test.TestEnumUint",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUintArray",
+            "type_name": "[nos.test.TestEnumUint]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUbyte",
+            "type_name": "nos.test.TestEnumUbyte",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUbyteArray",
+            "type_name": "[nos.test.TestEnumUbyte]",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY"
           },
