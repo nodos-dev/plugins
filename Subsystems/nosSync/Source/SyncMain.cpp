@@ -234,10 +234,8 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	}
 
 	uint64_t minTs = UINT64_MAX, maxTs = 0;
-	int i = 0;
 	while (true)
 	{
-		nosEngine.LogI("Iteration: %d, Waiting for consensus on event group %s", i++, eventGroupStr);
 		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		auto currDiffFromStartNs = currentTimeNs - startTimeNs;
 		auto eventIntervalNs = event->GetEventIntervalAsSeconds() * 1e9;
