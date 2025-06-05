@@ -16,7 +16,7 @@ typedef nosResult (*nosEventWaitPfn)(void* userData, uint64_t* outEventTimestamp
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
-	uint64_t Timeout; /// Number of delta seconds to wait before timing out.
+	double Timeout; /// Number of frames to wait before timing out.
 	double Tolerance; /// Fraction of an event time to allow during consensus.
 } nosRegisterEventGroupParams;
 
@@ -56,7 +56,7 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 1
+#define NOS_SYNC_VERSION_MAJOR 2
 #define NOS_SYNC_VERSION_MINOR 0
 
 extern struct nosModuleInfo nosSyncPluginInfo;
