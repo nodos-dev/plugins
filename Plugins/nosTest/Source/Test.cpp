@@ -216,7 +216,7 @@ struct TestPluginFunctions : PluginFunctions
 	}
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 17;
+		outCount = 18;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -354,6 +354,38 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 		RegisterPartialUpdateTest(outFunctions[16]);
+		outFunctions[17]->ClassName = NOS_NAME_STATIC("nos.test.DownloadBuffer");
+		outFunctions[17]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
+			auto pinValues = nos::GetPinValues(params);
+			auto outBuffer =
+				vkss::ConvertToResourceInfo(*InterpretPinValue<nos::sys::vulkan::Buffer>(pinValues[NOS_NAME("Output")]));
+			auto inBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<nos::sys::vulkan::Buffer>(pinValues[NOS_NAME("Input")]));
+			if (outBuffer.Memory.Handle == 0 || outBuffer.Info.Buffer.Size != inBuffer.Info.Buffer.Size)
+			{
+				outBuffer.Memory = {};
+				outBuffer.Info.Buffer.Size = inBuffer.Info.Buffer.Size;
+				outBuffer.Info.Buffer.Usage =
+					nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_TRANSFER_SRC);
+				outBuffer.Info.Buffer.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_DOWNLOAD);
+				nosEngine.SetPinValueByName(params->NodeId, NOS_NAME("Output"), nos::Buffer::From(vkss::ConvertBufferInfo(outBuffer)));
+				outBuffer = vkss::ConvertToResourceInfo(
+					*InterpretPinValue<nos::sys::vulkan::Buffer>(pinValues[NOS_NAME("Output")]));
+			}
+			if (outBuffer.Memory.Handle == 0)
+			{
+				return NOS_RESULT_FAILED;
+			}
+			auto cmd = nos::vkss::BeginCmd(NOS_NAME("DownloadBuffer Download"), params->NodeId);
+			nosVulkan->Copy(cmd,
+							&inBuffer,
+							&outBuffer,
+							0);
+			nosGPUEvent gpuEvent{};
+			nosCmdEndParams endParams{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &gpuEvent};
+			nosVulkan->End(cmd, &endParams);
+			nosVulkan->WaitGpuEvent(&gpuEvent, UINT64_MAX);
+			return NOS_RESULT_SUCCESS;
+		};
 		return NOS_RESULT_SUCCESS;
 	}
 };

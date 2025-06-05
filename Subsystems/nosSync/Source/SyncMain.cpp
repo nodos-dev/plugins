@@ -60,7 +60,7 @@ struct Event
 struct EventGroup
 {
 	uint32_t Id;
-	uint64_t Timeout; // Maximum time to wait for consensus in number of time units (delta-seconds)
+	double Timeout; // Maximum time to wait for consensus in number of time units (delta-seconds)
 	double Tolerance; // Fraction of the event time to allow for consensus
 	std::unordered_map<uint64_t, Event> Events;
 };
@@ -163,16 +163,16 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	// Gather the events that should be considered for consensus.
 	// They should be in the same group and have the same delta-seconds.
-	std::unordered_map<uint64_t, Event*> events;
-	for (const auto& [groupId, group] : GEventSync.Groups)
+	std::unordered_map<uint64_t, Ref<Event>> events;
+	for (auto& [groupId, group] : GEventSync.Groups)
 	{
 		if (group.Id != eventGroup->Id) // Only consider events in the same group
 			continue;
-		for (const auto& [eid, ev] : group.Events)
+		for (auto& [eid, ev] : group.Events)
 		{
 			if (ev.DeltaSeconds.x == event->DeltaSeconds.x && ev.DeltaSeconds.y == event->DeltaSeconds.y)
 				// Only consider events with the same delta-seconds
-				events[eid] = const_cast<Event*>(&ev);
+				events.emplace(eid, ev);
 		}
 	}
 
@@ -210,6 +210,30 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	uint32_t syncedEventOccurrences = 0;
 	uint64_t lastConsensusTimestamp = 0;
 	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+	
+	if (events.empty())
+	{
+		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
+		return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
+	}
+
+	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
+	eventTimestamps.reserve(events.size()); // Reserve space for all events
+
+	// Collect initial timestamps for all events
+	for (const auto& [eventId, event] : events)
+	{
+		auto waitRes = event->Wait(event->UserData);
+		if (waitRes.Result == NOS_RESULT_FAILED)
+		{
+			// Error when waiting for an event, consensus cannot be achieved
+			return waitRes.Result;
+		}
+		eventTimestamps[event] = waitRes.Timestamp;
+	}
+
+	uint64_t minTs = UINT64_MAX, maxTs = 0;
 	while (true)
 	{
 		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -221,44 +245,21 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr);
 			return NOS_RESULT_TIMEOUT; // Timeout reached
 		}
-		if (events.empty())
-		{
-			nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
-			return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
-		}
-		std::vector<std::pair<Event*, uint64_t>> eventTimestamps;
-		eventTimestamps.reserve(events.size()); // Reserve space for all events
-
-		for (const auto& [eventId, event] : events)
-		{
-			uint64_t ts = 0;
-			auto waitRes = event->Wait(event->UserData);
-			if (waitRes.Result == NOS_RESULT_FAILED)
-			{
-				// Error when waiting for an event, consensus cannot be achieved
-				return waitRes.Result;
-			}
-			ts = waitRes.Timestamp;
-			eventTimestamps.emplace_back(event, ts);
-		}
-
+		
 		// Find min and max timestamps
-		uint64_t minTs = UINT64_MAX, maxTs = 0;
+		minTs = UINT64_MAX;
+		maxTs = 0;
 		for (const auto& [event, ts] : eventTimestamps)
 		{
 			minTs = std::min(minTs, ts);
 			maxTs = std::max(maxTs, ts);
 		}
-		
-		auto diffNs = (maxTs - minTs);
-		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance) && lastConsensusTimestamp != maxTs)
-		{
-			syncedEventOccurrences++;
-			lastConsensusTimestamp = maxTs;
-		}
 
-		if (syncedEventOccurrences >= 2) // For 2 consecutive checks, all events agree on the same timestamp
+		// Check if consensus is achieved
+		auto diffNs = (maxTs - minTs);
+		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
 		{
+			lastConsensusTimestamp = maxTs;
 			auto time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
@@ -267,21 +268,37 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			*outCount = event->NumOccurrences;
 			return NOS_RESULT_SUCCESS;
 		}
-
-		// Wait again for those who are behind
-		for (auto& [event, ts] : eventTimestamps)
+		// Consensus is not achieved
+		
+		// Wait for the non-synchronized events again
+		for (const auto& [eventId, event] : events)
 		{
-			if (ts < maxTs)
+			// If the the event's timestamp is already within the tolarence compared to the maximum timestamp, skip it
+			auto ts = eventTimestamps[event];
+			auto difFrac = (maxTs - ts) / eventIntervalNs;
+			if (difFrac <= eventGroup->Tolerance)
+				continue;
+
+			// Log the event that is behind
 			{
-				nosEngine.LogD("Event group %s entry %llu: Current TS %llu, waiting for %llu",
-					eventGroupStr, event->Id, ts, maxTs);
-				auto waitRes = event->Wait(event->UserData);
-				if (waitRes.Result == NOS_RESULT_FAILED)
-				{
-					// Error when waiting for an event, consensus cannot be achieved
-					return waitRes.Result;
-				}
+				auto curTime =
+					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(ts));
+				auto maxTime =
+					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(maxTs));
+				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
+							   eventGroupStr,
+							   event->Id,
+							   std::format("{:%H:%M:%S}", curTime).c_str(),
+							   std::format("{:%H:%M:%S}", maxTime).c_str());
 			}
+
+			auto waitRes = event->Wait(event->UserData);
+			if (waitRes.Result == NOS_RESULT_FAILED)
+			{
+				// Error when waiting for an event, consensus cannot be achieved
+				return waitRes.Result;
+			}
+			eventTimestamps[event] = waitRes.Timestamp;
 		}
 	}
 	nosEngine.LogE("Unable to establish consensus on event group %s", eventGroupStr);
