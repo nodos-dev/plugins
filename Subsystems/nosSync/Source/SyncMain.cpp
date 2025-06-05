@@ -211,9 +211,28 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	uint64_t lastConsensusTimestamp = 0;
 	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
+	
+	if (events.empty())
+	{
+		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
+		return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
+	}
+
 	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
 	eventTimestamps.reserve(events.size()); // Reserve space for all events
-	bool first = true;
+
+	// Collect initial timestamps for all events
+	for (const auto& [eventId, event] : events)
+	{
+		auto waitRes = event->Wait(event->UserData);
+		if (waitRes.Result == NOS_RESULT_FAILED)
+		{
+			// Error when waiting for an event, consensus cannot be achieved
+			return waitRes.Result;
+		}
+		eventTimestamps[event] = waitRes.Timestamp;
+	}
+
 	uint64_t minTs = UINT64_MAX, maxTs = 0;
 	int i = 0;
 	while (true)
@@ -228,50 +247,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr);
 			return NOS_RESULT_TIMEOUT; // Timeout reached
 		}
-		if (events.empty())
-		{
-			nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
-			return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
-		}
 		
-
-		for (const auto& [eventId, event] : events)
-		{
-			if (!first)
-			{
-				auto ts = eventTimestamps[event];
-				auto difFrac = (maxTs - ts) / eventIntervalNs;
-				if (difFrac <= eventGroup->Tolerance)
-					continue;
-				auto curTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(ts));
-				auto maxTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(maxTs));
-				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
-							   eventGroupStr,
-							   event->Id,
-							   std::format("{:%H:%M:%S}", curTime).c_str(),
-							   std::format("{:%H:%M:%S}", maxTime).c_str());
-			}
-			auto waitRes = event->Wait(event->UserData);
-			if (waitRes.Result == NOS_RESULT_FAILED)
-			{
-				// Error when waiting for an event, consensus cannot be achieved
-				return waitRes.Result;
-			}
-			eventTimestamps[event] = waitRes.Timestamp;
-
-			
-			auto curTime = std::chrono::duration_cast<std::chrono::system_clock::duration>(
-				std::chrono::nanoseconds(waitRes.Timestamp));
-			nosEngine.LogD("Event group %s entry %llu: Current %s",
-						   eventGroupStr,
-						   event->Id,
-						   std::format("{:%H:%M:%S}", curTime).c_str());
-
-		}
-		first = false;
-
 		// Find min and max timestamps
 		minTs = UINT64_MAX;
 		maxTs = 0;
@@ -280,6 +256,8 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			minTs = std::min(minTs, ts);
 			maxTs = std::max(maxTs, ts);
 		}
+
+		// Check if consensus is achieved
 		auto diffNs = (maxTs - minTs);
 		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
 		{
@@ -291,6 +269,38 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			*outTimestamp = event->LastWaitedTimestamp;
 			*outCount = event->NumOccurrences;
 			return NOS_RESULT_SUCCESS;
+		}
+		// Consensus is not achieved
+		
+		// Wait for the non-synchronized events again
+		for (const auto& [eventId, event] : events)
+		{
+			// If the the event's timestamp is already within the tolarence compared to the maximum timestamp, skip it
+			auto ts = eventTimestamps[event];
+			auto difFrac = (maxTs - ts) / eventIntervalNs;
+			if (difFrac <= eventGroup->Tolerance)
+				continue;
+
+			// Log the event that is behind
+			{
+				auto curTime =
+					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(ts));
+				auto maxTime =
+					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(maxTs));
+				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
+							   eventGroupStr,
+							   event->Id,
+							   std::format("{:%H:%M:%S}", curTime).c_str(),
+							   std::format("{:%H:%M:%S}", maxTime).c_str());
+			}
+
+			auto waitRes = event->Wait(event->UserData);
+			if (waitRes.Result == NOS_RESULT_FAILED)
+			{
+				// Error when waiting for an event, consensus cannot be achieved
+				return waitRes.Result;
+			}
+			eventTimestamps[event] = waitRes.Timestamp;
 		}
 	}
 	nosEngine.LogE("Unable to establish consensus on event group %s", eventGroupStr);
