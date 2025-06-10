@@ -137,34 +137,8 @@ struct ArrayNode : NodeContext
 
 		uint32_t i = 0;
 		for (auto value : values) {
-			nosUpdateBufferParams updateParams = {};
-			updateParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
-			updateParams.ActionParams.SetOrInsert.Value = value;
-			nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ };
-			updateParams.Path = &path;
-			updateParams.PathLength = 1;
-			updateParams.Target.PinId = GetPin(NSN_Output)->Id;
-			updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-			nosEngine.UpdateBuffer(&updateParams);
-		}
-		return true;
-	}
-
-	bool UpdateOutputArrayElements(std::unordered_map<size_t, nosBuffer> const& dirtyElements) {
-		auto outPin = GetPin(NSN_Output);
-		if (!outPin || !Type)
-			return false;
-
-		for (auto value : dirtyElements) {
-			nosUpdateBufferParams updateParams = {};
-			updateParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
-			updateParams.ActionParams.SetOrInsert.Value = value.second;
-			nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, value.first };
-			updateParams.Path = &path;
-			updateParams.PathLength = 1;
-			updateParams.Target.PinId = GetPin(NSN_Output)->Id;
-			updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-			nosEngine.UpdateBuffer(&updateParams);
+			if (SetField(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ } }, value) == NOS_RESULT_NOT_FOUND)
+				AddElementToArray(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, values.size() - 1} }, value);
 		}
 		return true;
 	}
@@ -195,6 +169,7 @@ struct ArrayNode : NodeContext
 			std::vector<nosBuffer> datas;
 			for (unsigned int i = 0; i < GetInputs().size(); i++)
 				datas.push_back(*buf);
+
 			SendOutputArray(datas);
 		}
 	}
@@ -234,7 +209,7 @@ struct ArrayNode : NodeContext
 		}
 		HandleEvent(CreateAppEvent(
 			fbb,
-			nos::app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &fields)));
+			nos::app::CreateAppContextMenuUpdateDirect(fbb, request->item_id(), request->pos(), request->instigator(), &fields)));
 	}
 
 	void SendAddElementRequest() {
@@ -263,15 +238,10 @@ struct ArrayNode : NodeContext
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, 0, &pins)));
 
-		nosUpdateBufferParams updateParams = {};
-		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_INSERT;
-		updateParams.ActionParams.SetOrInsert.Value = { data.data(), data.size()};
-		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, inputs.size() };
-		updateParams.Path = &path;
-		updateParams.PathLength = 1;
-		updateParams.Target.PinId = GetPin(NSN_Output)->Id;
-		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-		nosEngine.UpdateBuffer(&updateParams);
+		if (!Type)
+			return;
+
+		AddElementToArray(GetPin(NSN_Output)->Id, { {nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, inputs.size()} }, { data.data(), data.size() });
 	}
 
 	void SendRemoveElementRequest(std::optional<size_t> elementIndx = std::nullopt) {
@@ -282,18 +252,14 @@ struct ArrayNode : NodeContext
 		}
 		flatbuffers::FlatBufferBuilder fbb;
 
-		std::vector<fb::UUID> id = { inputs.back()->Id };
+		if (!elementIndx)
+			elementIndx = inputs.size() - 1;
+
+		std::vector<fb::UUID> id = { inputs[*elementIndx]->Id};
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &id)));
 
-		nosUpdateBufferParams updateParams = {};
-		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_REMOVE;
-		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, elementIndx ? *elementIndx : inputs.size() - 1 };
-		updateParams.Path = &path;
-		updateParams.PathLength = 1;
-		updateParams.Target.PinId = GetPin(NSN_Output)->Id;
-		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-		nosEngine.UpdateBuffer(&updateParams);
+		RemoveElementFromArray(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, *elementIndx } });
 	}
 
 	void OnMenuCommand(uuid const& itemId, uint32_t cmd) override

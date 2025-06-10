@@ -96,19 +96,22 @@
         ],
         "functions": [
           {
-            "class_name": "2ElementArray",
+            "class_name": "SetTableOfExistingTable",
+            "description": "Sets test struct table of the Table pin's table subfield",
             "contents_type": "Job",
             "pins": [
             ]
           },
           {
-            "class_name": "SetArraysFixedSizeField",
+            "class_name": "SetTablesWholeArray",
+            "description": "Sets table array field of Table pin",
             "contents_type": "Job",
             "pins": [
             ]
           },
           {
             "class_name": "RemoveElement1",
+            "description": "Remove element 1 from table array field of Table pin",
             "contents_type": "Job",
             "pins": [
             ]

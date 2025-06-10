@@ -91,17 +91,7 @@ struct MakeNode : NodeContext
 			if (pin.first == NSN_Output)
 				continue;
 
-			nosUpdateBufferParams params = {};
-			params.Action = NOS_BUFFER_UPDATE_ACTION_SET;
-			params.ActionParams.SetOrInsert.Value = *pin.second.Data;
-			nosDataPathComponent path = {};
-			path.Component.FieldName = pin.first;
-			path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
-			params.Path = &path;
-			params.PathLength = 1;
-			params.Target.PinId = pins[NSN_Output].Id;
-			params.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-			nosEngine.UpdateBuffer(&params);
+			AddElementToArray(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = {.FieldName = pin.first} } }, *pin.second.Data);
 		}
 
 		return NOS_RESULT_SUCCESS;

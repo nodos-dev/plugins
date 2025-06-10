@@ -218,7 +218,7 @@ struct BreakNode : NodeContext
         {
         case NOS_BASE_TYPE_ARRAY: {
         	const flatbuffers::Vector<uint8_t>* vec = InterpretPinValue<VectorPinData<uint8_t>>(*buf);
-        	for (int i = 0; i < vec->size(); ++i)
+        	for (size_t i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
         		if (!pinId)

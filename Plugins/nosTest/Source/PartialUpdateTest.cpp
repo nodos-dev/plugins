@@ -5,16 +5,16 @@
 #include <Builtins_generated.h>
 
 #include <Nodos/PluginHelpers.hpp>
+#include "Test_generated.h"
 
 
 // Nodos SDK
 #include <PluginConfig_generated.h>
-#include <nosVulkanSubsystem/Types_generated.h>
 
 namespace nos::test
 {
 NOS_REGISTER_NAME(Type)
-NOS_REGISTER_NAME(Input)
+NOS_REGISTER_NAME(Table)
 NOS_REGISTER_NAME(PartialUpdateTest)
 struct PartialUpdateTestNode : NodeContext
 {
@@ -29,67 +29,79 @@ struct PartialUpdateTestNode : NodeContext
 	std::vector<nosName> AllTypeNames;
 
 
-    void TwoElementArray() {
-        auto pinId = GetPinId(NSN_Input);
-        if (!pinId)
+    void SetTableOfExistingTable() {
+        auto pinId = GetPinId(NSN_Table);
+        if (!pinId) {
             nosEngine.LogE("Pin not found!");
+            return;
+        }
+
         nosBuffer buf;
-        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.sys.vulkan.BlendMode"), &buf) != NOS_RESULT_SUCCESS) {
+        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.test.TestTable"), &buf) != NOS_RESULT_SUCCESS) {
             nosEngine.LogE("Failed to get default value of type");
             return;
         }
-        nos::sys::vulkan::TBlendMode cppPassInfo = {};
-        InterpretPinValue<nos::sys::vulkan::BlendMode>(buf)->UnPackTo(&cppPassInfo);
-        cppPassInfo.alpha_op = nos::sys::vulkan::BlendOp::REVERSE_SUBTRACT;
-        cppPassInfo.color_op = nos::sys::vulkan::BlendOp::REVERSE_SUBTRACT;
-        nos::Buffer finalBuf = nos::Buffer::From(cppPassInfo);
-        std::string abc = "bc";
-		nosUpdateBufferParams finalBufParams;
-		finalBufParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
-        finalBufParams.ActionParams.SetOrInsert.Value = finalBuf;
-        nosDataPathComponent pinPath[3] = { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("pass3s") }  , { NOS_DATA_PATH_ARRAY_ELEMENT, 1 }, { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("blend_mode") } };
-		finalBufParams.Path = pinPath;
-		finalBufParams.PathLength = sizeof(pinPath) / sizeof(pinPath[0]);
-		finalBufParams.Target.PinId = *pinId;
-		finalBufParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-        nosEngine.UpdateBuffer(&finalBufParams);
+        nos::test::TTestTable testTable = {};
+        InterpretPinValue<nos::test::TestTable>(buf)->UnPackTo(&testTable);
+        testTable.test1 = "Set by node function: SetTableOfExistingTable()";
+        testTable.test2 = std::make_unique<nos::test::TestStruct2>();
+        testTable.test2->mutable_test1().mutate_test1(15.0f);
+        testTable.test2->mutate_test2(30.0f);
+        nos::Buffer finalBuf = nos::Buffer::From(testTable);
+
+        SetField(*pinId, { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table") } , { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table1") } }, finalBuf);
     }
 
-    void SetArraysFixedSizeField() {
-        auto pinId = GetPinId(NSN_Input);
-        if (!pinId)
+    void SetTablesWholeArray(NodeExecuteParams& execParams) {
+        auto pinId = GetPinId(NSN_Table);
+        if (!pinId) {
             nosEngine.LogE("Pin not found!");
+            return;
+        }
 
-		uint32_t multiSampleCount = 4;
-        nos::Buffer finalBuf = nos::Buffer::From(multiSampleCount);
-        nosUpdateBufferParams finalBufParams;
-        finalBufParams.Action = NOS_BUFFER_UPDATE_ACTION_SET;
-        finalBufParams.ActionParams.SetOrInsert.Value = finalBuf;
-        nosDataPathComponent pinPath[3] = { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("pass3s") } , { NOS_DATA_PATH_ARRAY_ELEMENT, 3 }, { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("multi_sample_count") } };
-        finalBufParams.Path = pinPath;
-        finalBufParams.PathLength = sizeof(pinPath) / sizeof(pinPath[0]);
-        finalBufParams.Target.PinId = *pinId;
-        finalBufParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-        nosEngine.UpdateBuffer(&finalBufParams);
+        nosBuffer tableDef;
+        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.test.TestTable2"), &tableDef) != NOS_RESULT_SUCCESS) {
+            nosEngine.LogE("Failed to get default value of type");
+            return;
+        }
+        nos::test::TTestTable2 elements[2]{};
+        // Set first element
+        {
+            auto& testTable = elements[0];
+            InterpretPinValue<nos::test::TestTable2>(tableDef)->UnPackTo(&testTable);
+            testTable.table1 = std::make_unique<nos::test::TTestTable>();
+            testTable.table1->test1 = "First Element";
+            testTable.table1->test2 = std::make_unique<nos::test::TestStruct2>();
+            testTable.table1->test2->mutable_test1().mutate_test1(10.0f);
+            testTable.table1->test2->mutate_test2(20.0f);
+            testTable.test_enum = nos::test::TestEnumUint::TEST1;
+        }
+        // Set second element
+        {
+            auto& testTable = elements[1];
+            InterpretPinValue<nos::test::TestTable2>(tableDef)->UnPackTo(&testTable);
+            testTable.table1 = std::make_unique<nos::test::TTestTable>();
+            testTable.table1->test1 = "Second Element";
+            testTable.table1->test2 = std::make_unique<nos::test::TestStruct2>();
+            testTable.table1->test2->mutable_test1().mutate_test1(30.0f);
+            testTable.table1->test2->mutate_test2(60.0f);
+            testTable.test_enum = nos::test::TestEnumUint::TEST2;
+        }
+
+		SetField(*pinId, { nosDataPathComponent{ NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table_array")} }, {});
+        for (size_t i = 0; i < sizeof(elements) / sizeof(elements[0]); i++) {
+			AddElementToArray(*pinId,
+				{ { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table_array") }, { NOS_DATA_PATH_ARRAY_ELEMENT, i } },
+				nos::Buffer::From(elements[i]));
+        }
     }
 
     void RemoveElement1() {
-        auto pinId = GetPinId(NSN_Input);
+        auto pinId = GetPinId(NSN_Table);
         if (!pinId)
             nosEngine.LogE("Pin not found!");
 
-        nosUpdateBufferParams finalBufParams;
-        finalBufParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_REMOVE;
-        nosDataPathComponent pinPath[2] = { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("pass3s") } , {} };
-        {
-            pinPath[1].Component.ArrayIndex = 1;
-            pinPath[1].ComponentType = NOS_DATA_PATH_ARRAY_ELEMENT;
-        }
-        finalBufParams.Path = pinPath;
-        finalBufParams.PathLength = sizeof(pinPath) / sizeof(pinPath[0]);
-        finalBufParams.Target.PinId = *pinId;
-        finalBufParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-        nosEngine.UpdateBuffer(&finalBufParams);
+		RemoveElementFromArray(*pinId, { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table_array") }, { NOS_DATA_PATH_ARRAY_ELEMENT, 1 } });
     }
 
     static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
@@ -98,19 +110,20 @@ struct PartialUpdateTestNode : NodeContext
         if (!names || !fns)
             return NOS_RESULT_SUCCESS;
 
-        names[0] = NOS_NAME_STATIC("2ElementArray");
+        names[0] = NOS_NAME_STATIC("SetTableOfExistingTable");
         fns[0] = [](void* ctx, nosFunctionExecuteParams* params)
             {
                 auto writeImage = (PartialUpdateTestNode*)ctx;
-                writeImage->TwoElementArray();
+                writeImage->SetTableOfExistingTable();
                 return NOS_RESULT_SUCCESS;
             };
 
-        names[1] = NOS_NAME_STATIC("SetArraysFixedSizeField");
+        names[1] = NOS_NAME_STATIC("SetTablesWholeArray");
         fns[1] = [](void* ctx, nosFunctionExecuteParams* params)
             {
+				NodeExecuteParams execParams = params->ParentNodeExecuteParams;
                 auto writeImage = (PartialUpdateTestNode*)ctx;
-                writeImage->SetArraysFixedSizeField();
+                writeImage->SetTablesWholeArray(execParams);
                 return NOS_RESULT_SUCCESS;
             };
 

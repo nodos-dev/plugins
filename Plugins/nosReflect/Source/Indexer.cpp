@@ -134,16 +134,7 @@ struct Indexer : NodeContext
 		if (!inPin || !Type)
 			return false;
 
-		nosUpdateBufferParams updateParams = {};
-		updateParams.Action = NOS_BUFFER_UPDATE_ACTION_ARRAY_INSERT;
-		updateParams.ActionParams.SetOrInsert.Value = { data.data(), data.size() };
-		nosDataPathComponent path{ nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 };
-		updateParams.Path = &path;
-		updateParams.PathLength = 1;
-		updateParams.Target.PinId = inPin->Id;
-		updateParams.TargetType = NOS_BUFFER_UPDATE_TARGET_PIN;
-		
-		return nosEngine.UpdateBuffer(&updateParams) == NOS_RESULT_SUCCESS;
+		return AddElementToArray(inPin->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 } }, { data.data(), data.size() }) == NOS_RESULT_SUCCESS;
 	}
 	
     nosResult ExecuteNode(nosNodeExecuteParams* params) override
