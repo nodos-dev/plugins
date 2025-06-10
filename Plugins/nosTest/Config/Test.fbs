@@ -1,5 +1,6 @@
 namespace nos.test;
 
+
 struct TestStruct {
 	test1:float;
 }
@@ -10,13 +11,48 @@ struct TestStruct2 {
 	test2:float;
 }
 
-enum TestEnum : uint32 {
+enum TestEnumUint : uint32 {
 	NONE = 0,
 	TEST1 = 1,
 	TEST2 = 2
 }
 
+enum TestEnumUbyte : ubyte {
+	NONE = 0,
+	TEST1U = 1,
+	TEST2U = 2
+}
+
 table TestTable {
 	test1:string;
 	test2:TestStruct2;
+}
+
+table TestTable2 {
+    table1:TestTable;
+    test_enum:TestEnumUint = TEST2;
+}
+
+struct Vec2Test{
+    x:float;
+    y:float;
+}
+
+struct Mat2Test{
+    vec2s: [Vec2Test:2];
+}
+
+table FbTestTable{
+    table: TestTable2;
+    table_array: [TestTable2];
+    string_test: string;
+    string_array: [string];
+    struct_test: Vec2Test;
+    struct_array: [Vec2Test];
+    fixed_length_array_test: Mat2Test;
+    fixed_length_array_list: [Mat2Test];
+    enum_uint_test: TestEnumUint;
+    enum_uint_array: [TestEnumUint];
+    enum_ubyte_test: TestEnumUbyte;
+    enum_ubyte_array: [TestEnumUbyte];
 }

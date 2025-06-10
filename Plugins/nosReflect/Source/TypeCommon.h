@@ -10,42 +10,6 @@
 
 namespace nos::reflect
 {
-void CopyInline(flatbuffers::FlatBufferBuilder& fbb, decltype(nosTypeInfo::Fields) fielddef,
-	const flatbuffers::Table* table, size_t align, size_t size);
-
-void CopyInline(
-	flatbuffers::FlatBufferBuilder& fbb, uint16_t offset, const uint8_t* data, size_t align, size_t size);
-
-void CopyInline2(flatbuffers::FlatBufferBuilder& fbb, const flatbuffers::FieldDef* fielddef,
-	const flatbuffers::Table* table, size_t align, size_t size);
-
-const flatbuffers::StructDef* GetUnionType(
-	const flatbuffers::StructDef* parent,
-	const flatbuffers::FieldDef* unionfield, 
-	const flatbuffers::Table* table);
-
-flatbuffers::uoffset_t CopyTable2(
-	flatbuffers::FlatBufferBuilder& fbb,
-	const flatbuffers::StructDef* objectdef,
-	const flatbuffers::Table* table);
-
-flatbuffers::uoffset_t CopyTable(
-	flatbuffers::FlatBufferBuilder& fbb,
-	const nosTypeInfo* type,
-	const flatbuffers::Table* table);
-
-flatbuffers::uoffset_t CopyArgs(
-	flatbuffers::FlatBufferBuilder& fbb,
-	const nosTypeInfo* type,
-	NodeExecuteParams& table);
-
-std::vector<uint8_t> GenerateBuffer(
-	const nosTypeInfo* type,
-	const void* data);
-
-nos::Buffer GenerateVector(
-	const nosTypeInfo* type, 
-	std::vector<const void*> inputs);
 
 bool AreFlatBuffersEqual(const nosTypeInfo* type,
 						 void* first,

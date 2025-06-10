@@ -1,0 +1,123 @@
+{
+  "nodes": [
+    {
+      "class_name": "PartialUpdateTest",
+      "menu_info": {
+        "category": "TEST",
+        "display_name": "Test Partial Update"
+      },
+      "node": {
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Table",
+            "type_name": "nos.test.FbTestTable",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "TableArray",
+            "type_name": "[nos.test.FbTestTable]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "String",
+            "type_name": "string",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "StringArray",
+            "type_name": "[string]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Struct",
+            "type_name": "nos.test.Vec2Test",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "StructArray",
+            "type_name": "[nos.test.Vec2Test]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "FixedLengthArrayStruct",
+            "type_name": "nos.test.Mat2Test",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "FixedLengthArrayStructArray",
+            "type_name": "[nos.test.Mat2Test]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUint",
+            "type_name": "nos.test.TestEnumUint",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUintArray",
+            "type_name": "[nos.test.TestEnumUint]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUbyte",
+            "type_name": "nos.test.TestEnumUbyte",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "EnumUbyteArray",
+            "type_name": "[nos.test.TestEnumUbyte]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Primitive",
+            "type_name": "bool",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "PrimitiveArray",
+            "type_name": "[bool]",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          }
+        ],
+        "functions": [
+          {
+            "class_name": "SetTableOfExistingTable",
+            "description": "Sets test struct table of the Table pin's table subfield",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          },
+          {
+            "class_name": "SetTablesWholeArray",
+            "description": "Sets table array field of Table pin",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          },
+          {
+            "class_name": "RemoveElement1",
+            "description": "Remove element 1 from table array field of Table pin",
+            "contents_type": "Job",
+            "pins": [
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

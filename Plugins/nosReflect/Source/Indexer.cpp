@@ -134,8 +134,7 @@ struct Indexer : NodeContext
 		if (!inPin || !Type)
 			return false;
 
-		nosEngine.SetPinValue(inPin->Id, GenerateVector(*Type, datas));
-		return true;
+		return AddElementToArray(inPin->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 } }, { data.data(), data.size() }) == NOS_RESULT_SUCCESS;
 	}
 	
     nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -155,32 +154,24 @@ struct Indexer : NodeContext
 			return NOS_RESULT_FAILED;
 		auto ID = pins[NSN_Output].Id;
 		auto& type = *Type;
-		if (type->ByteSize)
+
+		nosQueryBufferParams queryParams = {};
 		{
-			auto data = vec->data() + Index * type->ByteSize;
-			nosEngine.SetPinValue(ID, {(void*)data, type->ByteSize});
+			queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
+			queryParams.Buffer = *pins[NSN_Input].Data;
+			nosDataPathComponent queryPath;
+			queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
+			queryPath.Component.ArrayIndex = Index;
+			queryParams.Path = &queryPath;
+			queryParams.PathLength = 1;
 		}
-		else
+		auto element = QueryBuffer(queryParams);
+		if (!element)
 		{
-			nos::Buffer buf;
-			if (type->BaseType == NOS_BASE_TYPE_STRING)
-			{
-				flatbuffers::FlatBufferBuilder fbb;
-				auto vect = InterpretPinValue<VectorPinData<flatbuffers::Offset<flatbuffers::String>>>(*pins[NSN_Input].Data);
-				auto elem = vect->Get(Index);
-				buf = nos::Buffer(elem->c_str(), elem->size() + 1);
-				nosEngine.SetPinValue(ID, buf);
-			}
-			else
-			{
-				flatbuffers::FlatBufferBuilder fbb;
-				auto vect = InterpretPinValue<VectorPinData<flatbuffers::Offset<flatbuffers::Table>>>(*pins[NSN_Input].Data);
-				auto elem = vect->Get(Index);
-				fbb.Finish(flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, type, elem)));
-				buf = fbb.Release();
-				nosEngine.SetPinValue(ID, buf);	
-			}
+			SetNodeStatusMessages({ {{}, "Failed to query buffer", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
+			return NOS_RESULT_FAILED;
 		}
+		nosEngine.SetPinValue(ID, *element);
 		return NOS_RESULT_SUCCESS;
     }
 

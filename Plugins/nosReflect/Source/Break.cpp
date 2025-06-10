@@ -218,31 +218,23 @@ struct BreakNode : NodeContext
         {
         case NOS_BASE_TYPE_ARRAY: {
         	const flatbuffers::Vector<uint8_t>* vec = InterpretPinValue<VectorPinData<uint8_t>>(*buf);
-        	for (int i = 0; i < vec->size(); ++i)
+        	for (size_t i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
         		if (!pinId)
         			continue;
-        		if (type->ElementType->ByteSize)
-        		{
-        			auto data = vec->data() + i * type->ElementType->ByteSize;
-        			SetPinValueCached(*pinId, {(void*)data, type->ElementType->ByteSize});
-        		}
-        		else if (type->ElementType->BaseType == NOS_BASE_TYPE_STRING)
-				{
-					auto strVec = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>*)(vec);
-					auto str = strVec->Get(i)->string_view();
-					SetPinValueCached(*pinId, { (void*)str.data(), str.size() + 1 });
-        		}
-				else
-				{
-					auto tableVec = (flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*)(vec);
-					flatbuffers::FlatBufferBuilder fbb;
-					fbb.Finish(
-						flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, type->ElementType, tableVec->Get(i))));
-					nos::Buffer buf = fbb.Release();
-					SetPinValueCached(*pinId, { (void*)buf.Data(), buf.Size() });
+				nosQueryBufferParams params = {};
+				params.Buffer = *buf;
+				nosDataPathComponent path = { NOS_DATA_PATH_ARRAY_ELEMENT, i };
+				params.Path = &path;
+				params.PathLength = 1;
+				params.TypeName = GetPin(NSN_Input)->TypeName;
+				auto pinValue = QueryBuffer(params);
+				if (!pinValue) {
+					nosEngine.LogE("%s[%d] not found", nos::Name(params.TypeName).AsCStr(), i);
+					continue;
 				}
+				SetPinValueCached(*pinId, *pinValue);
         	}
         	break;
         }
@@ -255,34 +247,20 @@ struct BreakNode : NodeContext
 				auto pin = GetPin(field.Name);
 				if (!pin)
 					continue;
-				if (!type->ByteSize && !root->CheckField(field.Offset)) 
-				{
-					if (field.DefaultValue.Size)
-						SetPinValueCached(pin->Id, field.DefaultValue);
+
+				nosQueryBufferParams params = {};
+				params.Buffer = *buf;
+				nosDataPathComponent path = {};
+				path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
+				path.Component.FieldName = field.Name;
+				params.Path = &path;
+				params.PathLength = 1;
+				params.TypeName = GetPin(NSN_Input)->TypeName;
+				auto pinValue = QueryBuffer(params);
+				if (!pinValue) {
 					continue;
 				}
-				
-				if (field.Type->ByteSize)
-				{
-					auto data = !type->ByteSize ? root->GetStruct<uint8_t*>(field.Offset) : ((uint8_t*)root + field.Offset);
-					SetPinValueCached(pin->Id, { (void*)data, field.Type->ByteSize });
-				}
-                else
-                {
-                	nos::Buffer buf;
-                    if (field.Type->BaseType == NOS_BASE_TYPE_STRING)
-                    {
-	                    auto str = root->GetPointer<const ::flatbuffers::String *>(field.Offset)->string_view();
-						buf = Buffer(str.data(), str.size() + 1);
-                    }
-                	else
-                	{
-						flatbuffers::FlatBufferBuilder fbb;
-                		fbb.Finish(flatbuffers::Offset<flatbuffers::Table>(CopyTable(fbb, field.Type, root->GetPointer<flatbuffers::Table*>(field.Offset))));
-						buf = fbb.Release();
-                	}
-					SetPinValueCached(pin->Id, buf);
-                }
+				SetPinValueCached(pin->Id, *pinValue);
             }
         }
         }

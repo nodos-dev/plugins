@@ -87,14 +87,13 @@ struct MakeNode : NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		flatbuffers::uoffset_t offset = CopyArgs(fbb, type, pins);
-		fbb.Finish(flatbuffers::Offset<flatbuffers::Vector<uint8_t>>(offset));
-		nos::Buffer buf = fbb.Release();
+		for (auto pin : pins) {
+			if (pin.first == NSN_Output)
+				continue;
 
-		auto root = flatbuffers::GetRoot<flatbuffers::Table>(buf.Data());
+			AddElementToArray(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = {.FieldName = pin.first} } }, *pin.second.Data);
+		}
 
-		SetPinValue(NSN_Output, type->ByteSize ? nosBuffer{(void*)root, type->ByteSize}
-											   : nosBuffer{(void*)(buf.Data()), buf.Size()});
 		return NOS_RESULT_SUCCESS;
     }
 
@@ -278,17 +277,23 @@ struct MakeNode : NodeContext
                 else
                 {
                     uuid id = nosEngine.GenerateID();
-					std::vector<uint8_t> data;
-					if (type->ByteSize)
+					data = {};
+					nosQueryBufferParams params = {};
+					params.Buffer = buf;
+					nosDataPathComponent path = {};
+					path.Component.FieldName = field.Name;
+					path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
+					params.Path = &path;
+					params.PathLength = 1;
+					params.TypeName = type->TypeName;
+					auto queriedField = QueryBuffer(params);
+					if (!queriedField && field.Type->ByteSize)
 					{
-						auto* fieldStart = buf.As<uint8_t>() + field.Offset;
-						data = std::vector<uint8_t>(fieldStart,
-											   fieldStart + field.Type->ByteSize);
-                    }
-					else
-					{
-                        data = GenerateBuffer(field.Type, rootIftable->GetStruct<uint8_t*>(field.Offset));
-                    }
+						nosEngine.LogE("Failed to query field '%s' of type '%s'", nos::Name(field.Name).AsString(), nos::Name(type->TypeName).AsString());
+						continue;
+					}
+					else if (queriedField) // If field is an empty array, queriedField will be empty
+						data = std::vector<uint8_t>{ (uint8_t*)queriedField->Data(), ((uint8_t*)queriedField->Data()) + queriedField->Size()};
                     pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
                 }
             }
