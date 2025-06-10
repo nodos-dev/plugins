@@ -137,7 +137,7 @@ struct ArrayNode : NodeContext
 
 		uint32_t i = 0;
 		for (auto value : values) {
-			if (SetField(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ } }, value) == NOS_RESULT_NOT_FOUND)
+			if (SetField(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ } }, value) != NOS_RESULT_SUCCESS)
 				AddElementToArray(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, values.size() - 1} }, value);
 		}
 		return true;
