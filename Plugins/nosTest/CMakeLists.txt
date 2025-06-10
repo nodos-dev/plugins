@@ -13,7 +13,6 @@ if(NOT TARGET glfw)
 	nos_group_targets("${NOSTEST_EXTERNAL_TARGETS}" "External")
 endif()
 
-nos_find_plugin_sdk("39.5.0" TEST_NOS_PLUGIN_SDK_TARGET TEST_NOS_SDK_DIR)
-list(APPEND DEPENDENCIES glfw ${NOS_SYS_VULKAN_TARGET} ${TEST_NOS_PLUGIN_SDK_TARGET} nosTest_generated)
+list(APPEND DEPENDENCIES glfw ${NOS_SYS_VULKAN_TARGET} ${NOS_PLUGIN_SDK_TARGET} nosTest_generated)
 list(APPEND INCLUDE_FOLDERS ${CMAKE_CURRENT_SOURCE_DIR}/External/glfw)
 nos_add_plugin("nosTest" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
