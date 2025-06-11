@@ -26,6 +26,7 @@ struct WaitResult
 struct Event
 {
 	uint64_t Id;
+	uint64_t PathGroupId = 0;
 	nosEventWaitPfn PfnWait;
 	void* UserData;
 	nosVec2u DeltaSeconds = { 0, 0 }; // Time units in delta-seconds (x, y) for this event
@@ -95,6 +96,18 @@ nosResult NOSAPI_CALL RegisterEventGroup(const nosRegisterEventGroupParams* para
 	return NOS_RESULT_SUCCESS;
 }
 
+std::optional<uint64_t> GetCurrentPathGroupId()
+{
+	uint64_t pathGroupId = 0;
+	auto res = nosEngine.GetCurrentPathGroupId(&pathGroupId);
+	if (res != NOS_RESULT_SUCCESS || pathGroupId == 0)
+	{
+		nosEngine.LogE("Failed to get current path group ID: Error code %d", res);
+		return std::nullopt;
+	}
+	return pathGroupId;
+}
+
 nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 {
 	if (!params->WaitFn || !params->OutEventId)
@@ -103,10 +116,14 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 	auto it = GEventSync.Groups.find(params->EventGroupId);
 	if (it == GEventSync.Groups.end())
 		return NOS_RESULT_NOT_FOUND; // Event group not found
+	auto pathGroupId = GetCurrentPathGroupId();
+	if (!pathGroupId.has_value())
+		return NOS_RESULT_FAILED; // Failed to get current path group ID
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
 	eventGroup.Events[nextId] = {
 		.Id = nextId,
+		.PathGroupId = *pathGroupId,
 		.PfnWait = params->WaitFn,
 		.UserData = params->UserData,
 		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds)
@@ -170,8 +187,10 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			continue;
 		for (auto& [eid, ev] : group.Events)
 		{
-			if (ev.DeltaSeconds.x == event->DeltaSeconds.x && ev.DeltaSeconds.y == event->DeltaSeconds.y)
-				// Only consider events with the same delta-seconds
+			if (ev.DeltaSeconds.x == event->DeltaSeconds.x
+				&& ev.DeltaSeconds.y == event->DeltaSeconds.y
+				&& ev.PathGroupId == event->PathGroupId)
+				// Only consider events with the same delta-seconds and in same connected component
 				events.emplace(eid, ev);
 		}
 	}
@@ -203,7 +222,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	}
 
 	char eventGroupStr[256];
-	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%lu, (%lu/%lu)]", eventGroup->Id, event->DeltaSeconds.x, event->DeltaSeconds.y);
+	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu, %lu, (%lu/%lu)]", event->PathGroupId, eventGroup->Id, event->DeltaSeconds.x, event->DeltaSeconds.y);
 
 	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr);
 	
