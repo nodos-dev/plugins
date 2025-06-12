@@ -59,6 +59,8 @@ struct ResourceInterface {
 	// Returns false if resource is compatible with the current sample
 	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
+	virtual void OnRepeatPinValue(nosCopyInfo* cpy) {}
+	virtual uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const { return ringSize; }
 	virtual void OnPathStart() {}
 };
 
@@ -235,6 +237,23 @@ struct GPUTextureResource : ResourceInterface {
 		}
 		return false;
 	}
+
+	void OnRepeatPinValue(nosCopyInfo* cpy) override
+	{
+		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
+		textureInfo.field_type = sys::vulkan::FieldType::PROGRESSIVE;
+		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(textureInfo));
+	}
+
+	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	{
+		if (!inputPinData)
+			return ringSize;
+		auto input = vkss::DeserializeTextureInfo(inputPinData);
+		if (vkss::IsTextureFieldTypeInterlaced(input.Info.Texture.FieldType))
+			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
+		return ringSize;
+	}
 };
 
 struct GPUBufferResource : ResourceInterface {
@@ -401,6 +420,7 @@ struct GPUBufferResource : ResourceInterface {
 		}
 		return NOS_RESULT_SUCCESS;
 	}
+
 	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
 		auto sampleInfo = vkss::ConvertBufferInfo(vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)(Sample.Data())));
 		if (updateName == NSN_Input)
@@ -447,6 +467,23 @@ struct GPUBufferResource : ResourceInterface {
 			return true;
 		}
 		return false;
+	}
+
+	void OnRepeatPinValue(nosCopyInfo* cpy) override
+	{
+		auto outputBuffer = static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
+		outputBuffer->mutate_field_type(sys::vulkan::FieldType::PROGRESSIVE);
+		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(*outputBuffer));
+	}
+
+	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	{
+		if (!inputPinData)
+			return ringSize;
+		auto input = static_cast<sys::vulkan::Buffer*>(inputPinData);
+		if (vkss::IsTextureFieldTypeInterlaced((nosTextureFieldType)input->field_type()))
+			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
+		return ringSize;
 	}
 };
 
@@ -772,7 +809,25 @@ struct RingNodeBase : NodeContext
 	std::atomic_bool RepeatWhenFilling = false;
 	TypeInfo TypeInfo;
 
-	void TypeResolved() {
+	void RequestRingResize(uint32_t size)
+	{
+		if (size == 0)
+		{
+			nosEngine.LogW((GetName() + " size cannot be 0").c_str());
+			return;
+		}
+		if (Ring->Size != size && (!RequestedRingSize.has_value() || *RequestedRingSize != size))
+		{
+			nosPathCommand ringSizeChange{ .Event = NOS_RING_SIZE_CHANGE, .RingSize = size };
+			nosEngine.SendPathCommand(PinName2Id[NSN_Input], ringSizeChange);
+			SendPathRestart();
+			RequestedRingSize = size;
+			Ring->Stop();
+		}
+	}
+
+	void TypeResolved()
+	{
 		std::shared_ptr<ResourceInterface> resource;
 		if (TypeInfo->TypeName == NOS_NAME(sys::vulkan::Buffer::GetFullyQualifiedName()))
 			resource = std::make_unique<GPUBufferResource>();
@@ -786,19 +841,9 @@ struct RingNodeBase : NodeContext
 		Ring->Stop();
 		AddPinValueWatcher(NSN_Size, [this](nos::Buffer const& newSize, std::optional<nos::Buffer> oldVal) {
 			uint32_t size = *newSize.As<uint32_t>();
-			if (size == 0)
-			{
-				nosEngine.LogW((GetName() + " size cannot be 0").c_str());
+			if (oldVal && oldVal == newSize)
 				return;
-			}
-			if (Ring->Size != size && (!RequestedRingSize.has_value() || *RequestedRingSize != size))
-			{
-				nosPathCommand ringSizeChange{ .Event = NOS_RING_SIZE_CHANGE, .RingSize = size };
-				nosEngine.SendPathCommand(PinName2Id[NSN_Input], ringSizeChange);
-				SendPathRestart();
-				RequestedRingSize = size;
-				Ring->Stop();
-			}
+			RequestRingResize(size);
 		});
 		AddPinValueWatcher(NSN_Input, [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
 			if (Ring->ResInterface->CheckNewResource(NSN_Input, newBuf, oldVal))
@@ -888,8 +933,17 @@ struct RingNodeBase : NodeContext
 		assert(inputPin.Data);
 
 		void* input = Ring->ResInterface->GetPinInfo(pins[NSN_Input], rejectFieldMismatch);
-		if (input == nullptr) {
+		if (input == nullptr)
+		{
 			SendScheduleRequest(0);
+			return NOS_RESULT_FAILED;
+		}
+		
+		auto requiredSize = Ring->ResInterface->GetRequiredRingSize(input, Ring->Size);
+		if (Ring->Size != requiredSize)
+		{
+			nosEngine.LogW("Required ring size for this data type is %lu, will resize it", requiredSize);
+			RequestRingResize(requiredSize);
 			return NOS_RESULT_FAILED;
 		}
 
@@ -943,9 +997,7 @@ struct RingNodeBase : NodeContext
 		{
 			if (RemainingRepeatableCount > 0)
 			{
-				auto outputBuffer = static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
-				outputBuffer->mutate_field_type(sys::vulkan::FieldType::PROGRESSIVE);
-				nosEngine.SetPinDirty(cpy->ID);
+				Ring->ResInterface->OnRepeatPinValue(cpy);
 				RemainingRepeatableCount--;
 				return NOS_RESULT_SUCCESS;
 			}
