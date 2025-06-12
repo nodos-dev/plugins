@@ -572,13 +572,13 @@
 				"pins": [
 					{
 						"name": "Input",
-						"type_name": "float",
+						"type_name": "nos.Generic",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
 						"name": "Output",
-						"type_name": "float",
+						"type_name": "nos.Generic",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"live": true

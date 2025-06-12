@@ -320,8 +320,9 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
-		outFunctions[10]->CopyFrom = [](void* ctx, nosCopyInfo* copyInfo) {
-			nosEngine.LogD("LiveOutWithInput: CopyFrom");
+		outFunctions[10]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
+			NodeExecuteParams pins(params);
+			nosEngine.SetPinValue(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].Data);
 			return NOS_RESULT_SUCCESS;
 		};
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);

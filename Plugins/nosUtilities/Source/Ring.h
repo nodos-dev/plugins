@@ -943,6 +943,9 @@ struct RingNodeBase : NodeContext
 		{
 			if (RemainingRepeatableCount > 0)
 			{
+				auto outputBuffer = static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
+				outputBuffer->mutate_field_type(sys::vulkan::FieldType::PROGRESSIVE);
+				nosEngine.SetPinDirty(cpy->ID);
 				RemainingRepeatableCount--;
 				return NOS_RESULT_SUCCESS;
 			}
