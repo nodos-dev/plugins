@@ -91,7 +91,7 @@ struct MakeNode : NodeContext
 			if (pin.first == NSN_Output)
 				continue;
 
-			AddElementToArray(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = {.FieldName = pin.first} } }, *pin.second.Data);
+			SetField(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = {.FieldName = pin.first} } }, *pin.second.Data);
 		}
 
 		return NOS_RESULT_SUCCESS;
