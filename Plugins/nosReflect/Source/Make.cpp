@@ -288,10 +288,7 @@ struct MakeNode : NodeContext
 					params.TypeName = type->TypeName;
 					auto queriedField = QueryBuffer(params);
 					if (!queriedField && field.Type->ByteSize)
-					{
-						nosEngine.LogE("Failed to query field '%s' of type '%s'", nos::Name(field.Name).AsCStr(), nos::Name(type->TypeName).AsCStr());
-						continue;
-					}
+						data = std::vector<uint8_t>{ (uint8_t*)field.DefaultValue.Data, ((uint8_t*)field.DefaultValue.Data) + field.DefaultValue.Size };
 					else if (queriedField) // If field is an empty array, queriedField will be empty
 						data = std::vector<uint8_t>{ (uint8_t*)queriedField->Data(), ((uint8_t*)queriedField->Data()) + queriedField->Size()};
                     pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
