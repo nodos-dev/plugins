@@ -477,7 +477,8 @@ void RegisterArithmeticNodePresets() {
 					continue;
 			}
 			// Don't show enums and arrays
-			if (typeInfo->BaseType == NOS_BASE_TYPE_UNION || typeInfo->BaseType == NOS_BASE_TYPE_ARRAY)
+			if (typeInfo->BaseType == NOS_BASE_TYPE_UNION || typeInfo->BaseType == NOS_BASE_TYPE_ARRAY ||
+				IsEnumType(typeInfo))
 				continue;
 
 			if (binaryOp != BinaryOperator::ADD && typeInfo->BaseType == NOS_BASE_TYPE_STRING)

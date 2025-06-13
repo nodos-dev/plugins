@@ -34,9 +34,8 @@ struct MakeNode : NodeContext
 		if (info->BaseType == NOS_BASE_TYPE_NONE || info->BaseType == NOS_BASE_TYPE_ARRAY)
 			return false;
 		// If has 'skip_make' attribute
-		if (info->BaseType == NOS_BASE_TYPE_STRUCT || info->BaseType == NOS_BASE_TYPE_UNION)
+		if (info->BaseType == NOS_BASE_TYPE_STRUCT || info->BaseType == NOS_BASE_TYPE_UNION || IsEnumType(info))
 		{
-
 			bool skip = strict;
 			for (int i = 0; i < info->AttributeCount; ++i)
 			{
