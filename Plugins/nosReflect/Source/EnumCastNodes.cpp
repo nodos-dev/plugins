@@ -57,7 +57,7 @@ struct EnumCastNodeBase : NodeContext
 			auto& pin = params->Pins[i];
 			if (pin.Id == uuid(params->InstigatorPinId))
 				continue;
-			pin.OutResolvedTypeName = nos::Name(PrimitiveToString(*info));
+			pin.OutResolvedTypeName = nos::Name(PrimitiveToName(*info));
 		}
 		return NOS_RESULT_SUCCESS;
 	};

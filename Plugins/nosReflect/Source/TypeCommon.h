@@ -264,20 +264,38 @@ inline bool IsPrimitiveType(nosTypeInfo const& typeInfo)
 	}
 }
 
-inline const char* PrimitiveToString(nosTypeInfo const& typeInfo)
+inline nos::Name PrimitiveToName(nosTypeInfo const& typeInfo)
 {
 	switch (typeInfo.BaseType)
 	{
-	case NOS_BASE_TYPE_NONE: return "None";
-	case NOS_BASE_TYPE_INT: return typeInfo.ByteSize == 4 ? "int" : "long";
-	case NOS_BASE_TYPE_UINT: return typeInfo.ByteSize == 4 ? "uint" : "ulong";
-	case NOS_BASE_TYPE_FLOAT: return typeInfo.ByteSize == 4 ? "float" : "double";
-	default: return "Unknown";
+	case NOS_BASE_TYPE_NONE: return NOS_NAME("None");
+	case NOS_BASE_TYPE_INT: {
+		switch (typeInfo.ByteSize)
+		{
+		case 1: return NOS_NAME("byte");
+		case 2: return NOS_NAME("short");
+		case 4: return NOS_NAME("int");
+		case 8: return NOS_NAME("long");
+		}
+		break;
 	}
+	case NOS_BASE_TYPE_UINT: {
+		switch (typeInfo.ByteSize)
+		{
+		case 1: return NOS_NAME("ubyte");
+		case 2: return NOS_NAME("ushort");
+		case 4: return NOS_NAME("uint");
+		case 8: return NOS_NAME("ulong");
+		}
+		break;
+	}
+	case NOS_BASE_TYPE_FLOAT: return typeInfo.ByteSize == 4 ? NOS_NAME("float") : NOS_NAME("double");
+	}
+	return NOS_NAME("Unknown");
 }
 
 inline bool IsEnumType(nosTypeInfo const& typeInfo)
 {
-	return IsPrimitiveType(typeInfo) && strcmp(nos::Name(typeInfo.TypeName).AsCStr(), PrimitiveToString(typeInfo)) != 0;
+	return IsPrimitiveType(typeInfo) && PrimitiveToName(typeInfo) != typeInfo.TypeName;
 }
 } // namespace nos::reflect
