@@ -490,7 +490,7 @@ void RegisterArithmeticNodePresets() {
 			if (typeInfo->BaseType == NOS_BASE_TYPE_NONE)
 				continue;
 			// Don't show table types
-			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT) {
+			if (typeInfo->BaseType == NOS_BASE_TYPE_STRUCT || IsEnumType(typeInfo)) {
 				if (!typeInfo->ByteSize)
 					continue;
 				// Don't show structs with no builtin attribute
