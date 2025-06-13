@@ -91,7 +91,7 @@ struct MakeNode : NodeContext
 			if (pin.first == NSN_Output)
 				continue;
 
-			SetField(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = {.FieldName = pin.first} } }, *pin.second.Data);
+			SetField(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = pin.first } }, *pin.second.Data);
 		}
 
 		return NOS_RESULT_SUCCESS;
@@ -289,7 +289,7 @@ struct MakeNode : NodeContext
 					auto queriedField = QueryBuffer(params);
 					if (!queriedField && field.Type->ByteSize)
 					{
-						nosEngine.LogE("Failed to query field '%s' of type '%s'", nos::Name(field.Name).AsString(), nos::Name(type->TypeName).AsString());
+						nosEngine.LogE("Failed to query field '%s' of type '%s'", nos::Name(field.Name).AsCStr(), nos::Name(type->TypeName).AsCStr());
 						continue;
 					}
 					else if (queriedField) // If field is an empty array, queriedField will be empty
