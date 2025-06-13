@@ -20,3 +20,9 @@ table TestTable {
 	test1:string;
 	test2:TestStruct2;
 }
+
+enum TestEnumByte : ubyte 
+{
+	NONE = 0,
+	TEST1 = 1,
+}
