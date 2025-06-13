@@ -144,7 +144,8 @@ void OnMessageFromEditor(uint64_t editorId, nosBuffer blob)
 	}
 }
 
-void BroadcastAnimationTypesToEditors()
+// Broadcasts if targetEditorId is nullopt
+void SendAnimationTypesToEditor(std::optional<uint64_t> targetEditorId = std::nullopt)
 {
 	auto names = GAnimationSysContext->InterpolatorManager.GetAnimatableTypes();
 
@@ -154,14 +155,20 @@ void BroadcastAnimationTypesToEditors()
 	flatbuffers::FlatBufferBuilder fbb;
 	fbb.Finish(editor::MakeFromAnimation(fbb, editor::CreateAnimatableTypes(fbb, &types)));
 	nos::Buffer buf = fbb.Release();
-	nosSendEditorMessageParams params{.Message = buf, .DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST};
+	nosSendEditorMessageParams params{.Message = buf};
+	if (!targetEditorId.has_value())
+	{
+		params.DispatchType = nosEditorMessageSendType::NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST;
+	}
+	else
+	{
+		params.DispatchType = nosEditorMessageSendType::NOS_EDITOR_MESSAGE_DISPATCH_TYPE_TO_SELECTED;
+		params.ToSelected.EditorId = targetEditorId.value();
+	}
 	nosEngine.SendEditorMessage(&params);
 }
 
-void OnEditorConnected(uint64_t editorId)
-{
-	BroadcastAnimationTypesToEditors();
-}
+void OnEditorConnected(uint64_t editorId) { SendAnimationTypesToEditor(editorId); }
 
 nosResult NOSAPI_CALL OnPreUnloadSubsystem()
 {
@@ -175,7 +182,7 @@ void NOSAPI_CALL OnPostOtherModuleUnloaded(nosModuleIdentifier moduleId)
 		{ .name = nos::Name(moduleId.Name).AsString(), .version = nos::Name(moduleId.Version).AsString() });
 	if (!typesChanged)
 		return;
-	BroadcastAnimationTypesToEditors();
+	SendAnimationTypesToEditor();
 }
 }
 
