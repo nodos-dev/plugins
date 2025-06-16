@@ -235,9 +235,8 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	
 	uint32_t syncedEventOccurrences = 0;
 	uint64_t lastConsensusTimestamp = 0;
-	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
-	
 	if (events.empty())
 	{
 		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
@@ -262,7 +261,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	uint64_t minTs = UINT64_MAX, maxTs = 0;
 	while (true)
 	{
-		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 		auto currDiffFromStartNs = currentTimeNs - startTimeNs;
 		auto eventIntervalNs = event->GetEventIntervalAsSeconds() * 1e9;
 		auto frac = currDiffFromStartNs / eventIntervalNs;
@@ -286,7 +285,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
 		{
 			lastConsensusTimestamp = maxTs;
-			auto time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
+			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
 			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s", eventGroupStr, formatted.c_str());
@@ -308,9 +307,9 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			// Log the event that is behind
 			{
 				auto curTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(ts));
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(ts));
 				auto maxTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(maxTs));
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(maxTs));
 				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
 							   eventGroupStr,
 							   event->Id,
