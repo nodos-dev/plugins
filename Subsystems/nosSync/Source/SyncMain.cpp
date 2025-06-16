@@ -16,6 +16,11 @@ namespace nos::sync
 {
 std::unordered_map<uint32_t, nosSyncSubsystem*> GExportedSubsystemVersions;
 
+uint64_t NowNs()
+{
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
 struct WaitResult
 {
 	nosResult Result;
@@ -44,14 +49,16 @@ struct Event
 		WaitResult res{};
 		if (PfnWait)
 		{
-			uint64_t ts = 0, occurrences = 0;
-			res.Result = PfnWait(userData, &ts, &occurrences);
+			nosWaitResult outRes{};
+			res.Result = PfnWait(userData, &outRes);
+			auto nowNs = NowNs();
 			if (res.Result == NOS_RESULT_SUCCESS)
 			{
+				auto ts = nowNs - outRes.TimeSinceLastEventNs; // Timestamp when the event was last waited on
 				LastWaitedTimestamp = ts;
-				NumOccurrences = occurrences;
+				NumOccurrences = outRes.EventCount;
 				res.Timestamp = ts;
-				res.Occurrences = occurrences;
+				res.Occurrences = NumOccurrences;
 			}
 		}
 		return res;

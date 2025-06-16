@@ -12,7 +12,12 @@ extern "C"
 {
 #endif
 
-typedef nosResult (*nosEventWaitPfn)(void* userData, uint64_t* outEventTimestampNs, uint64_t* outEventCount);
+typedef struct nosWaitResult {
+	uint64_t TimeSinceLastEventNs;
+	uint64_t EventCount;
+} nosWaitResult;
+
+typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
@@ -34,11 +39,11 @@ typedef struct nosSyncSubsystem
 	/// Event Synchronization
 	/// ---------------------
 	/// 
-	nosResult(NOSAPI_CALL* RegisterEventGroup)(const nosRegisterEventGroupParams* params);
+	nosResult (NOSAPI_CALL* RegisterEventGroup)(const nosRegisterEventGroupParams* params);
 
 	/// Registers an event that can be waited with `waitFn` in an event group specified by `eventGroupId`.
 	/// When WaitForConsensus is called, it will poll wait functions until they agree on the same event timestamp.
-	nosResult(NOSAPI_CALL* RegisterEvent)(const nosRegisterEventParams* params);
+	nosResult (NOSAPI_CALL* RegisterEvent)(const nosRegisterEventParams* params);
 
 	/// Unregisters a previously registered event using its unique identifier.
 	nosResult (NOSAPI_CALL* UnregisterEvent)(uint64_t eventId);
@@ -47,7 +52,7 @@ typedef struct nosSyncSubsystem
 	/// indicating they're all synchronized on the same event occurrence.
 	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount);
 
-	nosResult(NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
+	nosResult (NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
 	/// 
 	/// ---------------------
 } nosSyncSubsystem;
@@ -56,7 +61,7 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 2
+#define NOS_SYNC_VERSION_MAJOR 3
 #define NOS_SYNC_VERSION_MINOR 0
 
 extern struct nosModuleInfo nosSyncPluginInfo;
