@@ -81,7 +81,11 @@ struct SwitchTrigger : NodeContext
 		else
 			dispName = pin->name()->str();
 
-		AddCasePinInfo(*pin->id(), DisplayNameToCase(dispName), pin->meta_data_map()->LookupByKey("Duplicate"));
+		std::optional<bool> isDuplicate = std::nullopt;
+		if (pin->meta_data_map())
+			isDuplicate = pin->meta_data_map()->LookupByKey("Duplicate");
+
+		AddCasePinInfo(*pin->id(), DisplayNameToCase(dispName), isDuplicate);
 	}
 
 	void AddCasePinInfo(nos::uuid const& pinId,
