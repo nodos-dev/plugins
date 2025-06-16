@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.10.7"
+			"version": "3.10.8"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
