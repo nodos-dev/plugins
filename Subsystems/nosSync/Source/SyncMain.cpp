@@ -76,7 +76,7 @@ struct EventGroup
 struct 
 {
 	std::shared_mutex Mutex;
-	uint64_t NextEventId = 0;
+	uint64_t NextEventId = 1;
 	std::unordered_map<uint32_t, EventGroup> Groups;
 } GEventSync = {};
 
