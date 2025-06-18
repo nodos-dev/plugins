@@ -12,11 +12,14 @@ extern "C"
 {
 #endif
 
+#define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1
+	
 typedef struct nosWaitResult {
 	uint64_t TimeSinceLastEventNs;
 	uint64_t EventCount;
 } nosWaitResult;
 
+typedef nosResult (*nosResetEventPfn)(void* userData);
 typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
 
 typedef struct nosRegisterEventGroupParams {
@@ -29,6 +32,7 @@ typedef struct nosRegisterEventParams {
 	uint32_t EventGroupId; /// The event group to register the event in.
 	nosVec2u DeltaSeconds; /// Interval between events.
 	void* UserData; /// User data to pass to the wait function.
+	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
 	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
 } nosRegisterEventParams;

@@ -32,6 +32,7 @@ struct Event
 {
 	uint64_t Id;
 	uint64_t PathGroupId = 0;
+	nosResetEventPfn PfnReset = nullptr; // Optional callback for resetting the event
 	nosEventWaitPfn PfnWait;
 	void* UserData;
 	nosVec2u DeltaSeconds = { 0, 0 }; // Time units in delta-seconds (x, y) for this event
@@ -62,6 +63,13 @@ struct Event
 			}
 		}
 		return res;
+	}
+
+	nosResult Reset(void* userData)
+	{
+		if (PfnReset)
+			return PfnReset(userData);
+		return NOS_RESULT_SUCCESS;
 	}
 };
 
@@ -128,9 +136,7 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 		return NOS_RESULT_FAILED; // Failed to get current path group ID
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
-	eventGroup.Events[nextId] = {
-		.Id = nextId,
-		.PathGroupId = *pathGroupId,
+	eventGroup.Events[nextId] = {.Id = nextId, .PathGroupId = *pathGroupId, .PfnReset = params->ResetFn,
 		.PfnWait = params->WaitFn,
 		.UserData = params->UserData,
 		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds)
@@ -231,6 +237,20 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	char eventGroupStr[256];
 	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu, %lu, (%lu/%lu)]", event->PathGroupId, eventGroup->Id, event->DeltaSeconds.x, event->DeltaSeconds.y);
 
+
+	nosEngine.LogD("Resetting events of group %s", eventGroupStr);
+
+	for (const auto& [eventId, event] : events)
+	{
+		auto res = event->Reset(event->UserData);
+		if (res == NOS_RESULT_FAILED)
+		{
+			// Error when resetting, consensus cannot be achieved
+			nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr);
+			return res;
+		}
+	}
+
 	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr);
 	
 	uint32_t syncedEventOccurrences = 0;
@@ -245,7 +265,6 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
 	eventTimestamps.reserve(events.size()); // Reserve space for all events
-
 	// Collect initial timestamps for all events
 	for (const auto& [eventId, event] : events)
 	{
@@ -253,6 +272,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		if (waitRes.Result == NOS_RESULT_FAILED)
 		{
 			// Error when waiting for an event, consensus cannot be achieved
+			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr);
 			return waitRes.Result;
 		}
 		eventTimestamps[event] = waitRes.Timestamp;
@@ -288,7 +308,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
-			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s", eventGroupStr, formatted.c_str());
+			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr, formatted.c_str(), (diffNs / eventIntervalNs));
 			*outTimestamp = event->LastWaitedTimestamp;
 			*outCount = event->NumOccurrences;
 			return NOS_RESULT_SUCCESS;
@@ -351,6 +371,12 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 
 nosResult NOSAPI_CALL Initialize()
 {
+	nosRegisterEventGroupParams params{
+		.Id = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
+		.Timeout = 10.0,	// Allow 10 frames for sync
+		.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
+	};
+	RegisterEventGroup(&params);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -358,6 +384,7 @@ nosResult NOSAPI_CALL UnloadSubsystem()
 {
 	for (auto& [minorVersion, subsystem] : GExportedSubsystemVersions)
 		delete subsystem;
+	UnregisterEventGroup(NOS_SYNC_DEFAULT_EVENT_GROUP_ID);
 	return NOS_RESULT_SUCCESS;
 }
 
