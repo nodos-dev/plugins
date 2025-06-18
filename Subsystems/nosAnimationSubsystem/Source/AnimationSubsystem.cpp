@@ -23,8 +23,8 @@ namespace editor
 static std::unique_ptr<struct AnimationSubsystemCtx> GAnimation;
 static constexpr auto SETTINGS_FILE_DIRECTORY = NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE;
 
-static constexpr char SETTINGS_KEY_FREE_RUN_DELTA_SECS[] = "Free Run Delta Seconds";
-nosResult UpdateSettings(const char* entryName, nosBuffer entryValue);
+NOS_REGISTER_NAME_SPACED(SETTINGS_KEY_FREE_RUN_DELTA_SECS, "Free Run Delta Seconds");
+nosResult UpdateSettings(nosName entryName, nosBuffer entryValue);
 
 struct AnimationSubsystemCtx
 {
@@ -61,45 +61,14 @@ struct AnimationSubsystemCtx
 
 	void InitSettings()
 	{
-		nosSettingsEntryParams params = {};
-		params.Directory = SETTINGS_FILE_DIRECTORY;
-		params.EntryName = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
-		params.TypeName = NOS_NAME("nos.fb.vec2u");
-		if (nosSettings->ReadSettingsEntry(&params) == NOS_RESULT_SUCCESS && params.Buffer.Data) {
-			auto deltaSec = static_cast<nosVec2u*>(params.Buffer.Data);
-			FreeRunDeltaSecs = *deltaSec;
-			nosEngine.FreeBuffer(&params.Buffer);
+		if (sys::settings::RegisterEntry(NSN_SETTINGS_KEY_FREE_RUN_DELTA_SECS.AsCStr(), "nos.fb.vec2u", UpdateSettings, nosBuffer{.Data = &FreeRunDeltaSecs, .Size = sizeof(FreeRunDeltaSecs)}) != NOS_RESULT_SUCCESS) {
+			nosEngine.LogE("nos.sys.animation failed to register FreeRunDeltaSecs settings entry");
 		}
-		
-		{
-			auto buf = nos::Buffer::From(FreeRunDeltaSecs);
-			params.Buffer = buf;
-			auto ret = nosSettings->WriteSettingsEntry(&params);
-			if (ret != NOS_RESULT_SUCCESS) {
-				nosEngine.LogE("Failed to write animation subsystem settings, changes reverted");
-				return;
-			}
-		}
-
-		nos::Buffer itemFreeRunDeltaSec;
-		{
-			nos::sys::settings::editor::TSettingsEditorItem item;
-			item.item_display_name = "Free Run Delta Seconds";
-			item.entry.reset(new nos::sys::settings::TSettingsEntry());
-			item.entry->type_name = "nos.fb.vec2u";
-			item.entry->entry_name = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
-			item.entry->data = nos::Buffer::From(FreeRunDeltaSecs);
-			itemFreeRunDeltaSec = nos::Buffer::From(item);
-		}
-		std::vector editorItems = {
-			itemFreeRunDeltaSec.As<const nosSettingsEditorItem>(),
-		};
-		nosSettings->RegisterEditorSettings(editorItems.size(), editorItems.data(), UpdateSettings, SETTINGS_FILE_DIRECTORY);
 	}
 
 	void DeinitSettings()
 	{
-		nosSettings->UnregisterEditorSettings();
+		sys::settings::UnregisterEntry(NSN_SETTINGS_KEY_FREE_RUN_DELTA_SECS.AsCStr());
 	}
 
 	InterpolatorManager InterpolatorManager;
@@ -110,9 +79,9 @@ struct AnimationSubsystemCtx
 };
 
 
-nosResult UpdateSettings(const char* entryName, nosBuffer entryValue)
+nosResult UpdateSettings(nosName entryName, nosBuffer entryValue)
 {
-	if (strcmp(SETTINGS_KEY_FREE_RUN_DELTA_SECS, entryName) == 0)
+	if (NSN_SETTINGS_KEY_FREE_RUN_DELTA_SECS == entryName)
 	{
 		auto* newVal = static_cast<const nosVec2u*>(entryValue.Data);
 		GAnimation->FreeRunDeltaSecs = *newVal;
