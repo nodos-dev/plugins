@@ -80,7 +80,10 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 		if (!ShouldDeinterlace || fieldType == NOS_TEXTURE_FIELD_TYPE_ODD)
 			res = ExecuteRingNode(params, true, NOS_NAME_STATIC("DeinterlacedBufferRing"), true);
 		else
+		{
+			res = SkipExecuteRingNode(params, NOS_NAME_STATIC("DeinterlacedBufferRing"));
 			SendScheduleRequest(1);
+		}
 		return res;
 	}
 

@@ -55,6 +55,7 @@ struct ResourceInterface {
 	virtual void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) = 0;
 	virtual void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) = 0;
 	virtual nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) = 0;
+	virtual nosResult SkipExecute(nosNodeExecuteParams* params) { return NOS_RESULT_SUCCESS; }
 	virtual void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) = 0;
 	// Returns false if resource is compatible with the current sample
 	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
@@ -64,18 +65,18 @@ struct ResourceInterface {
 	virtual void OnPathStart() {}
 };
 
-struct GPUTextureResource : ResourceInterface {
+struct GPUTextureResource : ResourceInterface
+{
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::GPUTexture;
-	struct Resource : ResourceBase {
+	struct Resource : ResourceBase
+	{
 		vkss::Resource VkRes;
-		struct {
+		struct
+		{
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosGPUEvent WaitEvent = 0;
 		} Params{};
-		Resource(vkss::Resource res) : VkRes(std::move(res))
-		{
-			ResourceType = RESOURCE_TYPE;
-		}
+		Resource(vkss::Resource res) : VkRes(std::move(res)) { ResourceType = RESOURCE_TYPE; }
 		~Resource()
 		{
 			if (Params.WaitEvent)
@@ -91,7 +92,8 @@ struct GPUTextureResource : ResourceInterface {
 		.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST),
 	};
 
-	GPUTextureResource() : ResourceInterface(ResourceType::GPUTexture) {
+	GPUTextureResource() : ResourceInterface(ResourceType::GPUTexture)
+	{
 		nosResourceShareInfo shareInfo;
 		shareInfo.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
 		shareInfo.Info.Texture = SampleTexture;
@@ -99,7 +101,8 @@ struct GPUTextureResource : ResourceInterface {
 	}
 	rc<ResourceBase> CreateResource() override
 	{
-		if (auto texture = vkss::Resource::CreateWithSameInfo(vkss::DeserializeTextureInfo(Sample.Data()), "Texture Ring Resource"))
+		if (auto texture = vkss::Resource::CreateWithSameInfo(vkss::DeserializeTextureInfo(Sample.Data()),
+															  "Texture Ring Resource"))
 			return MakeShared<Resource>(std::move(*texture));
 		return nullptr;
 	}
@@ -112,33 +115,36 @@ struct GPUTextureResource : ResourceInterface {
 		res->FrameNumber = 0;
 	}
 
-	void OnPathStart() override
-	{
-		WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-	}
+	void OnPathStart() override { WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN; }
 
-	void WaitForDownloadToEnd(ResourceBase* r, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) override {
-		Resource* res = GetResource<GPUTextureResource>(r); 
-		if (res->Params.WaitEvent) {
+	void WaitForDownloadToEnd(ResourceBase* r,
+							  const std::string& nodeTypeName,
+							  const std::string& nodeDisplayName,
+							  nosCopyInfo* cpy) override
+	{
+		Resource* res = GetResource<GPUTextureResource>(r);
+		if (res->Params.WaitEvent)
+		{
 			nos::util::Stopwatch sw;
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 
 			auto elapsed = sw.Elapsed();
 			nosEngine.WatchLog((nodeTypeName + " Copy From GPU Wait: " + nodeDisplayName).c_str(),
-				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+							   nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 
 		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(vkss::ConvertTextureInfo(res->VkRes)));
 	}
 
-	void Copy(ResourceBase* r, nosCopyInfo* cpy, uuid NodeId) override {
+	void Copy(ResourceBase* r, nosCopyInfo* cpy, uuid NodeId) override
+	{
 		Resource* res = GetResource<GPUTextureResource>(r);
 		nosResourceShareInfo outputResource = vkss::DeserializeTextureInfo(cpy->PinData->Data);
 		nosCmd cmd;
-		nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd };
+		nosCmdBeginParams beginParams = {NOS_NAME("BoundedQueue"), NodeId, &cmd};
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &res->VkRes, &outputResource, 0);
-		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &res->Params.WaitEvent };
+		nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &res->Params.WaitEvent};
 		nosVulkan->End(cmd, &end);
 
 		nosTextureFieldType outFieldType = res->VkRes.Info.Texture.FieldType;
@@ -149,13 +155,13 @@ struct GPUTextureResource : ResourceInterface {
 		nosEngine.SetPinValue(cpy->ID, Buffer::From(texDef));
 	}
 
-	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override {
+	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override
+	{
 		nosResourceShareInfo input = vkss::DeserializeTextureInfo(pin.Data->Data);
 		nosTextureFieldType incomingField = input.Info.Texture.FieldType;
 
 		if (!input.Memory.Handle)
 			return nullptr;
-
 
 		if (rejectFieldMismatch)
 		{
@@ -175,7 +181,12 @@ struct GPUTextureResource : ResourceInterface {
 		return pin.Data->Data;
 	}
 
-	nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) override {
+	nosResult Push(ResourceBase* r,
+				   void* pinInfo,
+				   nosNodeExecuteParams* params,
+				   nos::Name ringExecuteName,
+				   bool pushEventForCopyFrom) override
+	{
 		Resource* res = GetResource<GPUTextureResource>(r);
 		res->FrameNumber = params->FrameNumber;
 
@@ -188,21 +199,24 @@ struct GPUTextureResource : ResourceInterface {
 			nos::util::Stopwatch sw;
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog((ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
+			nosEngine.WatchLog(
+				(ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 		nosCmd cmd;
 		nosCmdBeginParams beginParams;
-		beginParams = { ringExecuteName, params->NodeId, &cmd };
+		beginParams = {ringExecuteName, params->NodeId, &cmd};
 
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
-		nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
+		nosCmdEndParams end{.ForceSubmit = NOS_TRUE,
+							.OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr};
 		nosVulkan->End(cmd, &end);
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) override {
+	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) override
+	{
 		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
 		if (updateName != NSN_Input)
 			return false;
@@ -217,7 +231,8 @@ struct GPUTextureResource : ResourceInterface {
 		return true;
 	}
 
-	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override{
+	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override
+	{
 		Resource* res = GetResource<GPUTextureResource>(r);
 		auto outputTextureDesc = static_cast<sys::vulkan::Texture*>(pinData.Data);
 		auto output = vkss::DeserializeTextureInfo(outputTextureDesc);
@@ -228,7 +243,8 @@ struct GPUTextureResource : ResourceInterface {
 		{
 			output.Memory = {};
 			output.Info = res->VkRes.Info;
-			output.Info.Texture.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_SAMPLED);
+			output.Info.Texture.Usage =
+				nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_SAMPLED);
 
 			sys::vulkan::TTexture texDef = vkss::ConvertTextureInfo(output);
 			texDef.unscaled = true;
@@ -251,8 +267,16 @@ struct GPUTextureResource : ResourceInterface {
 			return ringSize;
 		auto input = vkss::DeserializeTextureInfo(inputPinData);
 		if (vkss::IsTextureFieldTypeInterlaced(input.Info.Texture.FieldType))
-			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
+			ringSize =
+				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
+	}
+
+	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
+	{
+		// Force submit to ensure passes run correctly
+		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams->NodeId), true, nullptr);
+		return NOS_RESULT_SUCCESS;
 	}
 };
 
@@ -484,6 +508,12 @@ struct GPUBufferResource : ResourceInterface {
 		if (vkss::IsTextureFieldTypeInterlaced((nosTextureFieldType)input->field_type()))
 			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
+	}
+	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
+	{
+		// Force submit to ensure passes run correctly
+		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams->NodeId), true, nullptr);
+		return NOS_RESULT_SUCCESS;
 	}
 };
 
@@ -918,6 +948,13 @@ struct RingNodeBase : NodeContext
 			return;
 
 		TypeResolved();
+	}
+
+	nosResult SkipExecuteRingNode(nosNodeExecuteParams* params, nosName ringExecuteName) 
+	{
+		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
+			return NOS_RESULT_FAILED;
+		return Ring->ResInterface->SkipExecute(params);
 	}
 
 	nosResult ExecuteRingNode(nosNodeExecuteParams* params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
