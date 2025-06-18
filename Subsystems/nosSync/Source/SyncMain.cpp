@@ -16,6 +16,11 @@ namespace nos::sync
 {
 std::unordered_map<uint32_t, nosSyncSubsystem*> GExportedSubsystemVersions;
 
+uint64_t NowNs()
+{
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
 struct WaitResult
 {
 	nosResult Result;
@@ -27,6 +32,7 @@ struct Event
 {
 	uint64_t Id;
 	uint64_t PathGroupId = 0;
+	nosResetEventPfn PfnReset = nullptr; // Optional callback for resetting the event
 	nosEventWaitPfn PfnWait;
 	void* UserData;
 	nosVec2u DeltaSeconds = { 0, 0 }; // Time units in delta-seconds (x, y) for this event
@@ -44,17 +50,26 @@ struct Event
 		WaitResult res{};
 		if (PfnWait)
 		{
-			uint64_t ts = 0, occurrences = 0;
-			res.Result = PfnWait(userData, &ts, &occurrences);
+			nosWaitResult outRes{};
+			res.Result = PfnWait(userData, &outRes);
+			auto nowNs = NowNs();
 			if (res.Result == NOS_RESULT_SUCCESS)
 			{
+				auto ts = nowNs - outRes.TimeSinceLastEventNs; // Timestamp when the event was last waited on
 				LastWaitedTimestamp = ts;
-				NumOccurrences = occurrences;
+				NumOccurrences = outRes.EventCount;
 				res.Timestamp = ts;
-				res.Occurrences = occurrences;
+				res.Occurrences = NumOccurrences;
 			}
 		}
 		return res;
+	}
+
+	nosResult Reset(void* userData)
+	{
+		if (PfnReset)
+			return PfnReset(userData);
+		return NOS_RESULT_SUCCESS;
 	}
 };
 
@@ -69,7 +84,7 @@ struct EventGroup
 struct 
 {
 	std::shared_mutex Mutex;
-	uint64_t NextEventId = 0;
+	uint64_t NextEventId = 1;
 	std::unordered_map<uint32_t, EventGroup> Groups;
 } GEventSync = {};
 
@@ -121,9 +136,7 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 		return NOS_RESULT_FAILED; // Failed to get current path group ID
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
-	eventGroup.Events[nextId] = {
-		.Id = nextId,
-		.PathGroupId = *pathGroupId,
+	eventGroup.Events[nextId] = {.Id = nextId, .PathGroupId = *pathGroupId, .PfnReset = params->ResetFn,
 		.PfnWait = params->WaitFn,
 		.UserData = params->UserData,
 		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds)
@@ -224,13 +237,26 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	char eventGroupStr[256];
 	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu, %lu, (%lu/%lu)]", event->PathGroupId, eventGroup->Id, event->DeltaSeconds.x, event->DeltaSeconds.y);
 
+
+	nosEngine.LogD("Resetting events of group %s", eventGroupStr);
+
+	for (const auto& [eventId, event] : events)
+	{
+		auto res = event->Reset(event->UserData);
+		if (res == NOS_RESULT_FAILED)
+		{
+			// Error when resetting, consensus cannot be achieved
+			nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr);
+			return res;
+		}
+	}
+
 	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr);
 	
 	uint32_t syncedEventOccurrences = 0;
 	uint64_t lastConsensusTimestamp = 0;
-	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
-	
 	if (events.empty())
 	{
 		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
@@ -239,7 +265,6 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
 	eventTimestamps.reserve(events.size()); // Reserve space for all events
-
 	// Collect initial timestamps for all events
 	for (const auto& [eventId, event] : events)
 	{
@@ -247,6 +272,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		if (waitRes.Result == NOS_RESULT_FAILED)
 		{
 			// Error when waiting for an event, consensus cannot be achieved
+			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr);
 			return waitRes.Result;
 		}
 		eventTimestamps[event] = waitRes.Timestamp;
@@ -255,7 +281,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	uint64_t minTs = UINT64_MAX, maxTs = 0;
 	while (true)
 	{
-		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 		auto currDiffFromStartNs = currentTimeNs - startTimeNs;
 		auto eventIntervalNs = event->GetEventIntervalAsSeconds() * 1e9;
 		auto frac = currDiffFromStartNs / eventIntervalNs;
@@ -279,10 +305,10 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
 		{
 			lastConsensusTimestamp = maxTs;
-			auto time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
+			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
-			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s", eventGroupStr, formatted.c_str());
+			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr, formatted.c_str(), (diffNs / eventIntervalNs));
 			*outTimestamp = event->LastWaitedTimestamp;
 			*outCount = event->NumOccurrences;
 			return NOS_RESULT_SUCCESS;
@@ -301,9 +327,9 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			// Log the event that is behind
 			{
 				auto curTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(ts));
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(ts));
 				auto maxTime =
-					std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(maxTs));
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(maxTs));
 				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
 							   eventGroupStr,
 							   event->Id,
@@ -345,6 +371,12 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 
 nosResult NOSAPI_CALL Initialize()
 {
+	nosRegisterEventGroupParams params{
+		.Id = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
+		.Timeout = 10.0,	// Allow 10 frames for sync
+		.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
+	};
+	RegisterEventGroup(&params);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -352,6 +384,7 @@ nosResult NOSAPI_CALL UnloadSubsystem()
 {
 	for (auto& [minorVersion, subsystem] : GExportedSubsystemVersions)
 		delete subsystem;
+	UnregisterEventGroup(NOS_SYNC_DEFAULT_EVENT_GROUP_ID);
 	return NOS_RESULT_SUCCESS;
 }
 
