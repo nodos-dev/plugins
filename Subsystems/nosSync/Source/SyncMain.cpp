@@ -172,7 +172,7 @@ bool IsDeltaSecondsSyncable(nosVec2u deltaSec1, nosVec2u deltaSec2)
 	if (deltaSec1.y == 0 || deltaSec2.y == 0)
 		return false; // Cannot sync if any of the delta-seconds is zero
 	auto gcdx = std::gcd(deltaSec1.x, deltaSec2.x);
-	auto gcdy = std::gcd(deltaSec2.y, deltaSec2.y);
+	auto gcdy = std::gcd(deltaSec1.y, deltaSec2.y);
 	return (gcdx == deltaSec1.x || gcdx == deltaSec2.x) && (gcdy == deltaSec1.y || gcdy == deltaSec2.y);
 }
 
