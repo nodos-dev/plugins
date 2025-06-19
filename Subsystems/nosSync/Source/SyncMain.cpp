@@ -217,14 +217,21 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	{
 		if (group.Id != eventGroup->Id) // Only consider events in the same group
 			continue;
-		for (auto& [eid, ev] : group.Events)
+		for (auto& [eid, e] : group.Events)
 		{
-			if (CanTimeStepsAlign(ev.DeltaSeconds, event->DeltaSeconds)
-				&& ev.PathGroupId == event->PathGroupId)
+			if (group.Id == NOS_SYNC_NO_SYNC_EVENT_GROUP_ID)
+			{
+				if (e.Id != event->Id)
+					continue;
+				else
+					events.emplace(eid, e);
+			}
+			else if (CanTimeStepsAlign(e.DeltaSeconds, event->DeltaSeconds)
+					 && e.PathGroupId == event->PathGroupId)
 			{
 				// Only consider events with the same delta-seconds and in same connected component
-				events.emplace(eid, ev);
-				smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, ev.DeltaSeconds);
+				events.emplace(eid, e);
+				smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, e.DeltaSeconds);
 			}
 		}
 	}

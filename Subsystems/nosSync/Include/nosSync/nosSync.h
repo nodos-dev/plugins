@@ -12,7 +12,8 @@ extern "C"
 {
 #endif
 
-#define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1
+#define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1UL
+#define NOS_SYNC_NO_SYNC_EVENT_GROUP_ID 0UL
 	
 typedef struct nosWaitResult {
 	uint64_t TimeSinceLastEventNs;
@@ -29,7 +30,7 @@ typedef struct nosRegisterEventGroupParams {
 } nosRegisterEventGroupParams;
 
 typedef struct nosRegisterEventParams {
-	uint32_t EventGroupId; /// The event group to register the event in.
+	uint32_t EventGroupId; /// The event group to register the event in. If 0, it will not be synced with other 0 ID'd events.
 	nosVec2u DeltaSeconds; /// Interval between events.
 	void* UserData; /// User data to pass to the wait function.
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
