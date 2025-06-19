@@ -167,7 +167,7 @@ nosResult NOSAPI_CALL UnregisterEventGroup(uint32_t eventGroupId)
 	return NOS_RESULT_SUCCESS;
 }
 
-bool IsDeltaSecondsSyncable(nosVec2u deltaSec1, nosVec2u deltaSec2)
+bool CanTimeStepsAlign(nosVec2u deltaSec1, nosVec2u deltaSec2)
 {
 	if (deltaSec1.y == 0 || deltaSec2.y == 0)
 		return false; // Cannot sync if any of the delta-seconds is zero
@@ -219,7 +219,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			continue;
 		for (auto& [eid, ev] : group.Events)
 		{
-			if (IsDeltaSecondsSyncable(ev.DeltaSeconds, event->DeltaSeconds)
+			if (CanTimeStepsAlign(ev.DeltaSeconds, event->DeltaSeconds)
 				&& ev.PathGroupId == event->PathGroupId)
 			{
 				// Only consider events with the same delta-seconds and in same connected component
