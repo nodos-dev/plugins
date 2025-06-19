@@ -658,14 +658,11 @@ struct TRing
         return Size - Write.Pool.size();
     }
 
-	ResourceInterface::ResourceBase*BeginPush()
+	ResourceInterface::ResourceBase* BeginPush(uint64_t timeoutMs)
     {
         std::unique_lock lock(Write.Mutex);
-        while (Write.Pool.empty() && !Exit)
-        {
-            Write.CV.wait(lock);
-        }
-        if (Exit)
+		if (!Write.CV.wait_for(
+				lock, std::chrono::milliseconds(timeoutMs), [this]() { return !Write.Pool.empty() || Exit; }))
             return 0;
         ResourceInterface::ResourceBase* res = Write.Pool.front();
         Write.Pool.pop_front();
@@ -724,52 +721,6 @@ struct TRing
         }
         Write.CV.notify_one();
     }
-
-    bool CanPop(uint64_t& frameNumber, uint32_t spare = 0)
-    {
-        std::unique_lock lock(Read.Mutex);
-        if (Read.Pool.size() > spare)
-        {
-        	// TODO: Under current arch, schedule requests are sent for the node instead of pin, so this code shouldn't be needed, but check.
-            // auto newFrameNumber = Read.Pool.front()->FrameNumber.load();
-            // bool result = ResetFrameCount || !frameNumber || newFrameNumber > frameNumber;
-            // frameNumber = newFrameNumber;
-            // ResetFrameCount = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    bool CanPush()
-    {
-        std::unique_lock lock(Write.Mutex);
-        return !Write.Pool.empty();
-    }
-
-	ResourceInterface::ResourceBase*TryPush()
-    {
-        if (CanPush())
-            return BeginPush();
-        return 0;
-    }
-
-	ResourceInterface::ResourceBase*TryPush(const std::chrono::milliseconds timeout)
-    {
-		{
-            std::unique_lock lock(Write.Mutex);
-		    if (Write.Pool.empty())
-                Write.CV.wait_for(lock, timeout, [&]{ return CanPush(); });
-		}
-		return TryPush();
-    }
-
-	ResourceInterface::ResourceBase*TryPop(uint64_t& frameNumber, uint32_t spare = 0)
-    {
-        if (CanPop(frameNumber, spare))
-            return BeginPop(20);
-        return 0;
-	}
 
     void Reset(bool fill)
     {
@@ -971,10 +922,16 @@ struct RingNodeBase : NodeContext
 		{
 			nos::util::Stopwatch sw;
 			ScopedProfilerEvent _({ .Name = "Wait For Empty Slot" });
-			slot = Ring->BeginPush();
+			slot = Ring->BeginPush(100);
 			nosEngine.WatchLog((GetName() + " Begin Push").c_str(), nos::util::Stopwatch::ElapsedString(sw.Elapsed()).c_str());
 		}
-
+		if (!slot)
+		{
+			if (Ring->Exit)
+				return NOS_RESULT_FAILED;
+			else
+				return NOS_RESULT_PENDING;
+		}
 		Ring->ResInterface->Push(slot, input, params, ringExecuteName, pushEventForCopyFrom);
 		
 		bool isFillComplete = false;
