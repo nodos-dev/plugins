@@ -6,6 +6,9 @@
 #include <shared_mutex>
 #include <format>
 #include <numeric>
+#include <random>
+
+#define RANDOMIZE_EVENT_ORDER 0 // For diagnosis, set to 1 to randomize the order of events when waiting for consensus
 
 NOS_INIT_WITH_MIN_REQUIRED_MINOR(0);
 
@@ -264,6 +267,42 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	char eventGroupStr[256];
 	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu:%lu:(%lu/%lu)]", event->PathGroupId, eventGroup->Id, smallestDeltaSecs.x, smallestDeltaSecs.y);
+
+	// Diagnosis code, randomize the order of events to treat everyone equally
+#if RANDOMIZE_EVENT_ORDER
+	{
+		std::unordered_set<size_t> usedIndices;
+		std::vector<uint64_t> eventIds;
+		for (const auto& [eid, ev] : events)
+		{
+			eventIds.push_back(eid);
+		}
+		
+		auto copy = std::move(events);
+		events = {};
+
+		// Randomly select from eventIds, avoiding duplicates
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<size_t> dis(0, eventIds.size() - 1);
+		while (usedIndices.size() < copy.size())
+		{
+			size_t idx = dis(gen);
+			if (usedIndices.find(idx) == usedIndices.end())
+			{
+				usedIndices.insert(idx);
+				events.emplace(eventIds[idx], copy.at(eventIds[idx]));
+			}
+		}
+	}
+	std::string idOrder = "[";
+	for (auto& [id, _] : events)
+	{
+		idOrder += std::to_string(id) + ", ";
+	}
+	nosEngine.LogI("Waiting for consensus on event group %u with events: %s", eventGroup->Id, (idOrder + "]").c_str());
+#endif
+
 
 	if (NOS_SYNC_NO_SYNC_EVENT_GROUP_ID != eventGroup->Id)
 	{
