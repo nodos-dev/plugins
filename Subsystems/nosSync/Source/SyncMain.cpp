@@ -217,14 +217,21 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	{
 		if (group.Id != eventGroup->Id) // Only consider events in the same group
 			continue;
-		for (auto& [eid, ev] : group.Events)
+		for (auto& [eid, e] : group.Events)
 		{
-			if (CanTimeStepsAlign(ev.DeltaSeconds, event->DeltaSeconds)
-				&& ev.PathGroupId == event->PathGroupId)
+			if (group.Id == NOS_SYNC_NO_SYNC_EVENT_GROUP_ID)
+			{
+				if (e.Id != event->Id)
+					continue;
+				else
+					events.emplace(eid, e);
+			}
+			else if (CanTimeStepsAlign(e.DeltaSeconds, event->DeltaSeconds)
+					 && e.PathGroupId == event->PathGroupId)
 			{
 				// Only consider events with the same delta-seconds and in same connected component
-				events.emplace(eid, ev);
-				smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, ev.DeltaSeconds);
+				events.emplace(eid, e);
+				smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, e.DeltaSeconds);
 			}
 		}
 	}
@@ -256,19 +263,21 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	}
 
 	char eventGroupStr[256];
-	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu, %lu, (%lu/%lu)]", event->PathGroupId, eventGroup->Id, smallestDeltaSecs.x, smallestDeltaSecs.y);
+	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu:%lu:(%lu/%lu)]", event->PathGroupId, eventGroup->Id, smallestDeltaSecs.x, smallestDeltaSecs.y);
 
-
-	nosEngine.LogD("Resetting events of group %s", eventGroupStr);
-
-	for (const auto& [eventId, event] : events)
+	if (NOS_SYNC_NO_SYNC_EVENT_GROUP_ID != eventGroup->Id)
 	{
-		auto res = event->Reset(event->UserData);
-		if (res == NOS_RESULT_FAILED)
+		nosEngine.LogD("Resetting events of group %s", eventGroupStr);
+
+		for (const auto& [eventId, event] : events)
 		{
-			// Error when resetting, consensus cannot be achieved
-			nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr);
-			return res;
+			auto res = event->Reset(event->UserData);
+			if (res == NOS_RESULT_FAILED)
+			{
+				// Error when resetting, consensus cannot be achieved
+				nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr);
+				return res;
+			}
 		}
 	}
 
@@ -392,12 +401,18 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 
 nosResult NOSAPI_CALL Initialize()
 {
-	nosRegisterEventGroupParams params{
+	nosRegisterEventGroupParams defaultGroup{
 		.Id = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
 		.Timeout = 10.0,	// Allow 10 frames for sync
 		.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
 	};
-	RegisterEventGroup(&params);
+	RegisterEventGroup(&defaultGroup);
+	nosRegisterEventGroupParams noSyncGroup{
+		.Id = NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
+		.Timeout = 0.0,	// Don't care
+		.Tolerance = 0.0f, // Don't care
+	};
+	RegisterEventGroup(&noSyncGroup);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -406,6 +421,7 @@ nosResult NOSAPI_CALL UnloadSubsystem()
 	for (auto& [minorVersion, subsystem] : GExportedSubsystemVersions)
 		delete subsystem;
 	UnregisterEventGroup(NOS_SYNC_DEFAULT_EVENT_GROUP_ID);
+	UnregisterEventGroup(NOS_SYNC_NO_SYNC_EVENT_GROUP_ID);
 	return NOS_RESULT_SUCCESS;
 }
 
