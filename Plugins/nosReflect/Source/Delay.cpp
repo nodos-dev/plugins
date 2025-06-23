@@ -16,6 +16,7 @@ struct SlotBase
 	SlotBase& operator=(const SlotBase&) = delete;
 	SlotBase(nosBuffer const& buf) : Buffer(buf) {}
 	virtual void CopyFrom(nosBuffer const& buf, uuid const& nodeId) = 0;
+	virtual bool IsSlotCompatible(nosBuffer const& buf) const = 0;
 };
 
 struct DelayQueue {
@@ -36,7 +37,17 @@ struct DelayQueue {
 		Slots.clear(); 
 	}
 
-	bool HasFree() const { return !FreeQueue.empty(); }
+	void ClearIfIncompatibleData(nosBuffer const& buf)
+	{
+		if (AreSlotsCompatibleWith(buf))
+			return;
+		Clear();
+	}
+
+	bool HasFree() const 
+	{
+		return !FreeQueue.empty(); 
+	}
 
 	void DeleteSlotAndPopFromQueue(std::queue<Ref<SlotBase>>& queue)
 	{
@@ -104,6 +115,16 @@ struct DelayQueue {
 	{ 
 		return Delay + (AccountForActiveSlot ? 1 : 0); 
 	}
+
+	bool AreSlotsCompatibleWith(nosBuffer const& buf) const
+	{
+		if (Slots.empty())
+			return true;
+		for (const auto& slot : Slots)
+			if (!slot->IsSlotCompatible(buf))
+				return false;
+		return true;
+	}
 };
 
 
@@ -114,6 +135,10 @@ struct TriviallyCopyableSlot : SlotBase
 	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
 	{
 		Buffer = other;
+	}
+	bool IsSlotCompatible(nosBuffer const& buf) const override
+	{ 
+		return true;
 	}
 };
 
@@ -160,6 +185,29 @@ struct ResourceSlot : SlotBase
 		nosVulkan->Copy(cmd, &src, &Res, nullptr);
 		nosVulkan->End(cmd, nullptr);
 		Buffer = Res.ToPinData();
+	}
+
+	bool IsSlotCompatible(nosBuffer const& buf) const override
+	{
+		if constexpr (std::is_same_v<T, nosBufferInfo>)
+		{
+			auto vkBuf = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(buf.Data));
+			if (vkBuf.Info.Buffer.Size != Res.Info.Buffer.Size ||
+				vkBuf.Info.Buffer.Alignment != Res.Info.Buffer.Alignment ||
+				vkBuf.Info.Buffer.Usage != Res.Info.Buffer.Usage ||
+				vkBuf.Info.Buffer.MemoryFlags != Res.Info.Buffer.MemoryFlags)
+				return false;
+		}
+		if constexpr (std::is_same_v<T, nosTextureInfo>)
+		{
+			auto tex = vkss::DeserializeTextureInfo(buf.Data);
+			if (tex.Info.Texture.Format != Res.Info.Texture.Format ||
+				tex.Info.Texture.Width != Res.Info.Texture.Width ||
+				tex.Info.Texture.Height != Res.Info.Texture.Height ||
+				tex.Info.Texture.Usage != Res.Info.Texture.Usage || tex.Info.Texture.Filter != Res.Info.Texture.Filter)
+				return false;
+		}
+		return false;
 	}
 };
 
@@ -232,7 +280,7 @@ struct DelayNode : NodeContext
 			SetPinValue(NSN_Output, popSlot->Buffer);
 			Queue.EndPop(*popSlot);
 		}
-
+		Queue.ClearIfIncompatibleData(inputBuffer);
 		if (!Queue.HasFree())
 		{
 			std::unique_ptr<SlotBase> slot;
