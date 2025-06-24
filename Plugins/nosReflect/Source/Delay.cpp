@@ -207,7 +207,7 @@ struct ResourceSlot : SlotBase
 				tex.Info.Texture.Usage != Res.Info.Texture.Usage || tex.Info.Texture.Filter != Res.Info.Texture.Filter)
 				return false;
 		}
-		return false;
+		return true;
 	}
 };
 
