@@ -53,7 +53,7 @@
 		"Config/ThreadedSyncMultiOutlet.nosdef",
 		"Config/ConditionalTrigger.nosdef",
 		"Config/TriggerOnAnyInput.nosdef",
-		"Config/TextureMonitor.nosdef",
+		"Config/SplitWipe.nosdef",
 		"Config/SwitchTrigger.nosdef",
 		"Config/PrintLog.nosdef",
 		"Config/ScheduleOnRequest.nosdef",

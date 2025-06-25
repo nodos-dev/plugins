@@ -1,19 +1,19 @@
 {
 	"nodes": [
 		{
-			"class_name": "TextureMonitor",
+			"class_name": "SplitWipe",
 			"menu_info": {
 				"category": "Utilities",
-				"display_name": "Texture Monitor",
+				"display_name": "Split Wipe",
 				"name_aliases": [ "compare", "switch", "watch", "display" ]
 			},
 			"node": {
-				"class_name": "TextureMonitor",
+				"class_name": "SplitWipe",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "Shaders/TextureMonitor.frag"
+						"shader": "Shaders/SplitWipe.frag"
 					}
 				},
 				"description": "Compare 2 textures with a slider that can rotate.\nClick on point to move.\nClick on empty space to rotate",
