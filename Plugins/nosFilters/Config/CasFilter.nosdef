@@ -4,7 +4,8 @@
 			"class_name": "CasFilter",
 			"menu_info": {
 				"category": "Filters",
-				"display_name": "CAS Filter (Raw)"
+				"display_name": "CAS Filter (Raw)",
+				"name_aliases": [ "Contrast Adaptive Sharpening", "sharpen", "fx" ]
 			},
 			"node": {
 				"class_name": "CasFilter",
