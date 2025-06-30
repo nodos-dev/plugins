@@ -16,7 +16,8 @@ void main()
 {
     const ivec2 D = ivec2(gl_NumWorkGroups * gl_WorkGroupSize).xy;
     const ivec2 Q = textureSize(Input, 0);
-    const ivec2 N = Q / D;
+    const vec2 Nf = Q / vec2(D);
+    const ivec2 N = ivec2(ceil(Nf));
     const ivec2 LocalGroupCoord = ivec2(gl_GlobalInvocationID.xy) * N;
 
     for (int i = 0; i < N.x; ++i)
@@ -64,3 +65,4 @@ void main()
         }
     }
 }
+

@@ -4,13 +4,13 @@
 			"class_name": "CasFilter",
 			"menu_info": {
 				"category": "Filters",
-				"display_name": "CAS Filter (Raw)",
-				"name_aliases": [ "Contrast Adaptive Sharpening", "sharpen", "fx" ]
+				"display_name": "Contrast Adaptive Sharpen (Raw)",
+				"name_aliases": [ "Contrast Adaptive Sharpen", "cas", "sharpen", "fx" ]
 			},
+			"hide_in_context_menu": true,
 			"node": {
 				"class_name": "CasFilter",
 				"display_name": "CAS Filter",
-				"description": "Contrast Adaptive Sharpening",
 				"contents_type": "Job",
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
