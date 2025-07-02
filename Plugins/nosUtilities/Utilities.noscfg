@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.23.5"
+			"version": "3.24"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -62,7 +62,10 @@
 		"Config/PrintLog.nosdef",
 		"Config/LayoutNodes.nosdef",
 		"Config/LayoutDrawer.nosdef",
-		"Config/LayoutQuadCanvas.nosdef"
+		"Config/LayoutQuadCanvas.nosdef",
+		"Config/CalculateDispatchSize.nosdef",
+		"Config/YADIF.nosdef",
+		"Config/YADIFWithAutoDispatchSize.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
