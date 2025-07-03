@@ -2206,7 +2206,7 @@
               "id": "30453811-b1b7-4255-9106-c2f03afb2ea2",
               "name": "Comment (4)",
               "hint": "RealityHub Hint",
-              "content": "16",
+              "content": "Controls the overall sharpness level applied by the CAS filter. Higher values increase detail but may introduce noise.",
               "pos": { "x": -18.725433, "y": 427.930328 },
               "size": { "x": 305.564148, "y": 88.570435 },
               "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }

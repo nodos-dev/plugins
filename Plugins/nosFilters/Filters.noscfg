@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.filters",
-            "version": "1.5.4"
+            "version": "1.5.5"
         },
         "display_name": "Filters",
         "description": "Collection of image filters.",
