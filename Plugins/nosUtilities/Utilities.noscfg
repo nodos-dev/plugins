@@ -58,7 +58,8 @@
 		"Config/PrintLog.nosdef",
 		"Config/LayoutNodes.nosdef",
 		"Config/LayoutDrawer.nosdef",
-		"Config/LayoutQuadCanvas.nosdef"
+		"Config/LayoutQuadCanvas.nosdef",
+		"Config/ReduceBuffer.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
@@ -68,7 +69,8 @@
 		"Config/TextureSwitcher.fbs",
 		"Config/ChannelViewer.fbs",
 		"Config/Sink.fbs",
-		"Config/Layout.fbs"
+		"Config/Layout.fbs",
+		"Config/ReduceBuffer.fbs"
 	],
 	"defaults": [
 		"Config/Defaults.json"

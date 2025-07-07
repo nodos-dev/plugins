@@ -5,12 +5,22 @@
             "path": "Shaders/Resize.frag",
             "stage": "FRAGMENT",
             "lang": "GLSL"
+        },
+        {
+            "key": "REDUCE_BUFFER",
+            "path": "Shaders/ReduceBuffer.comp",
+            "stage": "COMPUTE",
+            "lang": "GLSL"
         }
     ],
     "passes": [
         {
             "key": "RESIZE_PASS",
             "shader": "RESIZE_FRAG"
+        },
+        {
+            "key": "BUFFER_REDUCE_PASS",
+            "shader": "REDUCE_BUFFER"
         }
     ]
 }
