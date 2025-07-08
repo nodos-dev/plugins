@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.24.0"
+			"version": "3.25.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -65,7 +65,9 @@
 		"Config/LayoutQuadCanvas.nosdef",
 		"Config/CalculateDispatchSize.nosdef",
 		"Config/YADIF.nosdef",
-		"Config/YADIFWithAutoDispatchSize.nosdef"
+		"Config/YADIFWithAutoDispatchSize.nosdef",
+		"Config/ReduceTexture.nosdef",
+		"Config/MeanSquaredError.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

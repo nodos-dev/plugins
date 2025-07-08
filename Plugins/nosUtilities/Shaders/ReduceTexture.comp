@@ -1,0 +1,52 @@
+#version 450
+#extension GL_EXT_shader_atomic_float : require
+
+layout(local_size_x = 256) in;
+
+// Output buffer: Result[0] = sum, Result[1] = sum of squares
+layout(std430, binding = 0) buffer Output {
+    float Result[];
+};
+
+layout(binding = 1) uniform sampler2D Input;
+
+shared float PartialSum[256];
+shared float PartialSq[256];
+
+void main() {
+    uint GlobalId    = gl_GlobalInvocationID.x;
+    uint LocalId     = gl_LocalInvocationID.x;
+    uint LocalSize   = gl_WorkGroupSize.x;
+
+    ivec2 TexSize = textureSize(Input, 0);  // Texture size at mip level 0
+    uint ElementCount = uint(TexSize.x) * uint(TexSize.y);
+
+    // Initialize shared memory to zero
+    PartialSum[LocalId] = 0.0;
+    PartialSq[LocalId] = 0.0;
+
+    if (GlobalId < ElementCount) {
+        int X = int(GlobalId % uint(TexSize.x));
+        int Y = int(GlobalId / uint(TexSize.x));
+
+        float Value = texelFetch(Input, ivec2(X, Y), 0).x;
+        PartialSum[LocalId] = Value;
+        PartialSq[LocalId] = Value * Value;
+    }
+
+    barrier();
+
+    // Reduction within workgroup
+    for (uint Stride = LocalSize / 2u; Stride > 0u; Stride >>= 1u) {
+        if (LocalId < Stride) {
+            PartialSum[LocalId] += PartialSum[LocalId + Stride];
+            PartialSq[LocalId] += PartialSq[LocalId + Stride];
+        }
+        barrier();
+    }
+
+    if (LocalId == 0) {
+        atomicAdd(Result[0], PartialSum[0]);
+        atomicAdd(Result[1], PartialSq[0]);
+    }
+}

@@ -43,7 +43,7 @@ struct Texture2BufferNode : nos::NodeContext
 			// Need to create a new buffer
 			outputBufferDesc.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
 			outputBufferDesc.Info.Buffer.Size = currentSize;
-			outputBufferDesc.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_SRC);
+			outputBufferDesc.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER);
 			outputBufferDesc.Info.Buffer.ElementType = GetBufferElementTypeFromVulkanFormat(inputTextureDesc.Info.Texture.Format);
 		}
 
