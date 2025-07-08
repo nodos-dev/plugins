@@ -19,13 +19,6 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
-						"name": "ElementType",
-						"type_name": "nos.utilities.BufferElementType",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "FLOAT32"
-					},
-					{
 						"name": "Sum",
 						"type_name": "float",
 						"show_as": "OUTPUT_PIN",

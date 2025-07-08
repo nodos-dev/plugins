@@ -4,8 +4,6 @@
 
 #include <nosVulkanSubsystem/Helpers.hpp>
 
-#include "ReduceBuffer_generated.h"
-
 #include <memory>
 
 namespace nos::utilities
@@ -35,18 +33,18 @@ struct ReduceBufferNode : NodeContext
 		}
 	}
 
-	static constexpr uint32_t GetElementSize(BufferElementType type) {
+	static constexpr uint32_t GetElementSize(sys::vulkan::BufferElementType type) {
 		switch (type) {
-		case BufferElementType::FLOAT32:
-		case BufferElementType::INT32:
-		case BufferElementType::UINT32:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_FLOAT:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_INT32:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_UINT32:
 			return 4;
-		case BufferElementType::FLOAT16:
-		case BufferElementType::INT16:
-		case BufferElementType::UINT16:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_FLOAT16:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_INT16:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_UINT16:
 			return 2;
-		case BufferElementType::INT8:
-		case BufferElementType::UINT8:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_INT8:
+		case sys::vulkan::BufferElementType::ELEMENT_TYPE_UINT8:
 			return 1;
 		default:
 			return 4;  // Default fallback size
@@ -61,7 +59,7 @@ struct ReduceBufferNode : NodeContext
 
 		nos::NodeExecuteParams nodeParams(params);
 		auto* inputBuffer = nodeParams.GetPinData<sys::vulkan::Buffer>(NSN_RawData);
-		auto* elementType = nodeParams.GetPinData<utilities::BufferElementType>(NSN_ElementType);
+		auto elementType = inputBuffer->element_type();
 
 		if (!inputBuffer->handle())
 			return NOS_RESULT_FAILED;
@@ -71,11 +69,11 @@ struct ReduceBufferNode : NodeContext
 
 		std::vector bindings = {
 			vkss::ShaderBinding(NSN_RawData, inputBufferDesc),
-			vkss::ShaderBinding(NSN_ElementType, *elementType),
+			vkss::ShaderBinding(NSN_ElementType, elementType),
 			vkss::ShaderBinding(NSN_Result, resultBufferDesc)
 		};
 
-		uint32_t elementCount = inputBufferDesc.Info.Buffer.Size / GetElementSize(*elementType);
+		uint32_t elementCount = inputBufferDesc.Info.Buffer.Size / GetElementSize(elementType);
 		uint32_t localSizeX = 256; // Workgroup size for X dimension
 		uint32_t dispatchSizeX = (elementCount + localSizeX - 1) / localSizeX;  // ceil division
 
