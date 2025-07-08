@@ -26,7 +26,7 @@ using Clock = std::chrono::high_resolution_clock;
 namespace nos::utilities
 {
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_ReadImage, "nos.utilities.ReadImage")
-
+NOS_REGISTER_NAME(Internal_ReleaseResource)
 enum State
 {
     Idle = 0,
@@ -158,9 +158,8 @@ struct ReadImageContext : NodeContext
 					std::lock_guard<std::mutex> lock(this->OutImageDecRefCallbacksMutex);
 					OutPendingImageRefs.push_back(std::move(outRes));
 				}
-
+				nosEngine.CallNodeFunction(this->NodeId, NSN_Internal_ReleaseResource);
 				nosEngine.TriggerNodeEvent(this->NodeId, NOS_NAME_STATIC("OnImageLoaded"));
-				this->FlushImageDecRefCallbacks();
 
 				free(img);
 				UpdateStatus(State::Idle);
@@ -205,7 +204,7 @@ struct ReadImageContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 
 		names[0] = NOS_NAME_STATIC("ReadImage_Load");
-		names[1] = NOS_NAME_STATIC("Internal_ReleaseResource");
+		names[1] = NSN_Internal_ReleaseResource;
 
 		fns[0] = &Load;
 		fns[1] = &ReleaseResource;
