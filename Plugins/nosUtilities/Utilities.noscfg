@@ -67,7 +67,8 @@
 		"Config/YADIF.nosdef",
 		"Config/YADIFWithAutoDispatchSize.nosdef",
 		"Config/ReduceTexture.nosdef",
-		"Config/MeanSquaredError.nosdef"
+		"Config/MeanSquaredError.nosdef",
+		"Config/PSNR.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

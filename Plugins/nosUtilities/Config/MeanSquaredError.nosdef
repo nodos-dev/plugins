@@ -1,6 +1,11 @@
 { "nodes": [
     {
       "class_name": "nos.utilities.MeanSquaredError",
+			"menu_info": {
+				"category": "Measurement",
+				"display_name": "Mean Squared Error",
+				"name_aliases": [ "mse", "metric", "measure", "image" ]
+			},
       "node": {
         "id": "f2317fd3-bbcb-4d0c-b7e0-05a4c4c70862",
         "name": "MeanSquaredError",
