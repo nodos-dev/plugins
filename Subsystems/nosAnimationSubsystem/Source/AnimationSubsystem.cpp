@@ -21,7 +21,6 @@ namespace editor
 	NOS_FBS_CREATE_FUNCTION_MAKE_FOR_UNION(nos::sys::animation::editor, FromAnimation)
 }
 static std::unique_ptr<struct AnimationSubsystemCtx> GAnimation;
-static constexpr auto SETTINGS_FILE_DIRECTORY = NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE;
 
 static constexpr char SETTINGS_KEY_FREE_RUN_DELTA_SECS[] = "Free Run Delta Seconds";
 nosResult UpdateSettings(const char* entryName, nosBuffer entryValue);
@@ -61,45 +60,7 @@ struct AnimationSubsystemCtx
 
 	void InitSettings()
 	{
-		nosSettingsEntryParams params = {};
-		params.Directory = SETTINGS_FILE_DIRECTORY;
-		params.EntryName = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
-		params.TypeName = NOS_NAME("nos.fb.vec2u");
-		if (nosSettings->ReadSettingsEntry(&params) == NOS_RESULT_SUCCESS && params.Buffer.Data) {
-			auto deltaSec = static_cast<nosVec2u*>(params.Buffer.Data);
-			FreeRunDeltaSecs = *deltaSec;
-			nosEngine.FreeBuffer(&params.Buffer);
-		}
-		
-		{
-			auto buf = nos::Buffer::From(FreeRunDeltaSecs);
-			params.Buffer = buf;
-			auto ret = nosSettings->WriteSettingsEntry(&params);
-			if (ret != NOS_RESULT_SUCCESS) {
-				nosEngine.LogE("Failed to write animation subsystem settings, changes reverted");
-				return;
-			}
-		}
-
-		nos::Buffer itemFreeRunDeltaSec;
-		{
-			nos::sys::settings::editor::TSettingsEditorItem item;
-			item.item_display_name = "Free Run Delta Seconds";
-			item.entry.reset(new nos::sys::settings::TSettingsEntry());
-			item.entry->type_name = "nos.fb.vec2u";
-			item.entry->entry_name = SETTINGS_KEY_FREE_RUN_DELTA_SECS;
-			item.entry->data = nos::Buffer::From(FreeRunDeltaSecs);
-			itemFreeRunDeltaSec = nos::Buffer::From(item);
-		}
-		std::vector editorItems = {
-			itemFreeRunDeltaSec.As<const nosSettingsEditorItem>(),
-		};
-		nosSettings->RegisterEditorSettings(editorItems.size(), editorItems.data(), UpdateSettings, SETTINGS_FILE_DIRECTORY);
-	}
-
-	void DeinitSettings()
-	{
-		nosSettings->UnregisterEditorSettings();
+		settings::RegisterEntry(SETTINGS_KEY_FREE_RUN_DELTA_SECS, "nos.fb.vec2u", UpdateSettings, nos::Buffer::From(FreeRunDeltaSecs), "Free Run Delta Seconds");
 	}
 
 	InterpolatorManager InterpolatorManager;
@@ -233,7 +194,6 @@ void OnEditorConnected(uint64_t editorId)
 
 nosResult NOSAPI_CALL OnPreUnloadPlugin()
 {
-	GAnimation->DeinitSettings();
 	GAnimation = nullptr;
 	return NOS_RESULT_SUCCESS;
 }
