@@ -9,7 +9,6 @@ endif()
 
 # Update subsystems.json if you add dependencies, so that CD can create releases.
 
-add_subdirectory(nosTestSubsystem)
 if (WIN32)
     add_subdirectory(nosPython)
 endif()

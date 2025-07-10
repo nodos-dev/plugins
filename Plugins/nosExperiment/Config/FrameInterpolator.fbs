@@ -1,4 +1,4 @@
-namespace nos.test;
+namespace nos.experiment;
 
 enum FrameInterpolationMethod: uint
 {

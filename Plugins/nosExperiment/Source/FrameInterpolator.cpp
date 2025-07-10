@@ -12,7 +12,7 @@ namespace nos::test
 NOS_REGISTER_NAME(Input)
 NOS_REGISTER_NAME(Output)
 NOS_REGISTER_NAME(Method)
-NOS_REGISTER_NAME_SPACED(ClassName_FrameInterpolator, "nos.test.FrameInterpolator")
+NOS_REGISTER_NAME_SPACED(ClassName_FrameInterpolator, "nos.experiment.FrameInterpolator")
 NOS_REGISTER_NAME(FrameInterpolator_BasicInterpolationShader)
 NOS_REGISTER_NAME(FrameInterpolator_BasicInterpolationPass)
 

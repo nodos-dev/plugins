@@ -37,7 +37,7 @@ struct PartialUpdateTestNode : NodeContext
         }
 
         nosBuffer buf;
-        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.test.TestTable"), &buf) != NOS_RESULT_SUCCESS) {
+        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.experiment.TestTable"), &buf) != NOS_RESULT_SUCCESS) {
             nosEngine.LogE("Failed to get default value of type");
             return;
         }
@@ -60,7 +60,7 @@ struct PartialUpdateTestNode : NodeContext
         }
 
         nosBuffer tableDef;
-        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.test.TestTable2"), &tableDef) != NOS_RESULT_SUCCESS) {
+        if (nosEngine.GetDefaultValueOfType(nos::Name("nos.experiment.TestTable2"), &tableDef) != NOS_RESULT_SUCCESS) {
             nosEngine.LogE("Failed to get default value of type");
             return;
         }

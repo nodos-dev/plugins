@@ -22,7 +22,7 @@
 					},
 					{
 						"name": "Method",
-						"type_name": "nos.test.FrameInterpolationMethod",
+						"type_name": "nos.experiment.FrameInterpolationMethod",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "REPEAT"

@@ -10,8 +10,8 @@
 [submodule "Subsystems/nosShaderCompiler/Binaries/tools"]
 	path = Subsystems/nosShaderCompiler/Binaries/tools
 	url = https://github.com/mediaz/tools.git
-[submodule "Plugins/nosTest/External/glfw"]
-	path = Plugins/nosTest/External/glfw
+[submodule "Plugins/nosExperiment/External/glfw"]
+	path = Plugins/nosExperiment/External/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "Subsystems/nosVulkanSubsystem/External/subprocess"]
 	path = Subsystems/nosVulkanSubsystem/External/subprocess
