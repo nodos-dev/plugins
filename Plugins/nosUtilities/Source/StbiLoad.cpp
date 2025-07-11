@@ -90,7 +90,7 @@ struct StbiLoadContext : NodeContext
 
 			nosResourceShareInfo outResInfo = {
 				.Info = {.Type = NOS_RESOURCE_TYPE_TEXTURE,
-							.Texture = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}} };
+							.Texture = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R16G16B16A16_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}} };
 
 			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
 			if (sRGB)
