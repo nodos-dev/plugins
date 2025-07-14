@@ -794,7 +794,10 @@
           "major": 3,
           "minor": 10,
           "patch": 0
-        }
+        },
+        "meta_data_map": [
+          { "key": "NodeStatusPortal", "value": "/STBI Load" }
+        ]
       }
     }
   ] }

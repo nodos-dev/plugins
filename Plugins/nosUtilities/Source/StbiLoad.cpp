@@ -53,7 +53,7 @@ struct StbiLoadContext : NodeContext
         {
         case State::Loading:
 		    TimeStarted = Clock::now();
-			SetNodeStatusMessage("Loading image", fb::NodeStatusMessageType::INFO);
+			SetNodeStatusMessage("Loading image: " + path.generic_string(), fb::NodeStatusMessageType::INFO);
             break;
         case State::Idle:
         {
@@ -61,7 +61,7 @@ struct StbiLoadContext : NodeContext
 			auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - TimeStarted).count();
 			std::string fileName = nos::PathToUtf8(path.filename());
 			auto messageDetails = messageDetailsFileRef + " is loaded in " + std::to_string(dt) + "ms";
-			SetNodeStatusMessages({{{}, "Image loaded", fb::NodeStatusMessageType::INFO, messageDetails, 5, true, true}});
+			SetNodeStatusMessages({{{}, "Image loaded: " + path.generic_string(), fb::NodeStatusMessageType::INFO, messageDetails, 5, true, true}});
             break;
         }
         case State::Failed:
