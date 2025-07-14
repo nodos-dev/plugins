@@ -156,15 +156,13 @@ struct Indexer : NodeContext
 		auto& type = *Type;
 
 		nosQueryBufferParams queryParams = {};
-		{
-			queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
-			queryParams.Buffer = *pins[NSN_Input].Data;
-			nosDataPathComponent queryPath;
-			queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
-			queryPath.Component.ArrayIndex = Index;
-			queryParams.Path = &queryPath;
-			queryParams.PathLength = 1;
-		}
+		queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
+		queryParams.Buffer = *pins[NSN_Input].Data;
+		nosDataPathComponent queryPath;
+		queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
+		queryPath.Component.ArrayIndex = Index;
+		queryParams.Path = &queryPath;
+		queryParams.PathLength = 1;
 		auto element = QueryBuffer(queryParams);
 		if (!element)
 		{
