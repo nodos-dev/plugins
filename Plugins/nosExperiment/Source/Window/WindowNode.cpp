@@ -13,7 +13,7 @@
 
 #include "nosUtil/Stopwatch.hpp"
 #include <cstdint>
-namespace nos::test
+namespace nos::experiment
 {
 
 void RegisterWindowNode(nosNodeFunctions* out)

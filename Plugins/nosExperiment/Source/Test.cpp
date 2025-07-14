@@ -26,7 +26,7 @@ NOS_END_IMPORT_DEPS()
 
 #define STRINGIZE(A, B) A##B
 
-namespace nos::test
+namespace nos::experiment
 {
 
 
@@ -306,7 +306,7 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 		RegisterFrameInterpolator(outFunctions[7]);
-		nos::test::RegisterWindowNode(outFunctions[8]);
+		nos::experiment::RegisterWindowNode(outFunctions[8]);
 		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.experiment.BypassTexture");
 		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto values = nos::GetPinValues(params);
@@ -393,4 +393,4 @@ struct TestPluginFunctions : PluginFunctions
 
 NOS_EXPORT_PLUGIN_FUNCTIONS(TestPluginFunctions)
 
-} // namespace nos::test
+} // namespace nos::experiment

@@ -9,7 +9,7 @@
 
 #include "GLFW/glfw3.h"
 
-namespace nos::test
+namespace nos::experiment
 {
 void RegisterWindowNode(nosNodeFunctions* out);
 class WindowNode : public nos::NodeContext

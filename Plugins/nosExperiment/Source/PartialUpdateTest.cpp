@@ -11,7 +11,7 @@
 // Nodos SDK
 #include <PluginConfig_generated.h>
 
-namespace nos::test
+namespace nos::experiment
 {
 NOS_REGISTER_NAME(Type)
 NOS_REGISTER_NAME(Table)
@@ -41,10 +41,10 @@ struct PartialUpdateTestNode : NodeContext
             nosEngine.LogE("Failed to get default value of type");
             return;
         }
-        nos::test::TTestTable testTable = {};
-        InterpretPinValue<nos::test::TestTable>(buf)->UnPackTo(&testTable);
+        nos::experiment::TTestTable testTable = {};
+        InterpretPinValue<nos::experiment::TestTable>(buf)->UnPackTo(&testTable);
         testTable.test1 = "Set by node function: SetTableOfExistingTable()";
-        testTable.test2 = std::make_unique<nos::test::TestStruct2>();
+        testTable.test2 = std::make_unique<nos::experiment::TestStruct2>();
         testTable.test2->mutable_test1().mutate_test1(15.0f);
         testTable.test2->mutate_test2(30.0f);
         nos::Buffer finalBuf = nos::Buffer::From(testTable);
@@ -64,28 +64,28 @@ struct PartialUpdateTestNode : NodeContext
             nosEngine.LogE("Failed to get default value of type");
             return;
         }
-        nos::test::TTestTable2 elements[2]{};
+        nos::experiment::TTestTable2 elements[2]{};
         // Set first element
         {
             auto& testTable = elements[0];
-            InterpretPinValue<nos::test::TestTable2>(tableDef)->UnPackTo(&testTable);
-            testTable.table1 = std::make_unique<nos::test::TTestTable>();
+            InterpretPinValue<nos::experiment::TestTable2>(tableDef)->UnPackTo(&testTable);
+            testTable.table1 = std::make_unique<nos::experiment::TTestTable>();
             testTable.table1->test1 = "First Element";
-            testTable.table1->test2 = std::make_unique<nos::test::TestStruct2>();
+            testTable.table1->test2 = std::make_unique<nos::experiment::TestStruct2>();
             testTable.table1->test2->mutable_test1().mutate_test1(10.0f);
             testTable.table1->test2->mutate_test2(20.0f);
-            testTable.test_enum = nos::test::TestEnumUint::TEST1;
+            testTable.test_enum = nos::experiment::TestEnumUint::TEST1;
         }
         // Set second element
         {
             auto& testTable = elements[1];
-            InterpretPinValue<nos::test::TestTable2>(tableDef)->UnPackTo(&testTable);
-            testTable.table1 = std::make_unique<nos::test::TTestTable>();
+            InterpretPinValue<nos::experiment::TestTable2>(tableDef)->UnPackTo(&testTable);
+            testTable.table1 = std::make_unique<nos::experiment::TTestTable>();
             testTable.table1->test1 = "Second Element";
-            testTable.table1->test2 = std::make_unique<nos::test::TestStruct2>();
+            testTable.table1->test2 = std::make_unique<nos::experiment::TestStruct2>();
             testTable.table1->test2->mutable_test1().mutate_test1(30.0f);
             testTable.table1->test2->mutate_test2(60.0f);
-            testTable.test_enum = nos::test::TestEnumUint::TEST2;
+            testTable.test_enum = nos::experiment::TestEnumUint::TEST2;
         }
 
 		SetField(*pinId, { nosDataPathComponent{ NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table_array")} }, {});
