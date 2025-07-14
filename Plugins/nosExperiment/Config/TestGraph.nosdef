@@ -1,10 +1,10 @@
 { "nodes": [
     {
-      "class_name": "nos.test.TestGraph",
+      "class_name": "nos.experiment.TestGraph",
       "node": {
         "id": "b0b721eb-6d48-4810-9521-da045bc84270",
         "name": "Collapsed Graph",
-        "class_name": "nos.test.TestGraph",
+        "class_name": "nos.experiment.TestGraph",
         "pins": [
           {
             "id": "5b865f55-fd9a-4010-a4cb-2571f4ee7ad3",

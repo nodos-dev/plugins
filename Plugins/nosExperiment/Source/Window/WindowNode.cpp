@@ -13,12 +13,12 @@
 
 #include "nosUtil/Stopwatch.hpp"
 #include <cstdint>
-namespace nos::test
+namespace nos::experiment
 {
 
 void RegisterWindowNode(nosNodeFunctions* out)
 {	
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.Window"), WindowNode, out);
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.experiment.Window"), WindowNode, out);
 }
 
 WindowNode::~WindowNode() 

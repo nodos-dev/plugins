@@ -7,12 +7,12 @@
 #include <shared_mutex>
 #include "FrameInterpolator_generated.h"
 
-namespace nos::test
+namespace nos::experiment
 {
 NOS_REGISTER_NAME(Input)
 NOS_REGISTER_NAME(Output)
 NOS_REGISTER_NAME(Method)
-NOS_REGISTER_NAME_SPACED(ClassName_FrameInterpolator, "nos.test.FrameInterpolator")
+NOS_REGISTER_NAME_SPACED(ClassName_FrameInterpolator, "nos.experiment.FrameInterpolator")
 NOS_REGISTER_NAME(FrameInterpolator_BasicInterpolationShader)
 NOS_REGISTER_NAME(FrameInterpolator_BasicInterpolationPass)
 
@@ -45,7 +45,7 @@ struct FrameInterpolatorNode : NodeContext
 		}
 		auto inputTextureInfo = vkss::DeserializeTextureInfo(execParams[NSN_Input].Data->Data);
 		auto outputTextureInfo = vkss::DeserializeTextureInfo(execParams.GetPinData<void>(NSN_Output));
-		auto method = execParams.GetPinData<nos::test::FrameInterpolationMethod>(NSN_Method);
+		auto method = execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
 		switch (*method)
 		{
 		case FrameInterpolationMethod::REPEAT: {
@@ -125,4 +125,4 @@ nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::test
+} // namespace nos::experiment

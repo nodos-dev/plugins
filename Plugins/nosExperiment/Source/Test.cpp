@@ -26,7 +26,7 @@ NOS_END_IMPORT_DEPS()
 
 #define STRINGIZE(A, B) A##B
 
-namespace nos::test
+namespace nos::experiment
 {
 
 
@@ -188,7 +188,7 @@ struct TestPluginFunctions : PluginFunctions
 	nosResult Initialize() override
 	{
 		nosTypeInfo* leakedTypeInfo{};
-		auto res  = nosEngine.GetTypeInfo(NOS_NAME_STATIC("nos.test.TestStruct"), &leakedTypeInfo);
+		auto res  = nosEngine.GetTypeInfo(NOS_NAME_STATIC("nos.experiment.TestStruct"), &leakedTypeInfo);
 		assert(res == NOS_RESULT_SUCCESS);
 
 		auto vkResOpt = vkss::Resource::Create(
@@ -231,9 +231,9 @@ struct TestPluginFunctions : PluginFunctions
 		msg.Dismissable = true;
 		nosEngine.SendPluginStatusMessageUpdate(&msg);
 
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.NodeTest"), TestNode, outFunctions[0]);
-		outFunctions[1]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCategories");
-		outFunctions[2]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithFunctions");
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.experiment.NodeTest"), TestNode, outFunctions[0]);
+		outFunctions[1]->ClassName = NOS_NAME_STATIC("nos.experiment.NodeWithCategories");
+		outFunctions[2]->ClassName = NOS_NAME_STATIC("nos.experiment.NodeWithFunctions");
 		outFunctions[2]->GetFunctions = [](size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* fns) {
 			*outCount = 1;
 			if (!pName || !fns)
@@ -255,10 +255,10 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 
-		outFunctions[3]->ClassName = NOS_NAME_STATIC("nos.test.NodeWithCustomTypes");
-		outFunctions[4]->ClassName = NOS_NAME_STATIC("nos.test.CopyTest");
+		outFunctions[3]->ClassName = NOS_NAME_STATIC("nos.experiment.NodeWithCustomTypes");
+		outFunctions[4]->ClassName = NOS_NAME_STATIC("nos.experiment.CopyTest");
 		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
-			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.test.CopyTest) Copy"), params->NodeId);
+			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
 			auto values = nos::GetPinValues(params);
 			nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
 			nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
@@ -267,7 +267,7 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 
-		outFunctions[5]->ClassName = NOS_NAME_STATIC("nos.test.CopyTestLicensed");
+		outFunctions[5]->ClassName = NOS_NAME_STATIC("nos.experiment.CopyTestLicensed");
 		outFunctions[5]->OnNodeCreated = [](nosFbNodePtr node, void** outCtxPtr) {
 			nosEngine.RegisterFeature(
 				uuid(*node->id()), "Nodos.CopyTestLicensed", 1, "Nodos.CopyTestLicensed required");
@@ -276,7 +276,7 @@ struct TestPluginFunctions : PluginFunctions
 			nosEngine.UnregisterFeature(nodeId, "Nodos.CopyTestLicensed");
 		};
 		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
-			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.test.CopyTest) Copy"), params->NodeId);
+			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
 			auto values = nos::GetPinValues(params);
 			nosResourceShareInfo input = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Input")]);
 			nosResourceShareInfo output = nos::vkss::DeserializeTextureInfo(values[NOS_NAME_STATIC("Output")]);
@@ -284,7 +284,7 @@ struct TestPluginFunctions : PluginFunctions
 			nosVulkan->End(cmd, nullptr);
 			return NOS_RESULT_SUCCESS;
 		};
-		outFunctions[6]->ClassName = NOS_NAME_STATIC("nos.test.CopyBuffer");
+		outFunctions[6]->ClassName = NOS_NAME_STATIC("nos.experiment.CopyBuffer");
 		outFunctions[6]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto inBuf = nos::GetPinValue<sys::vulkan::Buffer>(nos::GetPinValues(params), NOS_NAME_STATIC("Input"));
 			auto outBuf = nos::GetPinValue<sys::vulkan::Buffer>(nos::GetPinValues(params), NOS_NAME_STATIC("Output"));
@@ -300,14 +300,14 @@ struct TestPluginFunctions : PluginFunctions
 				out = *outRes;
 				nosEngine.SetPinValue(params->Pins[1]->Id, outRes->ToPinData());
 			}
-			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.test.CopyBuffer) Copy"), params->NodeId);
+			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.experiment.CopyBuffer) Copy"), params->NodeId);
 			nosVulkan->Copy(cmd, &in, &out, 0);
 			nosVulkan->End(cmd, nullptr);
 			return NOS_RESULT_SUCCESS;
 		};
 		RegisterFrameInterpolator(outFunctions[7]);
-		nos::test::RegisterWindowNode(outFunctions[8]);
-		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.test.BypassTexture");
+		nos::experiment::RegisterWindowNode(outFunctions[8]);
+		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.experiment.BypassTexture");
 		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto values = nos::GetPinValues(params);
 			nos::sys::vulkan::TTexture in, out;
@@ -319,29 +319,29 @@ struct TestPluginFunctions : PluginFunctions
 			nosEngine.SetPinValue(ids[NOS_NAME_STATIC("Output")], nos::Buffer::From(out));
 			return NOS_RESULT_SUCCESS;
 		};
-		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.test.LiveOutWithInput");
+		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.experiment.LiveOutWithInput");
 		outFunctions[10]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			NodeExecuteParams pins(params);
 			nosEngine.SetPinValue(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].Data);
 			return NOS_RESULT_SUCCESS;
 		};
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.test.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.experiment.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Print"), PrintNode, outFunctions[12]);
-		outFunctions[13]->ClassName = NOS_NAME_STATIC("nos.test.Crash");
+		outFunctions[13]->ClassName = NOS_NAME_STATIC("nos.experiment.Crash");
 		outFunctions[13]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 		{
 			nosEngine.LogI("Crashing...");
 			*(int*)0 = 0;
 			return NOS_RESULT_SUCCESS;
 		};
-		outFunctions[14]->ClassName = NOS_NAME_STATIC("nos.test.Exception");
+		outFunctions[14]->ClassName = NOS_NAME_STATIC("nos.experiment.Exception");
 		outFunctions[14]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 		{
 			nosEngine.LogI("Throwing exception...");
 			throw std::runtime_error("Exception thrown");
 			return NOS_RESULT_SUCCESS;
 		};
-		outFunctions[15]->ClassName = NOS_NAME_STATIC("nos.test.IsStockTexture");
+		outFunctions[15]->ClassName = NOS_NAME_STATIC("nos.experiment.IsStockTexture");
 		outFunctions[15]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 		{
 			auto pinValues = nos::GetPinValues(params);
@@ -355,7 +355,7 @@ struct TestPluginFunctions : PluginFunctions
 			return NOS_RESULT_SUCCESS;
 		};
 		RegisterPartialUpdateTest(outFunctions[16]);
-		outFunctions[17]->ClassName = NOS_NAME_STATIC("nos.test.DownloadBuffer");
+		outFunctions[17]->ClassName = NOS_NAME_STATIC("nos.experiment.DownloadBuffer");
 		outFunctions[17]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			auto pinValues = nos::GetPinValues(params);
 			auto outBuffer =
@@ -393,4 +393,4 @@ struct TestPluginFunctions : PluginFunctions
 
 NOS_EXPORT_PLUGIN_FUNCTIONS(TestPluginFunctions)
 
-} // namespace nos::test
+} // namespace nos::experiment
