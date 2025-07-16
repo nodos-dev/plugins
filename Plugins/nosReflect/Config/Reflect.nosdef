@@ -18,7 +18,7 @@
             "name": "Output",
             "type_name": "nos.Generic",
             "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+            "can_show_as": "OUTPUT_PIN_ONLY"
           },
           {
             "name": "Input 0",
