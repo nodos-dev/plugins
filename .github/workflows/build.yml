@@ -86,3 +86,4 @@ jobs:
       last_build_tag: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.last_build_tag || '' }}
       linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
+      run_tests: true
