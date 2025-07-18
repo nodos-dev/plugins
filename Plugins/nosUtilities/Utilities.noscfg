@@ -59,7 +59,7 @@
 		"Config/LayoutNodes.nosdef",
 		"Config/LayoutDrawer.nosdef",
 		"Config/LayoutQuadCanvas.nosdef",
-		"Config/RegisterLoadCubeLUT.nosdef"
+		"Config/LoadCubeLUT.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

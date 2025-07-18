@@ -108,7 +108,7 @@ inline static std::unique_ptr<CubeLUT<T>> LoadCubeFile(const std::filesystem::pa
         }
     }
     // Validate
-	size_t expected = file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * componentCount);
+	size_t expected = file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * componentCount;
     if (file.LUT3DSize == 0 || file.LUT3DData.size() != expected) {
         return nullptr;
     }
