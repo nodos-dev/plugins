@@ -54,6 +54,7 @@ inline static std::unique_ptr<CubeLUT<T>> LoadCubeFile(const std::filesystem::pa
 
     std::string line;
     size_t dataLines = 0;
+	uint32_t componentCount = pushAlpha ? 4 : 3; // RGB or RGBA
     while (std::getline(in, line)) {
         // Trim whitespace
         line.erase(0, line.find_first_not_of(" \t\r\n"));
@@ -70,7 +71,7 @@ inline static std::unique_ptr<CubeLUT<T>> LoadCubeFile(const std::filesystem::pa
 		{
             std::istringstream iss(line.substr(12));
             iss >> file.LUT3DSize;
-            file.LUT3DData.reserve(file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * (pushAlpha ? 4 : 3));
+			file.LUT3DData.reserve(file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * componentCount);
 		}
 		else if (line.find("DOMAIN_MIN", 0) == 0)
 		{
@@ -107,7 +108,7 @@ inline static std::unique_ptr<CubeLUT<T>> LoadCubeFile(const std::filesystem::pa
         }
     }
     // Validate
-    size_t expected = file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * (3 + (pushAlpha ? 1 : 0));
+	size_t expected = file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * componentCount);
     if (file.LUT3DSize == 0 || file.LUT3DData.size() != expected) {
         return nullptr;
     }
