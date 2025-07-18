@@ -70,7 +70,7 @@ inline static std::unique_ptr<CubeLUT<T>> LoadCubeFile(const std::filesystem::pa
 		{
             std::istringstream iss(line.substr(12));
             iss >> file.LUT3DSize;
-            file.LUT3DData.reserve(file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * 3);
+            file.LUT3DData.reserve(file.LUT3DSize * file.LUT3DSize * file.LUT3DSize * (pushAlpha ? 4 : 3));
 		}
 		else if (line.find("DOMAIN_MIN", 0) == 0)
 		{
