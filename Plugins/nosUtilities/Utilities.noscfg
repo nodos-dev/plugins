@@ -2,14 +2,14 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.10.12"
+			"version": "3.11.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "6.3"
+				"version": "6.6"
 			},
 			{
 				"name": "nos.math",
@@ -58,7 +58,8 @@
 		"Config/PrintLog.nosdef",
 		"Config/LayoutNodes.nosdef",
 		"Config/LayoutDrawer.nosdef",
-		"Config/LayoutQuadCanvas.nosdef"
+		"Config/LayoutQuadCanvas.nosdef",
+		"Config/RegisterLoadCubeLUT.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
