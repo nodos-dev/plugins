@@ -55,6 +55,7 @@ enum Utilities : int
 	GridLayout,
 	FreeOutputLayout,
 	GridOutputLayout,
+	LoadCubeLUT,
 	Count
 };
 
@@ -89,6 +90,7 @@ nosResult RegisterFreeLayout(nosNodeFunctions*);
 nosResult RegisterGridLayout(nosNodeFunctions*);
 nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
+nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -139,6 +141,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(GridLayout)
 			GEN_CASE_NODE(FreeOutputLayout)
 			GEN_CASE_NODE(GridOutputLayout)
+			GEN_CASE_NODE(LoadCubeLUT)
 		}
 	}
 	return NOS_RESULT_SUCCESS;

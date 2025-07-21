@@ -2,14 +2,14 @@
     "info": {
         "id": {
             "name": "nos.filters",
-            "version": "1.5.5"
+            "version": "1.6.0"
         },
         "display_name": "Filters",
         "description": "Collection of image filters.",
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "6.0.0"
+                "version": "6.6.0"
             },
             {
                 "name": "nos.math",
@@ -35,7 +35,8 @@
         "Config/Sobel.nosdef",
         "Config/Thresholder.nosdef",
         "Config/CasFilter.nosdef",
-        "Config/CasWithColorSpace.nosdef"
+        "Config/CasWithColorSpace.nosdef",
+        "Config/ColorGradeLUT.nosdef"
     ],
     "custom_types": [
         "Config/Thresholder.fbs"
