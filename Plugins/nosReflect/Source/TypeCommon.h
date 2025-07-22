@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Nodos/NodeHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 #include "Names.h"
 

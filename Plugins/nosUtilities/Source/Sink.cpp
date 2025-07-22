@@ -1,11 +1,11 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
 // stl
 #include <chrono>
-#include <nosUtil/Stopwatch.hpp>
+#include <Nodos/Utils/Stopwatch.hpp>
 
 #include "Sink_generated.h"
 

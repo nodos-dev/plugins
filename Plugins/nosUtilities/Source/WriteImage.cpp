@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include "Builtins_generated.h"
 #include <AppService_generated.h>
 #define STBIW_WINDOWS_UTF8

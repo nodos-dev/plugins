@@ -2,7 +2,7 @@
 
 #include <Nodos/PluginAPI.h>
 #include <Builtins_generated.h>
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <AppService_generated.h>
 #include <AppEvents_generated.h>
 #include "SignalingServer.h"

@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 // External
 #define STBI_WINDOWS_UTF8

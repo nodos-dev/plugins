@@ -4,12 +4,12 @@
 
 #include <Builtins_generated.h>
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include "Test_generated.h"
 
 
 // Nodos SDK
-#include <PluginConfig_generated.h>
+#include <PluginManifest_generated.h>
 
 namespace nos::experiment
 {

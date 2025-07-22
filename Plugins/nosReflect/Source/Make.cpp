@@ -3,7 +3,7 @@
 #include "TypeCommon.h"
 
 // Nodos SDK
-#include <PluginConfig_generated.h>
+#include <PluginManifest_generated.h>
 
 namespace nos::reflect
 {

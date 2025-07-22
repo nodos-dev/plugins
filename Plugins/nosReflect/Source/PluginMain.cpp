@@ -1,5 +1,5 @@
-#include <Nodos/PluginHelpers.hpp>
-#include <Nodos/Helpers.hpp>
+#include <Nodos/Plugin.hpp>
+#include <Nodos/Plugin.hpp>
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVariableSubsystem/nosVariableSubsystem.h>

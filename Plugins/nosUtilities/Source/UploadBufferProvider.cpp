@@ -1,10 +1,10 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 // External
 #include <nosVulkanSubsystem/Helpers.hpp>
-#include <nosUtil/Stopwatch.hpp>
+#include <Nodos/Utils/Stopwatch.hpp>
 
 NOS_REGISTER_NAME(Buffer);
 NOS_REGISTER_NAME(GPUEventRef);

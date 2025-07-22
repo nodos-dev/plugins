@@ -1,4 +1,4 @@
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <nosAnimationSubsystem/nosAnimationSubsystem.h>
 
 namespace nos::animation

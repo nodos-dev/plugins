@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 // External
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
 #include <nosVulkanSubsystem/Helpers.hpp>
 
 #include "Ring.h"
-#include "nosUtil/Stopwatch.hpp"
+#include "Nodos/Utils/Stopwatch.hpp"
 
 namespace nos::utilities
 {

@@ -6,7 +6,7 @@
 
 #include <Nodos/PluginAPI.h>
 #include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
-#include <Nodos/Helpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include "nosAnimationSubsystem/nosAnimationSubsystem.h"
 
 namespace nos::sys::animation

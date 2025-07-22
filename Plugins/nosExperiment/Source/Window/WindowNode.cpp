@@ -11,7 +11,7 @@
 #endif
 #include "GLFW/glfw3native.h"
 
-#include "nosUtil/Stopwatch.hpp"
+#include "Nodos/Utils/Stopwatch.hpp"
 #include <cstdint>
 namespace nos::experiment
 {

@@ -1,6 +1,6 @@
 ﻿// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 // External
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this

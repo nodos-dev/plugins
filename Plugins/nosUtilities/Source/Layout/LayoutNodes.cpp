@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include "Layout_generated.h"
 
 NOS_REGISTER_NAME(FreeLayout)

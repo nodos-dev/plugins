@@ -1,4 +1,4 @@
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 
 namespace nos::utilities

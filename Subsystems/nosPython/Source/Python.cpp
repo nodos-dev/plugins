@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include <Nodos/PluginAPI.h>
-#include <Nodos/NodeHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 #include <nosPython/Python_generated.h>
 #include <nosPython/nosPython.h>

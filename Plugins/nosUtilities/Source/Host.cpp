@@ -1,6 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 #if defined(_WIN32)
 #include <WinSock2.h>

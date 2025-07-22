@@ -3,12 +3,12 @@
  */
 
 #pragma once
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
  // External
 #include <nosVulkanSubsystem/Helpers.hpp>
 
-#include "nosUtil/Stopwatch.hpp"
+#include "Nodos/Utils/Stopwatch.hpp"
 
 NOS_REGISTER_NAME(Input)
 NOS_REGISTER_NAME(Output)

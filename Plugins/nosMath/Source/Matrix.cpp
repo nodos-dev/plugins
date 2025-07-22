@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <tinyexpr.h>
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 

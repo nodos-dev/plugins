@@ -8,9 +8,9 @@
 #define _WIN32_WINNT 0x0A00
 #endif
 
-#include <nosUtil/Thread.h>
+#include <Nodos/Utils/Thread.hpp>
 #include <AppService_generated.h>
-#include "Nodos/PluginHelpers.hpp"
+#include "Nodos/Plugin.hpp"
 #include "Track_generated.h"
 #include <glm/glm.hpp>
 #include <asio.hpp>

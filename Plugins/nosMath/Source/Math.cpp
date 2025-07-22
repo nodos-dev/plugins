@@ -7,7 +7,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 #include <chrono>
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 NOS_INIT()
 

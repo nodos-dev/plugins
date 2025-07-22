@@ -2,7 +2,7 @@
 
 // Includes
 #include <Nodos/PluginAPI.h>
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 // Subsystem dependencies
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>

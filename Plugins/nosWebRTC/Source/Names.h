@@ -3,7 +3,7 @@
  */
 
 #pragma once
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 NOS_REGISTER_NAME(In)
 NOS_REGISTER_NAME(Out)
