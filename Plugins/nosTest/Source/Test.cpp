@@ -181,6 +181,8 @@ struct PrintNode : nos::NodeContext
 };
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions);
+nosResult RegisterPartialTextureCopy(nosNodeFunctions*);
+nosResult RegisterPartialBufferCopy(nosNodeFunctions*);
 
 struct TestPluginFunctions : PluginFunctions
 {
@@ -215,7 +217,7 @@ struct TestPluginFunctions : PluginFunctions
 	}
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 17;
+		outCount = 19;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -381,6 +383,8 @@ struct TestPluginFunctions : PluginFunctions
 			nosVulkan->WaitGpuEvent(&gpuEvent, UINT64_MAX);
 			return NOS_RESULT_SUCCESS;
 		};
+		RegisterPartialTextureCopy(outFunctions[17]);
+		RegisterPartialBufferCopy(outFunctions[18]);
 		return NOS_RESULT_SUCCESS;
 	}
 };

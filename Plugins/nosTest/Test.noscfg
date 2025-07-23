@@ -2,14 +2,14 @@
   "info": {
     "id": {
       "name": "nos.test",
-      "version": "0.2.0"
+      "version": "42.0.0"
     },
     "display_name": "Test",
     "description": "Plugin for testing purposes.",
     "dependencies": [
       {
         "name": "nos.sys.vulkan",
-        "version": "6.0.0"
+        "version": "6.7"
       },
       {
         "name": "nos.py",
@@ -22,7 +22,9 @@
   "node_definitions": [
     "Config/Test.nosdef",
     "Config/FrameInterpolator.nosdef",
-    "Config/Window.nosdef"
+    "Config/Window.nosdef",
+		"Config/PartialTextureCopy.nosdef",
+		"Config/PartialBufferCopy.nosdef"
   ],
   "binary_path": "Binaries/nosTest"
 }
