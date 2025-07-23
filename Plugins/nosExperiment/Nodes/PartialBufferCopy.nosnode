@@ -1,0 +1,48 @@
+{
+	"nodes": [
+		{
+			"class_name": "PartialBufferCopy",
+			"menu_info": {
+				"category": "Experiment",
+				"display_name": "Partial Copy (Buffer)"
+			},
+			"node": {
+				"class_name": "PartialBufferCopy",
+				"contents_type": "Job",
+				"description": "Translates the input buffer using an offset",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "SrcOffset",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "DstOffset",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Size",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
+}
