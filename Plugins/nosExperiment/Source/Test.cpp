@@ -77,6 +77,40 @@ public:
 	// Menu & key events
 	virtual void OnMenuRequested(nosContextMenuRequestPtr request) override
 	{
+		std::atomic_bool ExitThreads = false;
+		std::atomic_int started = 0;
+		std::atomic_int ended = 0;
+		std::condition_variable cv;
+		std::mutex mut;
+		std::vector<std::jthread> threads;
+		for (auto i = 0; i < 500; i++)
+		{
+			threads.push_back(std::jthread([&, i]() {
+				nosCmdBeginParams beginParams{};
+				nosCmd cmd{};
+				beginParams.Name = NOS_NAME("TestNode::OnMenuRequested");
+				beginParams.AssociatedNodeId = NodeId;
+				beginParams.OutCmdHandle = &cmd;
+				nosVulkan->Begin(&beginParams);
+				nosCmdEndParams endParams{};
+				endParams.ForceSubmit = true;
+				nosVulkan->End(cmd, &endParams);
+				std::unique_lock<std::mutex> lock(mut);
+				nosEngine.LogI("Thread %d started wait", started++);
+				cv.wait(lock, [&]() { return ExitThreads.load(); });
+				nosEngine.LogI("Thread %d ended wait", ended++);
+				return;
+			}));
+		}
+		nosEngine.LogI("Begin sleep");
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+		nosEngine.LogI("Started: %d", started.load());
+		ExitThreads = true;
+		cv.notify_all();
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		nosEngine.LogI("Ended: %d", started.load());
+		threads.clear();
+
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 	}
 	virtual void OnMenuCommand(uuid const& itemID, uint32_t cmd) override

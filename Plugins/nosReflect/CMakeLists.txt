@@ -2,7 +2,7 @@
 
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "" nosReflect_generated)
 
-set(MODULE_DEPENDENCIES "nos.sys.vulkan-6.22" "nos.sys.variables-1.11")
+set(MODULE_DEPENDENCIES "nos.sys.vulkan-6.28" "nos.sys.variables-1.11")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>
