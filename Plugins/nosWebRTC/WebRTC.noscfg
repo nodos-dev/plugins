@@ -9,7 +9,7 @@
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "6.282"
+                "version": "6.28"
             }
         ],
         "category": "Media I/O",
