@@ -1,7 +1,9 @@
 {
     "release_globs": [
         "Config/**",
-        "*.noscfg",
+        "Nodes/**",
+        "Types/**",
+        "*.nosplugin",
         "Include/**",
         "Assets/**",
         "Shaders/*.{hlsl,glsl,frag,vert,spv,comp}",

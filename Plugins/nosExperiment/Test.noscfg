@@ -1,11 +1,11 @@
 {
+  "binary_path": "Binaries/nosExperiment",
+  "custom_types": [
+    "Config/Test.fbs",
+    "Config/FrameInterpolator.fbs"
+  ],
   "info": {
-    "id": {
-      "name": "nos.experiment",
-      "version": "0.4.0"	
-    },
-    "display_name": "Test",
-    "description": "Plugin for testing purposes.",
+    "category": "Test",
     "dependencies": [
       {
         "name": "nos.sys.vulkan",
@@ -16,15 +16,18 @@
         "version": "0.11"
       }
     ],
-    "category": "Test"
+    "description": "Plugin for testing purposes.",
+    "display_name": "Test",
+    "id": {
+      "name": "nos.experiment",
+      "version": "0.4.0"
+    }
   },
-  "custom_types": [ "Config/Test.fbs", "Config/FrameInterpolator.fbs" ],
   "node_definitions": [
     "Config/Test.nosdef",
     "Config/FrameInterpolator.nosdef",
     "Config/Window.nosdef",
     "Config/PartialUpdateTest.nosdef",
-	  "Config/TestGraph.nosdef"
-  ],
-  "binary_path": "Binaries/nosExperiment"
+    "Config/TestGraph.nosdef"
+  ]
 }
