@@ -12,8 +12,19 @@ from loguru import logger
 
 path = str(os.path.dirname(__file__))
 
+def get_tools_dir():
+    arch_mapping = {
+        "amd64": "x86_64",
+        "x86_64": "x86_64",
+        "aarch64": "aarch64",
+        "arm64": "aarch64",
+    }
+    arch_folder_name = arch_mapping.get(platform.machine().lower(), platform.machine().lower())
+    return f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/{arch_folder_name}"
+    
+
 def embed_binary(filepath):
-    result = run([f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/bin2header", filepath], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    result = run([f"{get_tools_dir()}/bin2header", filepath], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     if result.returncode != 0:
         logger.warning(f"Failed to embed {filepath}")
         exit(result.returncode)
@@ -22,12 +33,13 @@ def embed_binary(filepath):
 
 def compile_to_spv(filepath):
     logger.info(f"Compiling {filepath}")
-    re = run([f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/glslc", "-o",  f"{filepath}_.spv", filepath], stdout=stdout, stderr=stderr, universal_newlines=True)
+    tools_dir = get_tools_dir()
+    re = run([f"{tools_dir}/glslc", "-o",  f"{filepath}_.spv", filepath], stdout=stdout, stderr=stderr, universal_newlines=True)
     if re.returncode != 0:
         logger.error(f"Failed to compile {filepath}")
         return re.returncode
     else:
-        re = run([f"{path}/../Subsystems/nosShaderCompiler/Binaries/tools/{platform.system()}/spirv-opt", "-O", "-o",  f"{filepath}.spv", f"{filepath}_.spv"], stdout=stdout, stderr=stderr, universal_newlines=True)
+        re = run([f"{tools_dir}/spirv-opt", "-O", "-o",  f"{filepath}.spv", f"{filepath}_.spv"], stdout=stdout, stderr=stderr, universal_newlines=True)
         os.remove(f"{filepath}_.spv")
         if re.returncode != 0:
             logger.error(f"Failed to optimize {filepath}")
