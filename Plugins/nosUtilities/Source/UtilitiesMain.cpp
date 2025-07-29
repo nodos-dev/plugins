@@ -60,6 +60,7 @@ enum Utilities : int
 	ReadImage,
 	BoxFit,
 	ReduceTexture,
+	MultiLiveOut,
 	Count
 };
 
@@ -98,6 +99,7 @@ nosResult RegisterGridLayout(nosNodeFunctions*);
 nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 nosResult RegisterReduceTexture(nosNodeFunctions*);
+nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -152,6 +154,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(FreeOutputLayout)
 			GEN_CASE_NODE(GridOutputLayout)
 			GEN_CASE_NODE(ReduceTexture)
+			GEN_CASE_NODE(MultiLiveOut)
 		}
 	}
 	
