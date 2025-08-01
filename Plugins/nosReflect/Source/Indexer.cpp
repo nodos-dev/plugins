@@ -10,6 +10,13 @@ struct Indexer : NodeContext
 
     uint32_t Index = 0;
 	uint32_t ArraySize = 0;
+	enum class IndexState
+	{
+		None = 0,
+		Valid = 1,
+		Invalid = 2,
+	};
+	IndexState LastState = IndexState::None;
     
     nosResult OnCreate(nosFbNodePtr inNode) override
     {
@@ -79,7 +86,7 @@ struct Indexer : NodeContext
         }
 		return NOS_RESULT_FAILED;
 	}
-    
+
 	void OnPinUpdated(nosPinUpdate const* update) override
 	{
 		if (Type || update->UpdatedField != NOS_PIN_FIELD_TYPE_NAME)
@@ -101,25 +108,29 @@ struct Indexer : NodeContext
 		UpdateInputVectorSize();
 	}
 
+	void UpdateIndexState(IndexState newState)
+	{
+		if (newState == LastState)
+			return;
+		LastState = newState;
+		if (newState == IndexState::Valid)
+		{
+			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::ACTIVE);
+			ClearNodeStatusMessages();
+		}
+		else
+		{
+			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
+			SetNodeStatusMessages({ {{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
+		}
+	}
+
 	bool SetIndex(uint32_t newIndex)
     {
 		Index = newIndex;
-    	if (Index >= ArraySize)
-    	{
-			SetNodeStatusMessages({{{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true}});
-			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
-    		return false;
-    	}
-		ClearOutputState();
+		UpdateIndexState(Index >= ArraySize ? IndexState::Invalid : IndexState::Valid);
     	return true;
     }
-
-	void ClearOutputState()
-	{
-		SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::ACTIVE, "");
-		ClearNodeStatusMessages();
-	}
-
 	bool UpdateInputVectorSize() {
 		std::vector<uint8_t> data;
 
