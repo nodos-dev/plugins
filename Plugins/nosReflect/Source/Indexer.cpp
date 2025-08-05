@@ -128,8 +128,9 @@ struct Indexer : NodeContext
 	bool SetIndex(uint32_t newIndex)
     {
 		Index = newIndex;
-		UpdateIndexState(Index >= ArraySize ? IndexState::Invalid : IndexState::Valid);
-    	return true;
+		bool isValidIndex = Index < ArraySize;
+		UpdateIndexState(isValidIndex ? IndexState::Valid : IndexState::Invalid);
+		return isValidIndex;
     }
 	bool UpdateInputVectorSize() {
 		std::vector<uint8_t> data;
