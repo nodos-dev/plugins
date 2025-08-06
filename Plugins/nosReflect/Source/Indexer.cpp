@@ -163,7 +163,7 @@ struct Indexer : NodeContext
 		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_Input].Data);
     	ArraySize = vec->size();
 		if (!SetIndex(*(uint32_t*)pins[NSN_Index].Data->Data))
-			return NOS_RESULT_FAILED;
+			return NOS_RESULT_SUCCESS;
 		auto ID = pins[NSN_Output].Id;
 		auto& type = *Type;
 
