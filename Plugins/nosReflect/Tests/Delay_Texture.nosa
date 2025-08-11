@@ -1,15 +1,15 @@
 { "info": { "version": "1.4.0.b0", "build_time": "2025-07-09 16:05:07 +0300", "loaded_modules": [
-      { "name": "nos.reflect", "version": "1.12.3" },
-      { "name": "nos.sys.vulkan", "version": "6.27.1.b687" },
-      { "name": "nos.sys.shaderc", "version": "1.1.0.b953" },
-      { "name": "nos.sys.variables", "version": "1.11.2.b986" },
-      { "name": "nos.sys.settings", "version": "1.0.0.b821" },
-      { "name": "nos.sys.device", "version": "0.11.0.b28" },
-      { "name": "nos.utilities", "version": "3.25.0.b1043" },
-      { "name": "nos.math", "version": "1.22.0.b1033" },
-      { "name": "nos.test", "version": "0.2.0" },
-      { "name": "nos.filters", "version": "1.11.2.b1043" },
-      { "name": "nos.mediaio", "version": "2.12.2.b678" }
+      { "name": "nos.reflect", "version": "1.12.4" },
+      { "name": "nos.sys.shaderc", "version": "2.0.0" },
+      { "name": "nos.sys.vulkan", "version": "6.29.0" },
+      { "name": "nos.sys.settings", "version": "1.1.0" },
+      { "name": "nos.sys.variables", "version": "1.11.3" },
+      { "name": "nos.sys.device", "version": "0.11.1" },
+      { "name": "nos.utilities", "version": "3.26.0" },
+      { "name": "nos.math", "version": "1.22.1" },
+      { "name": "nos.test", "version": "0.2.1" },
+      { "name": "nos.filters", "version": "1.11.3" },
+      { "name": "nos.mediaio", "version": "2.12.3" }
     ] }, "graph": {
     "id": "30ac0e24-7fe3-499e-8df5-0a8504977afe",
     "pos": { "x": 0.0, "y": 0.0 },
