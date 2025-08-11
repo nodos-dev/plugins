@@ -2,8 +2,7 @@
     "release_globs": {
         "x86_64-windows": [
             "*.nossys",
-            "Binaries/tools/Windows/*.exe",
-            "Binaries/tools/Windows/*.dll"
+            "Binaries/tools/Windows/**/*"
         ],
         "x86_64-linux": [
             "*.nossys",
