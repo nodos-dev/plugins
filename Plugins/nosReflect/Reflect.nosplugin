@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.reflect",
-            "version": "1.12.4"
+            "version": "1.13.0"
         },
         "display_name": "Reflect",
         "description": "Collection of type reflection nodes",
@@ -18,9 +18,5 @@
 		]
     },
     "binary_path": "Binaries/nosReflect",
-    "node_definitions": ["Config/Reflect.nosdef"],
-    "defaults": [],
-	"custom_types": [
-		"Config/Reflect.fbs"
-	]
+    "defaults": []
 }

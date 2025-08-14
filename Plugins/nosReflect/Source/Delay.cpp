@@ -8,23 +8,25 @@
 namespace nos::reflect
 {
 
-struct SlotBase
+struct Slot
 {
-	nos::Buffer Buffer;
-	virtual ~SlotBase() = default;
-	SlotBase(const SlotBase&) = delete;
-	SlotBase& operator=(const SlotBase&) = delete;
-	SlotBase(nosBuffer const& buf) : Buffer(buf) {}
-	virtual void CopyFrom(nosBuffer const& buf, uuid const& nodeId) = 0;
-	virtual bool IsSlotCompatible(nosBuffer const& buf) const = 0;
+	struct DelayNode& Context; 
+	nosObjectHandle Handle = nullptr;
+	~Slot();
+	Slot(const Slot&) = delete;
+	Slot& operator=(const Slot&) = delete;
+	Slot(DelayNode& context, nosBuffer const& buf);
+	void CopyFrom(nosBuffer const& buf, uuid const& nodeId);
+	bool IsSlotCompatible(nosBuffer const& buf) const;
+	EngineBuffer GetBuffer();
 };
 
 struct DelayQueue {
-	std::vector<std::unique_ptr<SlotBase>> Slots;
-	std::queue<Ref<SlotBase>> ReadyQueue;
+	std::vector<std::unique_ptr<Slot>> Slots;
+	std::queue<Ref<Slot>> ReadyQueue;
 	// This is the actively used slot, which is the output pin's value, if AccountForActiveSlot is true.
-	SlotBase* ActiveSlot{};
-	std::queue<Ref<SlotBase>> FreeQueue;
+	Slot* ActiveSlot{};
+	std::queue<Ref<Slot>> FreeQueue;
 	uint32_t Delay = 0;
 	bool AccountForActiveSlot = false;
 	DelayQueue() {}
@@ -49,17 +51,17 @@ struct DelayQueue {
 		return !FreeQueue.empty(); 
 	}
 
-	void DeleteSlotAndPopFromQueue(std::queue<Ref<SlotBase>>& queue)
+	void DeleteSlotAndPopFromQueue(std::queue<Ref<Slot>>& queue)
 	{
 		if (!queue.empty())
 		{
 			auto slotPtr = queue.front();
 			queue.pop();
-			std::erase_if(Slots, [slotPtr](const std::unique_ptr<SlotBase>& slot) { return slot.get() == &slotPtr; });
+			std::erase_if(Slots, [slotPtr](const std::unique_ptr<Slot>& slot) { return slot.get() == &slotPtr; });
 		}
 	}
 
-	SlotBase* BeginPush()
+	Slot* BeginPush()
 	{
 		if (!HasFree())
 			return nullptr;
@@ -67,14 +69,16 @@ struct DelayQueue {
 		FreeQueue.pop();
 		return slotPtr;
 	}
-	void EndPush(SlotBase& slot)
+
+	void EndPush(Slot& slot)
 	{
 		ReadyQueue.push(slot);
 		// If there are more than Delay slots in the queue, we need to delete the oldest ones.
 		while (ReadyQueue.size() > Delay)
 			DeleteSlotAndPopFromQueue(ReadyQueue);
 	}
-	SlotBase* BeginPop()
+
+	Slot* BeginPop()
 	{
 		if (ReadyQueue.size() < Delay)
 			return nullptr;
@@ -87,7 +91,8 @@ struct DelayQueue {
 		ReadyQueue.pop();
 		return slotPtr;
 	}
-	void EndPop(SlotBase& popped)
+
+	void EndPop(Slot& popped)
 	{
 		// FreeQueue should be normally empty, but if Slot count is not enough in total, then we can keep FreeQueue non-empty
 		while (Slots.size() > GetRequiredSlotCount() && !FreeQueue.empty())
@@ -103,7 +108,7 @@ struct DelayQueue {
 			FreeQueue.push(popped);
 	}
 
-	void AddResource(std::unique_ptr<SlotBase> slot)
+	void AddResource(std::unique_ptr<Slot> slot)
 	{
 		if (Slots.size() >= Delay + 1)
 			return;
@@ -127,94 +132,13 @@ struct DelayQueue {
 	}
 };
 
-
-
-struct TriviallyCopyableSlot : SlotBase
-{
-	using SlotBase::SlotBase;
-	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
-	{
-		Buffer = other;
-	}
-	bool IsSlotCompatible(nosBuffer const& buf) const override
-	{ 
-		return true;
-	}
-};
-
-template <typename T>
-requires std::is_same_v<T, nosTextureInfo> || std::is_same_v<T, nosBufferInfo>
-struct ResourceSlot : SlotBase
-{
-	vkss::Resource Res;
-	ResourceSlot(nosBuffer const& buf)
-		: SlotBase(buf),
-		  Res(*vkss::Resource::Create(
-			  [](nosBuffer const& buf) -> T {
-				  if constexpr (std::is_same_v<T, nosBufferInfo>)
-				  {
-					  auto desc =
-						  vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(buf.Data)).Info.Buffer;
-					  desc.Usage = nosBufferUsage(desc.Usage | nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST));
-					  return desc;
-				  }
-				  if constexpr (std::is_same_v<T, nosTextureInfo>)
-				  {
-					  return vkss::DeserializeTextureInfo(buf.Data).Info.Texture;
-				  }
-			  }(buf),
-			  "Delay Resource"))
-	{
-	}
-
-	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
-	{
-		// TODO: Interlaced.
-		nosCmd cmd{};
-		nosCmdBeginParams beginParams{
-			.Name = NOS_NAME_STATIC("Delay Copy"),
-			.AssociatedNodeId = nodeId,
-			.OutCmdHandle = &cmd
-		};
-		nosResourceShareInfo src{};
-		if constexpr (std::is_same_v<T, nosBufferInfo>)
-			src = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(other.Data));
-		if constexpr (std::is_same_v<T, nosTextureInfo>)
-			src = vkss::DeserializeTextureInfo(other.Data);
-		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &src, &Res, nullptr);
-		nosVulkan->End(cmd, nullptr);
-		Buffer = Res.ToPinData();
-	}
-
-	bool IsSlotCompatible(nosBuffer const& buf) const override
-	{
-		if constexpr (std::is_same_v<T, nosBufferInfo>)
-		{
-			auto vkBuf = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(buf.Data));
-			if (vkBuf.Info.Buffer.Size != Res.Info.Buffer.Size ||
-				vkBuf.Info.Buffer.Alignment != Res.Info.Buffer.Alignment ||
-				vkBuf.Info.Buffer.Usage != Res.Info.Buffer.Usage ||
-				vkBuf.Info.Buffer.MemoryFlags != Res.Info.Buffer.MemoryFlags)
-				return false;
-		}
-		if constexpr (std::is_same_v<T, nosTextureInfo>)
-		{
-			auto tex = vkss::DeserializeTextureInfo(buf.Data);
-			if (tex.Info.Texture.Format != Res.Info.Texture.Format ||
-				tex.Info.Texture.Width != Res.Info.Texture.Width ||
-				tex.Info.Texture.Height != Res.Info.Texture.Height ||
-				tex.Info.Texture.Usage != Res.Info.Texture.Usage || tex.Info.Texture.Filter != Res.Info.Texture.Filter)
-				return false;
-		}
-		return true;
-	}
-};
-
 struct DelayNode : NodeContext
 {
-    nosName TypeName = NSN_TypeNameGeneric;
+	nos::Name TypeName = NSN_TypeNameGeneric;
 	DelayQueue Queue{};
+
+	nosObjectCopyInterface* CopyInterface = nullptr;
+	nosObjectTypeFunctions Functions{};
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -223,7 +147,7 @@ struct DelayNode : NodeContext
 			auto name = nos::Name(pin->name()->c_str());
 			if (NSN_Output == name)
 			{
-				if (pin->type_name()->c_str() == NSN_TypeNameGeneric.AsString())
+				if (strcmp(pin->type_name()->c_str(), NSN_TypeNameGeneric.AsCStr()) == 0)
 					continue;
 				SetType(nos::Name(pin->type_name()->c_str()));
 			}
@@ -237,8 +161,6 @@ struct DelayNode : NodeContext
 		{
 			Queue.Delay = *static_cast<uint32_t*>(value.Data);
 		}
-		if(NSN_TypeNameGeneric == TypeName)
-			return;
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
@@ -267,7 +189,19 @@ struct DelayNode : NodeContext
 	void SetType(nos::Name typeName)
 	{
 		TypeName = typeName;
-		Queue.AccountForActiveSlot = TypeName == NSN_TextureTypeName || TypeName == NSN_BufferTypeName;
+		Queue.AccountForActiveSlot = true; // TODO!
+		auto res = nosEngine.GetObjectTypeFunctions(TypeName, &Functions);
+		if (res != NOS_RESULT_SUCCESS)
+		{
+			nosEngine.LogE("Failed to get object type functions for type: %s", TypeName.AsCStr());
+			return;
+		}
+		res = nosEngine.RequestInterfaceImplementation(TypeName, NOS_NAME(nosObjectCopyInterface::Name), reinterpret_cast<void**>(&CopyInterface));
+		if (res != NOS_RESULT_SUCCESS)
+		{
+			nosEngine.LogE("Failed to request copy interface implementation for type: %s", TypeName.AsCStr());
+			return;
+		}
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -288,19 +222,13 @@ struct DelayNode : NodeContext
 
 		if (auto popSlot = Queue.BeginPop())
 		{
-			SetPinValue(NSN_Output, popSlot->Buffer);
+			SetPinValue(NSN_Output, popSlot->GetBuffer());
 			Queue.EndPop(*popSlot);
 		}
 		Queue.ClearIfIncompatibleData(inputBuffer);
 		if (!Queue.HasFree())
 		{
-			std::unique_ptr<SlotBase> slot;
-			if (TypeName == NSN_TextureTypeName)
-				slot = std::make_unique<ResourceSlot<nosTextureInfo>>(inputBuffer);
-			else if (TypeName == NSN_BufferTypeName)
-				slot = std::make_unique<ResourceSlot<nosBufferInfo>>(inputBuffer);
-			else
-				slot = std::make_unique<TriviallyCopyableSlot>(inputBuffer);
+			auto slot = std::make_unique<Slot>(*this, inputBuffer);
 			Queue.AddResource(std::move(slot));
 		}
 		if (auto pushSlot = Queue.BeginPush())
@@ -311,6 +239,56 @@ struct DelayNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 };
+
+Slot::Slot(DelayNode& context, nosBuffer const& buf)
+	: Context(context)
+{
+	Context.Functions.Create(
+		nosTypedBuffer {
+			.TypeName = Context.TypeName,
+			.Buffer = buf
+		},
+		&Handle);
+}
+
+Slot::~Slot()
+{
+	Context.Functions.Release(Handle);
+}
+
+void Slot::CopyFrom(nosBuffer const& buf, uuid const& nodeId)
+{
+	nosObjectHandle inHandle = nullptr;
+	Context.Functions.GetHandleFromTypedBuffer(
+		nosTypedBuffer {
+			.TypeName = Context.TypeName,
+			.Buffer = buf
+		},
+		&inHandle);
+	Context.CopyInterface->Copy(inHandle, Handle, nullptr);
+	Context.Functions.Release(inHandle);
+}
+
+bool Slot::IsSlotCompatible(nosBuffer const& buf) const
+{
+	nosObjectHandle inHandle = nullptr;
+	Context.Functions.GetHandleFromTypedBuffer(
+		nosTypedBuffer {
+			.TypeName = Context.TypeName,
+			.Buffer = buf
+		},
+		&inHandle);
+	bool supports = NOS_OBJECT_COPY_COMPATIBILITY_FLAGS_SUPPORTS_COPY & Context.CopyInterface->GetCopyCompatibility(Handle, inHandle);
+	Context.Functions.Release(inHandle);
+	return supports;
+}
+
+EngineBuffer Slot::GetBuffer()
+{
+	nosTypedBuffer outBuf;
+	Context.Functions.GetTypedBufferFromHandle(Handle, &outBuf);
+	return EngineBuffer::FromExisting(outBuf.Buffer);
+}
 
 nosResult RegisterDelay(nosNodeFunctions* fn)
 {

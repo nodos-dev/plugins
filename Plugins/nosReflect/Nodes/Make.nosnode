@@ -1,0 +1,37 @@
+{
+    "nodes": [
+        {
+            "class_name": "MakeDynamic",
+            "menu_info": {
+                "category": "Type",
+                "display_name": "Make",
+                "name_aliases": [
+                    "variable",
+                    "create",
+                    "new",
+                    "Make *"
+                ]
+            },
+            "node": {
+                "name": "Make",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "Output",
+                        "type_name": "nos.Generic",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY",
+                        "connection_conditions": "!resource"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "Make",
+            "hide_in_context_menu": true,
+            "node": {
+                "contents_type": "Job"
+            }
+        }
+    ]
+}
