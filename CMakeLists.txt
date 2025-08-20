@@ -12,9 +12,8 @@ if (NOT WITH_NODOS_WORKSPACE)
 endif()
 
 add_compile_definitions(NOS_DISABLE_DEPRECATED)
-nos_find_plugin_sdk("39.5.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
-nos_get_module("nos.sys.vulkan" "6.28" NOS_SYS_VULKAN_TARGET)
-cmake_path(SET FLATC_EXECUTABLE "${NOS_SDK_DIR}/bin/flatc")
+nos_find_plugin_sdk("39.12.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
+nos_get_plugin("nos.sys.vulkan" "6.28" NOS_SYS_VULKAN_TARGET)
 
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Subsystems/nosShaderCompiler/Binaries/tools/${CMAKE_SYSTEM_NAME})
 
