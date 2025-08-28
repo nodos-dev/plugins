@@ -7,7 +7,7 @@
 #include <chrono>
 #include <Nodos/Utils/Stopwatch.hpp>
 
-#include "Sink_generated.h"
+#include "nosUtilities/Sink_generated.h"
 
 namespace nos::utilities
 {

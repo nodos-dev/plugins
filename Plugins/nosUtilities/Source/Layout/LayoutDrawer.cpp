@@ -3,7 +3,7 @@
 #include <Nodos/Plugin.hpp>
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <glm/glm.hpp>
-#include "Layout_generated.h"
+#include "nosUtilities/Layout_generated.h"
 
 NOS_REGISTER_NAME(LayoutDrawer)
 NOS_REGISTER_NAME(TexturedQuad_Pass)
