@@ -1,0 +1,9 @@
+include "Common.fbs";
+
+namespace nos.sys.lino;
+
+table Channel
+{
+	name : string;
+	size : nos.fb.vec2u;
+}
