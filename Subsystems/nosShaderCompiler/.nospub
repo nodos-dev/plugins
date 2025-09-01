@@ -1,15 +1,15 @@
 {
     "release_globs": {
         "x86_64-windows": [
-            "*.nossys",
+            "*.nosplugin",
             "Binaries/tools/Windows/**/*"
         ],
         "x86_64-linux": [
-            "*.nossys",
+            "*.nosplugin",
             "Binaries/tools/Linux/**/*"
         ],
         "x86_64-macos": [
-            "*.nossys",
+            "*.nosplugin",
             "Binaries/tools/Darwin/**/*"
         ]
     }

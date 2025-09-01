@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.py",
-            "version": "0.11.2"
+            "version": "1.0.0"
         },
         "display_name": "Python Subsystem",
         "description": "Python subsystem for Nodos. Allows Python scripts to be run inside Nodos.\n\nConsiderations:\n- Requires Python 3 to be installed on the system.",
@@ -14,10 +14,5 @@
         ],
         "category": "Scripting"
     },
-    "binary_path": "./Binaries/nosPython",
-    "custom_types": [
-        "./Config/Python.fbs"
-    ],
-    "defaults": [
-    ]
+    "binary_path": "./Binaries/nosPython"
 }

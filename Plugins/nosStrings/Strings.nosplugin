@@ -1,0 +1,12 @@
+{
+    "info": {
+        "id": {
+            "name": "nos.str",
+            "version": "0.11.2"
+        },
+        "display_name": "Strings",
+        "description": "Collection of string manipulation nodes",
+        "dependencies": []
+    },
+    "binary_path": "Binaries/nosStrings"
+}

@@ -1,0 +1,21 @@
+{
+  "info": {
+    "id": {
+      "name": "nos.animation",
+      "version": "0.12.0"
+    },
+    "display_name": "nos.animation",
+    "description": "Animation nodes for Nodos.",
+    "category": "Animation",
+    "dependencies": [
+      {
+        "name": "nos.sys.animation",
+        "version": "2.0"
+      }
+    ]
+  },
+  "binary_path": "./Binaries/nosAnimation",
+  "named_values": [
+    "Types/AnimationExpressionPresets.json"
+  ]
+}

@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.math",
-      "version": "1.22.1"
+      "version": "1.23.0"
     },
     "description": "Nodes for math operations.",
     "display_name": "Math",
@@ -10,23 +10,10 @@
     "dependencies": [
       {
         "name": "nos.reflect",
-        "version": "1.11"
+        "version": "2.0"
       }
     ]
   },
-  "custom_types": [],
-  "named_values": [],
-  "node_definitions": [
-    "Config/Math.nosdef",
-    "Config/Eval.nosdef",
-    "Config/Matrix.nosdef",
-    "Config/Round.nosdef",
-    "Config/Boolean.nosdef",
-    "Config/Xor.nosdef",
-    "Config/Random.nosdef",
-    "Config/Lerp.nosdef",
-    "Config/SineWave.nosdef"
-  ],
   "binary_path": "Binaries/nosMath",
   "third_party_software": [
     "Config/Licenses.json"

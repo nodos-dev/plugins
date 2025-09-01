@@ -2,18 +2,18 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.27.0"
+			"version": "3.28.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "6.28"
+				"version": "7.0"
 			},
 			{
 				"name": "nos.math",
-				"version": "1.21"
+				"version": "1.23"
 			}
 		],
 		"category": "Utilities"
@@ -23,7 +23,7 @@
 		{
 			"plugin": "nos.sys.vulkan",
 			"type": "nos.sys.vulkan.Resources",
-			"path": "Config/Resources.json"
+			"path": "Types/Resources.json"
 		}
 	]
 }

@@ -2,25 +2,19 @@
     "info": {
         "id": {
             "name": "nos.webrtc",
-            "version": "1.11.2"
+            "version": "1.12.0"
         },
         "description": "WebRTC Nodes",
         "display_name": "WebRTC",
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "6.28"
+                "version": "7.0"
             }
         ],
         "category": "Media I/O",
         "tags": ["streaming"]
     },
-    "node_definitions": [
-        "Config/WebRTCStreamer.nosdef",
-        "Config/WebRTCPlayer.nosdef",
-        "Config/WebRTCSignalingServer.nosdef"
-    ],
-    "custom_types": [],
     "binary_path": "Binaries/nosWebRTC",
     "associated_nodes": [
     ]

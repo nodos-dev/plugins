@@ -1,0 +1,26 @@
+{
+    "info": {
+        "id": {
+            "name": "nos.filters",
+            "version": "2.0.0"
+        },
+        "display_name": "Filters",
+        "description": "Collection of image filters.",
+        "dependencies": [
+            {
+                "name": "nos.sys.vulkan",
+                "version": "7.0"
+            },
+            {
+                "name": "nos.math",
+                "version": "1.23"
+            },
+            {
+                "name": "nos.mediaio",
+                "version": "3.0"
+            }
+        ],
+        "category": "Image Processing"
+    },
+    "binary_path": "Binaries/nosFilters"
+}

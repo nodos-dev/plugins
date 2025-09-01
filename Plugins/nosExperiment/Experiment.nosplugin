@@ -1,0 +1,22 @@
+{
+  "binary_path": "Binaries/nosExperiment",
+  "info": {
+    "category": "Test",
+    "dependencies": [
+      {
+        "name": "nos.sys.vulkan",
+        "version": "7.0"
+      },
+      {
+        "name": "nos.py",
+        "version": "1.0"
+      }
+    ],
+    "description": "Plugin for testing purposes.",
+    "display_name": "Test",
+    "id": {
+      "name": "nos.experiment",
+      "version": "1.0.0"
+    }
+  }
+}

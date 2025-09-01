@@ -24,12 +24,12 @@ A plugin structure is as follows:
 
 ```
 SomePlugin/
-├─ SomePlugin.noscfg (or .nossys if a subsystem)
+├─ SomePlugin.nosplugin
 ├─ Binaries/ (shipped)
 │  ├─ SomePlugin.dll
 ├─ Config/ (shipped)
 │  ├─ SomePlugin.fbs
-│  ├─ SomePlugin.nosdef
+│  ├─ SomePlugin.nosnode
 ├─ Source/ (example)
 │  ├─ SomePlugin.cpp
 ```

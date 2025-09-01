@@ -1,7 +1,7 @@
 {
     "release_globs": [
         "Config/**",
-        "*.nossys",
+        "*.nosplugin",
         "Include/**",
         "Assets/**",
         "Binaries/*.{dll,dylib,so}",
