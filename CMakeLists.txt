@@ -13,7 +13,7 @@ endif()
 
 add_compile_definitions(NOS_DISABLE_DEPRECATED)
 nos_find_plugin_sdk("39.12.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
-nos_get_plugin("nos.sys.vulkan" "6.28" NOS_SYS_VULKAN_TARGET)
+nos_get_plugin("nos.sys.vulkan" "7.0" NOS_SYS_VULKAN_TARGET)
 
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Subsystems/nosShaderCompiler/Binaries/tools/${CMAKE_SYSTEM_NAME})
 

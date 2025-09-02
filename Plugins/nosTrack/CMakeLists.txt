@@ -1,6 +1,6 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 set(PUBLIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include")
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${PUBLIC_INCLUDE_DIR}/nosTrack" "cpp" "${NOS_SDK_DIR}/types" nosTrack_generated)
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Types" "${PUBLIC_INCLUDE_DIR}/nosTrack" "cpp" "${NOS_SDK_DIR}/types" nosTrack_generated)
 
 set(MODULE_DEPENDENCIES "nos.sys.animation-1.11")
 set(dep_idx 0)
