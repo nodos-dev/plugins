@@ -119,7 +119,9 @@ struct MakeNode : NodeContext
     	uint32_t index = 0;
     	for (auto ty : AllTypeNames)
     		types.push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
-    	HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &types)));
+    	std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
+    	items.push_back(nos::CreateContextMenuItemDirect(fbb, "Set Type", -1, &types));
+    	HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
     }
 
     void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
