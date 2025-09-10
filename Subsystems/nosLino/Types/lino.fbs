@@ -4,6 +4,6 @@ namespace nos.sys.lino;
 
 table Channel
 {
-	name : string;
-	size : nos.fb.vec2u;
+	name : string (id: 0);
+	size : nos.fb.vec2u (native_inline, id: 1);
 }
