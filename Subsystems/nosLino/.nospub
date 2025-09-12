@@ -1,0 +1,6 @@
+{
+    "release_globs": [
+        "*.nossys",
+        "Types/**"
+    ]
+}

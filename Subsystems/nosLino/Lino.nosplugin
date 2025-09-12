@@ -1,0 +1,11 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.sys.lino",
+			"version": "2.0.0"
+		},
+		"display_name": "Lino Subsystem",
+		"description": "A Nodos subsystem for Lino",
+		"category": "Media"
+	}
+}
