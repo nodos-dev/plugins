@@ -19,4 +19,7 @@ set(FLATC_EXECUTABLE ${NOS_SDK_DIR}/bin/flatc${CMAKE_EXECUTABLE_SUFFIX})
 
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Types" "${CMAKE_CURRENT_SOURCE_DIR}/Include" "cpp" "${NOS_SDK_DIR}/types" generated_nosLinoSubsystem)
 
+# Ensure the generated flatbuffers target is built
+add_custom_target(build_nosLinoSubsystem ALL DEPENDS generated_nosLinoSubsystem)
+
 
