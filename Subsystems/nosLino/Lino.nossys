@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.sys.lino",
-			"version": "1.0.0"
+			"version": "1.0.1"
 		},
 		"display_name": "Lino Subsystem",
 		"description": "A Nodos subsystem for Lino",
