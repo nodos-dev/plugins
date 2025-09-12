@@ -52,8 +52,8 @@ struct RepeatingJunctionNode : NodeContext
 		}
 	}
 
-	nosResult CopyFrom(nosCopyInfo* cpy) override {
-
+	nosResult CopyFrom(nosCopyInfo* cpy) override
+	{
 		std::unique_lock lock(NewFrameMutex);
 		if (NewFrame)
 		{
@@ -61,6 +61,7 @@ struct RepeatingJunctionNode : NodeContext
 			NewFrame = std::nullopt;
 			ScheduleNextFrame();
 		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnPathStart() override
