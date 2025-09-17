@@ -29,11 +29,6 @@ struct FrameInterpolatorNode : NodeContext
 		ShouldStop = true;
 	}
 
-	nosResult CopyFrom(nosCopyInfo* copyInfo) override
-	{
-		return NOS_RESULT_SUCCESS;
-	}
-
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		NodeExecuteParams execParams(params);
@@ -43,14 +38,14 @@ struct FrameInterpolatorNode : NodeContext
 			if (!InputPinId)
 				InputPinId = execParams[NSN_Input].Id;
 		}
-		auto inputTextureInfo = vkss::DeserializeTextureInfo(execParams[NSN_Input].Data->Data);
-		auto outputTextureInfo = vkss::DeserializeTextureInfo(execParams.GetPinData<void>(NSN_Output));
-		auto method = execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
-		switch (*method)
+		auto inputTexture = *execParams[NSN_Input].ObjectHandle;
+		auto outputTexture = *execParams[NSN_Output].ObjectHandle;
+		auto method = *execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
+		switch (method)
 		{
 		case FrameInterpolationMethod::REPEAT: {
 			nosCmd cmd = vkss::BeginCmd(NOS_NAME("Frame Interpolator"), NodeId);
-			nosVulkan->Copy(cmd, &inputTextureInfo, &outputTextureInfo, 0);
+			nosVulkan->Copy(cmd, inputTexture, outputTexture, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			break;
 		}

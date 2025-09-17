@@ -92,10 +92,10 @@ struct EnumCastNodeBase : NodeContext
 
 struct EnumToUnderlyingValueNode : EnumCastNodeBase
 {
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams args(params);
-		if(!EnumType || args[NSN_Value].TypeName == NSN_TypeNameGeneric)
+		if (!EnumType || args[NSN_Value].TypeName == NSN_TypeNameGeneric)
 			return NOS_RESULT_SUCCESS;
 		SetPinValue(NSN_Value, *args[NSN_Enum].Data);
 		return NOS_RESULT_SUCCESS;

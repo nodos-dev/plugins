@@ -148,13 +148,13 @@ struct ArithmeticNodeContext : NodeContext
 				if ("string" == templateParam->name()->string_view() ||
 					NSN_Type == templateParam->name()->string_view())
 				{
-					newTypeName = nos::Name(InterpretPinValue<const char*>((void*)templateParam->value()->Data()));
+					newTypeName = nos::Name(InterpretObjectData<const char*>((void*)templateParam->value()->Data()));
 					continue;
 				}
 				if ("nos.reflect.BinaryOperator" == templateParam->name()->string_view() ||
 					NSN_Operator == templateParam->name()->string_view())
 				{
-					Operator = *InterpretPinValue<reflect::BinaryOperator>((void*)templateParam->value()->Data());
+					Operator = *InterpretObjectData<reflect::BinaryOperator>((void*)templateParam->value()->Data());
 					continue;
 				}
 			}
@@ -249,7 +249,7 @@ struct ArithmeticNodeContext : NodeContext
 		if constexpr (IsScalarArithmetic)
 			displayNameStr += " (Scalar)";
 		auto displayName = fbb.CreateString(displayNameStr);
-		std::vector<uint8_t> opData = PackPinData(*Operator);
+		std::vector<uint8_t> opData = PackObjectData(*Operator);
 		std::vector params = {
 			fb::CreateTemplateParameterDirect(fbb, NSN_Operator.AsCStr(), "nos.reflect.BinaryOperator", &opData)
 		};
@@ -364,19 +364,32 @@ struct ArithmeticNodeContext : NodeContext
 			if ((*Type)->BaseType == NOS_BASE_TYPE_STRING)
 			{
 				std::stringstream ss;
-				ss << InterpretPinValue<const char*>(*A.Data) << InterpretPinValue<const char*>(*B.Data);
+				ss << InterpretObjectData<const char*>(*A.Data) << InterpretObjectData<const char*>(*B.Data);
 				auto str = ss.str();
-				nosEngine.SetPinValue(Output.Id, PackPinData(str.c_str()));
+				SetPinValue(Output.Id, str.c_str());
 			}
 			else
 			{
-				DoOp<void>(*Operator, *Type, InterpretPinValue<uint8_t>(*A.Data), InterpretPinValue<uint8_t>(*B.Data), InterpretPinValue<uint8_t>(*Output.Data));
+				nos::Buffer outputBuf(Output.Data->Size);
+				DoOp<void>(*Operator,
+						   *Type,
+						   InterpretObjectData<uint8_t>(*A.Data),
+						   InterpretObjectData<uint8_t>(*B.Data),
+						   InterpretObjectData<uint8_t>(outputBuf));
+				SetPinValue(Output.Id, outputBuf);
 			}
 		}
 		else
 		{
 			auto& scalar = pins[NSN_Scalar];
-			DoScalarOp(*Operator, *Type, InterpretPinValue<uint8_t>(*A.Data), *ScalarType, InterpretPinValue<void>(*scalar.Data), InterpretPinValue<uint8_t>(*Output.Data));
+			nos::Buffer outputBuf(Output.Data->Size);
+			DoScalarOp(*Operator,
+					   *Type,
+					   InterpretObjectData<uint8_t>(*A.Data),
+					   *ScalarType,
+					   InterpretObjectData<void>(*scalar.Data),
+					   InterpretObjectData<uint8_t>(outputBuf));
+			SetPinValue(Output.Id, outputBuf);
 		}
 
 		return NOS_RESULT_SUCCESS;
@@ -437,7 +450,7 @@ struct ArithmeticNodeContext : NodeContext
 		}
 		auto& templateParam2 = tNode.template_parameters.emplace_back(std::make_unique<fb::TTemplateParameter>());
 		templateParam2->name = NSN_Type.AsString();
-		templateParam2->value = std::vector<uint8_t>(PackPinData(type.c_str()));
+		templateParam2->value = std::vector<uint8_t>(PackObjectData(type.c_str()));
 		templateParam2->type_name = "string";
 		*outBuffer = EngineBuffer::CopyFrom(tNode).Release();
 		return NOS_RESULT_SUCCESS;
@@ -491,9 +504,10 @@ void RegisterArithmeticNodePresets() {
 			info.category = "Math|" + binaryOpStr;
 			info.display_name = binaryOpStr + " " + name.substr(idx);
 			preset.menu_info = std::make_unique<fb::TNodeMenuInfo>(std::move(info));
-			std::vector<uint8_t> data = PackPinData(name.c_str());
+			std::vector<uint8_t> data = PackObjectData(name.c_str());
 			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Type.AsString(), "string", std::move(data) });
-			preset.params.emplace_back(new fb::TTemplateParameter{ {}, NSN_Operator.AsString(), "nos.reflect.BinaryOperator", PackPinData(binaryOp) });
+			preset.params.emplace_back(new fb::TTemplateParameter{
+				{}, NSN_Operator.AsString(), "nos.reflect.BinaryOperator", PackObjectData(binaryOp)});
 			flatbuffers::FlatBufferBuilder fbb;
 			fbb.Finish(CreateNodePreset(fbb, &preset));
 			nos::Buffer buf = fbb.Release();

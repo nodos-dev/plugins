@@ -41,13 +41,13 @@ struct ComparisonNode : NodeContext
 		void* aPtr, *bPtr;
 		if (!type->ByteSize && type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			aPtr = (void*)InterpretPinValue<flatbuffers::Table>(*A.Data);
-			bPtr = (void*)InterpretPinValue<flatbuffers::Table>(*B.Data);
+			aPtr = (void*)InterpretObjectData<flatbuffers::Table>(*A.Data);
+			bPtr = (void*)InterpretObjectData<flatbuffers::Table>(*B.Data);
 		}
 		else
 		{
-			aPtr = A.Data->Data;
-			bPtr = B.Data->Data;
+			aPtr = InterpretObjectData<void>(*A.Data);
+			bPtr = InterpretObjectData<void>(*B.Data);
 		}
 		bool yes = CompareFlatBuffers<TCompareResult>(type, aPtr, bPtr);
 		nos::Name pinName;
@@ -57,7 +57,7 @@ struct ComparisonNode : NodeContext
 			pinName = NSN_IsLess;
 		else if constexpr (TCompareResult == CompareResult::Greater)
 			pinName = NSN_IsGreater;
-		nosEngine.SetPinValueByName(NodeId, pinName, nosBuffer{.Data = &yes, .Size = sizeof(bool)});
+		SetPinValue(pinName, yes);
 		return NOS_RESULT_SUCCESS;
 	}
 };

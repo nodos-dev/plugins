@@ -22,6 +22,8 @@ NOS_REGISTER_NAME(Rotation);
 NOS_REGISTER_NAME(Transformation);
 NOS_REGISTER_NAME(FOV);
 
+// TODO: Transfer do not allow changing outputs
+
 namespace nos::math
 {
 
@@ -110,14 +112,15 @@ void FieldIterator(F&& f)
 
 nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 {
-	auto pins = GetPinValues(params);
-	auto xBuf = pins[NSN_X];
-	auto yBuf = pins[NSN_Y];
-	auto zBuf = pins[NSN_Z];
-	FieldIterator<fb::Transform>([X = static_cast<uint8_t*>(xBuf), Y = static_cast<uint8_t*>(yBuf), Z = static_cast<uint8_t*>(zBuf)]<u32 i, class T>(auto O) {
+	NodeExecuteParams execParams(params);
+	nos::Buffer outBuf = *execParams[NSN_Z].Data;
+	FieldIterator<fb::Transform>([X = execParams.GetPinData<uint8_t>(NSN_X),
+								  Y = execParams.GetPinData<uint8_t>(NSN_Y),
+								  Z = outBuf.As<uint8_t>()]<u32 i, class T>(auto O) {
 		if constexpr (i == 2) (T&)O[Z] = (T&)O[X] * (T&)O[Y];
 		else (T&)O[Z] = (T&)O[X] + (T&)O[Y];
 	});
+	SetPinValue(execParams[NSN_Z].Id, outBuf);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -156,13 +159,12 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 				auto valueBuf = params->Pins[PIN_IN]->Data;
 				auto minBuf = params->Pins[PIN_MIN]->Data;
 				auto maxBuf = params->Pins[PIN_MAX]->Data;
-				auto outBuf = params->Pins[PIN_OUT]->Data;
 				float value = *static_cast<float*>(valueBuf->Data);
 				float min = *static_cast<float*>(minBuf->Data);
 				float max = *static_cast<float*>(maxBuf->Data);
-				*(static_cast<float*>(outBuf->Data)) = std::clamp(value, min, max);
+				SetPinValue(params->Pins[PIN_OUT]->Id, std::clamp(value, min, max));
 				return NOS_RESULT_SUCCESS;
-				};
+			};
 			break;
 		}
 		case MathNodeTypes::Absolute: {
@@ -171,9 +173,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_OUT = 1;
 				auto valueBuf = params->Pins[PIN_IN]->Data;
-				auto outBuf = params->Pins[PIN_OUT]->Data;
 				float value = *static_cast<float*>(valueBuf->Data);
-				*(static_cast<float*>(outBuf->Data)) = std::abs(value);
+				SetPinValue(params->Pins[PIN_OUT]->Id, std::abs(value));
 				return NOS_RESULT_SUCCESS;
 				};
 			break;
@@ -187,9 +188,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			node->ClassName = NOS_NAME_STATIC("nos.math.PerspectiveView");
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 				{
-					auto pins = GetPinValues(params);
-
-					auto fov = *static_cast<float*>(pins[NSN_FOV]);
+				NodeExecuteParams execParams(params);
+					auto fov = *execParams.GetPinData<float>(NSN_FOV);
 
 					// Sanity checks
 					static_assert(alignof(glm::vec3) == alignof(nos::fb::vec3));
@@ -198,12 +198,11 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 					static_assert(sizeof(glm::mat4) == sizeof(nos::fb::mat4));
 
 					// glm::dvec3 is compatible with nos::fb::vec3d so it's safe to cast
-					auto const& rot = *static_cast<glm::vec3*>(pins[NSN_Rotation]);
-					auto const& pos = *static_cast<glm::vec3*>(pins[NSN_Position]);
+					auto const& rot = *execParams.GetPinData<glm::vec3>(NSN_Rotation);
+					auto const& pos = *execParams.GetPinData<glm::vec3>(NSN_Position);
 					auto perspective = glm::perspective(fov, 16.f / 9.f, 10.f, 10000.f);
 					auto view = glm::eulerAngleXYZ(rot.x, rot.y, rot.z);
-					auto& out = *static_cast<glm::mat4*>(pins[NSN_Transformation]);
-					out = perspective * view;
+					SetPinValue(execParams[NSN_Transformation].Id, perspective * view);
 					return NOS_RESULT_SUCCESS;
 				};
 			break;

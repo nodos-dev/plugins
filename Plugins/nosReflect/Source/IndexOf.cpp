@@ -124,10 +124,10 @@ struct IndexOfNode : NodeContext
 		auto pins = NodeExecuteParams(params);
 		auto indexPinId = *GetPinId(NSN_Index);
 
-		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_InputArray].Data);
-		void* value = pins[NSN_Value].Data->Data;
+		auto* vec = InterpretObjectData<VectorObjectData<uint8_t>>(*pins[NSN_InputArray].Data);
+		void* value = InterpretObjectData<void>(*pins[NSN_Value].Data);
 		if (!type->ByteSize && type->BaseType != NOS_BASE_TYPE_STRING)
-			value = (void*)InterpretPinValue<flatbuffers::Table>(value);
+			value = (void*)InterpretObjectData<flatbuffers::Table>(value);
 		int index =	-1;
 		if (type->ByteSize)
 		{
@@ -168,7 +168,7 @@ struct IndexOfNode : NodeContext
 			}
 			FoundIndex = index;
 		}	
-		nosEngine.SetPinValue(indexPinId, nos::Buffer::From(FoundIndex));
+		SetPinValue(indexPinId, FoundIndex);
 		return NOS_RESULT_SUCCESS;
 	}
 };

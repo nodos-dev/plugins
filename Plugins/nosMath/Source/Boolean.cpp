@@ -15,8 +15,7 @@ struct AndNode : NodeContext
 		NodeExecuteParams pins(params);
 		auto& A = *pins.GetPinData<bool>(NOS_NAME("A"));
 		auto& B = *pins.GetPinData<bool>(NOS_NAME("B"));
-		auto& result = *pins.GetPinData<bool>(NOS_NAME("AndResult"));
-		result = A && B;
+		SetPinValue(NOS_NAME("AndResult"), A && B);
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -30,8 +29,7 @@ struct OrNode : NodeContext
 		NodeExecuteParams pins(params);
 		auto& A = *pins.GetPinData<bool>(NOS_NAME("A"));
 		auto& B = *pins.GetPinData<bool>(NOS_NAME("B"));
-		auto& result = *pins.GetPinData<bool>(NOS_NAME("OrResult"));
-		result = A || B;
+		SetPinValue(NOS_NAME("OrResult"), A || B);
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -44,8 +42,7 @@ struct NotNode : NodeContext
 	{
 		NodeExecuteParams pins(params);
 		auto& X = *pins.GetPinData<bool>(NOS_NAME("X"));
-		auto& notX = *pins.GetPinData<bool>(NOS_NAME("NotX"));
-		notX = !X;
+		SetPinValue(NOS_NAME("NotX"), !X);
 		return NOS_RESULT_SUCCESS;
 	}
 };

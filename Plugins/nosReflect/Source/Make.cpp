@@ -66,10 +66,10 @@ struct MakeNode : NodeContext
 				UpdateVisualizer(visualizerName);
 			}
 		}
-    }
+	}
 
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
-    {
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	{
 		if (!Type)
 			return NOS_RESULT_SUCCESS;
 
@@ -87,15 +87,18 @@ struct MakeNode : NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		for (auto pin : pins) {
+		for (auto pin : pins)
+		{
 			if (pin.first == NSN_Output)
 				continue;
 
-			SetField(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = pin.first } }, *pin.second.Data);
+			SetField(pins[NSN_Output].Id,
+					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = pin.first}},
+					 *pin.second.Data);
 		}
 
 		return NOS_RESULT_SUCCESS;
-    }
+	}
 
 	std::vector<nosName> AllTypeNames;
     

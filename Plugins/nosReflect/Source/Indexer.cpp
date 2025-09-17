@@ -148,9 +148,9 @@ struct Indexer : NodeContext
 			UpdateInputVectorSize();
 		}
 
-		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_Input].Data);
+		auto vec = InterpretObjectData<VectorObjectData<uint8_t>>(*pins[NSN_Input].Data);
     	ArraySize = vec->size();
-		if (!SetIndex(*(uint32_t*)pins[NSN_Index].Data->Data))
+		if (!SetIndex(*InterpretObjectData<uint32_t>(*pins[NSN_Index].Data)))
 			return NOS_RESULT_FAILED;
 		auto ID = pins[NSN_Output].Id;
 		auto& type = *Type;
@@ -169,7 +169,7 @@ struct Indexer : NodeContext
 			SetNodeStatusMessages({ {{}, "Failed to query buffer", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
 			return NOS_RESULT_FAILED;
 		}
-		nosEngine.SetPinValue(ID, *element);
+		SetPinValue(ID, *element);
 		return NOS_RESULT_SUCCESS;
     }
 
@@ -177,13 +177,13 @@ struct Indexer : NodeContext
     {
         if (pinName == NSN_Index)
         {
-        	SetIndex(*(uint32_t*)value.Data);
+        	SetIndex(*InterpretObjectData<uint32_t>(value));
 		}
         else if (pinName == NSN_Input)
         {
 			if (!Type)
 				return;
-            ArraySize = InterpretPinValue<VectorPinData<uint8_t>>(value)->size();
+			ArraySize = InterpretObjectData<VectorObjectData<uint8_t>>(value)->size();
 			SetIndex(Index);
 		}
 	}

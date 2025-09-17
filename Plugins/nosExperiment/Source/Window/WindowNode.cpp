@@ -13,6 +13,7 @@
 
 #include "Nodos/Utils/Stopwatch.hpp"
 #include <cstdint>
+#undef CreateSemaphore
 namespace nos::experiment
 {
 
@@ -32,22 +33,20 @@ bool WindowNode::CreateSwapchain()
 	createInfo.SurfaceHandle = Surface;
 	createInfo.Extent = { 800, 600 };
 	createInfo.PresentMode = NOS_PRESENT_MODE_FIFO;
-	nosResult res = nosVulkan->CreateSwapchain(&createInfo, &Swapchain, &FrameCount);
+	nosResult res = nosVulkan->CreateSwapchain(&createInfo, &Swapchain.Handle, &FrameCount);
 	if (res != NOS_RESULT_SUCCESS)
 		return false;
 	nosSemaphoreCreateInfo semaphoreCreateInfo = {};
 	semaphoreCreateInfo.Type = NOS_SEMAPHORE_TYPE_BINARY;
 	Images.resize(FrameCount);
-	nosVulkan->GetSwapchainImages(Swapchain, Images.data());
+	if (FrameCount > 0)
+		nosVulkan->GetSwapchainImages(Swapchain, &Images[0].Handle);
 	WaitSemaphore.resize(FrameCount);
 	SignalSemaphore.resize(FrameCount);
 	for (int i = 0; i < FrameCount; i++)
 	{
-#ifdef CreateSemaphore
-#undef CreateSemaphore
-#endif
-		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i]);
-		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i]);
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i].Handle);
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i].Handle);
 	}
 	return true;
 }
@@ -66,26 +65,19 @@ void WindowNode::DestroySwapchain()
 	nosCmd cmd;
 	nosCmdBeginParams beginParams = {.Name = NOS_NAME("Window node flush cmd"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 	nosVulkan->Begin(&beginParams);
-	nosGPUEvent wait;
+	nosVkGPUEvent wait;
 	nosCmdEndParams endParams = {.ForceSubmit = true, .OutGPUEventHandle = &wait};
 	nosVulkan->End(cmd, &endParams);
 	nosVulkan->WaitGpuEvent(&wait, UINT64_MAX);
-	for (int i = 0; i < FrameCount; i++)
-	{
-		nosVulkan->DestroySemaphore(&WaitSemaphore[i]);
-		nosVulkan->DestroySemaphore(&SignalSemaphore[i]);
-	}
 	WaitSemaphore.clear();
 	SignalSemaphore.clear();
 	Images.clear();
-	nosVulkan->DestroySwapchain(&Swapchain);
+	Swapchain = {};
 }
 
 void WindowNode::DestroyWindowSurface() 
 {
-	if (!Surface)
-		return;
-	nosVulkan->DestroyWindowSurface(&Surface);
+	Surface = {};
 }
 
 void WindowNode::DestroyWindow() 
@@ -108,8 +100,8 @@ nosResult WindowNode::ExecuteNode(nosNodeExecuteParams* params)
 
 	nos::NodeExecuteParams execParams = params;
 
-	auto input = vkss::DeserializeTextureInfo(execParams[NOS_NAME("Input")].Data->Data);
-	if (!input.Memory.Handle)
+	auto input = *execParams[NOS_NAME("Input")].ObjectHandle;
+	if (!input)
 		return NOS_RESULT_FAILED;
 
 	if(!glfwWindowShouldClose(Window))
@@ -119,9 +111,9 @@ nosResult WindowNode::ExecuteNode(nosNodeExecuteParams* params)
 		uint32_t imageIndex;
 		nosVulkan->SwapchainAcquireNextImage(Swapchain, -1, &imageIndex, WaitSemaphore[CurrentFrame]);
 		nosCmd cmd = vkss::BeginCmd(NOS_NAME("Window"), NodeId);
-		nosVulkan->Copy(cmd, &input, &Images[imageIndex], 0);
+		nosVulkan->Copy(cmd, input, Images[imageIndex], 0);
 
-		nosVulkan->ImageStateToPresent(cmd, &Images[imageIndex]);
+		nosVulkan->ImageStateToPresent(cmd, Images[imageIndex]);
 		nosVulkan->AddWaitSemaphoreToCmd(cmd, WaitSemaphore[CurrentFrame], 1);
 		nosVulkan->AddSignalSemaphoreToCmd(cmd, SignalSemaphore[CurrentFrame], 1);
 
@@ -165,7 +157,7 @@ void WindowNode::OnEnterRunnerThread(nosEnterRunnerThreadParams const& params)
 #error "Unsupported platform"
 #endif
 	;
-	if (nosVulkan->CreateWindowSurface((void*)windowHandle, &Surface) != NOS_RESULT_SUCCESS)
+	if (nosVulkan->CreateWindowSurface((void*)windowHandle, &Surface.Handle) != NOS_RESULT_SUCCESS)
 	{
 		DestroyWindow();
 		return;
@@ -184,7 +176,7 @@ void WindowNode::OnPathStop()
 	nosCmd cmd;
 	nosCmdBeginParams beginParams = { .Name = NOS_NAME("Window node flush cmd"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd };
 	nosVulkan->Begin(&beginParams);
-	nosGPUEvent wait;
+	nosVkGPUEvent wait;
 	nosCmdEndParams endParams = { .ForceSubmit = true, .OutGPUEventHandle = &wait };
 	nosVulkan->End(cmd, &endParams);
 	nosVulkan->WaitGpuEvent(&wait, UINT64_MAX);

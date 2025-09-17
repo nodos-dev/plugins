@@ -103,19 +103,18 @@ struct SetVariableNode : VariableNodeBase
 		CheckType();
 		// For editor to show changes without a scheduled node, we use pin value change callbacks.
 		// Once we support this in the engine, we can move these to ExecuteNode function.
-		AddPinValueWatcher(NOS_NAME("Name"), [this](const nos::Buffer& value,  std::optional<nos::Buffer> oldValue)
-		{
-			if (oldValue)
-			{
-				nos::Name oldName(static_cast<const char*>(oldValue->Data()));
-				nosVariables->DeleteNodeReference(oldName, NodeId);
-				nosVariables->UnregisterVariableUpdateCallback(oldName, CallbackId);
-				CallbackId = -1;
-			}
-			auto newName = static_cast<const char*>(value.Data());
-			Name = nos::Name(newName);
-			CheckName();
-			if (!HasName())
+		AddPinValueWatcher<const char*>(
+			NOS_NAME("Name"), [this](const char* newValue, std::optional<const char*> oldVal) {
+				if (oldVal)
+				{
+					nos::Name oldName(*oldVal);
+					nosVariables->DeleteNodeReference(oldName, NodeId);
+					nosVariables->UnregisterVariableUpdateCallback(oldName, CallbackId);
+					CallbackId = -1;
+				}
+				Name = nos::Name(newValue);
+				CheckName();
+				if (!HasName())
 				return;
 			CallbackId = nosVariables->RegisterVariableUpdateCallback(Name, &SetVariableNode::VariableUpdateCallback, this);
 			// Check if already exists

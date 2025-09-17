@@ -34,7 +34,7 @@ struct BreakNode : NodeContext
 		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
 		auto pin = GetPin(pinName);
-		auto* vec = InterpretPinValue<VectorPinData<uint8_t>>(value);
+		auto* vec = InterpretObjectData<VectorObjectData<uint8_t>>(value);
 		if (vec->size() != ArraySize)
 		{
 			ArraySize = vec->size();
@@ -204,7 +204,7 @@ struct BreakNode : NodeContext
 		auto it = LastServedPinValues.find(pinId);
 		if (it != LastServedPinValues.end() && it->second == value)
 			return;
-        nosEngine.SetPinValueDirect(pinId, value);
+        SetPinValue(pinId, value);
 		LastServedPinValues[pinId] = value;
 	}
 	
@@ -217,7 +217,7 @@ struct BreakNode : NodeContext
         switch (type->BaseType)
         {
         case NOS_BASE_TYPE_ARRAY: {
-        	const flatbuffers::Vector<uint8_t>* vec = InterpretPinValue<VectorPinData<uint8_t>>(*buf);
+        	const flatbuffers::Vector<uint8_t>* vec = InterpretObjectData<VectorObjectData<uint8_t>>(*buf);
         	for (size_t i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
@@ -240,7 +240,7 @@ struct BreakNode : NodeContext
         }
         case NOS_BASE_TYPE_STRUCT:
         {
-            auto root = type->ByteSize ? (flatbuffers::Table*)buf->Data : InterpretPinValue<flatbuffers::Table>(*buf);
+			auto root = type->ByteSize ? (flatbuffers::Table*)buf->Data : InterpretObjectData<flatbuffers::Table>(*buf);
             for (int i = 0; i < type->FieldCount; ++i)
             {
 				auto& field = type->Fields[i];

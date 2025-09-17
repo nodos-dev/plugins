@@ -34,12 +34,12 @@ private:
 	void WindowThread();
 
 	GLFWwindow* Window = nullptr;
-	std::vector<nosSemaphore> WaitSemaphore{};
-	std::vector<nosSemaphore> SignalSemaphore{};
-	std::vector<nosResourceShareInfo> Images{};
+	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> WaitSemaphore{};
+	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> SignalSemaphore{};
+	std::vector<TypedObjectRef<nos::sys::vulkan::Texture>> Images{};
 	uint32_t FrameCount = 0;
 	uint32_t CurrentFrame = 0;
-	nosSurfaceHandle Surface{};
-	nosSwapchainHandle Swapchain{};
+	TypedObjectRef<nos::sys::vulkan::Surface> Surface{};
+	TypedObjectRef<nos::sys::vulkan::Swapchain> Swapchain{};
 };
 }
