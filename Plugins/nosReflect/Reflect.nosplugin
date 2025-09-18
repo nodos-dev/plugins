@@ -2,10 +2,11 @@
     "info": {
         "id": {
             "name": "nos.reflect",
-            "version": "2.1.7"
+            "version": "2.1.8"
         },
         "display_name": "Reflect",
         "description": "Collection of type reflection nodes",
+        "category": "Utilities",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
