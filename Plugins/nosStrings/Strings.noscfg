@@ -6,6 +6,7 @@
         },
         "display_name": "Strings",
         "description": "Collection of string manipulation nodes",
+        "category": "Utilities",
         "dependencies": []
     },
     "binary_path": "Binaries/nosStrings",

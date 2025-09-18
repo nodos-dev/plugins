@@ -6,6 +6,7 @@
         },
         "display_name": "nos.pyutils",
         "description": "",
+        "category": "Utilities",
         "dependencies": [
             {
                 "name": "nos.py",
