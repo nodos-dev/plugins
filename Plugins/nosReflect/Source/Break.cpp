@@ -266,13 +266,12 @@ struct BreakNode : NodeContext
         }
     }
 
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+    nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if(!Type)
 			return NOS_RESULT_SUCCESS;
-		auto pins = NodeExecuteParams(params);
-		SetOutputValues(pins[NSN_Input].Data);
-		params->MarkAllOutsDirty = false;
+		SetOutputValues(params[NSN_Input].Data);
+		params.MarkAllOutsDirty = false;
 		return NOS_RESULT_SUCCESS;
 	}
 };

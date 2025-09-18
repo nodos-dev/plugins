@@ -89,7 +89,7 @@ void WindowNode::DestroyWindow()
 	Window = nullptr;
 }
 
-nosResult WindowNode::ExecuteNode(nosNodeExecuteParams* params)
+nosResult WindowNode::ExecuteNode(NodeExecuteParams const& params)
 {
 	if (!Window)
 		return NOS_RESULT_FAILED;

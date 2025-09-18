@@ -174,17 +174,18 @@ struct ArrayNode : NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		std::vector<nosBuffer> datas(params->PinCount - 1);
-		for (size_t i = 0, j = 0; i < params->PinCount; ++i)
+		std::vector<nosBuffer> datas;
+		datas.reserve(params.size() - 1);
+		for (auto const& [_, pin] : params)
 		{
-			if (params->Pins[i]->Name == NSN_Output)
+			if (pin.Name == NSN_Output)
 				continue;
-			datas[j++] = *params->Pins[i]->Data;
+			datas.push_back(*pin.Data);
 		}
 		return SendOutputArray(datas) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}

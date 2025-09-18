@@ -68,13 +68,12 @@ struct MakeNode : NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_SUCCESS;
 
 		flatbuffers::FlatBufferBuilder fbb;
-		NodeExecuteParams pins(params);
 		auto& type = *Type;
 		switch (type->BaseType)
 		{
@@ -83,18 +82,18 @@ struct MakeNode : NodeContext
 		case NOS_BASE_TYPE_UINT:
 		case NOS_BASE_TYPE_STRING:
 		case NOS_BASE_TYPE_UNION:
-			nosEngine.SetPinValue(pins[NSN_Output].Id, *pins[NSN_Value].Data);
+			nosEngine.SetPinValue(params[NSN_Output].Id, *params[NSN_Value].Data);
 			return NOS_RESULT_SUCCESS;
 		}
 
-		for (auto pin : pins)
+		for (auto const& [name, pin] : params)
 		{
-			if (pin.first == NSN_Output)
+			if (name == NSN_Output)
 				continue;
 
-			SetField(pins[NSN_Output].Id,
-					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = pin.first}},
-					 *pin.second.Data);
+			SetField(params[NSN_Output].Id,
+					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name}},
+					 *pin.Data);
 		}
 
 		return NOS_RESULT_SUCCESS;

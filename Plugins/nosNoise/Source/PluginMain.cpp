@@ -26,7 +26,7 @@ enum Nodes : int
 
 struct DynamicSizedNoiseNode : public NodeContext
 {
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+    nosResult ExecuteNode(NodeExecuteParams const& params) override
     {
 		NodeExecuteParams execParams(params);
         auto outTex = execParams.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
@@ -40,7 +40,7 @@ struct DynamicSizedNoiseNode : public NodeContext
             nosEngine.LogD("Resizing texture to %dx%d", res.x(), res.y());
 			SetPinObject(NOS_NAME("Output"), vkss::CreateTexture(outTexInfo, "DynamicSizedNoiseResult"));
         }
-        return nosVulkan->ExecuteGPUNode(this, params);
+        return nosVulkan->ExecuteGPUNode(this, params.RawParams);
     }
 
 };

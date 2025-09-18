@@ -10,49 +10,41 @@ namespace nos::utilities
 
 struct Buffer2TextureNodeContext : NodeContext
 {
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams execParams(params);
-		const auto& inputPinData = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Input")].Data->Data);
-		const nosBuffer* outputPinData = execParams[NOS_NAME_STATIC("Output")].Data;
-		const auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
-		const auto& size = *InterpretPinValue<fb::vec2u>(execParams[NOS_NAME_STATIC("Size")].Data->Data);
-		const auto& format = *InterpretPinValue<sys::vulkan::Format>(execParams[NOS_NAME_STATIC("Format")].Data->Data);
-		if (size.x() != output.width() ||
-			size.y() != output.height() ||
-			format != output.format())
+		auto inBuf = params.GetPinObject<vkss::Buffer>(NOS_NAME("Input"));
+		if (!inBuf.IsValid())
 		{
-			nosResourceShareInfo tex{.Info = {
-				.Type = NOS_RESOURCE_TYPE_TEXTURE,
-				.Texture = {
-					.Width = size.x(),
-					.Height = size.y(),
-					.Format = nosFormat(format),
-					.FieldType = (nosTextureFieldType)inputPinData.field_type()
-				}
-			}};
-			// Create resource
-			sys::vulkan::TTexture texDef = vkss::ConvertTextureInfo(tex);
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(texDef));
+			nosEngine.LogE("Buffer2Texture Node: Input buffer is not valid!");
+			return NOS_RESULT_FAILED;
 		}
-		nosResourceShareInfo out = vkss::DeserializeTextureInfo(outputPinData->Data);
-		nosResourceShareInfo in = vkss::ConvertToResourceInfo(inputPinData);
+		auto outTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
+		const auto& size = *params.GetPinData<fb::vec2u>(NOS_NAME("Size"));
+		const auto& format = *params.GetPinData<sys::vulkan::Format>(NOS_NAME("Format"));
+		auto inBufInfo = *vkss::GetResourceInfo(inBuf);
+		auto outTexInfo = vkss::GetResourceInfo(outTex);
+		if (!outTexInfo || size.x() != outTexInfo->Width || size.y() != outTexInfo->Height || format != (nos::sys::vulkan::Format)outTexInfo->Format)
+		{
+			// Create resource
+			outTex = vkss::CreateTexture({.Width = size.x(),
+										  .Height = size.y(),
+										  .Format = nosFormat(format),
+										  .FieldType = inBufInfo.FieldType},
+										 "Buffer2Texture Result");
+			SetPinObject(NOS_NAME_STATIC("Output"), outTex);
+		}
 
-		if (!in.Memory.Handle || !out.Memory.Handle)
-			return NOS_RESULT_SUCCESS;
+		if (!outTex.IsValid())
+			return NOS_RESULT_FAILED;
 
 		nosCmd cmd = vkss::BeginCmd(NOS_NAME("Buffer2Texture Copy"), NodeId);
-		nosVulkan->Copy(cmd, &in, &out, 0);
-		nosGPUEvent event;
+		nosVulkan->Copy(cmd, inBuf, outTex, 0);
+		nosVkGPUEvent event;
 		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &event};
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&event, UINT_MAX);
 
-		// Set field type
-		out.Info.Texture.FieldType = in.Info.Buffer.FieldType;
-		auto texDef = vkss::ConvertTextureInfo(out);
-		nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), Buffer::From(texDef));
-		
+		nosVulkan->SetResourceFieldType(outTex, inBufInfo.FieldType);
 		return NOS_RESULT_SUCCESS;
 	}
 };

@@ -8,12 +8,11 @@ namespace nos::track
 {
 void RegisterAddTrack(nosNodeFunctions* funcs) { 
 	funcs->ClassName = NOS_NAME("AddTrack");
-	funcs->ExecuteNode = [](void*, nosNodeExecuteParams* params) {
-		auto pins = GetPinValues(params);
-		auto ids = GetPinIds(params);
+	funcs->ExecuteNode = [](void*, nosNodeExecuteParams* execParams) {
+		NodeExecuteParams params(execParams);
 		// TODO: Remove these once generic table aritmetic ops are supported
-		auto* xTrack = flatbuffers::GetMutableRoot<track::Track>(pins[NOS_NAME("X")]);
-		auto* yTrack = flatbuffers::GetMutableRoot<track::Track>(pins[NOS_NAME("Y")]);
+		auto* xTrack = params.GetPinData<track::Track>(NOS_NAME("X"));
+		auto* yTrack = params.GetPinData<track::Track>(NOS_NAME("Y"));
 		track::TTrack sumTrack;
 		xTrack->UnPackTo(&sumTrack);
 		reinterpret_cast<glm::vec3&>(sumTrack.location) += reinterpret_cast<const glm::vec3&>(*yTrack->location());
@@ -34,7 +33,7 @@ void RegisterAddTrack(nosNodeFunctions* funcs) {
 		reinterpret_cast<glm::vec2&>(sumDistortion.mutable_k1k2()) +=
 			reinterpret_cast<const glm::vec2&>(yDistortion.k1k2());
 		sumDistortion.mutate_distortion_scale(sumDistortion.distortion_scale() + yDistortion.distortion_scale());
-		return nosEngine.SetPinValue(ids[NOS_NAME("Z")], nos::Buffer::From(sumTrack));
+		return nosEngine.SetPinValue(params[NOS_NAME("Z")].Id, nos::Buffer::From(sumTrack));
 	};
 }
 }

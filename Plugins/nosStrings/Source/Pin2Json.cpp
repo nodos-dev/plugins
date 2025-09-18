@@ -8,11 +8,10 @@ struct Pin2JsonNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams execParams(params);
-		auto& dataPin = execParams[NOS_NAME("Data")];
-		auto& jsonPin = execParams[NOS_NAME("Json")];
+		auto& dataPin = params[NOS_NAME("Data")];
+		auto& jsonPin = params[NOS_NAME("Json")];
 		if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *dataPin.Data))
 		{
 			SetPinValue(jsonPin.Name, outJson->AsBuffer());

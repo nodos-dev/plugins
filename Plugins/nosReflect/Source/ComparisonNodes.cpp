@@ -28,16 +28,15 @@ struct ComparisonNode : NodeContext
 			Type = nos::TypeInfo(update->TypeName);
 	}
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
 		auto& type = *Type;
 
-		auto pins = NodeExecuteParams(params);
-		auto& A = pins[NSN_A];
-		auto& B = pins[NSN_B];
+		auto& A = params[NSN_A];
+		auto& B = params[NSN_B];
 		void* aPtr, *bPtr;
 		if (!type->ByteSize && type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{

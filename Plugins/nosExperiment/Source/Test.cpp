@@ -67,7 +67,7 @@ public:
 	}
 
 	// Execution
-	virtual nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	virtual nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 		return NOS_RESULT_SUCCESS;
@@ -176,9 +176,8 @@ struct AlwaysDirtyNode : nos::NodeContext
 struct PrintNode : nos::NodeContext
 {
 	using NodeContext::NodeContext;
-	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams params(execParams);
 		const char* log = params.GetPinData<const char*>(NOS_NAME("Log"));
 		nosEngine.LogI("Print: %s", log);
 		return NOS_RESULT_SUCCESS;

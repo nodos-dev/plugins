@@ -6,10 +6,10 @@
 
 namespace nos::track
 {
-static NOS_REGISTER_NAME(Input);
-static NOS_REGISTER_NAME(Impulse);
-static NOS_REGISTER_NAME(Decay);
-static NOS_REGISTER_NAME(Track);
+NOS_REGISTER_NAME(Input);
+NOS_REGISTER_NAME(Impulse);
+NOS_REGISTER_NAME(Decay);
+NOS_REGISTER_NAME(Track);
 
 void RegisterController(nosNodeFunctions* functions)
 {
@@ -106,16 +106,15 @@ void RegisterController(nosNodeFunctions* functions)
 
     };
 
-    functions->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
+    functions->ExecuteNode = [](void* ctx, nosNodeExecuteParams* execParams)
     {
         auto c = (UserTrack*)ctx;
-    	auto values = GetPinValues(params);
-		c->impulse = glm::max(*(float*)values[NSN_Impulse], 1.f);
-		c->decay = glm::max(*(float*)values[NSN_Decay], 0.f);
+		NodeExecuteParams params(execParams);
+		c->impulse = glm::max(*params.GetPinData<float>(NSN_Impulse), 1.f);
+		c->decay = glm::max(*params.GetPinData<float>(NSN_Decay), 0.f);
         (glm::vec3&)c->state.location += c->v;
         c->v *= exp(-c->decay);
-		auto inTrack = GetPinValue<track::TTrack>(values, NSN_Input);
-        c->ReadAndUpdate(inTrack);
+		c->ReadAndUpdate(params.GetPinData<track::TTrack>(NSN_Input));
         return NOS_RESULT_SUCCESS;
     };
 }

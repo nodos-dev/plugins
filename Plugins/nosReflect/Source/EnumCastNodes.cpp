@@ -92,12 +92,11 @@ struct EnumCastNodeBase : NodeContext
 
 struct EnumToUnderlyingValueNode : EnumCastNodeBase
 {
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams args(params);
-		if (!EnumType || args[NSN_Value].TypeName == NSN_TypeNameGeneric)
+		if (!EnumType || params[NSN_Value].TypeName == NSN_TypeNameGeneric)
 			return NOS_RESULT_SUCCESS;
-		SetPinValue(NSN_Value, *args[NSN_Enum].Data);
+		SetPinValue(NSN_Value, *params[NSN_Enum].Data);
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -112,12 +111,11 @@ struct EnumFromUnderlyingValueNode : EnumCastNodeBase
 {
 	using EnumCastNodeBase::EnumCastNodeBase;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams args(params);
-		if (!EnumType || args[NSN_Value].TypeName == NSN_TypeNameGeneric)
+		if (!EnumType || params[NSN_Value].TypeName == NSN_TypeNameGeneric)
 			return NOS_RESULT_SUCCESS;
-		SetPinValue(NSN_Enum, *args[NSN_Value].Data);
+		SetPinValue(NSN_Enum, *params[NSN_Value].Data);
 		return NOS_RESULT_SUCCESS;
 	}
 };

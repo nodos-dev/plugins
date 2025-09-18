@@ -11,16 +11,14 @@ struct RegexNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams pins(params);
-		
-		const char* expression = pins.GetPinData<const char>(NOS_NAME("RegularExpression"));
-		const char* text = pins.GetPinData<const char>(NOS_NAME("Input"));
+		const char* expression = params.GetPinData<const char>(NOS_NAME("RegularExpression"));
+		const char* text = params.GetPinData<const char>(NOS_NAME("Input"));
 		std::string inputCopy = text;
 
-		auto& outMatchPin = pins[NOS_NAME("Match")].Id;
-		auto& outGroupsPin = pins[NOS_NAME("Groups")].Id;
+		auto& outMatchPin = params[NOS_NAME("Match")].Id;
+		auto& outGroupsPin = params[NOS_NAME("Groups")].Id;
 
 		std::smatch match;
 		try

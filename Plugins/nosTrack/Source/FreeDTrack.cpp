@@ -206,8 +206,8 @@ namespace nos::track
 
 	};
 
-static NOS_REGISTER_NAME(InvertZoom);
-static NOS_REGISTER_NAME(InvertFocus);
+NOS_REGISTER_NAME(InvertZoom);
+NOS_REGISTER_NAME(InvertFocus);
 
 struct FreeDNodeContext : public TrackNodeContext
 {

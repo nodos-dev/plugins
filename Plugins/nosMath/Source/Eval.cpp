@@ -251,12 +251,11 @@ struct EvalNodeContext : NodeContext
 		return true;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams pins(params);
 		
 		for (auto const& [pinId, value] : Variables)
-			Variables[pinId] = *InterpretObjectData<double>(pins[*GetPinName(pinId)].Data->Data);
+			Variables[pinId] = *params.GetPinData<double>(*GetPinName(pinId));
 
 		try
 		{

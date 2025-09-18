@@ -368,13 +368,13 @@ public:
 		}
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto m = GetPyObject();
 		if (!m)
 			return NOS_RESULT_NOT_FOUND;
 
-		return CallMethod<nosResult>("execute_node", PyNativeNodeExecuteParams(params));
+		return CallMethod<nosResult>("execute_node", PyNativeNodeExecuteParams(params.RawParams));
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override

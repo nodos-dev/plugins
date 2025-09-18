@@ -11,16 +11,15 @@ struct TransformNodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams params(execParams);
 		auto* rhs = params.GetPinData<fb::mat4>(NOS_NAME("A"));
 		auto* lhs = params.GetPinData<fb::mat4>(NOS_NAME("B"));
 		fb::mat4 out = *params.GetPinData<fb::mat4>(NOS_NAME("Result"));
 
 		std::array o = { &out.mutable_x(), &out.mutable_y(), &out.mutable_z(), &out.mutable_w() };
-		std::array l = { &lhs->mutable_x(), &lhs->mutable_y(), &lhs->mutable_z(), &lhs->mutable_w() };
-		std::array r = { &rhs->mutable_x(), &rhs->mutable_y(), &rhs->mutable_z(), &rhs->mutable_w() };
+		std::array l = { &lhs->x(), &lhs->y(), &lhs->z(), &lhs->w() };
+		std::array r = { &rhs->x(), &rhs->y(), &rhs->z(), &rhs->w() };
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -40,10 +39,9 @@ struct ToTransformMatrixNodeContext : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams args(execParams);
-		auto* xform = args.GetPinData<fb::Transform>(NOS_NAME("Transform"));
+		auto* xform = params.GetPinData<fb::Transform>(NOS_NAME("Transform"));
 
 		auto pos = xform->position();
 		auto rot = xform->rotation();
@@ -87,14 +85,14 @@ struct MatrixOperationNodeContext : NodeContext
 	std::optional<nos::Name> TypeName = std::nullopt;
 	
 	template <typename T>
-	void ApplyOperation(nos::NodeExecuteParams& params)
+	void ApplyOperation(nos::NodeExecuteParams const& params)
 	{
-		auto* in = params.GetPinData<T>(NOS_NAME("In"));
+		const T* in = params.GetPinData<T>(NOS_NAME("In"));
 		T out{};
 #define OP(ty, glmty)								\
 			if constexpr (std::is_same_v<T, ty>)				\
 			{													\
-				glmty& inglm = reinterpret_cast<glmty&>(*in);	\
+				const glmty& inglm = reinterpret_cast<const glmty&>(*in);	\
 				glmty& outglm = reinterpret_cast<glmty&>(out); \
 				if constexpr (OpType == MatOp::Inverse)		\
 					outglm = glm::inverse(inglm);				\
@@ -111,10 +109,8 @@ struct MatrixOperationNodeContext : NodeContext
 		SetPinValue(NOS_NAME("Out"), out);
 	}
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams params(execParams);
-
 		if (TypeName == NOS_NAME("nos.fb.mat4"))
 			ApplyOperation<fb::mat4>(params);
 		else if (TypeName == NOS_NAME("nos.fb.mat3"))

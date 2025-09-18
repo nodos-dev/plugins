@@ -142,10 +142,10 @@ void TrackNodeContext::OnPathStart()
 	FramesSinceStart = 0;
 }
 
-nosResult TrackNodeContext::ExecuteNode(nosNodeExecuteParams* params)
+nosResult TrackNodeContext::ExecuteNode(NodeExecuteParams const& params)
 {
-	if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
-		DeltaSeconds = params->TimingInfo.FixedStepTiming.DeltaSeconds;
+	if (params.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
+		DeltaSeconds = params.FixedStepTiming.DeltaSeconds;
 	else
 		DeltaSeconds = {};
 	FramesSinceStart++;

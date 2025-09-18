@@ -8,13 +8,10 @@ namespace nos::math
 {
 struct AndNode : NodeContext
 {
-	using NodeContext::NodeContext;
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams pins(params);
-		auto& A = *pins.GetPinData<bool>(NOS_NAME("A"));
-		auto& B = *pins.GetPinData<bool>(NOS_NAME("B"));
+		auto& A = *params.GetPinData<bool>(NOS_NAME("A"));
+		auto& B = *params.GetPinData<bool>(NOS_NAME("B"));
 		SetPinValue(NOS_NAME("AndResult"), A && B);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -22,13 +19,10 @@ struct AndNode : NodeContext
 
 struct OrNode : NodeContext
 {
-	using NodeContext::NodeContext;
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams pins(params);
-		auto& A = *pins.GetPinData<bool>(NOS_NAME("A"));
-		auto& B = *pins.GetPinData<bool>(NOS_NAME("B"));
+		auto& A = *params.GetPinData<bool>(NOS_NAME("A"));
+		auto& B = *params.GetPinData<bool>(NOS_NAME("B"));
 		SetPinValue(NOS_NAME("OrResult"), A || B);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -36,12 +30,9 @@ struct OrNode : NodeContext
 
 struct NotNode : NodeContext
 {
-	using NodeContext::NodeContext;
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams pins(params);
-		auto& X = *pins.GetPinData<bool>(NOS_NAME("X"));
+		auto& X = *params.GetPinData<bool>(NOS_NAME("X"));
 		SetPinValue(NOS_NAME("NotX"), !X);
 		return NOS_RESULT_SUCCESS;
 	}

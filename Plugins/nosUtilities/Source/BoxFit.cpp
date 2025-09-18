@@ -6,32 +6,26 @@ namespace nos::utilities
 {
 struct BoxFitNode : NodeContext
 {
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams execParams(params);
-		const nosBuffer* inputPinData = execParams[NOS_NAME("Input")].Data;
-		const nosBuffer* outputPinData = execParams[NOS_NAME("Output")].Data;
-		const nos::fb::vec2u& resolution = *execParams.GetPinData<fb::vec2u>(NOS_NAME("Resolution"));
-		auto input = vkss::DeserializeTextureInfo(inputPinData->Data);
-		auto& output = *InterpretPinValue<sys::vulkan::Texture>(outputPinData->Data);
+		auto inputTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Input"));
+		auto outputTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
+		auto inputTexInfo = *vkss::GetResourceInfo(inputTex);
+		auto outputTexInfo = vkss::GetResourceInfo(outputTex);
+		const nos::fb::vec2u& resolution = *params.GetPinData<fb::vec2u>(NOS_NAME("Resolution"));
 		
-		if (resolution.x() != output.width() || resolution.y() != output.height())
+		if (!outputTexInfo || resolution.x() != outputTexInfo->Width || resolution.y() != outputTexInfo->Height)
 		{
-			nosResourceShareInfo bufInfo = {
-				.Info = {
-					.Type = NOS_RESOURCE_TYPE_TEXTURE,
-					.Texture = nosTextureInfo{
-						.Width = resolution.x(),
-						.Height = resolution.y(),
-						.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_SAMPLED),
-						.FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN
-					}}};
-			auto textureDesc = vkss::ConvertTextureInfo(bufInfo);
-			textureDesc.unscaled = true;
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(textureDesc));
+			// TODO: Transfer output pin should be unscaled
+			SetPinObject(NOS_NAME("Output"), vkss::CreateTexture({
+			.Width = resolution.x(), .Height = resolution.y(),
+			.Usage =
+				nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_SAMPLED),
+			.FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN
+					}, "BoxFitResult"));
 		}
 
-		return nosVulkan->ExecuteGPUNode(this, params);
+		return nosVulkan->ExecuteGPUNode(this, params.RawParams);
 	}
 };
 

@@ -114,18 +114,17 @@ struct IndexOfNode : NodeContext
 
 	int FoundIndex = -2;
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
 		auto& type = *Type;
 
-		auto pins = NodeExecuteParams(params);
 		auto indexPinId = *GetPinId(NSN_Index);
 
-		auto* vec = InterpretObjectData<VectorObjectData<uint8_t>>(*pins[NSN_InputArray].Data);
-		void* value = InterpretObjectData<void>(*pins[NSN_Value].Data);
+		auto* vec = InterpretObjectData<VectorObjectData<uint8_t>>(*params[NSN_InputArray].Data);
+		void* value = InterpretObjectData<void>(*params[NSN_Value].Data);
 		if (!type->ByteSize && type->BaseType != NOS_BASE_TYPE_STRING)
 			value = (void*)InterpretObjectData<flatbuffers::Table>(value);
 		int index =	-1;

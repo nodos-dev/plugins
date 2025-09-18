@@ -249,14 +249,13 @@ struct DelayNode : NodeContext
 		TypeName = typeName;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (NSN_TypeNameGeneric == TypeName)
 			return NOS_RESULT_FAILED;
-		nos::NodeExecuteParams execParams(params);
 
-		auto& inputObject = *execParams[NSN_Input].ObjectHandle;
-		auto delay = *InterpretObject<uint32_t>(*execParams[NSN_Delay].ObjectHandle);
+		auto& inputObject = *params[NSN_Input].ObjectHandle;
+		auto delay = *InterpretObject<uint32_t>(*params[NSN_Delay].ObjectHandle);
 
 		if (0 == delay)
 		{

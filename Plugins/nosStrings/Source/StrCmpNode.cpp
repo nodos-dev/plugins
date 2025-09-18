@@ -8,12 +8,11 @@ struct IsSameStringNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto pin = GetPinValues(params);
-		auto firstStr = GetPinValue<const char>(pin, NOS_NAME("First"));
-		auto secondStr = GetPinValue<const char>(pin, NOS_NAME("Second"));
-		SetPinValue(NOS_NAME("IsSame"), nos::Buffer::From(strcmp(firstStr, secondStr) == 0));
+		auto firstStr = params.GetPinData<const char>(NOS_NAME("First"));
+		auto secondStr = params.GetPinData<const char>(NOS_NAME("Second"));
+		SetPinValue(NOS_NAME("IsSame"), strcmp(firstStr, secondStr) == 0);
 		return NOS_RESULT_SUCCESS;
 	}
 };

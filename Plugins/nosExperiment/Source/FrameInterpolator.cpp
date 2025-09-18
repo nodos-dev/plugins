@@ -29,9 +29,8 @@ struct FrameInterpolatorNode : NodeContext
 		ShouldStop = true;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& execParams) override
 	{
-		NodeExecuteParams execParams(params);
 		{
 			std::unique_lock guard(Mutex);
 			DeltaNanosec = 1'000'000'000u * execParams.GetDeltaTime();

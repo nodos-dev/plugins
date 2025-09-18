@@ -22,7 +22,7 @@ public:
 	void DestroyWindowSurface();
 	void DestroyWindow();
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override;
+	nosResult ExecuteNode(NodeExecuteParams const& params) override;
 
 	void OnPathStop() override;
 	void OnPathStart() override;
@@ -31,8 +31,6 @@ public:
 	void OnExitRunnerThread(nosExitRunnerThreadParams const& params) override;
 
 private:
-	void WindowThread();
-
 	GLFWwindow* Window = nullptr;
 	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> WaitSemaphore{};
 	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> SignalSemaphore{};

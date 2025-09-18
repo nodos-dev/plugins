@@ -55,12 +55,12 @@ struct ResourceInterface {
 	virtual void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) = 0;
 	virtual void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) = 0;
 	virtual nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) = 0;
-	virtual nosResult SkipExecute(nosNodeExecuteParams* params) { return NOS_RESULT_SUCCESS; }
-	virtual void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) = 0;
+	virtual nosResult SkipExecute(NodeExecuteParams const& params) { return NOS_RESULT_SUCCESS; }
+	virtual void* GetPinInfo(nosPinInfo const& pin, bool rejectFieldMismatch) = 0;
 	// Returns false if resource is compatible with the current sample
 	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
-	virtual void OnRepeatPinValue(nosCopyInfo* cpy) {}
+	virtual void OnRepeatPinValue(nosCopyFromInfo* cpy) {}
 	virtual uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const { return ringSize; }
 	virtual void OnPathStart() {}
 };
@@ -901,26 +901,23 @@ struct RingNodeBase : NodeContext
 		TypeResolved();
 	}
 
-	nosResult SkipExecuteRingNode(nosNodeExecuteParams* params, nosName ringExecuteName) 
+	nosResult SkipExecuteRingNode(NodeExecuteParams const& params, nosName ringExecuteName) 
 	{
 		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
 			return NOS_RESULT_FAILED;
 		return Ring->ResInterface->SkipExecute(params);
 	}
 
-	nosResult ExecuteRingNode(nosNodeExecuteParams* params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
+	nosResult ExecuteRingNode(NodeExecuteParams const& params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
 	{
 		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
 			return NOS_RESULT_FAILED;
 
-		NodeExecuteParams pins(params);
 
-		auto it = pins.find(NSN_Input);
-		assert(it != pins.end());
-		auto& inputPin = it->second;
+		auto& inputPin = params[NSN_Input];
 		assert(inputPin.Data);
 
-		void* input = Ring->ResInterface->GetPinInfo(pins[NSN_Input], rejectFieldMismatch);
+		void* input = Ring->ResInterface->GetPinInfo(params[NSN_Input], rejectFieldMismatch);
 		if (input == nullptr)
 		{
 			SendScheduleRequest(0);

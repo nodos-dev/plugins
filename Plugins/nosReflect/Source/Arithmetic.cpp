@@ -63,7 +63,7 @@ static void MapScalarToT(nosTypeInfo ty, auto&& f)
 
 template<typename RightHandSide>
 requires std::is_scalar_v<RightHandSide> || std::is_same_v<RightHandSide, void>
-static void DoOp(reflect::BinaryOperator op, nosTypeInfo const& ty, uint8_t* lhs, std::conditional_t<std::is_same_v<RightHandSide, void>, uint8_t, RightHandSide>* rhs, uint8_t* dst)
+static void DoOp(reflect::BinaryOperator op, nosTypeInfo const& ty, const uint8_t* lhs, std::conditional_t<std::is_same_v<RightHandSide, void>, uint8_t, RightHandSide> const* rhs, uint8_t* dst)
 {
 	constexpr bool isRightHandVoid = std::is_same_v<RightHandSide, void>;
     switch(ty.BaseType)
@@ -90,9 +90,9 @@ static void DoOp(reflect::BinaryOperator op, nosTypeInfo const& ty, uint8_t* lhs
 		using RightHandSideT = std::conditional_t<isRightHandVoid, T, RightHandSide>;
         switch(op)
         {
-            case reflect::BinaryOperator::ADD: *(T*)dst = *(T*)lhs + *(RightHandSideT*)rhs; break;
-            case reflect::BinaryOperator::SUB: *(T*)dst = *(T*)lhs - *(RightHandSideT*)rhs; break;
-            case reflect::BinaryOperator::MUL: *(T*)dst = *(T*)lhs * *(RightHandSideT*)rhs; break;
+            case reflect::BinaryOperator::ADD: *(T*)dst = *(const T*)lhs + *(RightHandSideT*)rhs; break;
+            case reflect::BinaryOperator::SUB: *(T*)dst = *(const T*)lhs - *(RightHandSideT*)rhs; break;
+            case reflect::BinaryOperator::MUL: *(T*)dst = *(const T*)lhs * *(RightHandSideT*)rhs; break;
             case reflect::BinaryOperator::DIV: 
             {
                 if (T(0) != *(RightHandSideT*)rhs)
@@ -100,18 +100,18 @@ static void DoOp(reflect::BinaryOperator op, nosTypeInfo const& ty, uint8_t* lhs
                 else nosEngine.LogW("Division by zero!");
                 break;
             }
-            case reflect::BinaryOperator::EXP: *(T*)dst = (T)std::pow(*(T*)lhs, *(RightHandSideT*)rhs); break;
-            case reflect::BinaryOperator::LOG: *(T*)dst = (T)(std::log(*(T*)lhs) / std::log(*(RightHandSideT*)rhs)); break;
+            case reflect::BinaryOperator::EXP: *(T*)dst = (T)std::pow(*(const T*)lhs, *(RightHandSideT*)rhs); break;
+            case reflect::BinaryOperator::LOG: *(T*)dst = (T)(std::log(*(const T*)lhs) / std::log(*(RightHandSideT*)rhs)); break;
             default:
                 *(T*)dst = 0;
         }
     });
 }
 
-void DoScalarOp(reflect::BinaryOperator op, nosTypeInfo const& ty, uint8_t* lhs, nosTypeInfo const& scalarTy, void* rhs, uint8_t* dst)
+void DoScalarOp(reflect::BinaryOperator op, nosTypeInfo const& ty, const uint8_t* lhs, nosTypeInfo const& scalarTy, const void* rhs, uint8_t* dst)
 {
 	MapScalarToT(scalarTy, [&]<class T>() -> void {
-		DoOp<T>(op, ty, lhs, static_cast<T*>(rhs), dst);
+		DoOp<T>(op, ty, lhs, static_cast<const T*>(rhs), dst);
 	});
 }
 
@@ -341,7 +341,7 @@ struct ArithmeticNodeContext : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type || NSN_TypeNameGeneric == Type->TypeName || !Operator)
 			return NOS_RESULT_SUCCESS;
@@ -352,19 +352,17 @@ struct ArithmeticNodeContext : NodeContext
 		}
 
 		flatbuffers::FlatBufferBuilder fbb;
-		NodeExecuteParams pins(params);
 
-		auto& A = pins[NSN_A];
-		auto& Output = pins[NSN_Output];
+		auto& Output = params[NSN_Output];
 
 		if constexpr (!IsScalarArithmetic)
 		{
-			auto& B = pins[NSN_B];
+			auto& B = params[NSN_B];
 			// TODO: we can directly set execute node function ptr instead of switch case etc.
 			if ((*Type)->BaseType == NOS_BASE_TYPE_STRING)
 			{
 				std::stringstream ss;
-				ss << InterpretObjectData<const char*>(*A.Data) << InterpretObjectData<const char*>(*B.Data);
+				ss << params.GetPinData<const char*>(NSN_A) << params.GetPinData<const char*>(NSN_B);
 				auto str = ss.str();
 				SetPinValue(Output.Id, str.c_str());
 			}
@@ -373,21 +371,20 @@ struct ArithmeticNodeContext : NodeContext
 				nos::Buffer outputBuf(Output.Data->Size);
 				DoOp<void>(*Operator,
 						   *Type,
-						   InterpretObjectData<uint8_t>(*A.Data),
-						   InterpretObjectData<uint8_t>(*B.Data),
+						   params.GetPinData<uint8_t>(NSN_A),
+						   params.GetPinData<uint8_t>(NSN_B),
 						   InterpretObjectData<uint8_t>(outputBuf));
 				SetPinValue(Output.Id, outputBuf);
 			}
 		}
 		else
 		{
-			auto& scalar = pins[NSN_Scalar];
 			nos::Buffer outputBuf(Output.Data->Size);
 			DoScalarOp(*Operator,
 					   *Type,
-					   InterpretObjectData<uint8_t>(*A.Data),
+					   params.GetPinData<uint8_t>(NSN_A),
 					   *ScalarType,
-					   InterpretObjectData<void>(*scalar.Data),
+					   params.GetPinData<void>(NSN_Scalar),
 					   InterpretObjectData<uint8_t>(outputBuf));
 			SetPinValue(Output.Id, outputBuf);
 		}

@@ -137,27 +137,26 @@ struct Indexer : NodeContext
 		return AddElementToArray(inPin->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 } }, { data.data(), data.size() }) == NOS_RESULT_SUCCESS;
 	}
 	
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+    nosResult ExecuteNode(NodeExecuteParams const& params) override
     {
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		auto pins = NodeExecuteParams(params);
-		if (!pins[NSN_Input].Data)
+		if (!params[NSN_Input].Data)
 		{
 			UpdateInputVectorSize();
 		}
 
-		auto vec = InterpretObjectData<VectorObjectData<uint8_t>>(*pins[NSN_Input].Data);
+		auto vec = InterpretObjectData<VectorObjectData<uint8_t>>(*params[NSN_Input].Data);
     	ArraySize = vec->size();
-		if (!SetIndex(*InterpretObjectData<uint32_t>(*pins[NSN_Index].Data)))
+		if (!SetIndex(*InterpretObjectData<uint32_t>(*params[NSN_Index].Data)))
 			return NOS_RESULT_FAILED;
-		auto ID = pins[NSN_Output].Id;
+		auto ID = params[NSN_Output].Id;
 		auto& type = *Type;
 
 		nosQueryBufferParams queryParams = {};
 		queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
-		queryParams.Buffer = *pins[NSN_Input].Data;
+		queryParams.Buffer = *params[NSN_Input].Data;
 		nosDataPathComponent queryPath;
 		queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
 		queryPath.Component.ArrayIndex = Index;

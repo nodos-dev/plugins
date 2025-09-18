@@ -429,7 +429,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) 
+	nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
 	{
 		copyToLogger.LogStats();
 		int writeIndex = 0;
