@@ -4,7 +4,8 @@
         "*.nosplugin",
         "Include/**",
         "Assets/**",
-        "Binaries/*.{dll,dylib,so}"
+        "Binaries/*.{dll,dylib,so}",
+        "Types/**"
     ],
     "trigger_publish_globs": [
         "Source/**",
