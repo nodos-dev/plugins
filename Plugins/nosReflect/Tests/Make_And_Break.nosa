@@ -1,13 +1,13 @@
 { "info": { "version": "1.4.0.b0", "build_time": "2025-07-09 16:05:07 +0300", "loaded_modules": [
-      { "name": "nos.reflect", "version": "1.12.4" },
+      { "name": "nos.reflect", "version": "2.0.0" },
       { "name": "nos.sys.shaderc", "version": "2.0.0" },
-      { "name": "nos.sys.vulkan", "version": "6.29.0" },
-      { "name": "nos.sys.settings", "version": "1.1.0" },
-      { "name": "nos.sys.variables", "version": "1.11.3" },
-      { "name": "nos.sys.device", "version": "0.11.1" },
-      { "name": "nos.utilities", "version": "3.26.0" },
-      { "name": "nos.math", "version": "1.22.1" },
+      { "name": "nos.sys.vulkan", "version": "7.0.0" },
       { "name": "nos.test", "version": "0.2.1" },
+      { "name": "nos.sys.settings", "version": "2.0.0" },
+      { "name": "nos.sys.variables", "version": "2.0.0" },
+      { "name": "nos.sys.device", "version": "1.0.0" },
+      { "name": "nos.utilities", "version": "3.28.0" },
+      { "name": "nos.math", "version": "1.23.0" },
       { "name": "nos.track", "version": "1.21.4" },
       { "name": "nos.sys.animation", "version": "1.12.1" }
     ] }, "graph": {
