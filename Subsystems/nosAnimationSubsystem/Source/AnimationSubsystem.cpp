@@ -105,7 +105,7 @@ nosResult OnPreExecuteNode(nosNodeExecuteParams* params)
 	if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
 		deltaSec = params->TimingInfo.FixedStepTiming.DeltaSeconds;
 	for (size_t i = 0; i < params->PinCount; ++i)
-		GAnimation->Animator.UpdatePin(params->Pins[i]->Id, deltaSec, curFrame, params->Pins[i]->Data);
+		GAnimation->Animator.UpdatePin(params->Pins[i]->Id, deltaSec, curFrame, *GetObjectBuffer(*params->Pins[i]->ObjectHandle));
 	return NOS_RESULT_SUCCESS;
 }
 

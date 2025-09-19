@@ -142,21 +142,22 @@ struct Indexer : NodeContext
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		if (!params[NSN_Input].Data)
-		{
-			UpdateInputVectorSize();
-		}
+		// TODO: Transfer what is this?
+		// if (!params[NSN_Input].Data)
+		//{
+		//	UpdateInputVectorSize();
+		//}
 
-		auto vec = InterpretObjectData<VectorObjectData<uint8_t>>(*params[NSN_Input].Data);
+		auto vec = params.GetPinData<VectorObjectData<uint8_t>>(NSN_Input);
     	ArraySize = vec->size();
-		if (!SetIndex(*InterpretObjectData<uint32_t>(*params[NSN_Index].Data)))
+		if (!SetIndex(*params.GetPinData<uint32_t>(NSN_Index)))
 			return NOS_RESULT_FAILED;
 		auto ID = params[NSN_Output].Id;
 		auto& type = *Type;
 
 		nosQueryBufferParams queryParams = {};
 		queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
-		queryParams.Buffer = *params[NSN_Input].Data;
+		queryParams.Buffer = params.GetPinDataBuffer(NSN_Input);
 		nosDataPathComponent queryPath;
 		queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
 		queryPath.Component.ArrayIndex = Index;

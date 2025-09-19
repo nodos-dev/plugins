@@ -208,23 +208,20 @@ struct BreakNode : NodeContext
 		LastServedPinValues[pinId] = value;
 	}
 	
-    void SetOutputValues(const nosBuffer* buf)
+    void SetOutputValues(nosBuffer buf)
     {
-        if(!buf)
-			return;
-
         auto& type = *Type;
         switch (type->BaseType)
         {
         case NOS_BASE_TYPE_ARRAY: {
-        	const flatbuffers::Vector<uint8_t>* vec = InterpretObjectData<VectorObjectData<uint8_t>>(*buf);
+        	const flatbuffers::Vector<uint8_t>* vec = InterpretObjectData<VectorObjectData<uint8_t>>(buf);
         	for (size_t i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
         		if (!pinId)
         			continue;
 				nosQueryBufferParams params = {};
-				params.Buffer = *buf;
+				params.Buffer = buf;
 				nosDataPathComponent path = { NOS_DATA_PATH_ARRAY_ELEMENT, i };
 				params.Path = &path;
 				params.PathLength = 1;
@@ -240,7 +237,7 @@ struct BreakNode : NodeContext
         }
         case NOS_BASE_TYPE_STRUCT:
         {
-			auto root = type->ByteSize ? (flatbuffers::Table*)buf->Data : InterpretObjectData<flatbuffers::Table>(*buf);
+			auto root = type->ByteSize ? (flatbuffers::Table*)buf.Data : InterpretObjectData<flatbuffers::Table>(buf);
             for (int i = 0; i < type->FieldCount; ++i)
             {
 				auto& field = type->Fields[i];
@@ -249,7 +246,7 @@ struct BreakNode : NodeContext
 					continue;
 
 				nosQueryBufferParams params = {};
-				params.Buffer = *buf;
+				params.Buffer = buf;
 				nosDataPathComponent path = {};
 				path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
 				path.Component.FieldName = field.Name;
@@ -270,7 +267,7 @@ struct BreakNode : NodeContext
 	{
 		if(!Type)
 			return NOS_RESULT_SUCCESS;
-		SetOutputValues(params[NSN_Input].Data);
+		SetOutputValues(params.GetPinDataBuffer(NSN_Input));
 		params.MarkAllOutsDirty = false;
 		return NOS_RESULT_SUCCESS;
 	}

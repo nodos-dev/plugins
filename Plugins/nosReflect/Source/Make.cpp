@@ -82,7 +82,7 @@ struct MakeNode : NodeContext
 		case NOS_BASE_TYPE_UINT:
 		case NOS_BASE_TYPE_STRING:
 		case NOS_BASE_TYPE_UNION:
-			nosEngine.SetPinValue(params[NSN_Output].Id, *params[NSN_Value].Data);
+			nosEngine.SetPinValue(params[NSN_Output].Id, params.GetPinDataBuffer(NSN_Value));
 			return NOS_RESULT_SUCCESS;
 		}
 
@@ -93,7 +93,7 @@ struct MakeNode : NodeContext
 
 			SetField(params[NSN_Output].Id,
 					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name}},
-					 *pin.Data);
+					 *GetObjectBuffer(*pin.ObjectHandle));
 		}
 
 		return NOS_RESULT_SUCCESS;

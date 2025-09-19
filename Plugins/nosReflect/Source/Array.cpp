@@ -185,7 +185,7 @@ struct ArrayNode : NodeContext
 		{
 			if (pin.Name == NSN_Output)
 				continue;
-			datas.push_back(*pin.Data);
+			datas.push_back(*GetObjectBuffer(*pin.ObjectHandle));
 		}
 		return SendOutputArray(datas) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}

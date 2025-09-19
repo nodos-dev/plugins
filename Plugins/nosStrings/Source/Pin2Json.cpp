@@ -11,10 +11,9 @@ struct Pin2JsonNode : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto& dataPin = params[NOS_NAME("Data")];
-		auto& jsonPin = params[NOS_NAME("Json")];
-		if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *dataPin.Data))
+		if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *GetObjectBuffer(*dataPin.ObjectHandle)))
 		{
-			SetPinValue(jsonPin.Name, outJson->AsBuffer());
+			SetPinValue(NOS_NAME("Json"), outJson->AsBuffer());
 			ClearNodeStatusMessages();
 		}
 		else

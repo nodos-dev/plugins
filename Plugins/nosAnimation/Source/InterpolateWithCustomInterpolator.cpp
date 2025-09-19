@@ -14,8 +14,8 @@ nosResult RegisterInterpolateWithCustomInterpolator(nosNodeFunctions* out)
 			nosEngine.LogW("InterpolateWithCustomInterpolator: Type is not resolved");
 			return NOS_RESULT_FAILED;
 		}
-		nosBuffer a = *args[NOS_NAME("A")].Data;
-		nosBuffer b = *args[NOS_NAME("B")].Data;
+		nosBuffer a = args.GetPinDataBuffer(NOS_NAME("A"));
+		nosBuffer b = args.GetPinDataBuffer(NOS_NAME("B"));
 		double t = *args.GetPinData<double>(NOS_NAME("t"));
 		EngineBuffer outBuf{};
 		nosResult res = nosAnimation->Interpolate(typeName, a, b, t, outBuf.GetBufferPtr());

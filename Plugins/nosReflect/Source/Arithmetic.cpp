@@ -353,8 +353,6 @@ struct ArithmeticNodeContext : NodeContext
 
 		flatbuffers::FlatBufferBuilder fbb;
 
-		auto& Output = params[NSN_Output];
-
 		if constexpr (!IsScalarArithmetic)
 		{
 			auto& B = params[NSN_B];
@@ -364,29 +362,29 @@ struct ArithmeticNodeContext : NodeContext
 				std::stringstream ss;
 				ss << params.GetPinData<const char*>(NSN_A) << params.GetPinData<const char*>(NSN_B);
 				auto str = ss.str();
-				SetPinValue(Output.Id, str.c_str());
+				SetPinValue(NSN_Output, str.c_str());
 			}
 			else
 			{
-				nos::Buffer outputBuf(Output.Data->Size);
+				nos::Buffer outputBuf(params.GetPinDataBuffer(NSN_Output));
 				DoOp<void>(*Operator,
 						   *Type,
 						   params.GetPinData<uint8_t>(NSN_A),
 						   params.GetPinData<uint8_t>(NSN_B),
 						   InterpretObjectData<uint8_t>(outputBuf));
-				SetPinValue(Output.Id, outputBuf);
+				SetPinValue(NSN_Output, outputBuf);
 			}
 		}
 		else
 		{
-			nos::Buffer outputBuf(Output.Data->Size);
+			nos::Buffer outputBuf(params.GetPinDataBuffer(NSN_Output));
 			DoScalarOp(*Operator,
 					   *Type,
 					   params.GetPinData<uint8_t>(NSN_A),
 					   *ScalarType,
 					   params.GetPinData<void>(NSN_Scalar),
 					   InterpretObjectData<uint8_t>(outputBuf));
-			SetPinValue(Output.Id, outputBuf);
+			SetPinValue(NSN_Output, outputBuf);
 		}
 
 		return NOS_RESULT_SUCCESS;

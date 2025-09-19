@@ -96,7 +96,7 @@ struct EnumToUnderlyingValueNode : EnumCastNodeBase
 	{
 		if (!EnumType || params[NSN_Value].TypeName == NSN_TypeNameGeneric)
 			return NOS_RESULT_SUCCESS;
-		SetPinValue(NSN_Value, *params[NSN_Enum].Data);
+		SetPinValue(NSN_Value, params.GetPinDataBuffer(NSN_Enum));
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -115,7 +115,7 @@ struct EnumFromUnderlyingValueNode : EnumCastNodeBase
 	{
 		if (!EnumType || params[NSN_Value].TypeName == NSN_TypeNameGeneric)
 			return NOS_RESULT_SUCCESS;
-		SetPinValue(NSN_Enum, *params[NSN_Value].Data);
+		SetPinValue(NSN_Enum, params.GetPinDataBuffer(NSN_Value));
 		return NOS_RESULT_SUCCESS;
 	}
 };

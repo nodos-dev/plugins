@@ -130,11 +130,8 @@ public:
 
 	std::optional<pyb::memoryview> GetPinValue(std::string pinName) const
 	{
-		auto it = this->find(nos::Name(pinName));
-		if (it == this->end())
-			return std::nullopt;
-		auto buf = it->second.Data;
-		return pyb::memoryview::from_memory(buf->Data, buf->Size);
+		auto buf = GetPinDataBuffer(nos::Name(pinName));
+		return pyb::memoryview::from_memory(buf.Data, buf.Size);
 	}
 	std::optional<nosUUID> GetPinId(std::string pinName) const
 	{

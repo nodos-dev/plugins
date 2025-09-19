@@ -227,7 +227,7 @@ bool PinDataAnimator::AddAnimation(uuid const& pinId,
 void PinDataAnimator::UpdatePin(uuid const& pinId, 
 								nosVec2u const& deltaSeconds,
 								uint64_t curFSM,
-								const nosBuffer* currentData)
+								nosBuffer currentData)
 {	
 	std::shared_lock lock(AnimationsMutex);
 	auto it = Animations.find(pinId);
@@ -253,13 +253,17 @@ void PinDataAnimator::UpdatePin(uuid const& pinId,
 		case editor::Interpolation::Lerp: {
 			auto* lerp = const_cast<editor::TLerp*>(animData.Interp.AsLerp());
 			if (lerp->start.empty())
-				lerp->start = std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData->Data), reinterpret_cast<uint8_t const*>(currentData->Data) + currentData->Size);
+				lerp->start =
+					std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData.Data),
+										 reinterpret_cast<uint8_t const*>(currentData.Data) + currentData.Size);
 			break;
 		}
 		case editor::Interpolation::CubicBezier: {
 			auto* cubic = const_cast<editor::TCubicBezier*>(animData.Interp.AsCubicBezier());
 			if (cubic->start.empty())
-				cubic->start = std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData->Data), reinterpret_cast<uint8_t const*>(currentData->Data) + currentData->Size);
+				cubic->start =
+					std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData.Data),
+										 reinterpret_cast<uint8_t const*>(currentData.Data) + currentData.Size);
 			break;
 		}
 		default: break;

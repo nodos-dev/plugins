@@ -113,7 +113,7 @@ void FieldIterator(F&& f)
 nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 {
 	NodeExecuteParams execParams(params);
-	nos::Buffer outBuf = *execParams[NSN_Z].Data;
+	nos::Buffer outBuf = execParams.GetPinDataBuffer(NSN_Z);
 	FieldIterator<fb::Transform>([X = execParams.GetPinData<uint8_t>(NSN_X),
 								  Y = execParams.GetPinData<uint8_t>(NSN_Y),
 								  Z = outBuf.As<uint8_t>()]<u32 i, class T>(auto O) {
@@ -156,12 +156,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 				constexpr uint32_t PIN_MIN = 1;
 				constexpr uint32_t PIN_MAX = 2;
 				constexpr uint32_t PIN_OUT = 3;
-				auto valueBuf = params->Pins[PIN_IN]->Data;
-				auto minBuf = params->Pins[PIN_MIN]->Data;
-				auto maxBuf = params->Pins[PIN_MAX]->Data;
-				float value = *static_cast<float*>(valueBuf->Data);
-				float min = *static_cast<float*>(minBuf->Data);
-				float max = *static_cast<float*>(maxBuf->Data);
+				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->ObjectHandle);
+				auto min = *InterpretObject<float>(*params->Pins[PIN_MIN]->ObjectHandle);
+				auto max = *InterpretObject<float>(*params->Pins[PIN_MAX]->ObjectHandle);
 				SetPinValue(params->Pins[PIN_OUT]->Id, std::clamp(value, min, max));
 				return NOS_RESULT_SUCCESS;
 			};
@@ -172,8 +169,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_OUT = 1;
-				auto valueBuf = params->Pins[PIN_IN]->Data;
-				float value = *static_cast<float*>(valueBuf->Data);
+				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->ObjectHandle);
 				SetPinValue(params->Pins[PIN_OUT]->Id, std::abs(value));
 				return NOS_RESULT_SUCCESS;
 				};

@@ -67,7 +67,7 @@ struct PinDataAnimator
 
 	bool AddAnimation(uuid const& pinId,
 					  editor::AnimatePin const& animate);
-	void UpdatePin(uuid const& pinId, nosVec2u const& deltaSeconds, uint64_t curFSM, const nosBuffer* currentData);
+	void UpdatePin(uuid const& pinId, nosVec2u const& deltaSeconds, uint64_t curFSM, nosBuffer currentData);
 	bool IsPinAnimating(uuid const& pinId);
 	void OnPinDeleted(uuid const& pinId);
 	std::optional<PathInfo> GetPathInfo(uuid const& nodeId);
