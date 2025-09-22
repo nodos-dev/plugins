@@ -56,7 +56,7 @@ struct SyncMultiOutletNode : NodeContext
 	{
 		std::mutex Mutex;
 		std::condition_variable CV;
-		const nosBuffer* Data = nullptr;
+		ObjectRef Obj;
 		uint64_t FrameNumber = 0;
 		bool Requested = false;
 	} InputPin{};
@@ -103,7 +103,7 @@ struct SyncMultiOutletNode : NodeContext
 		return true;
 	}
 
-	nosResult CopyFrom(nosCopyInfo* cpy) override
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		std::shared_lock outPinsLock(OutPinsMutex);
 		auto& outPin = OutPins[cpy->ID];
@@ -111,18 +111,17 @@ struct SyncMultiOutletNode : NodeContext
 		uint64_t lastOutFrameNum = outPin.ProcessedFrameNumber;
 		if (auto res = WaitInput(lastOutFrameNum + 1))
 			return res == EXIT ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
-		nosEngine.SetPinValue(cpy->ID, *InputPin.Data);
-		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		SetPinObject(cpy->ID, InputPin.Obj);
+		cpy->ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = InputPin.FrameNumber;
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams args(params);
 		assert(InputPin.Requested);
-		InputPin.Data = args[NOS_NAME("Input")].Data;
 		std::unique_lock lock(InputPin.Mutex);
+		InputPin.Obj = params.GetPinObject(NOS_NAME("Input"));
 		++InputPin.FrameNumber;
 		InputPin.Requested = false;
 		InputPin.CV.notify_all();

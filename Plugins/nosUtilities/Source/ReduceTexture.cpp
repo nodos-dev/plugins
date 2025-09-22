@@ -15,19 +15,15 @@ struct ReduceTextureNode : NodeContext
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
-		nosResourceShareInfo resultBufferCreateInfo{
-			.Info = nosResourceInfo {
-				.Type = NOS_RESOURCE_TYPE_BUFFER,
-				.Buffer = nosBufferInfo {
-					.Size = sizeof(float) * 2,
-					.Usage = nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_TRANSFER_SRC),
-					.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE)
-				}
-			}
-		};
-		if (auto buf = vkss::Resource::Create(resultBufferCreateInfo, ("ReduceTextureNode" + uuids::to_string(NodeId)).c_str()))
+		nosBufferInfo bufCreateInfo{.Size = sizeof(float) * 2,
+									.Usage =
+										nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_DST |
+													   NOS_BUFFER_USAGE_TRANSFER_SRC),
+									.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE)};
+		auto buf = vkss::CreateBuffer(bufCreateInfo, ("ReduceTextureNode" + uuids::to_string(NodeId)).c_str());
+		if (buf.IsValid())
 		{
-			ResultBuffer = std::make_unique<vkss::Resource>(std::move(*buf));
+			ResultBuffer = std::move(buf);
 			return NOS_RESULT_SUCCESS;
 		}
 		else
@@ -57,18 +53,18 @@ struct ReduceTextureNode : NodeContext
 
 	bool MessageSet = false;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		static const nos::Name NSN_Input = NOS_NAME("Input");
 		static const nos::Name NSN_Result = NOS_NAME("Result");
 
-		nos::NodeExecuteParams nodeParams(params);
-		nosResourceShareInfo inputTexDesc = vkss::DeserializeTextureInfo(nodeParams[NSN_Input].Data->Data);
+		auto inTex = params.GetPinObject<vkss::Texture>(NSN_Input);
 
-		if (!inputTexDesc.Memory.Handle)
+		if (!inTex.IsValid())
 			return NOS_RESULT_FAILED;
 
-		if (vkss::GetNumberOfComponentsFromTextureFormat(inputTexDesc.Info.Texture.Format) != 1)
+		auto inTexInfo = *vkss::GetResourceInfo(inTex);
+		if (vkss::GetNumberOfComponentsFromTextureFormat(inTexInfo.Format) != 1)
 		{
 			if (!MessageSet)
 			{
@@ -84,10 +80,8 @@ struct ReduceTextureNode : NodeContext
 			MessageSet = false;
 		}
 
-		nosResourceShareInfo& resultBufferDesc = *ResultBuffer;
-
 		// Reset the Result buffer to zero before running the compute pass
-		auto* resultBufferData = reinterpret_cast<float*>(nosVulkan->Map(&resultBufferDesc));
+		auto* resultBufferData = reinterpret_cast<float*>(nosVulkan->Map(ResultBuffer));
 		if (resultBufferData)
 		{
 			resultBufferData[0] = 0.0f; // Reset sum
@@ -95,11 +89,11 @@ struct ReduceTextureNode : NodeContext
 		}
 
 		std::vector bindings = {
-			vkss::ShaderBinding(NSN_Input, inputTexDesc),
-			vkss::ShaderBinding(NSN_Result, resultBufferDesc)
+			vkss::ShaderTextureBinding(NSN_Input, inTex, NOS_TEXTURE_FILTER_NEAREST),
+			vkss::ShaderBufferBinding(NSN_Result, ResultBuffer)
 		};
 
-		uint32_t elementCount = inputTexDesc.Info.Texture.Width * inputTexDesc.Info.Texture.Height;
+		uint32_t elementCount = inTexInfo.Width * inTexInfo.Height;
 		uint32_t localSizeX = 256; // Workgroup size for X dimension
 		uint32_t dispatchSizeX = (elementCount + localSizeX - 1) / localSizeX;  // ceil division
 
@@ -112,16 +106,16 @@ struct ReduceTextureNode : NodeContext
 		};
 
 		nosCmd cmd;
-		nosCmdBeginParams beginParams{ .Name = NOS_NAME("TextureReducePass"), .AssociatedNodeId = params->NodeId, .OutCmdHandle = &cmd };
+		nosCmdBeginParams beginParams{ .Name = NOS_NAME("TextureReducePass"), .AssociatedNodeId = params.NodeId, .OutCmdHandle = &cmd };
 		nosVulkan->Begin(&beginParams);
 
 		nosVulkan->RunComputePass(cmd, &pass);
-		nosGPUEvent waitEvent{};
+		nosVkGPUEvent waitEvent{};
 		nosCmdEndParams endParams{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &waitEvent };
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&waitEvent, UINT64_MAX);
 
-		auto* result = reinterpret_cast<float*>(nosVulkan->Map(&resultBufferDesc));
+		auto* result = reinterpret_cast<float*>(nosVulkan->Map(ResultBuffer));
 		auto sum = result[0];
 		auto sumOfSquares = result[1];
 		auto mean = sum / float(elementCount);
@@ -135,7 +129,7 @@ struct ReduceTextureNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	std::unique_ptr<vkss::Resource> ResultBuffer = nullptr;
+	TypedObjectRef<vkss::Buffer> ResultBuffer{};
 };
 
 nosResult RegisterReduceTexture(nosNodeFunctions* fn)

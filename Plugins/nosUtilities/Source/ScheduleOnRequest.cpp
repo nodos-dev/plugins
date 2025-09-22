@@ -25,9 +25,9 @@ struct ScheduleOnRequestNode : NodeContext
 	nosResult OnCreate(nosFbNodePtr node) 
 	{
 		// Listen to the ScheduleWhenNodeCreated pin only at construction
-		AddPinValueWatcher(NSN_ScheduleWhenNodeCreated, [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
-			if (!oldVal)
-				ExecuteForOnceAtCreation = *InterpretPinValue<bool>(newVal);
+		AddPinValueWatcher<bool>(NSN_ScheduleWhenNodeCreated, [this](bool* newVal, std::optional<bool*> oldVal) {
+			if (!oldVal.has_value())
+				ExecuteForOnceAtCreation = *newVal;
 		});
 		return NOS_RESULT_SUCCESS;
 	}
@@ -60,10 +60,9 @@ struct ScheduleOnRequestNode : NodeContext
 			ScheduleNode();
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams execParams(params);
-		nosEngine.SetPinValueByName(NodeId, NSN_Output, *execParams[NSN_Input].Data);
+		SetPinValue(NSN_Output, params.GetPinObject(NSN_Input));
 		nosEngine.TriggerNodeEvent(NodeId, NSN_OnResponse);
 		ExecuteForOnceAtCreation = false;
 		return NOS_RESULT_SUCCESS;

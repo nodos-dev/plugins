@@ -112,10 +112,10 @@ struct MergeContext : NodeContext
 			if(NSN_Out == pin.Name)
 				continue;
 
-			auto val = pin.Data;
+			nosBuffer val = *GetObjectBuffer(*pin.ObjectHandle);
 			if (NSN_Background_Color == pin.Name)
 			{
-				bindings.emplace_back(vkss::ShaderDataBinding(pin.Name, *val));
+				bindings.emplace_back(vkss::ShaderDataBinding(pin.Name, val));
 				continue;
 			}
 
@@ -127,8 +127,8 @@ struct MergeContext : NodeContext
 			case 'T':
 				textures[idx] = *pin.ObjectHandle;
 				break;
-			case 'B': blends[idx] = *(int*)val->Data; break;
-			case 'O': opacities[idx] = *(float*)val->Data; break;
+			case 'B': blends[idx] = *(int*)val.Data; break;
+			case 'O': opacities[idx] = *(float*)val.Data; break;
 			}
 		}
 

@@ -17,34 +17,32 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_Resize, "nos.utilities.Resize")
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 {
 	nos::NodeExecuteParams nodeParams(params);
-	auto inputTex = vkss::DeserializeTextureInfo(nodeParams[NSN_Input].Data->Data);
-	auto method = *reinterpret_cast<uint32_t*>(nodeParams[NSN_Method].Data->Data);
+	auto inTex = nodeParams.GetPinObject<vkss::Texture>(NSN_Input);
+	auto method = *nodeParams.GetPinData<uint32_t>(NSN_Method);
 
-	auto tex = vkss::DeserializeTextureInfo(nodeParams[NSN_Output].Data->Data);
-	auto& size = *reinterpret_cast<nosVec2u*>(nodeParams[NSN_Size].Data->Data);
+	auto outTex = nodeParams.GetPinObject<vkss::Texture>(NSN_Output);
+	auto& size = *nodeParams.GetPinData<nosVec2u>(NSN_Size);
 		
-	if(size.x != tex.Info.Texture.Width ||
-		size.y != tex.Info.Texture.Height)
+	auto outTexInfo = vkss::GetResourceInfo(outTex);
+
+	if(!outTexInfo || size.x != outTexInfo->Width || size.y != outTexInfo->Height)
 	{
-		auto prevTex = tex;
-		prevTex.Memory = {};
-		prevTex.Info.Texture.Width = size.x;
-		prevTex.Info.Texture.Height = size.y;
-		auto texFb = vkss::ConvertTextureInfo(prevTex);
-		texFb.unscaled = true;
-		auto texFbBuf = nos::Buffer::From(texFb);
-		nosEngine.SetPinValue(params->Pins[1]->Id, {.Data = texFbBuf.Data(), .Size = texFbBuf.Size()});
+		auto newTexInfo = outTexInfo.value_or(nosTextureInfo{});
+		newTexInfo.Width = size.x;
+		newTexInfo.Height = size.y;
+		// TODO: Transfer output unscaled
+		outTex = vkss::CreateTexture(newTexInfo, "Resize Output");
+		nosEngine.SetPinObjectHandle(params->Pins[1]->Id, outTex);
 	}
     
-	std::vector bindings = {vkss::ShaderBinding(NSN_Input, inputTex), vkss::ShaderBinding(NSN_Method, method)};
-	
-	tex = vkss::DeserializeTextureInfo(nodeParams[NSN_Output].Data->Data);
+	// TODO: Transfer filter
+	std::vector bindings = {vkss::ShaderTextureBinding(NSN_Input, inTex, NOS_TEXTURE_FILTER_LINEAR), vkss::ShaderDataBinding(NSN_Method, method)};
 	
 	nosRunPassParams resizeParam {
 		.Key = NSN_RESIZE_PASS,
 		.Bindings = bindings.data(),
 		.BindingCount = 2,
-		.Output = tex,
+		.Output = outTex,
 		.Wireframe = 0,
 		.Benchmark = 0,
 	};

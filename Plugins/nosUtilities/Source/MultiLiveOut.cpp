@@ -138,16 +138,15 @@ struct MultiLiveOutNode : NodeContext
 		}
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		for (auto const& [_, idPair] : IndexToPairs)
 		{
-			for (int i = 0; i < params->PinCount; i++)
+			for (auto const& [name, pin] : params)
 			{
-				auto& pin = *params->Pins[i];
 				if (pin.Id == idPair.first)
 				{
-					nosEngine.SetPinValue(idPair.second, *pin.Data);
+					nosEngine.SetPinObjectHandle(idPair.second, *pin.ObjectHandle);
 					break;
 				}
 			}

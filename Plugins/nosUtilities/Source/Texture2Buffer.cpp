@@ -16,46 +16,34 @@ nosBufferElementType GetBufferElementTypeFromVulkanFormat(nosFormat format);
 
 struct Texture2BufferNode : nos::NodeContext
 {
-	uuid InputPinId = {}, OutputBufferPinId = {};
-	nosResult OnCreate(nosFbNodePtr node) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		for (const auto& pin : *node->pins()) {
-			const char* currentPinName = pin->name()->c_str();
-			if (NSN_Input.Compare(currentPinName) == 0) {
-				InputPinId = *pin->id();
-			}
-			else if (NSN_OutputBuffer.Compare(currentPinName) == 0) {
-				OutputBufferPinId = *pin->id();
-			}
-		}
-		return NOS_RESULT_SUCCESS;
-	}
-	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
-	{
-		nos::NodeExecuteParams pins(params);
-		nosResourceShareInfo inputTextureDesc = nos::vkss::DeserializeTextureInfo(pins[NSN_Input].Data->Data);
-		const nosBuffer* outputBufferPinData = pins[NSN_OutputBuffer].Data;
-		nosResourceShareInfo outputBufferDesc = nos::vkss::ConvertToResourceInfo(*static_cast<sys::vulkan::Buffer*>(outputBufferPinData->Data));
-		uint64_t currentSize = inputTextureDesc.Memory.Size;
+		auto inTex = params.GetPinObject<vkss::Texture>(NSN_Input);
+		if (!inTex.IsValid())
+			return NOS_RESULT_FAILED;
+		auto inTexInfo = *vkss::GetResourceInfo(inTex);
+		auto outBuf = params.GetPinObject<vkss::Buffer>(NSN_OutputBuffer);
+		auto outBufInfo = vkss::GetResourceInfo(outBuf);
+		uint32_t currentSize = static_cast<uint32_t>(inTexInfo.SizeInBytes);
 		
-		if (currentSize != outputBufferDesc.Memory.Size) {
+		if (!outBufInfo || currentSize != outBufInfo->Size) {
 			// Need to create a new buffer
-			outputBufferDesc.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-			outputBufferDesc.Info.Buffer.Size = currentSize;
-			outputBufferDesc.Info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER);
-			outputBufferDesc.Info.Buffer.ElementType = GetBufferElementTypeFromVulkanFormat(inputTextureDesc.Info.Texture.Format);
+			nosBufferInfo bufCreateInfo{
+				.Size = currentSize,
+				.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST |
+										NOS_BUFFER_USAGE_STORAGE_BUFFER),
+				.ElementType = GetBufferElementTypeFromVulkanFormat(inTexInfo.Format),
+			};
+			outBuf = vkss::CreateBuffer(bufCreateInfo, "Texture2Buffer Output");
+			SetPinObject(NSN_OutputBuffer, outBuf);
 		}
 
-		// Create buffer or update field type of existing buffer
-		outputBufferDesc.Info.Buffer.FieldType = inputTextureDesc.Info.Texture.FieldType;
-		nosEngine.SetPinValue(OutputBufferPinId, nos::Buffer::From(vkss::ConvertBufferInfo(outputBufferDesc)));
+		nosVulkan->SetResourceFieldType(outBuf, inTexInfo.FieldType);
 
-		outputBufferDesc = nos::vkss::ConvertToResourceInfo(*static_cast<sys::vulkan::Buffer*>(outputBufferPinData->Data));
 		nosCmd cmd = {};
 		nosCmdBeginParams beginParams = {.Name = NOS_NAME("Texture2Buffer Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &inputTextureDesc, &outputBufferDesc, 0);
+		nosVulkan->Copy(cmd, inTex, outBuf, 0);
 		nosVulkan->End(cmd, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}

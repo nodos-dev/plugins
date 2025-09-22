@@ -29,7 +29,7 @@ struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
 	{
 		if (pinName == NOS_NAME("ShouldInterlace"))
 		{
-			auto& shouldInterlace = *InterpretPinValue<bool>(value);
+			auto& shouldInterlace = *InterpretObjectData<bool>(value);
 			if (ShouldInterlace != shouldInterlace)
 			{
 				ShouldInterlace = shouldInterlace;
@@ -61,7 +61,7 @@ struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
 	std::condition_variable FrameArrivedCond;
 	std::atomic_bool ShouldInterlace = false;
 	
-	nosResult CopyFrom(nosCopyInfo* cpy) override
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		if (!Ring)
 			return NOS_RESULT_FAILED;
@@ -76,9 +76,9 @@ struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
 		}
 		if (currentField == NOS_TEXTURE_FIELD_TYPE_ODD)
 		{
-			cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+			cpy->ShouldSetSourceFrameNumber = true;
 			cpy->FrameNumber = 2 * LastServedFrameNumberBase + 1;
-			vkss::SetFieldType(cpy->ID, *cpy->PinData, currentField);
+			nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, currentField);
 			return NOS_RESULT_SUCCESS;
 		}
 
@@ -89,18 +89,18 @@ struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
 
 		Ring->ResInterface->Copy(slot, cpy, NodeId);
 
-		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		cpy->ShouldSetSourceFrameNumber = true;
 		LastServedFrameNumberBase = slot->FrameNumber;
 		cpy->FrameNumber = (ShouldInterlace + 1) * LastServedFrameNumberBase;
 
 		Ring->EndPop(slot);
 		if (currentField != NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
-			vkss::SetFieldType(cpy->ID, *cpy->PinData, currentField);
+			nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, currentField);
 		SendScheduleRequest(1);
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto res = ExecuteRingNode(params, false, NOS_NAME_STATIC("DeinterlacedBoundedTextureQueue"), false);
 		if (res == NOS_RESULT_SUCCESS)
