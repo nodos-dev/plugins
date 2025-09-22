@@ -163,7 +163,7 @@ struct SinkNode : NodeContext
 			if (diff < 1000.f / Fps)
 				continue;
 			lastSchedule = now;
-			if (PendingRequests / Fps >= DropAfterSeconds)
+			if ((float)PendingRequests.load() / Fps.load() >= DropAfterSeconds.load())
 			{
 				nosEngine.LogE("Sink Node dropping frame, pending requests: %d, fps: %.2f, drop after seconds: %.2f",
 							   (int)PendingRequests.load(),
