@@ -58,6 +58,15 @@
 						"can_show_as": "PROPERTY_ONLY",
 						"description": "Whether to schedule nodes at an unlimited or fixed rate",
 						"data": "Periodic"
+					},
+					{
+						"name": "DropAfterSeconds",
+						"display_name": "Drop After (Seconds)",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path after this many seconds",
+						"data": 1.0
 					}
 				]
 			}

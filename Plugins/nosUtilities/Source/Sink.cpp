@@ -21,8 +21,11 @@ struct SinkNode : NodeContext
 	std::atomic<bool> Wait = true;
 	std::thread Thread;
 	bool AcceptRepeat = false;
-	clock::time_point LastCopy = clock::now();
 	utilities::SinkMode Mode = utilities::SinkMode::Periodic;
+	std::atomic<int64_t> PendingRequests = 0;
+	std::atomic<float> DropAfterSeconds = 1.0f;
+	bool HasDroppingMessage = false;
+
 
 	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode)
 	{
@@ -35,8 +38,6 @@ struct SinkNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto& lastCopy = LastCopy;
-
 		if (nosVulkan)
 		{
 			nosCmd cmd{};
@@ -53,10 +54,10 @@ struct SinkNode : NodeContext
 			}
 		}
 
-		lastCopy = clock::now();
-
 		if (!IsPeriodic())
 			ScheduleNode();
+		else
+			PendingRequests--;
 
 		return NOS_RESULT_SUCCESS;
 	}
@@ -81,6 +82,10 @@ struct SinkNode : NodeContext
 		{
 			SetMode(*static_cast<utilities::SinkMode*>(value.Data));
 		}
+		if (NOS_NAME("DropAfterSeconds") == pinName)
+		{
+			DropAfterSeconds = *static_cast<float*>(value.Data);
+		}
 	}
 
 	void SetMode(utilities::SinkMode mode)
@@ -88,11 +93,14 @@ struct SinkNode : NodeContext
 		Mode = mode;
 		nosEngine.RecompilePath(NodeId);
 		auto fpsPinId = *GetPinId(NOS_NAME("Sink FPS"));
+		auto dropAfterSecondsPinId = *GetPinId(NOS_NAME("DropAfterSeconds"));
 		nosOrphanState orphanState{
 			.Type = !IsPeriodic() ? NOS_ORPHAN_STATE_TYPE_ORPHAN : NOS_ORPHAN_STATE_TYPE_ACTIVE,
 			.Message = !IsPeriodic() ? "Periodic mode is disabled" : ""
 		};
 		nosEngine.SetItemOrphanState(fpsPinId, &orphanState);
+		nosEngine.SetItemOrphanState(dropAfterSecondsPinId, &orphanState);
+		ClearNodeStatusMessages();
 	}
 
 	bool IsPeriodic()
@@ -116,6 +124,7 @@ struct SinkNode : NodeContext
 
 	void OnPathStart() override 
 	{
+		PendingRequests = 0;
 		if (!IsPeriodic())
 		{
 			StopThread();
@@ -138,31 +147,48 @@ struct SinkNode : NodeContext
 	void OnPathStop() override
 	{
 		if (IsPeriodic())
-			StartThread();
+			StopThread();
 	}
 
 	void SinkThread()
 	{
-		clock::time_point lastCopy;
+		clock::time_point start = clock::now();
+		clock::time_point lastSchedule;
+		bool dropped = false;
 		while (!ShouldStop)
 		{
 			auto now = clock::now();
 
-			float diff = std::chrono::duration_cast<std::chrono::microseconds>(now - lastCopy).count() / 1000.0f;
+			float diff = std::chrono::duration_cast<std::chrono::microseconds>(now - lastSchedule).count() / 1000.0f;
 			if (diff < 1000.f / Fps)
 				continue;
-			lastCopy = now;
-			flatbuffers::FlatBufferBuilder fbb;
-			std::vector<flatbuffers::Offset<app::AppEvent>> Offsets;
+			lastSchedule = now;
+			if (PendingRequests / Fps >= DropAfterSeconds)
+			{
+				nosEngine.LogE("Sink Node dropping frame, pending requests: %d, fps: %.2f, drop after seconds: %.2f",
+							   (int)PendingRequests.load(),
+							   Fps.load(),
+							   DropAfterSeconds.load());
+				SetNodeStatusMessage("Dropping", fb::NodeStatusMessageType::WARNING);
+				nosEngine.SendPathRestart(NodeId);
+				HasDroppingMessage = true;
+				dropped = true;
+				return;
+			}
+			if (HasDroppingMessage && !dropped)
+			{
+				if (now - start > std::chrono::milliseconds(int64_t(DropAfterSeconds.load() * 2.0 * 1000.0)))
+				{
+					ClearNodeStatusMessages();
+					HasDroppingMessage = false;
+				}
+			}
+			PendingRequests++;
 			{
 				std::unique_lock lock(Mutex);
 				if (ShouldStop)
 					break;
-				Offsets.push_back(CreateAppEventOffset(
-						fbb,
-						nos::app::CreateScheduleRequest(
-							fbb, nos::app::ScheduleRequestKind::NODE, &NodeId, 1)));
-				HandleEvent(CreateAppEvent(fbb, app::CreateBatchAppEventDirect(fbb, &Offsets)));
+				ScheduleNode();
 			}
 		}
 	}
