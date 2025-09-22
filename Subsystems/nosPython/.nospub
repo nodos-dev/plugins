@@ -5,11 +5,14 @@
         "Include/**",
         "Assets/**",
         "Binaries/*.{dll,dylib,so}",
-        "Types/**"
+        "Types/**",
+        "Nodes/*.nosnode"
     ],
     "trigger_publish_globs": [
         "Source/**",
         "CMakeLists.txt"
     ],
-    "target_platforms": ["x86_64-windows"]
+    "target_platforms": [
+        "x86_64-windows"
+    ]
 }
