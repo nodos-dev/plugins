@@ -100,7 +100,7 @@
                 },
                 {
                     "id": "a9a32c7b-8907-4116-a252-c816d0be6c78",
-                    "name": "DropAfterSeconds",
+                    "name": "LatencyBudget",
                     "type_name": "float",
                     "show_as": "PROPERTY",
                     "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -110,8 +110,8 @@
                     "def": 1.0,
                     "contents_type": "PortalPin",
                     "contents": { "source_id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8" },
-                    "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path after this many seconds",
-                    "display_name": "Drop After (Seconds)"
+                    "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
+                    "display_name": "Latency Budget (Seconds)"
                 }
             ],
             "pos": {
@@ -383,7 +383,7 @@
                             },
                             {
                                 "id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8",
-                                "name": "DropAfterSeconds",
+                                "name": "LatencyBudget",
                                 "type_name": "float",
                                 "show_as": "PROPERTY",
                                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -396,8 +396,8 @@
                                 "def": 1.0,
                                 "contents_type": "JobPin",
                                 "contents": {},
-                                "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path after this many seconds",
-                                "display_name": "Drop After (Seconds)"
+                                "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
+                                "display_name": "Latency Budget (Seconds)"
                             }
                         ],
                         "pos": {

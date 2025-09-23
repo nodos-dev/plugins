@@ -23,7 +23,7 @@ struct SinkNode : NodeContext
 	bool AcceptRepeat = false;
 	utilities::SinkMode Mode = utilities::SinkMode::Periodic;
 	std::atomic<int64_t> PendingRequests = 0;
-	std::atomic<float> DropAfterSeconds = 1.0f;
+	std::atomic<float> LatencyBudget = 1.0f;
 	bool HasDroppingMessage = false;
 
 
@@ -82,9 +82,9 @@ struct SinkNode : NodeContext
 		{
 			SetMode(*static_cast<utilities::SinkMode*>(value.Data));
 		}
-		if (NOS_NAME("DropAfterSeconds") == pinName)
+		if (NOS_NAME("LatencyBudget") == pinName)
 		{
-			DropAfterSeconds = *static_cast<float*>(value.Data);
+			LatencyBudget = *static_cast<float*>(value.Data);
 		}
 	}
 
@@ -93,13 +93,13 @@ struct SinkNode : NodeContext
 		Mode = mode;
 		nosEngine.RecompilePath(NodeId);
 		auto fpsPinId = *GetPinId(NOS_NAME("Sink FPS"));
-		auto dropAfterSecondsPinId = *GetPinId(NOS_NAME("DropAfterSeconds"));
+		auto latencyBudgetPinId = *GetPinId(NOS_NAME("LatencyBudget"));
 		nosOrphanState orphanState{
 			.Type = !IsPeriodic() ? NOS_ORPHAN_STATE_TYPE_ORPHAN : NOS_ORPHAN_STATE_TYPE_ACTIVE,
 			.Message = !IsPeriodic() ? "Periodic mode is disabled" : ""
 		};
 		nosEngine.SetItemOrphanState(fpsPinId, &orphanState);
-		nosEngine.SetItemOrphanState(dropAfterSecondsPinId, &orphanState);
+		nosEngine.SetItemOrphanState(latencyBudgetPinId, &orphanState);
 		ClearNodeStatusMessages();
 	}
 
@@ -163,12 +163,12 @@ struct SinkNode : NodeContext
 			if (diff < 1000.f / Fps)
 				continue;
 			lastSchedule = now;
-			if ((float)PendingRequests.load() / Fps.load() >= DropAfterSeconds.load())
+			if ((float)PendingRequests.load() / Fps.load() >= LatencyBudget.load())
 			{
-				nosEngine.LogE("Sink Node dropping frame, pending requests: %d, fps: %.2f, drop after seconds: %.2f",
+				nosEngine.LogE("Sink Node dropping frame, pending requests: %d, fps: %.2f, latency budget: %.2f",
 							   (int)PendingRequests.load(),
 							   Fps.load(),
-							   DropAfterSeconds.load());
+							   LatencyBudget.load());
 				SetNodeStatusMessage("Dropping", fb::NodeStatusMessageType::WARNING);
 				nosEngine.SendPathRestart(NodeId);
 				HasDroppingMessage = true;
@@ -177,7 +177,7 @@ struct SinkNode : NodeContext
 			}
 			if (HasDroppingMessage && !dropped)
 			{
-				if (now - start > std::chrono::milliseconds(int64_t(DropAfterSeconds.load() * 2.0 * 1000.0)))
+				if (now - start > std::chrono::milliseconds(int64_t(LatencyBudget.load() * 2.0 * 1000.0)))
 				{
 					ClearNodeStatusMessages();
 					HasDroppingMessage = false;

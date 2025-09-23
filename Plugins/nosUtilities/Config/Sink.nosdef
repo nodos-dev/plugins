@@ -60,12 +60,12 @@
 						"data": "Periodic"
 					},
 					{
-						"name": "DropAfterSeconds",
-						"display_name": "Drop After (Seconds)",
+						"name": "LatencyBudget",
+						"display_name": "Latency Budget (Seconds)",
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path after this many seconds",
+						"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
 						"data": 1.0
 					}
 				]
