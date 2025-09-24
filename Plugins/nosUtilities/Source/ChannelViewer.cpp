@@ -28,11 +28,9 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 	constexpr glm::vec3 coeffs[3] = {{.299f, .587f, .114f}, {.2126f, .7152f, .0722f}, {.2627f, .678f, .0593f}};
 
 	glm::vec4 multipliers = glm::vec4(coeffs[format], channel > 3);
-	std::vector bindings = {
-		vkss::ShaderTextureBinding(NSN_Input, inTex, NOS_TEXTURE_FILTER_NEAREST),
-		vkss::ShaderDataBinding(NSN_Channel, val), 
-		vkss::ShaderDataBinding(NSN_Format, multipliers)
-	};
+	std::vector bindings = {vkss::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
+							vkss::ShaderDataBinding(NSN_Channel, val),
+							vkss::ShaderDataBinding(NSN_Format, multipliers)};
 
 	nosRunPassParams pass = {
 		.Key = NSN_Channel_Viewer_Pass,

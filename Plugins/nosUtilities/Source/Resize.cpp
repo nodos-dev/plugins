@@ -34,11 +34,12 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 		outTex = vkss::CreateTexture(newTexInfo, "Resize Output");
 		nosEngine.SetPinObjectHandle(params->Pins[1]->Id, outTex);
 	}
-    
+
 	// TODO: Transfer filter
-	std::vector bindings = {vkss::ShaderTextureBinding(NSN_Input, inTex, NOS_TEXTURE_FILTER_LINEAR), vkss::ShaderDataBinding(NSN_Method, method)};
-	
-	nosRunPassParams resizeParam {
+	std::vector bindings = {vkss::ShaderTextureBindingFromPin(nodeParams[NSN_Input].Id, NSN_Input, inTex),
+							vkss::ShaderDataBinding(NSN_Method, method)};
+
+	nosRunPassParams resizeParam{
 		.Key = NSN_RESIZE_PASS,
 		.Bindings = bindings.data(),
 		.BindingCount = 2,

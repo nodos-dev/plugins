@@ -89,7 +89,7 @@ struct ReduceTextureNode : NodeContext
 		}
 
 		std::vector bindings = {
-			vkss::ShaderTextureBinding(NSN_Input, inTex, NOS_TEXTURE_FILTER_NEAREST),
+			vkss::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
 			vkss::ShaderBufferBinding(NSN_Result, ResultBuffer)
 		};
 

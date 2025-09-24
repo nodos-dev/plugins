@@ -101,6 +101,7 @@ struct MergeContext : NodeContext
 		std::vector<nosShaderBinding> bindings;
 		auto textureCount = GetTextureCount(params.size());
 		std::vector<nosObjectHandle> textures(textureCount);
+		std::vector<nosTextureFilter> textureFilters(textureCount);
 
 		std::array<int, 16> blends = {};
 		std::array<float, 16> opacities = {};
@@ -125,8 +126,11 @@ struct MergeContext : NodeContext
 			switch (name[0])
 			{
 			case 'T':
+			{
 				textures[idx] = *pin.ObjectHandle;
+				nosVulkan->GetPinTextureFilter(pin.Id, &textureFilters[idx]);
 				break;
+			}
 			case 'B': blends[idx] = *(int*)val.Data; break;
 			case 'O': opacities[idx] = *(float*)val.Data; break;
 			}
@@ -135,7 +139,8 @@ struct MergeContext : NodeContext
 		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Blends, blends));
 		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Opacities, opacities));
 		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Texture_Count, textureCount));
-		bindings.emplace_back(vkss::ShaderTextureArrayBinding(NSN_Textures, textures.data(), nullptr, textures.size()));
+		bindings.emplace_back(
+			vkss::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
 
 		nosRunPassParams mergePass{
 			.Key = NSN_Merge_Pass,
