@@ -104,17 +104,55 @@ struct PartialUpdateTestNode : NodeContext
 		RemoveElementFromArray(*pinId, { { NOS_DATA_PATH_FIELD_COMPONENT, NOS_NAME_STATIC("table_array") }, { NOS_DATA_PATH_ARRAY_ELEMENT, 1 } });
     }
 
+    nosResult SetPinSubfieldVisualizer(nosFunctionExecuteParams* params) {
+        auto pinId = GetPinId(NSN_Table);
+        if (!pinId)
+            nosEngine.LogE("Pin not found!");
+
+        fb::TVisualizer viz{};
+
+        auto pinValues = GetPinValues(params->FunctionNodeExecuteParams);
+        auto vizType = GetPinValue<fb::VisualizerType>(pinValues, NOS_NAME_STATIC("Type"));
+        if (!vizType)
+            nosEngine.LogE("Visualizer Type pin is empty!");
+        auto subfieldPath = GetPinValue<const char>(pinValues, NOS_NAME_STATIC("SubfieldPath"));
+        if (!subfieldPath)
+            nosEngine.LogE("SubfieldPath pin is empty!");
+        if (!vizType || !subfieldPath)
+            return NOS_RESULT_INVALID_ARGUMENT;
+        viz.visualizer_subfield_path = subfieldPath;
+        viz.type = *vizType;
+
+        if (auto vizName = GetPinValue<const char>(pinValues, NOS_NAME_STATIC("Name")))
+            viz.name = vizName;
+
+        if (auto vizFileExts = GetPinValue<const char>(pinValues, NOS_NAME_STATIC("FileExtensions")))
+            viz.file_extensions = { std::string(vizFileExts) };
+
+        if (auto vizDiscardedNames = GetPinValue<const char>(pinValues, NOS_NAME_STATIC("DiscardedNames")))
+            viz.discarded_names = { std::string(vizDiscardedNames) };
+
+        if (auto vizHideVal = GetPinValue<const char>(pinValues, NOS_NAME_STATIC("HideValue")))
+            viz.hide_value = *vizHideVal;
+
+        if (auto filePickerType = GetPinValue<fb::FilePickerType>(pinValues, NOS_NAME_STATIC("FilePickerType")))
+            viz.file_picker_type = *filePickerType;
+
+        SetPinVisualizer(NSN_Table, viz);
+        return NOS_RESULT_SUCCESS;
+    }
+
     static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
     {
-        *count = 3;
+        *count = 4;
         if (!names || !fns)
             return NOS_RESULT_SUCCESS;
 
         names[0] = NOS_NAME_STATIC("SetTableOfExistingTable");
         fns[0] = [](void* ctx, nosFunctionExecuteParams* params)
             {
-                auto writeImage = (PartialUpdateTestNode*)ctx;
-                writeImage->SetTableOfExistingTable();
+                auto node = (PartialUpdateTestNode*)ctx;
+                node->SetTableOfExistingTable();
                 return NOS_RESULT_SUCCESS;
             };
 
@@ -122,17 +160,24 @@ struct PartialUpdateTestNode : NodeContext
         fns[1] = [](void* ctx, nosFunctionExecuteParams* params)
             {
 				NodeExecuteParams execParams = params->ParentNodeExecuteParams;
-                auto writeImage = (PartialUpdateTestNode*)ctx;
-                writeImage->SetTablesWholeArray(execParams);
+                auto node = (PartialUpdateTestNode*)ctx;
+                node->SetTablesWholeArray(execParams);
                 return NOS_RESULT_SUCCESS;
             };
 
         names[2] = NOS_NAME_STATIC("RemoveElement1");
         fns[2] = [](void* ctx, nosFunctionExecuteParams* params)
             {
-                auto writeImage = (PartialUpdateTestNode*)ctx;
-                writeImage->RemoveElement1();
+                auto node = (PartialUpdateTestNode*)ctx;
+                node->RemoveElement1();
                 return NOS_RESULT_SUCCESS;
+            };
+
+        names[3] = NOS_NAME_STATIC("SetPinSubfieldVisualizer");
+        fns[3] = [](void* ctx, nosFunctionExecuteParams* params)
+            {
+                auto node = (PartialUpdateTestNode*)ctx;
+                return node->SetPinSubfieldVisualizer(params);
             };
 
         return NOS_RESULT_SUCCESS;

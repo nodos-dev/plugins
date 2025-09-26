@@ -1,132 +1,132 @@
 {
-	"nodes": [
-		{
-			"class_name": "PerspectiveView",
-			"menu_info": {
-				"category": "Math",
-				"display_name": "Perspective View"
-			},
-			"node": {
-				"class_name": "PerspectiveView",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "FOV",
-						"type_name": "float",
-						"show_as": "INPUT_PIN"
-					},
-					{
-						"name": "Rotation",
-						"type_name": "nos.fb.vec3",
-						"show_as": "INPUT_PIN"
-					},
-					{
-						"name": "Position",
-						"type_name": "nos.fb.vec3",
-						"show_as": "INPUT_PIN"
-					},
-					{
-						"name": "Transformation",
-						"type_name": "nos.fb.mat4",
-						"show_as": "OUTPUT_PIN"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "Clamp",
-			"menu_info": {
-				"category": "Math",
-				"display_name": "Clamp"
-			},
-			"node": {
-				"class_name": "Clamp",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "In",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Min",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 0.0
-					},
-					{
-						"name": "Max",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 1.0
-					},
-					{
-						"name": "Out",
-						"type_name": "float",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "Absolute",
-			"menu_info": {
-				"category": "Math",
-				"display_name": "Absolute"
-			},
-			"node": {
-				"class_name": "Absolute",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "In",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Out",
-						"type_name": "float",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "Add_Transform",
-			"menu_info": {
-				"category": "Math|Addition",
-				"display_name": "Add Transform"
-			},
-			"node": {
-				"class_name": "Add_Transform",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "X",
-						"type_name": "nos.fb.Transform",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Y",
-						"type_name": "nos.fb.Transform",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Z",
-						"type_name": "nos.fb.Transform",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-					}
-				]
-			}
-		}
-	]
+    "nodes": [
+        {
+            "class_name": "PerspectiveView",
+            "menu_info": {
+                "category": "Math",
+                "display_name": "Perspective View"
+            },
+            "node": {
+                "class_name": "PerspectiveView",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "FOV",
+                        "type_name": "float",
+                        "show_as": "INPUT_PIN"
+                    },
+                    {
+                        "name": "Rotation",
+                        "type_name": "nos.fb.vec3",
+                        "show_as": "INPUT_PIN"
+                    },
+                    {
+                        "name": "Position",
+                        "type_name": "nos.fb.vec3",
+                        "show_as": "INPUT_PIN"
+                    },
+                    {
+                        "name": "Transformation",
+                        "type_name": "nos.fb.mat4",
+                        "show_as": "OUTPUT_PIN"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "Clamp",
+            "menu_info": {
+                "category": "Math",
+                "display_name": "Clamp"
+            },
+            "node": {
+                "class_name": "Clamp",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "In",
+                        "type_name": "float",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "Min",
+                        "type_name": "float",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 0.0
+                    },
+                    {
+                        "name": "Max",
+                        "type_name": "float",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 1.0
+                    },
+                    {
+                        "name": "Out",
+                        "type_name": "float",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "Absolute",
+            "menu_info": {
+                "category": "Math",
+                "display_name": "Absolute"
+            },
+            "node": {
+                "class_name": "Absolute",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "In",
+                        "type_name": "float",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "Out",
+                        "type_name": "float",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "Add_Transform",
+            "menu_info": {
+                "category": "Math|Addition",
+                "display_name": "Add Transform"
+            },
+            "node": {
+                "class_name": "Add_Transform",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "X",
+                        "type_name": "nos.fb.Transform",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "Y",
+                        "type_name": "nos.fb.Transform",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "Z",
+                        "type_name": "nos.fb.Transform",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+                    }
+                ]
+            }
+        }
+    ]
 }

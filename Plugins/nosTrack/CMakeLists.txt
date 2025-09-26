@@ -2,7 +2,7 @@
 set(PUBLIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include")
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Types" "${PUBLIC_INCLUDE_DIR}/nosTrack" "cpp" "${NOS_SDK_DIR}/Types" nosTrack_generated)
 
-set(MODULE_DEPENDENCIES "nos.sys.animation-1.11")
+set(MODULE_DEPENDENCIES "nos.sys.animation-2.1")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>

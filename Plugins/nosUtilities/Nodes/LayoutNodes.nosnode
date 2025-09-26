@@ -1,327 +1,326 @@
 {
-	"nodes": [
-		{
-			"class_name": "FreeLayout",
-			"menu_info": {
-				"category": "Layout",
-				"display_name": "Free Layout"
-			},
-			"node": {
-				"class_name": "FreeLayout",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "OutputSize",
-						"type_name": "nos.fb.vec2u",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": {
-							"x": 1920,
-							"y": 1080
-						}
-					},
-					{
-						"name": "Items",
-						"type_name": "[nos.utilities.layout.FreeLayoutItem]",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": [
-							{
-								"position": {
-									"x": 0,
-									"y": 0
-								},
-								"size": {
-									"x": 1920,
-									"y": 1080
-								}
-							}
-
-						]
-					},
-					{
-						"name": "OutDrawItems",
-						"display_name": "Out Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "true"
-							}
-						],
-						"readonly": true
-					}
-				]
-			}
-		},
-		{
-			"class_name": "GridLayout",
-			"menu_info": {
-				"category": "Layout",
-				"display_name": "Grid Layout"
-			},
-			"node": {
-				"class_name": "GridLayout",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "Columns",
-						"type_name": "uint",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2,
-						"min": 1
-					},
-					{
-						"name": "Rows",
-						"type_name": "uint",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2,
-						"min": 1
-					},
-					{
-						"name": "Items",
-						"type_name": "[nos.utilities.layout.GridLayoutItem]",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": [
-							{
-								"start": {
-									"x": 0,
-									"y": 0
-								},
-								"span": {
-									"x": 1,
-									"y": 1
-								}
-							},
-							{
-								"start": {
-									"x": 1,
-									"y": 0
-								},
-								"span": {
-									"x": 1,
-									"y": 1
-								}
-							},
-							{
-								"start": {
-									"x": 0,
-									"y": 1
-								},
-								"span": {
-									"x": 1,
-									"y": 1
-								}
-							},
-							{
-								"start": {
-									"x": 1,
-									"y": 1
-								},
-								"span": {
-									"x": 1,
-									"y": 1
-								}
-							}
-						]
-					},
-					{
-						"name": "OutDrawItems",
-						"display_name": "Out Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "true"
-							}
-						],
-						"readonly": true
-					}
-				]
-			}
-		},
-		{
-			"class_name": "FreeOutputLayout",
-			"menu_info": {
-				"category": "Layout",
-				"display_name": "Free Output Layout"
-			},
-			"node": {
-				"class_name": "FreeOutputLayout",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "Resolution",
-						"type_name": "nos.fb.vec2u",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": {
-							"x": 1920,
-							"y": 1080
-						}
-					},
-					{
-						"name": "Items",
-						"type_name": "[nos.utilities.layout.FreeOutputItem]",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": [
-							{
-								"item": {
-									"position": {
-										"x": 0,
-										"y": 0
-									},
-									"size": {
-										"x": 1920,
-										"y": 1080
-									}
-								},
-								"resolution": {
-									"x": 1920,
-									"y": 1080
-								}
-							}
-						]
-					},
-					{
-						"name": "OutputInfos",
-						"display_name": "Output Infos",
-						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "true"
-							}
-						],
-						"readonly": true
-					}
-				]
-			}
-		},
-		{
-			"class_name": "GridOutputLayout",
-			"menu_info": {
-				"category": "Layout",
-				"display_name": "Grid Output Layout"
-			},
-			"node": {
-				"class_name": "GridOutputLayout",
-				"contents_type": "Job",
-				"pins": [
-					{
-						"name": "Columns",
-						"type_name": "uint",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2,
-						"min": 1
-					},
-					{
-						"name": "Rows",
-						"type_name": "uint",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2,
-						"min": 1
-					},
-					{
-						"name": "Items",
-						"type_name": "[nos.utilities.layout.GridOutputItem]",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": [
-							{
-								"item": {
-									"start": {
-										"x": 0,
-										"y": 0
-									},
-									"span": {
-										"x": 1,
-										"y": 1
-									}
-								},
-								"resolution": {
-									"x": 1920,
-									"y": 1080
-								}
-							},
-							{
-								"item": {
-									"start": {
-										"x": 1,
-										"y": 0
-									},
-									"span": {
-										"x": 1,
-										"y": 1
-									}
-								},
-								"resolution": {
-									"x": 1920,
-									"y": 1080
-								}
-							},
-							{
-								"item": {
-									"start": {
-										"x": 0,
-										"y": 1
-									},
-									"span": {
-										"x": 1,
-										"y": 1
-									}
-								},
-								"resolution": {
-									"x": 1920,
-									"y": 1080
-								}
-							},
-							{
-								"item": {
-									"start": {
-										"x": 1,
-										"y": 1
-									},
-									"span": {
-										"x": 1,
-										"y": 1
-									}
-								},
-								"resolution": {
-									"x": 1920,
-									"y": 1080
-								}
-							}
-						]
-					},
-					{
-						"name": "OutputInfos",
-						"display_name": "Output Infos",
-						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "true"
-							}
-						],
-						"readonly": true
-					}
-				]
-			}
-		}
-	]
+    "nodes": [
+        {
+            "class_name": "FreeLayout",
+            "menu_info": {
+                "category": "Layout",
+                "display_name": "Free Layout"
+            },
+            "node": {
+                "class_name": "FreeLayout",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "OutputSize",
+                        "type_name": "nos.fb.vec2u",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": {
+                            "x": 1920,
+                            "y": 1080
+                        }
+                    },
+                    {
+                        "name": "Items",
+                        "type_name": "[nos.utilities.layout.FreeLayoutItem]",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": [
+                            {
+                                "position": {
+                                    "x": 0,
+                                    "y": 0
+                                },
+                                "size": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "OutDrawItems",
+                        "display_name": "Out Draw Items",
+                        "type_name": "[nos.utilities.layout.LayoutDrawItem]",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN",
+                        "meta_data_map": [
+                            {
+                                "key": "AdvancedProperty",
+                                "value": "true"
+                            }
+                        ],
+                        "readonly": true
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "GridLayout",
+            "menu_info": {
+                "category": "Layout",
+                "display_name": "Grid Layout"
+            },
+            "node": {
+                "class_name": "GridLayout",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "Columns",
+                        "type_name": "uint",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 2,
+                        "min": 1
+                    },
+                    {
+                        "name": "Rows",
+                        "type_name": "uint",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 2,
+                        "min": 1
+                    },
+                    {
+                        "name": "Items",
+                        "type_name": "[nos.utilities.layout.GridLayoutItem]",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": [
+                            {
+                                "start": {
+                                    "x": 0,
+                                    "y": 0
+                                },
+                                "span": {
+                                    "x": 1,
+                                    "y": 1
+                                }
+                            },
+                            {
+                                "start": {
+                                    "x": 1,
+                                    "y": 0
+                                },
+                                "span": {
+                                    "x": 1,
+                                    "y": 1
+                                }
+                            },
+                            {
+                                "start": {
+                                    "x": 0,
+                                    "y": 1
+                                },
+                                "span": {
+                                    "x": 1,
+                                    "y": 1
+                                }
+                            },
+                            {
+                                "start": {
+                                    "x": 1,
+                                    "y": 1
+                                },
+                                "span": {
+                                    "x": 1,
+                                    "y": 1
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "OutDrawItems",
+                        "display_name": "Out Draw Items",
+                        "type_name": "[nos.utilities.layout.LayoutDrawItem]",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN",
+                        "meta_data_map": [
+                            {
+                                "key": "AdvancedProperty",
+                                "value": "true"
+                            }
+                        ],
+                        "readonly": true
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "FreeOutputLayout",
+            "menu_info": {
+                "category": "Layout",
+                "display_name": "Free Output Layout"
+            },
+            "node": {
+                "class_name": "FreeOutputLayout",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "Resolution",
+                        "type_name": "nos.fb.vec2u",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": {
+                            "x": 1920,
+                            "y": 1080
+                        }
+                    },
+                    {
+                        "name": "Items",
+                        "type_name": "[nos.utilities.layout.FreeOutputItem]",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": [
+                            {
+                                "item": {
+                                    "position": {
+                                        "x": 0,
+                                        "y": 0
+                                    },
+                                    "size": {
+                                        "x": 1920,
+                                        "y": 1080
+                                    }
+                                },
+                                "resolution": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "OutputInfos",
+                        "display_name": "Output Infos",
+                        "type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN",
+                        "meta_data_map": [
+                            {
+                                "key": "AdvancedProperty",
+                                "value": "true"
+                            }
+                        ],
+                        "readonly": true
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "GridOutputLayout",
+            "menu_info": {
+                "category": "Layout",
+                "display_name": "Grid Output Layout"
+            },
+            "node": {
+                "class_name": "GridOutputLayout",
+                "contents_type": "Job",
+                "pins": [
+                    {
+                        "name": "Columns",
+                        "type_name": "uint",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 2,
+                        "min": 1
+                    },
+                    {
+                        "name": "Rows",
+                        "type_name": "uint",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": 2,
+                        "min": 1
+                    },
+                    {
+                        "name": "Items",
+                        "type_name": "[nos.utilities.layout.GridOutputItem]",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": [
+                            {
+                                "item": {
+                                    "start": {
+                                        "x": 0,
+                                        "y": 0
+                                    },
+                                    "span": {
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                },
+                                "resolution": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            },
+                            {
+                                "item": {
+                                    "start": {
+                                        "x": 1,
+                                        "y": 0
+                                    },
+                                    "span": {
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                },
+                                "resolution": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            },
+                            {
+                                "item": {
+                                    "start": {
+                                        "x": 0,
+                                        "y": 1
+                                    },
+                                    "span": {
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                },
+                                "resolution": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            },
+                            {
+                                "item": {
+                                    "start": {
+                                        "x": 1,
+                                        "y": 1
+                                    },
+                                    "span": {
+                                        "x": 1,
+                                        "y": 1
+                                    }
+                                },
+                                "resolution": {
+                                    "x": 1920,
+                                    "y": 1080
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "OutputInfos",
+                        "display_name": "Output Infos",
+                        "type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN",
+                        "meta_data_map": [
+                            {
+                                "key": "AdvancedProperty",
+                                "value": "true"
+                            }
+                        ],
+                        "readonly": true
+                    }
+                ]
+            }
+        }
+    ]
 }

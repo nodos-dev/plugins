@@ -1,5 +1,6 @@
-namespace nos.experiment;
+include "Builtins.fbs";
 
+namespace nos.experiment;
 
 struct TestStruct {
 	test1:float;
@@ -31,6 +32,7 @@ table TestTable {
 table TestTable2 {
     table1:TestTable;
     test_enum:TestEnumUint = TEST2;
+    test_color:nos.fb.vec4;
 }
 
 struct Vec2Test{
