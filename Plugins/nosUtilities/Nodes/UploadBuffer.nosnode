@@ -21,7 +21,7 @@
 					},
 					{
 						"name": "InputGPUEventRef",
-						"type_name": "nos.sys.vulkan.GPUEventResource",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
