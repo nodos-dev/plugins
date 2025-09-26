@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.28.0"
+			"version": "4.0.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -13,7 +13,7 @@
 			},
 			{
 				"name": "nos.math",
-				"version": "1.23"
+				"version": "2.0"
 			}
 		],
 		"category": "Utilities"

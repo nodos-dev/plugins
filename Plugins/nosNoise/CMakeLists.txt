@@ -1,4 +1,4 @@
-set(MODULE_DEPENDENCIES "nos.sys.vulkan-8.0.0")
+set(MODULE_DEPENDENCIES "nos.sys.vulkan-8.0")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>

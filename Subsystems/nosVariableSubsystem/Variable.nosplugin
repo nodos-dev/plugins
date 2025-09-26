@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.sys.variables",
-            "version": "2.0.0"
+            "version": "3.0.0"
         },
         "display_name": "Variable Subsystem",
         "description": "",

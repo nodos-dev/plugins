@@ -2,14 +2,14 @@
     "info": {
         "id": {
             "name": "nos.pyutils",
-            "version": "0.12"
+            "version": "1.0"
         },
         "display_name": "nos.pyutils",
         "description": "",
         "dependencies": [
             {
                 "name": "nos.py",
-                "version": "1.0"
+                "version": "2.0"
             }
         ]
     },
