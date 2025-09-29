@@ -12,21 +12,21 @@ struct Buffer2TextureNodeContext : NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto inBuf = params.GetPinObject<vkss::Buffer>(NOS_NAME("Input"));
+		auto inBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
 		if (!inBuf.IsValid())
 		{
 			nosEngine.LogE("Buffer2Texture Node: Input buffer is not valid!");
 			return NOS_RESULT_FAILED;
 		}
-		auto outTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
+		auto outTex = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
 		const auto& size = *params.GetPinData<fb::vec2u>(NOS_NAME("Size"));
 		const auto& format = *params.GetPinData<sys::vulkan::Format>(NOS_NAME("Format"));
-		auto inBufInfo = *vkss::GetResourceInfo(inBuf);
-		auto outTexInfo = vkss::GetResourceInfo(outTex);
+		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);
 		if (!outTexInfo || size.x() != outTexInfo->Width || size.y() != outTexInfo->Height || format != (nos::sys::vulkan::Format)outTexInfo->Format)
 		{
 			// Create resource
-			outTex = vkss::CreateTexture({.Width = size.x(),
+			outTex = sys::vulkan::CreateTexture({.Width = size.x(),
 										  .Height = size.y(),
 										  .Format = nosFormat(format),
 										  .FieldType = inBufInfo.FieldType},
@@ -37,7 +37,7 @@ struct Buffer2TextureNodeContext : NodeContext
 		if (!outTex.IsValid())
 			return NOS_RESULT_FAILED;
 
-		nosCmd cmd = vkss::BeginCmd(NOS_NAME("Buffer2Texture Copy"), NodeId);
+		nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Buffer2Texture Copy"), NodeId);
 		nosVulkan->Copy(cmd, inBuf, outTex, 0);
 		nosVkGPUEvent event;
 		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &event};

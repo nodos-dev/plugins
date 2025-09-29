@@ -126,7 +126,7 @@ struct SyncMultiOutletNode : NodeContext
 		InputPin.Requested = false;
 		InputPin.CV.notify_all();
 		nosCmdEndParams endParams = {.ForceSubmit = NOS_TRUE};
-		nosVulkan->End(nos::vkss::BeginCmd(NOS_NAME("SyncMultiOutlet Submit"), NodeId), &endParams);
+		nosVulkan->End(nos::sys::vulkan::BeginCmd(NOS_NAME("SyncMultiOutlet Submit"), NodeId), &endParams);
 		return NOS_RESULT_SUCCESS;
 	}
 

@@ -20,7 +20,7 @@ struct ReduceTextureNode : NodeContext
 										nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_DST |
 													   NOS_BUFFER_USAGE_TRANSFER_SRC),
 									.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE)};
-		auto buf = vkss::CreateBuffer(bufCreateInfo, ("ReduceTextureNode" + uuids::to_string(NodeId)).c_str());
+		auto buf = sys::vulkan::CreateBuffer(bufCreateInfo, ("ReduceTextureNode" + uuids::to_string(NodeId)).c_str());
 		if (buf.IsValid())
 		{
 			ResultBuffer = std::move(buf);
@@ -58,13 +58,13 @@ struct ReduceTextureNode : NodeContext
 		static const nos::Name NSN_Input = NOS_NAME("Input");
 		static const nos::Name NSN_Result = NOS_NAME("Result");
 
-		auto inTex = params.GetPinObject<vkss::Texture>(NSN_Input);
+		auto inTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Input);
 
 		if (!inTex.IsValid())
 			return NOS_RESULT_FAILED;
 
-		auto inTexInfo = *vkss::GetResourceInfo(inTex);
-		if (vkss::GetNumberOfComponentsFromTextureFormat(inTexInfo.Format) != 1)
+		auto inTexInfo = *sys::vulkan::GetResourceInfo(inTex);
+		if (sys::GetNumberOfComponentsFromTextureFormat(inTexInfo.Format) != 1)
 		{
 			if (!MessageSet)
 			{
@@ -89,8 +89,8 @@ struct ReduceTextureNode : NodeContext
 		}
 
 		std::vector bindings = {
-			vkss::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
-			vkss::ShaderBufferBinding(NSN_Result, ResultBuffer)
+			sys::vulkan::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
+			sys::ShaderBufferBinding(NSN_Result, ResultBuffer)
 		};
 
 		uint32_t elementCount = inTexInfo.Width * inTexInfo.Height;
@@ -129,7 +129,7 @@ struct ReduceTextureNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	TypedObjectRef<vkss::Buffer> ResultBuffer{};
+	TypedObjectRef<sys::vulkan::Buffer> ResultBuffer{};
 };
 
 nosResult RegisterReduceTexture(nosNodeFunctions* fn)

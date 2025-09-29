@@ -96,7 +96,7 @@ struct MergeContext : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto outTex = params.GetPinObject<vkss::Texture>(NSN_Out);
+		auto outTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Out);
 
 		std::vector<nosShaderBinding> bindings;
 		auto textureCount = GetTextureCount(params.size());
@@ -116,7 +116,7 @@ struct MergeContext : NodeContext
 			nosBuffer val = *GetObjectBuffer(*pin.ObjectHandle);
 			if (NSN_Background_Color == pin.Name)
 			{
-				bindings.emplace_back(vkss::ShaderDataBinding(pin.Name, val));
+				bindings.emplace_back(sys::vulkan::ShaderDataBinding(pin.Name, val));
 				continue;
 			}
 
@@ -136,11 +136,11 @@ struct MergeContext : NodeContext
 			}
 		}
 
-		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Blends, blends));
-		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Opacities, opacities));
-		bindings.emplace_back(vkss::ShaderDataBinding(NSN_Texture_Count, textureCount));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Blends, blends));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Opacities, opacities));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Texture_Count, textureCount));
 		bindings.emplace_back(
-			vkss::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
+			sys::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
 
 		nosRunPassParams mergePass{
 			.Key = NSN_Merge_Pass,

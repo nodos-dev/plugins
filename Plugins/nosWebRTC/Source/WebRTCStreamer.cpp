@@ -343,7 +343,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 	void OnPinValueChanged(nos::Name pinName, nos::uuid const& pinId, nosBuffer value) override
 	{
 		if (pinName == NSN_In) {
-			DummyInput = nos::vkss::DeserializeTextureInfo(value.Data);
+			DummyInput = nos::sys::vulkan::DeserializeTextureInfo(value.Data);
 		}
 		if (pinName == NSN_MaxFPS) {
 			FPS = *(static_cast<float*>(value.Data));
@@ -441,7 +441,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 			}
 			writeIndex = InputRing->GetNextWritable();
 		}
-		nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("WebRTC Out Copy"), NodeId);
+		nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("WebRTC Out Copy"), NodeId);
 		auto& toCopy = InputBuffers[writeIndex];
 		nosVulkan->Copy(cmd, &DummyInput, &toCopy.second, 0);
 		assert(toCopy.first == 0);
@@ -503,12 +503,12 @@ struct WebRTCNodeContext : nos::NodeContext {
 
 			std::vector<nosShaderBinding> inputs;
 			auto& buf = InputBuffers[readIndex];
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_Input, buf.second));
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_PlaneY, YUVPlanes[nextBufferToCopyIndex]));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_Input, buf.second));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_PlaneY, YUVPlanes[nextBufferToCopyIndex]));
 			if (buf.first)
 				nosVulkan->WaitGpuEvent(&buf.first, UINT64_MAX);
 
-			nosCmd cmdRunPass = nos::vkss::BeginCmd(NOS_NAME("WebRTCStreamer.YUVConversion"), NodeId);
+			nosCmd cmdRunPass = nos::sys::vulkan::BeginCmd(NOS_NAME("WebRTCStreamer.YUVConversion"), NodeId);
 			auto t0 = std::chrono::high_resolution_clock::now();
 
 			{

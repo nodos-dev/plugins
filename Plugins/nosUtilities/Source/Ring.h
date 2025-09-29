@@ -64,13 +64,13 @@ struct GPUTextureResource : ResourceInterface
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::GPUTexture;
 	struct Resource : ResourceBase
 	{
-		TypedObjectRef<vkss::Texture> TexObj;
+		TypedObjectRef<sys::vulkan::Texture> TexObj;
 		struct
 		{
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosVkGPUEvent WaitEvent = 0;
 		} Params{};
-		Resource(TypedObjectRef<vkss::Texture> texObj) : TexObj(std::move(texObj)) { ResourceType = RESOURCE_TYPE; }
+		Resource(TypedObjectRef<sys::vulkan::Texture> texObj) : TexObj(std::move(texObj)) { ResourceType = RESOURCE_TYPE; }
 		~Resource()
 		{
 			if (Params.WaitEvent)
@@ -91,7 +91,7 @@ struct GPUTextureResource : ResourceInterface
 	}
 	rc<ResourceBase> CreateResource() override
 	{
-		auto texture = vkss::CreateTexture(SampleTexture, "Texture Ring Resource");
+		auto texture = sys::vulkan::CreateTexture(SampleTexture, "Texture Ring Resource");
 		if (!texture.IsValid())
 			return nullptr;
 		return MakeShared<Resource>(std::move(texture));
@@ -142,11 +142,11 @@ struct GPUTextureResource : ResourceInterface
 
 	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override
 	{
-		auto inTex = TypedObjectRef<vkss::Texture>::FromHandle(*pin.ObjectHandle);
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(*pin.ObjectHandle);
 
 		if (!inTex.IsValid())
 			return {};
-		auto resInfo = *vkss::GetResourceInfo(inTex);
+		auto resInfo = *sys::vulkan::GetResourceInfo(inTex);
 		nosTextureFieldType incomingField = resInfo.FieldType;
 
 		if (rejectFieldMismatch)
@@ -154,14 +154,14 @@ struct GPUTextureResource : ResourceInterface
 			if (WantedField == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
 				WantedField = incomingField;
 
-			auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(WantedField);
-			auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
+			auto outInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(WantedField);
+			auto inInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(incomingField);
 			if ((inInterlaced && outInterlaced) && incomingField != WantedField)
 			{
 				nosEngine.LogW("Field mismatch. Waiting for a new frame.");
 				return {};
 			}
-			WantedField = vkss::FlippedField(WantedField);
+			WantedField = sys::vulkan::FlippedField(WantedField);
 		}
 
 		return inTex;
@@ -176,9 +176,9 @@ struct GPUTextureResource : ResourceInterface
 		Resource* res = GetResource<GPUTextureResource>(r);
 		res->FrameNumber = params.FrameNumber;
 
-		auto inTex = TypedObjectRef<vkss::Texture>::FromHandle(inputObj);
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(inputObj);
 		assert(inTex.IsValid());
-		auto inputInfo = *vkss::GetResourceInfo(inTex);
+		auto inputInfo = *sys::vulkan::GetResourceInfo(inTex);
 		nosTextureFieldType incomingField = inputInfo.FieldType;
 		res->Params.FieldType = incomingField;
 
@@ -207,10 +207,10 @@ struct GPUTextureResource : ResourceInterface
 	{
 		if (updateName != NSN_Input)
 			return false;
-		auto newTex = TypedObjectRef<vkss::Texture>::FromHandle(newObject);
+		auto newTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(newObject);
 		if (!newTex.IsValid())
 			return false;
-		auto info = *vkss::GetResourceInfo(newTex);
+		auto info = *sys::vulkan::GetResourceInfo(newTex);
 		if (SampleTexture.Format == info.Format &&
 			SampleTexture.Height == info.Height && SampleTexture.Width == info.Width)
 			return false;
@@ -223,9 +223,9 @@ struct GPUTextureResource : ResourceInterface
 	bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		auto curTex = TypedObjectRef<vkss::Texture>::FromHandle(curPinObj);
-		auto currentInfo = *vkss::GetResourceInfo(curTex);
-		auto resInfo = *vkss::GetResourceInfo(res->TexObj);
+		auto curTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(curPinObj);
+		auto currentInfo = *sys::vulkan::GetResourceInfo(curTex);
+		auto resInfo = *sys::vulkan::GetResourceInfo(res->TexObj);
 		if (resInfo.Height != currentInfo.Height ||
 			resInfo.Width != currentInfo.Width ||
 			resInfo.Format != currentInfo.Format)
@@ -234,7 +234,7 @@ struct GPUTextureResource : ResourceInterface
 			currentInfo.Usage =
 				nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_SAMPLED);
 
-			outPinObj = vkss::CreateTexture(currentInfo, "Texture Ring Output");
+			outPinObj = sys::vulkan::CreateTexture(currentInfo, "Texture Ring Output");
 			return true;
 		}
 		return false;
@@ -251,7 +251,7 @@ struct GPUTextureResource : ResourceInterface
 	{
 		if (inputPinData == 0)
 			return ringSize;
-		if (vkss::IsTextureFieldTypeInterlaced(vkss::GetResourceInfo(inputPinData)->Texture.FieldType))
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceInfo(inputPinData)->Texture.FieldType))
 			ringSize =
 				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
@@ -260,7 +260,7 @@ struct GPUTextureResource : ResourceInterface
 	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
 	{
 		// Force submit to ensure passes run correctly
-		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
+		sys::vulkan::EndCmd(sys::vulkan::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}
 };
@@ -269,7 +269,7 @@ struct GPUBufferResource : ResourceInterface {
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::GPUBuffer;
 	struct Resource : ResourceBase
 	{
-		Resource(TypedObjectRef<vkss::Buffer> bufObj) : BufObj(std::move(bufObj))
+		Resource(TypedObjectRef<sys::vulkan::Buffer> bufObj) : BufObj(std::move(bufObj))
 		{
 			ResourceType = RESOURCE_TYPE;
 		}
@@ -278,7 +278,7 @@ struct GPUBufferResource : ResourceInterface {
 			if (Params.WaitEvent)
 				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
 		}
-		TypedObjectRef<vkss::Buffer> BufObj;
+		TypedObjectRef<sys::vulkan::Buffer> BufObj;
 		struct {
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosVkGPUEvent WaitEvent = 0;
@@ -305,7 +305,7 @@ struct GPUBufferResource : ResourceInterface {
 		TransferSem = {};
 	}
 	rc<ResourceBase> CreateResource() override {
-		auto buf = vkss::CreateBuffer(SampleBuffer, "Buffer Ring Sample");
+		auto buf = sys::vulkan::CreateBuffer(SampleBuffer, "Buffer Ring Sample");
 		if (!buf.IsValid())
 			return nullptr;
 		return MakeShared<Resource>(std::move(buf));
@@ -340,10 +340,10 @@ struct GPUBufferResource : ResourceInterface {
 
 	void Copy(ResourceBase* res, nosCopyFromInfo* cpy, uuid NodeId) override {
 		auto r = GetResource<GPUBufferResource>(res);
-		auto outBuf = TypedObjectRef<vkss::Buffer>::FromHandle(*cpy->PinObjectHandle);
+		auto outBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(*cpy->PinObjectHandle);
 		if (!outBuf.IsValid())
 			return;
-		auto outBufInfo = *vkss::GetResourceInfo(outBuf);
+		auto outBufInfo = *sys::vulkan::GetResourceInfo(outBuf);
 		{
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
@@ -354,7 +354,7 @@ struct GPUBufferResource : ResourceInterface {
 			nosVulkan->End(cmd, &end);
 		}
 		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
+			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
 			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
 			nosVulkan->End(cmd, nullptr);
 		}
@@ -364,10 +364,10 @@ struct GPUBufferResource : ResourceInterface {
 	}
 
 	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override{
-		auto bufObj = TypedObjectRef<vkss::Buffer>::FromHandle(*pin.ObjectHandle);
+		auto bufObj = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(*pin.ObjectHandle);
 		if (!bufObj.IsValid())
 			return {};
-		auto bufInfo = *vkss::GetResourceInfo(bufObj);
+		auto bufInfo = *sys::vulkan::GetResourceInfo(bufObj);
 
 		nosTextureFieldType incomingField = bufInfo.FieldType;
 
@@ -376,14 +376,14 @@ struct GPUBufferResource : ResourceInterface {
 			if (WantedField == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
 				WantedField = incomingField;
 
-			auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(WantedField);
-			auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
+			auto outInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(WantedField);
+			auto inInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(incomingField);
 			if ((inInterlaced && outInterlaced) && incomingField != WantedField)
 			{
 				nosEngine.LogW("Field mismatch. Waiting for a new frame.");
 				return {};
 			}
-			WantedField = vkss::FlippedField(WantedField);
+			WantedField = sys::vulkan::FlippedField(WantedField);
 		}
 
 		return bufObj;
@@ -393,9 +393,9 @@ struct GPUBufferResource : ResourceInterface {
 		Resource* res = GetResource<GPUBufferResource>(r);
 		res->FrameNumber = params.FrameNumber;
 
-		auto inBuf = TypedObjectRef<vkss::Buffer>::FromHandle(pinInfo);
+		auto inBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(pinInfo);
 		assert(inBuf.IsValid());
-		auto inBufInfo = *vkss::GetResourceInfo(inBuf);
+		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
 		nosVulkan->SetResourceFieldType(res->BufObj, inBufInfo.FieldType);
 
 		if (res->Params.WaitEvent)
@@ -417,7 +417,7 @@ struct GPUBufferResource : ResourceInterface {
 			nosVulkan->End(cmd, &end);
 		}
 		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), params.NodeId);
+			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), params.NodeId);
 			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
 			nosVulkan->End(cmd, nullptr);
 		}
@@ -428,10 +428,10 @@ struct GPUBufferResource : ResourceInterface {
 	{
 		if (updateName == NSN_Input)
 		{
-			auto newBuf = TypedObjectRef<vkss::Buffer>::FromHandle(newObj);
+			auto newBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(newObj);
 			if (!newBuf.IsValid())
 				return false;
-			auto newBufInfo = *vkss::GetResourceInfo(newBuf);
+			auto newBufInfo = *sys::vulkan::GetResourceInfo(newBuf);
 			if (SampleBuffer.Size == newBufInfo.Size)
 				return false;
 
@@ -456,11 +456,11 @@ struct GPUBufferResource : ResourceInterface {
 	bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) override
 	{
 		Resource* res = GetResource<GPUBufferResource>(r);
-		auto curBufInfo = vkss::GetResourceInfo(curPinObj)->Buffer;
-		auto resBufInfo = *vkss::GetResourceInfo(res->BufObj);
+		auto curBufInfo = sys::vulkan::GetResourceInfo(curPinObj)->Buffer;
+		auto resBufInfo = *sys::vulkan::GetResourceInfo(res->BufObj);
 		if (resBufInfo.Size != curBufInfo.Size)
 		{
-			outPinObj = vkss::CreateBuffer(curBufInfo, "Buffer Ring Output");
+			outPinObj = sys::vulkan::CreateBuffer(curBufInfo, "Buffer Ring Output");
 			return true;
 		}
 		return false;
@@ -477,15 +477,15 @@ struct GPUBufferResource : ResourceInterface {
 	{
 		if (!inputPinData)
 			return ringSize;
-		auto inBufInfo = vkss::GetResourceInfo(inputPinData)->Buffer;
-		if (vkss::IsTextureFieldTypeInterlaced(inBufInfo.FieldType))
+		auto inBufInfo = sys::vulkan::GetResourceInfo(inputPinData)->Buffer;
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(inBufInfo.FieldType))
 			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
 	}
 	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
 	{
 		// Force submit to ensure passes run correctly
-		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
+		sys::vulkan::EndCmd(sys::vulkan::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}
 };

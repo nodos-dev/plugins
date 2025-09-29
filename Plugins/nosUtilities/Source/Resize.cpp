@@ -17,13 +17,13 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_Resize, "nos.utilities.Resize")
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 {
 	nos::NodeExecuteParams nodeParams(params);
-	auto inTex = nodeParams.GetPinObject<vkss::Texture>(NSN_Input);
+	auto inTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Input);
 	auto method = *nodeParams.GetPinData<uint32_t>(NSN_Method);
 
-	auto outTex = nodeParams.GetPinObject<vkss::Texture>(NSN_Output);
+	auto outTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Output);
 	auto& size = *nodeParams.GetPinData<nosVec2u>(NSN_Size);
 		
-	auto outTexInfo = vkss::GetResourceInfo(outTex);
+	auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);
 
 	if(!outTexInfo || size.x != outTexInfo->Width || size.y != outTexInfo->Height)
 	{
@@ -31,13 +31,13 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 		newTexInfo.Width = size.x;
 		newTexInfo.Height = size.y;
 		// TODO: Transfer output unscaled
-		outTex = vkss::CreateTexture(newTexInfo, "Resize Output");
+		outTex = sys::vulkan::CreateTexture(newTexInfo, "Resize Output");
 		nosEngine.SetPinObjectHandle(params->Pins[1]->Id, outTex);
 	}
 
 	// TODO: Transfer filter
-	std::vector bindings = {vkss::ShaderTextureBindingFromPin(nodeParams[NSN_Input].Id, NSN_Input, inTex),
-							vkss::ShaderDataBinding(NSN_Method, method)};
+	std::vector bindings = {sys::vulkan::ShaderTextureBindingFromPin(nodeParams[NSN_Input].Id, NSN_Input, inTex),
+							sys::vulkan::ShaderDataBinding(NSN_Method, method)};
 
 	nosRunPassParams resizeParam{
 		.Key = NSN_RESIZE_PASS,

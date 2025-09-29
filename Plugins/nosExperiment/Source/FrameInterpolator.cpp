@@ -43,7 +43,7 @@ struct FrameInterpolatorNode : NodeContext
 		switch (method)
 		{
 		case FrameInterpolationMethod::REPEAT: {
-			nosCmd cmd = vkss::BeginCmd(NOS_NAME("Frame Interpolator"), NodeId);
+			nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Frame Interpolator"), NodeId);
 			nosVulkan->Copy(cmd, inputTexture, outputTexture, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			break;

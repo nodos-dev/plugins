@@ -131,7 +131,7 @@ struct PODSlot : SlotBase
 
 ObjectRef CreateVkDelayDestinationResource(nosObjectHandle fromObj)
 {
-	auto inRes = vkss::GetResourceInfo(fromObj);
+	auto inRes = sys::vulkan::GetResourceInfo(fromObj);
 	if (!inRes)
 		return {};
 	if (inRes->Type == nosResourceType::NOS_RESOURCE_TYPE_BUFFER)
@@ -144,7 +144,7 @@ ObjectRef CreateVkDelayDestinationResource(nosObjectHandle fromObj)
 		inRes->Texture.Usage =
 			nosImageUsage(inRes->Texture.Usage | NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST);
 	}
-	return vkss::CreateResource(*inRes, "Delay Resource");
+	return sys::vulkan::CreateResource(*inRes, "Delay Resource");
 }
 
 struct ResourceSlot : SlotBase

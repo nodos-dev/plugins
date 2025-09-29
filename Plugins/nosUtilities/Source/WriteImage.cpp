@@ -21,7 +21,7 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_WriteImage, "nos.utilities.WriteImage")
 struct WriteImage : NodeContext
 {
 	std::filesystem::path Path;
-	std::optional<TypedObjectRef<vkss::Texture>> TempSrgbCopy;
+	std::optional<TypedObjectRef<sys::vulkan::Texture>> TempSrgbCopy;
 	bool IncludeAlpha = false;
 	nosVkGPUEvent Event = 0;
 	std::atomic_bool WriteRequested = false;
@@ -78,15 +78,15 @@ struct WriteImage : NodeContext
 		Path = nos::Utf8ToPath(std::string(execParams.GetPinData<const char*>(NSN_Path)));
 		IncludeAlpha = *execParams.GetPinData<bool>(NSN_IncludeAlpha);
 		assert(Event == 0);
-		nosCmd cmd = vkss::BeginCmd(NOS_NAME("Write Image Copy To"), NodeId);
-		auto inputTex = execParams.GetPinObject<vkss::Texture>(NSN_In);
+		nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Write Image Copy To"), NodeId);
+		auto inputTex = execParams.GetPinObject<sys::vulkan::Texture>(NSN_In);
 		TempSrgbCopy = {};
 
-		auto texInfo = *vkss::GetResourceInfo(inputTex);
+		auto texInfo = *sys::vulkan::GetResourceInfo(inputTex);
 
 		texInfo.Format = NOS_FORMAT_R8G8B8A8_SRGB;
 		texInfo.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST);
-		TempSrgbCopy = vkss::CreateTexture(texInfo, "TempSrgbCopy");
+		TempSrgbCopy = sys::vulkan::CreateTexture(texInfo, "TempSrgbCopy");
 
 		nosVulkan->Copy(cmd, inputTex, *TempSrgbCopy, 0);
 		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &Event};
@@ -111,15 +111,15 @@ struct WriteImage : NodeContext
 		}
 		nosEngine.LogI("WriteImage: Writing frame to file %s", utf8Path.c_str());
 
-		auto tempSrgbInfo = *vkss::GetResourceInfo(*TempSrgbCopy);
-		TypedObjectRef<vkss::Buffer> downloadBuf{};
+		auto tempSrgbInfo = *sys::vulkan::GetResourceInfo(*TempSrgbCopy);
+		TypedObjectRef<sys::vulkan::Buffer> downloadBuf{};
 		nosVulkan->Download(0, *TempSrgbCopy, &downloadBuf.Handle, "TempSrgbCopy Download");
 		if (!downloadBuf.IsValid())
 		{
 			nosEngine.LogE("WriteImage: Unable to download frame");
 			return;
 		}
-		auto bufInfo = *vkss::GetResourceInfo(downloadBuf);
+		auto bufInfo = *sys::vulkan::GetResourceInfo(downloadBuf);
 
 		if (auto buf2write = nosVulkan->Map(downloadBuf))
 		{

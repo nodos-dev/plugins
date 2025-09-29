@@ -230,7 +230,7 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[3]->ClassName = NOS_NAME_STATIC("nos.experiment.NodeWithCustomTypes");
 		outFunctions[4]->ClassName = NOS_NAME_STATIC("nos.experiment.CopyTest");
 		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
-			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
+			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
 			nosVkTexture input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
 			nosVkTexture output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
@@ -248,7 +248,7 @@ struct TestPluginFunctions : PluginFunctions
 			nosEngine.UnregisterFeature(nodeId, "Nodos.CopyTestLicensed");
 		};
 		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
-			nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("(nos.experiment.CopyTestLicensed) Copy"), params->NodeId);
+			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTestLicensed) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
 			nosVkTexture input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
 			nosVkTexture output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;

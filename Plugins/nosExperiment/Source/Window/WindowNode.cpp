@@ -110,7 +110,7 @@ nosResult WindowNode::ExecuteNode(NodeExecuteParams const& params)
 
 		uint32_t imageIndex;
 		nosVulkan->SwapchainAcquireNextImage(Swapchain, -1, &imageIndex, WaitSemaphore[CurrentFrame]);
-		nosCmd cmd = vkss::BeginCmd(NOS_NAME("Window"), NodeId);
+		nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Window"), NodeId);
 		nosVulkan->Copy(cmd, input, Images[imageIndex], 0);
 
 		nosVulkan->ImageStateToPresent(cmd, Images[imageIndex]);

@@ -8,16 +8,16 @@ struct BoxFitNode : NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto inputTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Input"));
-		auto outputTex = params.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
-		auto inputTexInfo = *vkss::GetResourceInfo(inputTex);
-		auto outputTexInfo = vkss::GetResourceInfo(outputTex);
+		auto inputTex = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Input"));
+		auto outputTex = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
+		auto inputTexInfo = *sys::vulkan::GetResourceInfo(inputTex);
+		auto outputTexInfo = sys::vulkan::GetResourceInfo(outputTex);
 		const nos::fb::vec2u& resolution = *params.GetPinData<fb::vec2u>(NOS_NAME("Resolution"));
 		
 		if (!outputTexInfo || resolution.x() != outputTexInfo->Width || resolution.y() != outputTexInfo->Height)
 		{
 			// TODO: Transfer output pin should be unscaled
-			SetPinObject(NOS_NAME("Output"), vkss::CreateTexture({
+			SetPinObject(NOS_NAME("Output"), sys::vulkan::CreateTexture({
 			.Width = resolution.x(), .Height = resolution.y(),
 			.Usage =
 				nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_SAMPLED),

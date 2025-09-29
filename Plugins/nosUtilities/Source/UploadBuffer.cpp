@@ -21,8 +21,8 @@ struct UploadBufferNodeContext : NodeContext
 	}
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto outBuf = params.GetPinObject<vkss::Buffer>(NOS_NAME_STATIC("Output"));
-		auto inBuf = params.GetPinObject<vkss::Buffer>(NOS_NAME_STATIC("InputBuffer"));
+		auto outBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME_STATIC("Output"));
+		auto inBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME_STATIC("InputBuffer"));
 		if (!inBuf.IsValid())
 			return NOS_RESULT_FAILED;
 		auto inGpuEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME_STATIC("InputGPUEventRef"));
@@ -33,8 +33,8 @@ struct UploadBufferNodeContext : NodeContext
 			assert(res != NOS_RESULT_SUCCESS || *event == 0);
 		}
 		
-		auto inInfo = *vkss::GetResourceInfo(inBuf);
-		auto outBufInfo = vkss::GetResourceInfo(outBuf);
+		auto inInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		auto outBufInfo = sys::vulkan::GetResourceInfo(outBuf);
 		if (!outBufInfo || outBufInfo->Size != inInfo.Size)
 		{
 			nosBufferInfo newBufInfo {.Size = inInfo.Size,
@@ -43,7 +43,7 @@ struct UploadBufferNodeContext : NodeContext
 																		 NOS_BUFFER_USAGE_STORAGE_BUFFER),
 												 .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DEVICE_MEMORY)};
 
-			outBuf = vkss::CreateBuffer(newBufInfo, "UploadBuffer Output");
+			outBuf = sys::vulkan::CreateBuffer(newBufInfo, "UploadBuffer Output");
 			SetPinObject(NOS_NAME("Output"), outBuf);
 		}
 
@@ -64,7 +64,7 @@ struct UploadBufferNodeContext : NodeContext
 			nosVulkan->End(cmd, &endParams);
 		}
 		{
-			auto cmd = vkss::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
+			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
 			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, FrameNumber++);
 			nosVulkan->End(cmd, nullptr);
 		}

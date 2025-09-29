@@ -325,7 +325,7 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 			OnFrameVBuffers[writeIndex].Info.Texture.Height = buffer->height() / 2;
 			nosVulkan->CreateResource(&OnFrameVBuffers[writeIndex], "WebRTCPlayer V Plane");
 		}
-		nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("WebRTCPlayer Upload"), NodeId);
+		nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("WebRTCPlayer Upload"), NodeId);
 		nosVulkan->ImageLoad(cmd,
 							 buffer->DataY(),
 							 nosVec2u(buffer->width(), buffer->height()),
@@ -364,8 +364,8 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 
 		PlayerBeginCopyToLogger.LogStats();
 		int readIndex = OutputRing->GetNextReadable();
-		auto dst = nos::vkss::DeserializeTextureInfo(copyInfo->PinData->Data);
-		nosCmd cmd = nos::vkss::BeginCmd(NOS_NAME("WebRTC Copy From"), NodeId);
+		auto dst = nos::sys::vulkan::DeserializeTextureInfo(copyInfo->PinData->Data);
+		nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("WebRTC Copy From"), NodeId);
 		nosVulkan->Copy(cmd, &ConvertedTextures[readIndex], &dst, 0);
 		nosGPUEvent event;
 		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &event};
@@ -391,13 +391,13 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 			auto t_start = std::chrono::high_resolution_clock::now();
 			int writeIndex = OutputRing->GetNextWritable();
 			std::vector<nosShaderBinding> inputs;
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_Output, ConvertedTextures[writeIndex]));
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_PlaneY, OnFrameYBuffers[readIndex]));
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_PlaneU, OnFrameUBuffers[readIndex]));
-			inputs.emplace_back(nos::vkss::ShaderBinding(NSN_PlaneV, OnFrameVBuffers[readIndex]));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_Output, ConvertedTextures[writeIndex]));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_PlaneY, OnFrameYBuffers[readIndex]));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_PlaneU, OnFrameUBuffers[readIndex]));
+			inputs.emplace_back(nos::sys::ShaderBinding(NSN_PlaneV, OnFrameVBuffers[readIndex]));
 
 
-			nosCmd cmdRunPass = nos::vkss::BeginCmd(NOS_NAME("WebRTCPlayer.YUVConversion"), NodeId);
+			nosCmd cmdRunPass = nos::sys::vulkan::BeginCmd(NOS_NAME("WebRTCPlayer.YUVConversion"), NodeId);
 			auto t0 = std::chrono::high_resolution_clock::now();
 			{
 				nosRunComputePassParams pass = {};

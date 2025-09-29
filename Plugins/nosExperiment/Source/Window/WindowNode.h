@@ -34,7 +34,7 @@ private:
 	GLFWwindow* Window = nullptr;
 	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> WaitSemaphore{};
 	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> SignalSemaphore{};
-	std::vector<TypedObjectRef<vkss::Texture>> Images{};
+	std::vector<TypedObjectRef<sys::vulkan::Texture>> Images{};
 	uint32_t FrameCount = 0;
 	uint32_t CurrentFrame = 0;
 	TypedObjectRef<nos::sys::vulkan::Surface> Surface{};

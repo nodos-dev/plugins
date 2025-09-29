@@ -93,7 +93,7 @@ struct StbiLoadContext : NodeContext
 			if (sRGB)
 				texInfo.Format = NOS_FORMAT_R8G8B8A8_SRGB;
 
-			auto outTex = vkss::CreateTexture(texInfo, "ReadImage Texture");
+			auto outTex = sys::vulkan::CreateTexture(texInfo, "ReadImage Texture");
 			if (!outTex.IsValid())
 			{
 				nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());

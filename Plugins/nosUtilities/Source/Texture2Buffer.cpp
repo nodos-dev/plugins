@@ -18,12 +18,12 @@ struct Texture2BufferNode : nos::NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto inTex = params.GetPinObject<vkss::Texture>(NSN_Input);
+		auto inTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Input);
 		if (!inTex.IsValid())
 			return NOS_RESULT_FAILED;
-		auto inTexInfo = *vkss::GetResourceInfo(inTex);
-		auto outBuf = params.GetPinObject<vkss::Buffer>(NSN_OutputBuffer);
-		auto outBufInfo = vkss::GetResourceInfo(outBuf);
+		auto inTexInfo = *sys::vulkan::GetResourceInfo(inTex);
+		auto outBuf = params.GetPinObject<sys::vulkan::Buffer>(NSN_OutputBuffer);
+		auto outBufInfo = sys::vulkan::GetResourceInfo(outBuf);
 		uint32_t currentSize = static_cast<uint32_t>(inTexInfo.SizeInBytes);
 		
 		if (!outBufInfo || currentSize != outBufInfo->Size) {
@@ -34,7 +34,7 @@ struct Texture2BufferNode : nos::NodeContext
 										NOS_BUFFER_USAGE_STORAGE_BUFFER),
 				.ElementType = GetBufferElementTypeFromVulkanFormat(inTexInfo.Format),
 			};
-			outBuf = vkss::CreateBuffer(bufCreateInfo, "Texture2Buffer Output");
+			outBuf = sys::vulkan::CreateBuffer(bufCreateInfo, "Texture2Buffer Output");
 			SetPinObject(NSN_OutputBuffer, outBuf);
 		}
 

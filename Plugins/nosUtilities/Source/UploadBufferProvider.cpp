@@ -18,9 +18,9 @@ namespace nos::utilities
 {
 struct UploadBuffer
 {
-	TypedObjectRef<vkss::Buffer> Buffer{};
+	TypedObjectRef<sys::vulkan::Buffer> Buffer{};
 	TypedObjectRef<sys::vulkan::GPUEventHolder> EventHolder{};
-	UploadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(vkss::CreateBuffer(sampleBufferInfo, "UploadBuffer"))
+	UploadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "UploadBuffer"))
 	{
 		nosVulkan->CreateGPUEventHolder(&EventHolder.Handle);
 	}

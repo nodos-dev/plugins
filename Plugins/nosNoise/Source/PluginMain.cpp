@@ -29,16 +29,16 @@ struct DynamicSizedNoiseNode : public NodeContext
     nosResult ExecuteNode(NodeExecuteParams const& params) override
     {
 		NodeExecuteParams execParams(params);
-        auto outTex = execParams.GetPinObject<vkss::Texture>(NOS_NAME("Output"));
+        auto outTex = execParams.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
         auto& res = *execParams.GetPinData<const fb::vec2u>(NOS_NAME("Resolution"));
-		auto outTexInfo = *vkss::GetResourceInfo(outTex);
+		auto outTexInfo = *sys::vulkan::GetResourceInfo(outTex);
 
         if (res.x() != outTexInfo.Width || res.y() != outTexInfo.Height)
         {
             outTexInfo.Width = res.x();
 			outTexInfo.Height = res.y();
             nosEngine.LogD("Resizing texture to %dx%d", res.x(), res.y());
-			SetPinObject(NOS_NAME("Output"), vkss::CreateTexture(outTexInfo, "DynamicSizedNoiseResult"));
+			SetPinObject(NOS_NAME("Output"), sys::vulkan::CreateTexture(outTexInfo, "DynamicSizedNoiseResult"));
         }
         return nosVulkan->ExecuteGPUNode(this, params.RawParams);
     }

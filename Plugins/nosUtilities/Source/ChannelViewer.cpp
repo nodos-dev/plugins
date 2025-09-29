@@ -16,8 +16,8 @@ namespace nos::utilities
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 {
 	NodeExecuteParams params(execParams);
-	auto inTex = params.GetPinObject<vkss::Texture>(NSN_Input);
-	auto outTex = params.GetPinObject<vkss::Texture>(NSN_Output);
+	auto inTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Input);
+	auto outTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Output);
 
 	auto channel = *params.GetPinData<uint32_t>(NSN_Channel);
 	auto format = *params.GetPinData<uint32_t>(NSN_Format);
@@ -28,9 +28,9 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 	constexpr glm::vec3 coeffs[3] = {{.299f, .587f, .114f}, {.2126f, .7152f, .0722f}, {.2627f, .678f, .0593f}};
 
 	glm::vec4 multipliers = glm::vec4(coeffs[format], channel > 3);
-	std::vector bindings = {vkss::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
-							vkss::ShaderDataBinding(NSN_Channel, val),
-							vkss::ShaderDataBinding(NSN_Format, multipliers)};
+	std::vector bindings = {sys::vulkan::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
+							sys::vulkan::ShaderDataBinding(NSN_Channel, val),
+							sys::vulkan::ShaderDataBinding(NSN_Format, multipliers)};
 
 	nosRunPassParams pass = {
 		.Key = NSN_Channel_Viewer_Pass,
@@ -39,9 +39,9 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 		.Output = outTex,
 		.Wireframe = false,
 	};
-	auto cmd = vkss::BeginCmd(NOS_NAME("ChannelViewer"), params.NodeId);
+	auto cmd = sys::vulkan::BeginCmd(NOS_NAME("ChannelViewer"), params.NodeId);
 	nosVulkan->RunPass(cmd, &pass);
-	vkss::EndCmd(cmd, false, nullptr);
+	sys::vulkan::EndCmd(cmd, false, nullptr);
 	return NOS_RESULT_SUCCESS;
 }
 
