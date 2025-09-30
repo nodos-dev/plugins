@@ -67,7 +67,7 @@ struct RingBufferNode : NodeContext
 
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
-		std::unique_lock<std::mutex> lock(BufferMutex);
+		std::unique_lock lock(BufferMutex);
 		
 		// Wait until data is available in the buffer
 		auto success = DataAvailable.wait_for(lock, std::chrono::milliseconds(100), [this]
@@ -100,8 +100,11 @@ struct RingBufferNode : NodeContext
 	{
 		if (NSN_Size == pinName)
 		{
-			std::lock_guard<std::mutex> lock(BufferMutex);
-			RingSize = *InterpretObject<uint32_t>(handle);
+			std::unique_lock lock(BufferMutex);
+			auto newSize = *InterpretObject<uint32_t>(handle);
+			if (newSize != RingSize)
+				SendPathRestart(NSN_Input);
+			RingSize = newSize;
 			
 			// Trim buffer if new size is smaller
 			while (Buffer.size() > RingSize && RingSize > 0)
@@ -136,11 +139,11 @@ struct RingBufferNode : NodeContext
 		if (NSN_TypeNameGeneric == TypeName)
 			return NOS_RESULT_FAILED;
 
-		auto& inputObject = *params[NSN_Input].ObjectHandle;
+		auto inputObject = ObjectRef(*params[NSN_Input].ObjectHandle);
 		auto size = *InterpretObject<uint32_t>(*params[NSN_Size].ObjectHandle);
 		size = std::max(1u, size);
 
-		std::unique_lock<std::mutex> lock(BufferMutex);
+		std::unique_lock lock(BufferMutex);
 		
 		// Wait until space is available in the buffer (ring is not full)
 		auto success = SpaceAvailable.wait_for(lock, std::chrono::milliseconds(100), [this, size]
@@ -152,20 +155,22 @@ struct RingBufferNode : NodeContext
 		if (Exit)
 			return NOS_RESULT_FAILED;
 
+		auto cloned = inputObject.Clone();
+
 		// Create new slot with input object and current frame number
 		Slot newSlot;
-		newSlot.Object = ObjectRef(inputObject);
+		newSlot.Object = std::move(cloned);
 		newSlot.FrameNumber = params.FrameNumber;
-		
+
 		// Push to back of buffer
 		Buffer.push_back(newSlot);
-		
+
 		// If buffer exceeds ring size, remove from front to maintain ring behavior
 		while (Buffer.size() > size)
 		{
 			Buffer.pop_front();
 		}
-		
+
 		// Notify that data is now available
 		DataAvailable.notify_one();
 		return NOS_RESULT_SUCCESS;

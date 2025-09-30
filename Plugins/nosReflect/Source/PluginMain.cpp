@@ -3,14 +3,17 @@
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVariableSubsystem/nosVariableSubsystem.h>
+#include <nosTransfer/nosTransfer.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
 NOS_SYS_VARIABLES_INIT()
+NOS_TRANSFER_PLUGIN_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 	NOS_SYS_VARIABLES_IMPORT()
+	NOS_TRANSFER_PLUGIN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 namespace nos::reflect
