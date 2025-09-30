@@ -35,6 +35,7 @@ enum Nodes : size_t
 	GetVariable,
 	EnumToUnderlyingValue,
 	EnumFromUnderlyingValue,
+	RingBuffer,
 	Count
 };
 
@@ -55,6 +56,7 @@ nosResult RegisterSetVariable(nosNodeFunctions* node);
 nosResult RegisterGetVariable(nosNodeFunctions* node);
 nosResult RegisterEnumToUnderlyingValue(nosNodeFunctions* node);
 nosResult RegisterEnumFromUnderlyingValue(nosNodeFunctions* node);
+nosResult RegisterRingBuffer(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -92,6 +94,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(ArithmeticDynamic)
 			GEN_CASE_NODE(EnumToUnderlyingValue)
 			GEN_CASE_NODE(EnumFromUnderlyingValue)
+			GEN_CASE_NODE(RingBuffer)
 		}
 	}
 

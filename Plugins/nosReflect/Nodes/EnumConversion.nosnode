@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "class_name": "EnumToUnderlyingValue",
+      "menu_info": {
+        "category": "Type",
+        "display_name": "Enum To Underlying Value",
+        "name_aliases": [
+          "enum",
+          "cast"
+        ]
+      },
+      "node": {
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Value",
+            "type_name": "nos.Generic",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Enum",
+            "type_name": "nos.Generic",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          }
+        ]
+      }
+    },
+    {
+      "class_name": "EnumFromUnderlyingValue",
+      "menu_info": {
+        "category": "Type",
+        "display_name": "Enum From Underlying Value",
+        "name_aliases": [
+          "enum",
+          "cast"
+        ]
+      },
+      "node": {
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Enum",
+            "type_name": "nos.Generic",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+          },
+          {
+            "name": "Value",
+            "type_name": "nos.Generic",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY"
+          }
+        ]
+      }
+    }
+  ]
+}

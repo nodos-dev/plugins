@@ -1,0 +1,49 @@
+{
+  "nodes": [
+    {
+      "class_name": "RingBuffer",
+      "menu_info": {
+        "category": "Type",
+        "display_name": "Ring Buffer",
+        "name_aliases": [
+          "circular buffer",
+          "circular queue"
+        ]
+      },
+      "node": {
+        "name": "RingBuffer",
+        "display_name": "Ring Buffer",
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Thread",
+            "type_name": "nos.exe",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_ONLY"
+          },
+          {
+            "name": "Input",
+            "type_name": "nos.Generic",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_ONLY"
+          },
+          {
+            "name": "Size",
+            "type_name": "uint",
+            "show_as": "PROPERTY",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "data": 2,
+            "min": 1
+          },
+          {
+            "name": "Output",
+            "type_name": "nos.Generic",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "live": true
+          }
+        ]   
+      }
+    }
+  ]
+}
