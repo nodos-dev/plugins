@@ -7,7 +7,24 @@ namespace nos::reflect
 struct BreakNode : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = std::nullopt;
+	nosObjectKind ObjectKind = NOS_OBJECT_KIND_PRIMITIVE;
 	size_t ArraySize = 0;
+
+	void OnTypeUpdated(nos::Name typeName, bool preserveDisplayNames)
+	{
+		if (typeName == NSN_TypeNameGeneric)
+			Type = std::nullopt;
+		else
+		{
+			Type = nos::TypeInfo(typeName);
+			if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetObjectKindFromTypeName(typeName, &ObjectKind))
+			{
+				SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
+				return;
+			}
+			LoadPins(!preserveDisplayNames);
+		}
+	}
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -22,22 +39,25 @@ struct BreakNode : NodeContext
 			if (!ty)
 				// Has typename but not a valid type
 				return NOS_RESULT_FAILED;
-			Type = std::move(ty);
-			LoadPins(false);
+			OnTypeUpdated(typeName, true);
             break;
         }
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
+	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle newHandle) override
 	{ 
 		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
-		auto pin = GetPin(pinName);
-		auto* vec = InterpretObjectData<VectorObjectData<uint8_t>>(value);
-		if (vec->size() != ArraySize)
+		size_t size = 0;
+		if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArraySize(newHandle, &size))
 		{
-			ArraySize = vec->size();
+			SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid array object");
+			return;
+		}
+		if (size != ArraySize)
+		{
+			ArraySize = size;
 			SetOutputCount();
 		}
 	}
@@ -50,8 +70,7 @@ struct BreakNode : NodeContext
 		{
 			if (update->PinName != NSN_Input)
 				return;
-			Type = nos::TypeInfo(update->TypeName);
-			LoadPins(true);
+			OnTypeUpdated(update->TypeName, false);
 		}
 	}
 
@@ -72,7 +91,7 @@ struct BreakNode : NodeContext
 		}
 	};
 
-    void LoadPins(bool setDisplayName)
+    void LoadPins(bool preserveDisplayNames)
     {
         flatbuffers::FlatBufferBuilder fbb;
 		std::vector<flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate;
@@ -146,7 +165,7 @@ struct BreakNode : NodeContext
 				pinsToDelete.push_back(id);
 
         HandleEvent(CreateAppEvent(
-			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, setDisplayName ? typeName.c_str() : 0)));
+			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, preserveDisplayNames ? 0 : typeName.c_str())));
     }
 
 	void SetOutputCount()
@@ -267,7 +286,53 @@ struct BreakNode : NodeContext
 	{
 		if(!Type)
 			return NOS_RESULT_SUCCESS;
-		SetOutputValues(params.GetPinDataBuffer(NSN_Input));
+
+
+		switch (ObjectKind)
+		{
+		case NOS_OBJECT_KIND_PRIMITIVE:
+		{
+			SetOutputValues(params.GetPinDataBuffer(NSN_Input));
+			break;
+		}
+		case NOS_OBJECT_KIND_FOREIGN:
+		{
+			SetOutputValues(*SerializeObject(params.GetPinObject(NSN_Input)));
+			break;
+		}
+		case NOS_OBJECT_KIND_ARRAY:
+		{
+			for (size_t i = 0; i < ArraySize; ++i)
+			{
+				auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
+				if (!pinId)
+					continue;
+				nosObjectHandle elementHandle = 0;
+				if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArrayElement(params.GetPinObject(NSN_Input), i, &elementHandle))
+				{
+					nosEngine.LogE("Failed to get array element %d", i);
+					continue;
+				}
+				SetPinObject(*pinId, elementHandle);
+			}
+			break;
+		}
+		case NOS_OBJECT_KIND_COMPOSITE:
+		{
+			auto inputObj = params.GetPinObject(NSN_Input);
+			size_t i = 0;
+			nosName fieldName;
+			ObjectRef field;
+			while (NOS_RESULT_SUCCESS == nosEngine.ObjectAPI->IterateFields(inputObj, i++, &fieldName, &field.Handle))
+			{
+				auto pin = GetPin(fieldName);
+				if (!pin)
+					continue;
+				SetPinObject(pin->Id, field.Handle);
+			}
+			break;
+		}
+		}
 		params.MarkAllOutsDirty = false;
 		return NOS_RESULT_SUCCESS;
 	}
