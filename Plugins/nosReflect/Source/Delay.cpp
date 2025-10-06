@@ -32,10 +32,10 @@ struct Slot
 	}
 	ObjectRef GetObject() const
 	{
-		nosObjectHandle objHandle;
-		if (nosTransfer->GetObjectHandle(Handle, &objHandle) != NOS_RESULT_SUCCESS)
+		ObjectRef obj{};
+		if (nosTransfer->GetObjectHandle(Handle, &obj.Handle) != NOS_RESULT_SUCCESS)
 			return ObjectRef();
-		return objHandle;
+		return obj;
 	}
 };
 

@@ -389,7 +389,12 @@ struct GPUBufferResource : ResourceInterface {
 		return bufObj;
 	}
 
-	nosResult Push(ResourceBase* r, ObjectRef pinInfo, NodeExecuteParams const& params, nos::Name ringExecuteName, bool pushEventForCopyFrom) override {
+	nosResult Push(ResourceBase* r,
+				   ObjectRef pinInfo,
+				   NodeExecuteParams const& params,
+				   nos::Name ringExecuteName,
+				   bool pushEventForCopyFrom) override
+	{
 		Resource* res = GetResource<GPUBufferResource>(r);
 		res->FrameNumber = params.FrameNumber;
 
@@ -495,7 +500,7 @@ struct PODResource : ResourceInterface
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::POD;
 	struct Resource : ResourceBase
 	{
-		ObjectRef PODObj{};
+		PrimitiveObjectRef PODObj{};
 		Resource() { ResourceType = RESOURCE_TYPE; }
 	};
 

@@ -64,7 +64,7 @@ struct ReduceTextureNode : NodeContext
 			return NOS_RESULT_FAILED;
 
 		auto inTexInfo = *sys::vulkan::GetResourceInfo(inTex);
-		if (sys::GetNumberOfComponentsFromTextureFormat(inTexInfo.Format) != 1)
+		if (sys::vulkan::GetNumberOfComponentsFromTextureFormat(inTexInfo.Format) != 1)
 		{
 			if (!MessageSet)
 			{
@@ -90,7 +90,7 @@ struct ReduceTextureNode : NodeContext
 
 		std::vector bindings = {
 			sys::vulkan::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
-			sys::ShaderBufferBinding(NSN_Result, ResultBuffer)
+			sys::vulkan::ShaderBufferBinding(NSN_Result, ResultBuffer)
 		};
 
 		uint32_t elementCount = inTexInfo.Width * inTexInfo.Height;

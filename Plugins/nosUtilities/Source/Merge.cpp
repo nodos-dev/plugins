@@ -113,7 +113,7 @@ struct MergeContext : NodeContext
 			if(NSN_Out == pin.Name)
 				continue;
 
-			nosBuffer val = *GetObjectBuffer(*pin.ObjectHandle);
+			nosBuffer val = *GetPrimitiveObjectDataView(*pin.ObjectHandle);
 			if (NSN_Background_Color == pin.Name)
 			{
 				bindings.emplace_back(sys::vulkan::ShaderDataBinding(pin.Name, val));
@@ -140,7 +140,7 @@ struct MergeContext : NodeContext
 		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Opacities, opacities));
 		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Texture_Count, textureCount));
 		bindings.emplace_back(
-			sys::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
+			sys::vulkan::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
 
 		nosRunPassParams mergePass{
 			.Key = NSN_Merge_Pass,
