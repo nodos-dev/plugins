@@ -9,7 +9,7 @@ struct ArrayNode : NodeContext
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	bool invalidNode = false;
 	static constexpr char InputElementPrefix[] = "Input ";
-	nosObjectHandle ArrayObject = 0;
+	ObjectRef ArrayObject = 0;
 	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto& pin : Pins | std::views::values)
@@ -155,39 +155,25 @@ struct ArrayNode : NodeContext
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		size_t curSize{};
-		auto arrayObject = params.GetPinObject(NSN_Output);
-		if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArraySize(arrayObject, &curSize))
-		{
-			return NOS_RESULT_FAILED;
-		}
-
-		size_t inputCount = params.size() - 1;
-		for (size_t i = inputCount; i < curSize; i++)
-		{
-			if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->RemoveArrayElement(arrayObject, inputCount))
-				nosEngine.LogE("Failed to remove excess element from array");
-		}
-
 		auto& rawParams = *params.RawParams;
 		size_t arrayIndex = 0;
+		std::vector<nosObjectHandle> inputObjects;
+		nosName outputTypeName{};
 		for (size_t pinIndex = 0; pinIndex < rawParams.PinCount; pinIndex++)
 		{
 			auto& pin = rawParams.Pins[pinIndex];
 			if (pin->Name == NSN_Output)
+			{
+				outputTypeName = pin->TypeName;
 				continue;
-			if (arrayIndex >= curSize)
-			{
-				if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->InsertArrayElement(arrayObject, *pin->ObjectHandle, nullptr))
-					nosEngine.LogE("Failed to add element to array");
 			}
-			else if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->SetArrayElement(arrayObject, arrayIndex, *pin->ObjectHandle))
-			{
-				nosEngine.LogE("Failed to set element in array");
-			}
+			inputObjects.push_back(*pin->ObjectHandle);
 			arrayIndex++;
 		}
-		SetPinObject(NSN_Output, arrayObject); // TODO: Transfer: This should not be necessary, if object is updated, all the references should be notified?
+		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &ArrayObject.Handle);
+		if (!ArrayObject.IsValid())
+			return NOS_RESULT_FAILED;
+		SetPinObject(NSN_Output, ArrayObject);
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -243,8 +229,22 @@ struct ArrayNode : NodeContext
 		if (!Type)
 			return;
 
-		auto newElement = CreateObject(typeName, {.Data = data.data(), .Size = data.size()});
-		nosEngine.ObjectAPI->InsertArrayElement(ArrayObject, newElement, nullptr);
+		// TODO: Transfer: Helpers.
+		ObjectRef newElement{};
+		auto res = nosEngine.ObjectAPI->Construct(typeName, {.Data = data.data(), .Size = data.size()}, &newElement.Handle);
+		if (res != NOS_RESULT_SUCCESS || !newElement.IsValid())
+		{
+			nosEngine.LogE("Failed to construct new element of type %s", typeName.AsString().c_str());
+			return;
+		}
+		nosArrayObjectDelta delta{
+			.Type = NOS_ARRAY_OBJECT_DELTA_TYPE_APPEND,
+			.Append = {
+				.ElementHandle = newElement
+			}
+		};
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.Handle);
+		SetPinObject(NSN_Output, ArrayObject);
 	}
 
 	void SendRemoveElementRequest(std::optional<size_t> elementIndex = std::nullopt) {
@@ -262,7 +262,14 @@ struct ArrayNode : NodeContext
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &id)));
 
-		nosEngine.ObjectAPI->RemoveArrayElement(ArrayObject, *elementIndex);
+		nosArrayObjectDelta delta{
+			.Type = NOS_ARRAY_OBJECT_DELTA_TYPE_REMOVE_ELEMENT,
+			.Remove = {
+				.Index = *elementIndex
+			}
+		};
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.Handle);
+		SetPinObject(NSN_Output, ArrayObject);
 	}
 
 	void OnMenuCommand(uuid const& itemId, uint32_t cmd) override

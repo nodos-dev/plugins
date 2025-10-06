@@ -11,18 +11,31 @@ namespace nos::reflect
 
 struct Slot
 {
-	ObjectRef Object;
-	Slot(ObjectRef object) : Object(std::move(object)) {}
-	virtual ~Slot() = default;
+	nosTransferCopyDestination Handle;
+	Slot(ObjectRef src)
+	{
+		nosTransfer->CreateCopyDestination(src, &Handle);
+	}
+	~Slot()
+	{
+		nosTransfer->ReleaseCopyDestination(Handle);
+	}
 	Slot(const Slot&) = delete;
 	Slot& operator=(const Slot&) = delete;
 	nosResult CopyFrom(nosObjectHandle obj, uuid const& nodeId)
 	{
-		return nosTransfer->CopyAPI->Copy(obj, Object);
+		return nosTransfer->Copy(obj, Handle);
 	}
 	bool IsSlotCompatible(nosObjectHandle obj) const
 	{
-		return nosTransfer->CopyAPI->CanCopy(obj, Object) == NOS_TRUE;
+		return nosTransfer->CanCopy(obj, Handle) == NOS_TRUE;
+	}
+	ObjectRef GetObject() const
+	{
+		nosObjectHandle objHandle;
+		if (nosTransfer->GetObjectHandle(Handle, &objHandle) != NOS_RESULT_SUCCESS)
+			return ObjectRef();
+		return objHandle;
 	}
 };
 
@@ -201,13 +214,13 @@ struct DelayNode : NodeContext
 
 		if (auto popSlot = Queue.BeginPop())
 		{
-			SetPinObject(NSN_Output, popSlot->Object);
+			SetPinObject(NSN_Output, popSlot->GetObject());
 			Queue.EndPop(*popSlot);
 		}
 		Queue.ClearIfIncompatibleData(inputObject);
 		if (!Queue.HasFree())
 		{
-			auto slot = std::make_unique<Slot>(inputObject.Clone());
+			auto slot = std::make_unique<Slot>(inputObject);
 			Queue.AddResource(std::move(slot));
 		}
 		if (auto pushSlot = Queue.BeginPush())

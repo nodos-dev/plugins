@@ -11,12 +11,18 @@ struct Pin2JsonNode : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto& dataPin = params[NOS_NAME("Data")];
-		if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *GetObjectBuffer(*dataPin.ObjectHandle)))
+		bool success = false;
+		if (auto serialized = SerializeObject(*dataPin.ObjectHandle))
 		{
-			SetPinValue(NOS_NAME("Json"), outJson->AsBuffer());
-			ClearNodeStatusMessages();
+			if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *serialized))
+			{
+				SetPinValue(NOS_NAME("Json"), outJson->AsBuffer());
+				ClearNodeStatusMessages();
+				success = true;
+			}
 		}
-		else
+		
+		if (!success)
 			SetNodeStatusMessages({{{}, "Unable to convert pin value to JSON", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 		return NOS_RESULT_SUCCESS;
 	}

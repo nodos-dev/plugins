@@ -93,7 +93,7 @@ struct MakeNode : NodeContext
 
 			SetField(params[NSN_Output].Id,
 					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name}},
-					 *GetObjectBuffer(*pin.ObjectHandle));
+					 *SerializeObject(*pin.ObjectHandle));
 		}
 
 		return NOS_RESULT_SUCCESS;
