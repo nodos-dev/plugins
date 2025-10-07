@@ -319,17 +319,13 @@ struct BreakNode : NodeContext
 		}
 		case NOS_OBJECT_KIND_COMPOSITE:
 		{
-			auto inputObj = params.GetPinObject(NSN_Input);
-			size_t i = 0;
-			nosName fieldName;
-			nosObjectHandle fieldHandle;
-			while (NOS_RESULT_SUCCESS == nosEngine.ObjectAPI->IterateFields(inputObj, i++, &fieldName, &fieldHandle))
+			auto inputObj = params.GetPinObject<CompositeObjectRef>(NSN_Input);
+			for (auto& field : inputObj)
 			{
-				auto pin = GetPin(fieldName);
+				auto pin = GetPin(field.Name);
 				if (!pin)
 					continue;
-				SetPinObject(pin->Id, fieldHandle);
-				nosEngine.ObjectAPI->ReleaseReference(fieldHandle);
+				SetPinObject(pin->Id, field.Object);
 			}
 			break;
 		}
