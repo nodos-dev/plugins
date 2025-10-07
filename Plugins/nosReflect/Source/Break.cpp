@@ -322,13 +322,14 @@ struct BreakNode : NodeContext
 			auto inputObj = params.GetPinObject(NSN_Input);
 			size_t i = 0;
 			nosName fieldName;
-			ObjectRef field;
-			while (NOS_RESULT_SUCCESS == nosEngine.ObjectAPI->IterateFields(inputObj, i++, &fieldName, &field.Handle))
+			nosObjectHandle fieldHandle;
+			while (NOS_RESULT_SUCCESS == nosEngine.ObjectAPI->IterateFields(inputObj, i++, &fieldName, &fieldHandle))
 			{
 				auto pin = GetPin(fieldName);
 				if (!pin)
 					continue;
-				SetPinObject(pin->Id, field.Handle);
+				SetPinObject(pin->Id, fieldHandle);
+				nosEngine.ObjectAPI->ReleaseReference(fieldHandle);
 			}
 			break;
 		}
