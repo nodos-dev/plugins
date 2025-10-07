@@ -11,6 +11,7 @@ NOS_REGISTER_NAME(Type)
 struct MakeNode : NodeContext
 {
     std::optional<nos::TypeInfo> Type = {};
+	nosObjectKind ObjectKind = NOS_OBJECT_KIND_PRIMITIVE;
     nos::Name VisualizerName = {};
 
     nosResult OnCreate(const fb::Node* node) override
@@ -19,12 +20,10 @@ struct MakeNode : NodeContext
         {
             auto p = node->template_parameters()->Get(0);
 			nos::Name typeName = nos::Name((const char*)p->value()->Data());
-			Type = nos::TypeInfo(typeName);
 			std::optional<std::string> updateDisplayName = std::nullopt;
-			
-            if(flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
-                updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
-            LoadPins(updateDisplayName ? updateDisplayName->c_str() : nullptr);
+			if (flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
+				updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
+			OnTypeUpdated(typeName, updateDisplayName ? updateDisplayName->c_str() : nullptr);
         }
 		return NOS_RESULT_SUCCESS;
     }
@@ -86,14 +85,38 @@ struct MakeNode : NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		for (auto const& [name, pin] : params)
+		switch (ObjectKind)
 		{
-			if (name == NSN_Output)
-				continue;
+		case NOS_OBJECT_KIND_PRIMITIVE:
+		case NOS_OBJECT_KIND_FOREIGN:
+		{
+			for (auto const& [name, pin] : params)
+			{
+				if (name == NSN_Output)
+					continue;
 
-			SetField(params[NSN_Output].Id,
-					 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name}},
-					 *SerializeObject(*pin.ObjectHandle));
+				SetField(params[NSN_Output].Id,
+					{ nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name} },
+					*SerializeObject(*pin.ObjectHandle));
+			}
+			break;
+		}
+		case NOS_OBJECT_KIND_COMPOSITE:
+		{
+			std::vector<CompositeObjectField> fields;
+			for (auto const& [name, pin] : params)
+			{
+				if (name == NSN_Output)
+					continue;
+				fields.push_back({ name, *pin.ObjectHandle });
+			}
+			auto obj = CompositeObjectRef::Create(type->TypeName, fields);
+			if (obj)
+				SetPinObject(params[NSN_Output].Id, *obj);
+			else
+				return NOS_RESULT_FAILURE;
+			break;
+		}
 		}
 
 		return NOS_RESULT_SUCCESS;
@@ -159,9 +182,19 @@ struct MakeNode : NodeContext
         {
 			if (update->PinName != NSN_Output)
 				return;
-			Type = nos::TypeInfo(update->TypeName);
-            LoadPins();
+			OnTypeUpdated(update->TypeName);
 		}
+	}
+
+	void OnTypeUpdated(nos::Name typeName, const char* updatedDisplayName = nullptr)
+	{
+		Type = nos::TypeInfo(typeName);
+		if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetObjectKindFromTypeName(typeName, &ObjectKind))
+		{
+			SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
+			return;
+		}
+		LoadPins(updatedDisplayName);
 	}
 
     nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override

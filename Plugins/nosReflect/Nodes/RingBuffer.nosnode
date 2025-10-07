@@ -28,7 +28,7 @@
             "can_show_as": "INPUT_PIN_ONLY"
           },
           {
-            "name": "Size",
+            "name": "Capacity",
             "type_name": "uint",
             "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
