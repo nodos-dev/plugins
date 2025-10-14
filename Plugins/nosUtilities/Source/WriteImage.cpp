@@ -23,7 +23,7 @@ struct WriteImage : NodeContext
 	std::filesystem::path Path;
 	std::optional<TypedObjectRef<sys::vulkan::Texture>> TempSrgbCopy;
 	bool IncludeAlpha = false;
-	nosVkGPUEvent Event = 0;
+	nosGPUEvent Event = 0;
 	std::atomic_bool WriteRequested = false;
 	std::condition_variable CV;
 	std::mutex Mutex;

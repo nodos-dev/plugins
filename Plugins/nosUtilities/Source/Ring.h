@@ -68,7 +68,7 @@ struct GPUTextureResource : ResourceInterface
 		struct
 		{
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-			nosVkGPUEvent WaitEvent = 0;
+			nosGPUEvent WaitEvent = 0;
 		} Params{};
 		Resource(TypedObjectRef<sys::vulkan::Texture> texObj) : TexObj(std::move(texObj)) { ResourceType = RESOURCE_TYPE; }
 		~Resource()
@@ -281,7 +281,7 @@ struct GPUBufferResource : ResourceInterface {
 		TypedObjectRef<sys::vulkan::Buffer> BufObj;
 		struct {
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-			nosVkGPUEvent WaitEvent = 0;
+			nosGPUEvent WaitEvent = 0;
 		} Params{};
 	};
 	nosTextureFieldType WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;

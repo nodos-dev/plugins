@@ -26,7 +26,7 @@ struct UploadBufferNodeContext : NodeContext
 		if (!inBuf.IsValid())
 			return NOS_RESULT_FAILED;
 		auto inGpuEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME_STATIC("InputGPUEventRef"));
-		nosVkGPUEvent* event = nullptr;
+		nosGPUEvent* event = nullptr;
 		if (inGpuEventHolder.IsValid())
 		{
 			auto res = nosVulkan->GetGPUEventFromHolder(inGpuEventHolder, &event);

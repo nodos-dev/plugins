@@ -110,7 +110,7 @@ struct ReduceTextureNode : NodeContext
 		nosVulkan->Begin(&beginParams);
 
 		nosVulkan->RunComputePass(cmd, &pass);
-		nosVkGPUEvent waitEvent{};
+		nosGPUEvent waitEvent{};
 		nosCmdEndParams endParams{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &waitEvent };
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&waitEvent, UINT64_MAX);

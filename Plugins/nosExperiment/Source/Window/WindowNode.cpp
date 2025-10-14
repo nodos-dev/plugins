@@ -65,7 +65,7 @@ void WindowNode::DestroySwapchain()
 	nosCmd cmd;
 	nosCmdBeginParams beginParams = {.Name = NOS_NAME("Window node flush cmd"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 	nosVulkan->Begin(&beginParams);
-	nosVkGPUEvent wait;
+	nosGPUEvent wait;
 	nosCmdEndParams endParams = {.ForceSubmit = true, .OutGPUEventHandle = &wait};
 	nosVulkan->End(cmd, &endParams);
 	nosVulkan->WaitGpuEvent(&wait, UINT64_MAX);
@@ -176,7 +176,7 @@ void WindowNode::OnPathStop()
 	nosCmd cmd;
 	nosCmdBeginParams beginParams = { .Name = NOS_NAME("Window node flush cmd"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd };
 	nosVulkan->Begin(&beginParams);
-	nosVkGPUEvent wait;
+	nosGPUEvent wait;
 	nosCmdEndParams endParams = { .ForceSubmit = true, .OutGPUEventHandle = &wait };
 	nosVulkan->End(cmd, &endParams);
 	nosVulkan->WaitGpuEvent(&wait, UINT64_MAX);

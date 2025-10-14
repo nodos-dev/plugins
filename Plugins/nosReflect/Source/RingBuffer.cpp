@@ -4,18 +4,14 @@
 #include <condition_variable>
 #include <mutex>
 #include <utility>
+#include <vector>
+#include <optional>
+#include <atomic>
 
 #include <nosTransfer/nosTransfer.h>
 
 namespace nos::reflect
 {
-#include <vector>
-#include <optional>
-#include <mutex>
-#include <shared_mutex>
-#include <condition_variable>
-#include <atomic>
-#include <chrono>
 
 template <typename T>
 class RingBuffer
@@ -37,7 +33,7 @@ public:
 	T* BeginPush(uint32_t timeoutMs)
 	{
 		std::unique_lock lock(Mutex);
-		if (!FullCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
 			[this]() -> bool {
 				return Size < Capacity || ExitRequested.load();
 			}))
@@ -54,20 +50,27 @@ public:
 		std::unique_lock lock(Mutex);
 		Head = (Head + 1) % Capacity;
 		++Size;
-		lock.unlock();
-		AvailableCV.notify_one();
+		if (!WaitUntilFull || Size == Capacity)
+		{
+			WaitUntilFull = false;
+			ReadyForPopCV.notify_one();
+		}
 	}
 
 	T* BeginPop(uint32_t timeoutMs)
 	{
 		std::unique_lock lock(Mutex);
-		if (!AvailableCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
 			[this]() -> bool {
-				return Size > 0 || ExitRequested.load();
+				if (ExitRequested)
+					return true;
+				if (WaitUntilFull)
+					return Size == Capacity;
+				return Size > 0;
 			}))
 			return nullptr; // timeout
 
-		if (ExitRequested.load() && Size == 0)
+		if (ExitRequested.load())
 			return nullptr;
 
 		return &Buffer[Tail];
@@ -77,16 +80,17 @@ public:
 	{
 		std::unique_lock lock(Mutex);
 		Tail = (Tail + 1) % Capacity;
-		--Size;
+		if (Size > 0)
+			--Size;
 		lock.unlock();
-		FullCV.notify_one();
+		ReadyForPushCV.notify_one();
 	}
 
 	void Shutdown()
 	{
 		ExitRequested.store(true);
-		AvailableCV.notify_all();
-		FullCV.notify_all();
+		ReadyForPopCV.notify_all();
+		ReadyForPushCV.notify_all();
 	}
 
 	bool IsShuttingDown() const noexcept
@@ -127,10 +131,11 @@ public:
 		if (newCapacity && *newCapacity != Capacity)
 			Capacity = *newCapacity;
 		Buffer.resize(Capacity);
+		WaitUntilFull = true;
 		lock.unlock();
 		ExitRequested.store(false);
-		AvailableCV.notify_all();
-		FullCV.notify_all();
+		ReadyForPopCV.notify_all();
+		ReadyForPushCV.notify_all();
 	}
 
 private:
@@ -141,11 +146,11 @@ private:
 	size_t Size;
 
 	mutable std::mutex Mutex;
-	std::condition_variable AvailableCV;
-	std::condition_variable FullCV;
-	std::atomic<bool> ExitRequested;
+	std::condition_variable ReadyForPopCV;
+	std::condition_variable ReadyForPushCV;
+	std::atomic_bool ExitRequested;
+	std::atomic_bool WaitUntilFull;
 };
-
 
 struct Slot
 {
@@ -160,18 +165,18 @@ struct Slot
 	}
 	Slot(const Slot&) = delete;
 	Slot& operator=(const Slot&) = delete;
-	nosResult CopyFrom(nosObjectHandle obj, uuid const& nodeId)
+	nosResult CopyFrom(nosObjectId obj, uuid const& nodeId)
 	{
 		return nosTransfer->Copy(obj, Handle);
 	}
-	bool IsSlotCompatible(nosObjectHandle obj) const
+	bool IsSlotCompatible(nosObjectId obj) const
 	{
 		return nosTransfer->CanCopy(obj, Handle) == NOS_TRUE;
 	}
 	ObjectRef GetObject() const
 	{
 		ObjectRef obj{};
-		if (nosTransfer->GetObjectHandle(Handle, &obj.Handle) != NOS_RESULT_SUCCESS)
+		if (nosTransfer->GetObjectReference(Handle, &obj.GetStorage()) != NOS_RESULT_SUCCESS)
 			return ObjectRef();
 		return obj;
 	}
@@ -229,8 +234,8 @@ struct RingBufferNode : NodeContext
 		{
 			auto& slot = *srcSlot;
 			ObjectRef out;
-			nosTransfer->GetObjectHandle(slot->Handle, &out.Handle);
-			SetPinObject(NSN_Output, out.Handle);
+			nosTransfer->GetObjectReference(slot->Handle, &out.GetStorage());
+			SetPinObject(NSN_Output, out);
 			cpy->ShouldSetSourceFrameNumber = true;
 			cpy->FrameNumber = 0; // TODO: Store frame number in ring buffer
 			SendScheduleRequest(1);
@@ -242,14 +247,14 @@ struct RingBufferNode : NodeContext
 		return NOS_RESULT_PENDING;
 	}
 
-	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle handle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
 	{
 		if (NOS_NAME("Capacity") == pinName)
 		{
 			auto newCapacity = *InterpretObject<uint32_t>(handle);
 			if (newCapacity != RingCapacity)
 			{
-				RingCapacity = newCapacity;
+				RingCapacity = std::max(1u, newCapacity);
 				SendPathRestart(NSN_Input);
 			}
 		}
@@ -276,9 +281,10 @@ struct RingBufferNode : NodeContext
 	{
 		if (NSN_TypeNameGeneric == TypeName)
 			return NOS_RESULT_FAILED;
-
-		auto inputObject = ObjectRef(*params[NSN_Input].ObjectHandle);
-		auto capacity = *InterpretObject<uint32_t>(*params[NOS_NAME("Capacity")].ObjectHandle);
+		auto inputObject = ObjectRef(*params[NSN_Input].Object);
+		if (!inputObject)
+			return NOS_RESULT_FAILURE;
+		auto capacity = *InterpretObject<uint32_t>(*params[NOS_NAME("Capacity")].Object);
 		capacity = std::max(1u, capacity);
 
 		if (auto dstSlot = Ring.BeginPush(100))

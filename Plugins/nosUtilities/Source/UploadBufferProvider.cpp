@@ -34,7 +34,7 @@ struct UploadBuffer
 	{
 		if (EventHolder)
 		{
-			nosVkGPUEvent* event = nullptr;
+			nosGPUEvent* event = nullptr;
 			auto res = nosVulkan->GetGPUEventFromHolder(EventHolder, &event);
 
 			if (res == NOS_RESULT_SUCCESS && *event)
@@ -130,7 +130,7 @@ struct UploadBufferProviderNodeContext : NodeContext
 		if (nextBuf.EventHolder.IsValid())
 		{
 			util::Stopwatch sw;
-			nosVkGPUEvent* event = nullptr;
+			nosGPUEvent* event = nullptr;
 			auto res = nosVulkan->GetGPUEventFromHolder(nextBuf.EventHolder, &event);
 			if (*event)
 				nosVulkan->WaitGpuEvent(event, UINT64_MAX);
@@ -149,7 +149,7 @@ struct UploadBufferProviderNodeContext : NodeContext
 		{
 			if (buf.EventHolder.IsValid())
 			{
-				nosVkGPUEvent* event = nullptr;
+				nosGPUEvent* event = nullptr;
 				auto res = nosVulkan->GetGPUEventFromHolder(buf.EventHolder, &event);
 				if (*event)
 					nosVulkan->WaitGpuEvent(event, UINT64_MAX);

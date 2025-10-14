@@ -9,7 +9,7 @@ struct ArrayNode : NodeContext
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	bool invalidNode = false;
 	static constexpr char InputElementPrefix[] = "Input ";
-	ObjectRef ArrayObject = 0;
+	ObjectRef ArrayObject{};
 	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto& pin : Pins | std::views::values)
@@ -38,7 +38,7 @@ struct ArrayNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle newHandle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId newHandle) override
 	{
 		if (pinName == NSN_Output)
 			ArrayObject = newHandle;
@@ -157,7 +157,7 @@ struct ArrayNode : NodeContext
 
 		auto& rawParams = *params.RawParams;
 		size_t arrayIndex = 0;
-		std::vector<nosObjectHandle> inputObjects;
+		std::vector<nosObjectId> inputObjects;
 		nosName outputTypeName{};
 		for (size_t pinIndex = 0; pinIndex < rawParams.PinCount; pinIndex++)
 		{
@@ -167,10 +167,10 @@ struct ArrayNode : NodeContext
 				outputTypeName = pin->TypeName;
 				continue;
 			}
-			inputObjects.push_back(*pin->ObjectHandle);
+			inputObjects.push_back(*pin->Object);
 			arrayIndex++;
 		}
-		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &ArrayObject.Handle);
+		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &ArrayObject.GetStorage());
 		if (!ArrayObject.IsValid())
 			return NOS_RESULT_FAILED;
 		SetPinObject(NSN_Output, ArrayObject);
@@ -231,7 +231,7 @@ struct ArrayNode : NodeContext
 
 		// TODO: Transfer: Helpers.
 		ObjectRef newElement{};
-		auto res = nosEngine.ObjectAPI->Construct(typeName, {.Data = data.data(), .Size = data.size()}, &newElement.Handle);
+		auto res = nosEngine.ObjectAPI->Construct(typeName, {.Data = data.data(), .Size = data.size()}, &newElement.GetStorage());
 		if (res != NOS_RESULT_SUCCESS || !newElement.IsValid())
 		{
 			nosEngine.LogE("Failed to construct new element of type %s", typeName.AsString().c_str());
@@ -240,10 +240,10 @@ struct ArrayNode : NodeContext
 		nosArrayObjectDelta delta{
 			.Type = NOS_ARRAY_OBJECT_DELTA_TYPE_APPEND,
 			.Append = {
-				.ElementHandle = newElement
+				.Element = newElement
 			}
 		};
-		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.Handle);
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
 		SetPinObject(NSN_Output, ArrayObject);
 	}
 
@@ -268,7 +268,7 @@ struct ArrayNode : NodeContext
 				.Index = *elementIndex
 			}
 		};
-		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.Handle);
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
 		SetPinObject(NSN_Output, ArrayObject);
 	}
 

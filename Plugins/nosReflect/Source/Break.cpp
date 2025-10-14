@@ -45,7 +45,7 @@ struct BreakNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle newHandle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId newHandle) override
 	{ 
 		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
@@ -307,13 +307,13 @@ struct BreakNode : NodeContext
 				auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
 				if (!pinId)
 					continue;
-				nosObjectHandle elementHandle = 0;
-				if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArrayElement(params.GetPinObject(NSN_Input), i, &elementHandle))
+				ObjectRef elementRef;
+				if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArrayElement(params.GetPinObject(NSN_Input), i, &elementRef.GetStorage()))
 				{
 					nosEngine.LogE("Failed to get array element %d", i);
 					continue;
 				}
-				SetPinObject(*pinId, elementHandle);
+				SetPinObject(*pinId, elementRef);
 			}
 			break;
 		}

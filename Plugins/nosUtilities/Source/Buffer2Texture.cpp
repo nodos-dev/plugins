@@ -39,7 +39,7 @@ struct Buffer2TextureNodeContext : NodeContext
 
 		nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Buffer2Texture Copy"), NodeId);
 		nosVulkan->Copy(cmd, inBuf, outTex, 0);
-		nosVkGPUEvent event;
+		nosGPUEvent event;
 		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &event};
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&event, UINT_MAX);

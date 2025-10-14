@@ -22,18 +22,18 @@ struct Slot
 	}
 	Slot(const Slot&) = delete;
 	Slot& operator=(const Slot&) = delete;
-	nosResult CopyFrom(nosObjectHandle obj, uuid const& nodeId)
+	nosResult CopyFrom(nosObjectId obj, uuid const& nodeId)
 	{
 		return nosTransfer->Copy(obj, Handle);
 	}
-	bool IsSlotCompatible(nosObjectHandle obj) const
+	bool IsSlotCompatible(nosObjectId obj) const
 	{
 		return nosTransfer->CanCopy(obj, Handle) == NOS_TRUE;
 	}
 	ObjectRef GetObject() const
 	{
 		ObjectRef obj{};
-		if (nosTransfer->GetObjectHandle(Handle, &obj.Handle) != NOS_RESULT_SUCCESS)
+		if (nosTransfer->GetObjectReference(Handle, &obj.GetStorage()) != NOS_RESULT_SUCCESS)
 			return ObjectRef();
 		return obj;
 	}
@@ -56,16 +56,17 @@ struct DelayQueue {
 		Slots.clear(); 
 	}
 
-	void ClearIfIncompatibleData(nosObjectHandle obj)
-	{
-		if (AreSlotsCompatibleWith(obj))
-			return;
-		Clear();
-	}
-
 	bool HasFree() const 
 	{
 		return !FreeQueue.empty(); 
+	}
+
+	bool IsNextSlotIncompatible(nosObjectId obj) const
+	{
+		if (!HasFree())
+			return false;
+		auto slotPtr = &*FreeQueue.front();
+		return !slotPtr->IsSlotCompatible(obj);
 	}
 
 	void DeleteSlotAndPopFromQueue(std::queue<Ref<Slot>>& queue)
@@ -86,6 +87,7 @@ struct DelayQueue {
 		FreeQueue.pop();
 		return slotPtr;
 	}
+
 	void EndPush(Slot& slot)
 	{
 		ReadyQueue.push(slot);
@@ -130,14 +132,13 @@ struct DelayQueue {
 		return Delay + 1; 
 	}
 
-	bool AreSlotsCompatibleWith(nosObjectHandle obj) const
+	bool AreSlotsCompatibleWith(nosObjectId obj) const
 	{
 		if (Slots.empty())
 			return true;
-		for (const auto& slot : Slots)
-			if (!slot->IsSlotCompatible(obj))
-				return false;
-		return true;
+		if (!Slots.at(0)->IsSlotCompatible(obj))
+			return true;
+		return false;
 	}
 };
 
@@ -161,7 +162,7 @@ struct DelayNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle handle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
 	{
 		if (NSN_Delay == pinName)
 		{
@@ -202,8 +203,8 @@ struct DelayNode : NodeContext
 		if (NSN_TypeNameGeneric == TypeName)
 			return NOS_RESULT_FAILED;
 
-		ObjectRef inputObject = *params[NSN_Input].ObjectHandle;
-		auto delay = *InterpretObject<uint32_t>(*params[NSN_Delay].ObjectHandle);
+		ObjectRef inputObject = *params[NSN_Input].Object;
+		auto delay = *InterpretObject<uint32_t>(*params[NSN_Delay].Object);
 
 		if (0 == delay)
 		{
@@ -217,7 +218,8 @@ struct DelayNode : NodeContext
 			SetPinObject(NSN_Output, popSlot->GetObject());
 			Queue.EndPop(*popSlot);
 		}
-		Queue.ClearIfIncompatibleData(inputObject);
+		if (Queue.IsNextSlotIncompatible(inputObject))
+			Queue.Clear();
 		if (!Queue.HasFree())
 		{
 			auto slot = std::make_unique<Slot>(inputObject);

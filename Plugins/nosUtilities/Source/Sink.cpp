@@ -38,7 +38,7 @@ struct SinkNode : NodeContext
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams = {.Name = NOS_NAME("Sink Submit"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 			nosVulkan->Begin(&beginParams);
-			nosVkGPUEvent event{};
+			nosGPUEvent event{};
 			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = Wait ? &event : nullptr };
 			nosVulkan->End(cmd, &endParams);
 			if (Wait)

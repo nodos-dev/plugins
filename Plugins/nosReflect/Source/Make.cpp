@@ -97,7 +97,7 @@ struct MakeNode : NodeContext
 
 				SetField(params[NSN_Output].Id,
 					{ nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name} },
-					*SerializeObject(*pin.ObjectHandle));
+					*SerializeObject(*pin.Object));
 			}
 			break;
 		}
@@ -108,7 +108,7 @@ struct MakeNode : NodeContext
 			{
 				if (name == NSN_Output)
 					continue;
-				fields.push_back({ name, *pin.ObjectHandle });
+				fields.push_back({ name, *pin.Object });
 			}
 			auto obj = CompositeObjectRef::Create(type->TypeName, fields);
 			if (obj)

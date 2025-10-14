@@ -46,7 +46,7 @@ public:
 	}
 	~TestNode() { nosEngine.LogI("TestNode: %s", __FUNCTION__); }
 	void OnNodeUpdated(const nosNodeUpdate* updatedNode) override { nosEngine.LogI("TestNode: %s", __FUNCTION__); }
-	void OnPinObjectHandleChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle handle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle handle) override
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 	}
@@ -232,8 +232,8 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
-			nosVkTexture input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
-			nosVkTexture output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
+			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
+			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
 			nosVulkan->Copy(cmd, input, output, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			return NOS_RESULT_SUCCESS;
@@ -250,8 +250,8 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTestLicensed) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
-			nosVkTexture input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
-			nosVkTexture output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
+			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
+			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
 			nosVulkan->Copy(cmd, input, output, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			return NOS_RESULT_SUCCESS;
