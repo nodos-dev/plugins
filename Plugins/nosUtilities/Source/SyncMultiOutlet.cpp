@@ -42,11 +42,7 @@ struct SyncMultiOutletNode : NodeContext
 				OutPins.erase(update->PinDeleted);
 				std::erase(OutPinIdsOrdered, update->PinDeleted);
 			}
-			if (RequestNewInput())
-			{
-				nosScheduleNodeParams params = {.NodeId = NodeId, .AddScheduleCount = 1};
-				nosEngine.ScheduleNode(&params);
-			}
+			CheckAndRequestNewInputIfNeeded();
 		}
 	}
 	
@@ -54,7 +50,8 @@ struct SyncMultiOutletNode : NodeContext
 	struct SyncInPin
 	{
 		std::mutex Mutex;
-		std::condition_variable CV;
+		std::condition_variable InputArrivedCV;
+		std::condition_variable AllOutputsCompletedCV;
 		const nosBuffer* Data = nullptr;
 		uint64_t FrameNumber = 0;
 		bool Requested = false;
@@ -74,7 +71,7 @@ struct SyncMultiOutletNode : NodeContext
 	WaitResult WaitInput(uint64_t reqFrameNumber)
 	{
 		std::unique_lock lock(InputPin.Mutex);
-		if (!InputPin.CV.wait_for(
+		if (!InputPin.InputArrivedCV.wait_for(
 				lock, std::chrono::milliseconds(100), [&] { return InputPin.FrameNumber >= reqFrameNumber || Exit; }))
 			return TIMEOUT;
 		assert(Exit || InputPin.FrameNumber == reqFrameNumber);
@@ -83,7 +80,7 @@ struct SyncMultiOutletNode : NodeContext
 		return OK;
 	}
 
-	bool RequestNewInput()
+	void CheckAndRequestNewInputIfNeeded()
 	{
 		std::unique_lock inputLock(InputPin.Mutex);
 		uint64_t inFrameNumber = InputPin.FrameNumber;
@@ -94,12 +91,15 @@ struct SyncMultiOutletNode : NodeContext
 			if (pin.ConnectedPinCount == 0)
 				continue;
 			if (pin.ProcessedFrameNumber < inFrameNumber)
-				return false;
+				return;
 		}
+		// If someone else already requested
 		if (InputPin.Requested)
-			return false;
+			return;
 		InputPin.Requested = true;
-		return true;
+		InputPin.AllOutputsCompletedCV.notify_all();
+		nosScheduleNodeParams params = {.NodeId = NodeId, .AddScheduleCount = 1};
+		nosEngine.ScheduleNode(&params);
 	}
 
 	nosResult CopyFrom(nosCopyInfo* cpy) override
@@ -118,22 +118,45 @@ struct SyncMultiOutletNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
+		/*
+			Lets output paths run, then waits for their frame to end.
+			This is to work correctly with nodos scheduler, and it is not a hack if we consider that this node simulates
+			running/signalling multiple output paths. Imagine like this: Currently, because of scheduler notation
+			limitations, a graph that uses B and C to sync looks like this: A -> Sync Multi Outlet -> [B, C]
+
+			But, we actually want this:
+			A -> [B, C] -> End A Frame
+			Then, it should be the same as running B and C in this node's execute:
+			A -> Sync Multi Outlet Execute{RunAndWait(B); RunAndWait(C);} -> End A Frame
+
+			By writing ExecuteNode like it is now, we achieve the same result as above:
+			SyncMultiOutlet Execute { Signal(B), Signal(C), Wait(B), Wait(C); } -> End A Frame
+		*/
 		nos::NodeExecuteParams args(params);
 		assert(InputPin.Requested);
 		InputPin.Data = args[NOS_NAME("Input")].Data;
 		std::unique_lock lock(InputPin.Mutex);
 		++InputPin.FrameNumber;
 		InputPin.Requested = false;
-		InputPin.CV.notify_all();
+		InputPin.InputArrivedCV.notify_all();
+		// This is to ensure if there are vulkan commands, they are submitted before the output paths, 
+		// since their command buffers are separate and wont run this thread's commands.
 		nosCmdEndParams endParams = {.ForceSubmit = NOS_TRUE};
 		nosVulkan->End(nos::vkss::BeginCmd(NOS_NAME("SyncMultiOutlet Submit"), NodeId), &endParams);
+
+		if (!InputPin.AllOutputsCompletedCV.wait_for(
+				lock, std::chrono::milliseconds(100), [&] { return InputPin.Requested || Exit; }))
+			return NOS_RESULT_PENDING;
+		if (Exit)
+			return NOS_RESULT_FAILED;
 		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnPathStop() override
 	{ 
 		Exit = true;
-		InputPin.CV.notify_all();
+		InputPin.InputArrivedCV.notify_all();
+		InputPin.AllOutputsCompletedCV.notify_all();
 	}
 
 	void OnPathStart() override
@@ -255,11 +278,7 @@ struct SyncMultiOutletNode : NodeContext
 			// written to since at least this out pin is still processing the frame.
 			outPin.ProcessedFrameNumber = InputPin.FrameNumber;
 		}
-		if (RequestNewInput())
-		{
-			nosScheduleNodeParams params = {.NodeId = NodeId, .AddScheduleCount = 1};
-			nosEngine.ScheduleNode(&params);
-		}
+		CheckAndRequestNewInputIfNeeded();
 	}
 
 };
