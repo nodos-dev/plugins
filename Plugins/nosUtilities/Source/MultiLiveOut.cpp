@@ -146,7 +146,7 @@ struct MultiLiveOutNode : NodeContext
 			{
 				if (pin.Id == idPair.first)
 				{
-					nosEngine.SetPinObjectHandle(idPair.second, *pin.ObjectHandle);
+					SetPinObject(idPair.second, *pin.Object);
 					break;
 				}
 			}

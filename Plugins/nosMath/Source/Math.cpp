@@ -156,9 +156,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 				constexpr uint32_t PIN_MIN = 1;
 				constexpr uint32_t PIN_MAX = 2;
 				constexpr uint32_t PIN_OUT = 3;
-				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->ObjectHandle);
-				auto min = *InterpretObject<float>(*params->Pins[PIN_MIN]->ObjectHandle);
-				auto max = *InterpretObject<float>(*params->Pins[PIN_MAX]->ObjectHandle);
+				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->Object);
+				auto min = *InterpretObject<float>(*params->Pins[PIN_MIN]->Object);
+				auto max = *InterpretObject<float>(*params->Pins[PIN_MAX]->Object);
 				SetPinValue(params->Pins[PIN_OUT]->Id, std::clamp(value, min, max));
 				return NOS_RESULT_SUCCESS;
 			};
@@ -169,7 +169,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 				constexpr uint32_t PIN_IN = 0;
 				constexpr uint32_t PIN_OUT = 1;
-				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->ObjectHandle);
+				auto value = *InterpretObject<float>(*params->Pins[PIN_IN]->Object);
 				SetPinValue(params->Pins[PIN_OUT]->Id, std::abs(value));
 				return NOS_RESULT_SUCCESS;
 				};

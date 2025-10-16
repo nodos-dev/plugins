@@ -159,12 +159,12 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 	std::thread FrameConverterThread;
 	std::thread CallbackHandlerThread;
 
-	nosResourceShareInfo OutputRGBA8 = {};
+	nos::TypedObjectRef<nos::sys::vulkan::Texture> OutputRGBA8 = {};
 
-	std::vector<nosResourceShareInfo> ConvertedTextures = {};
-	std::vector<nosResourceShareInfo> OnFrameYBuffers;
-	std::vector<nosResourceShareInfo> OnFrameUBuffers;
-	std::vector<nosResourceShareInfo> OnFrameVBuffers;
+	std::vector<nos::TypedObjectRef<nos::sys::vulkan::Texture>> ConvertedTextures = {};
+	std::vector<nos::TypedObjectRef<nos::sys::vulkan::Texture>> OnFrameYBuffers;
+	std::vector<nos::TypedObjectRef<nos::sys::vulkan::Texture>> OnFrameUBuffers;
+	std::vector<nos::TypedObjectRef<nos::sys::vulkan::Texture>> OnFrameVBuffers;
 
 	std::atomic_int PeerCount = 0;
 	std::string server;

@@ -100,7 +100,7 @@ struct MergeContext : NodeContext
 
 		std::vector<nosShaderBinding> bindings;
 		auto textureCount = GetTextureCount(params.size());
-		std::vector<nosObjectHandle> textures(textureCount);
+		std::vector<nosObjectId> textures(textureCount);
 		std::vector<nosTextureFilter> textureFilters(textureCount);
 
 		std::array<int, 16> blends = {};
@@ -113,7 +113,7 @@ struct MergeContext : NodeContext
 			if(NSN_Out == pin.Name)
 				continue;
 
-			nosBuffer val = *GetPrimitiveObjectDataView(*pin.ObjectHandle);
+			nosBuffer val = *GetPrimitiveObjectDataView(*pin.Object);
 			if (NSN_Background_Color == pin.Name)
 			{
 				bindings.emplace_back(sys::vulkan::ShaderDataBinding(pin.Name, val));
@@ -127,7 +127,7 @@ struct MergeContext : NodeContext
 			{
 			case 'T':
 			{
-				textures[idx] = *pin.ObjectHandle;
+				textures[idx] = *pin.Object;
 				nosVulkan->GetPinTextureFilter(pin.Id, &textureFilters[idx]);
 				break;
 			}

@@ -100,7 +100,7 @@ nosResult WindowNode::ExecuteNode(NodeExecuteParams const& params)
 
 	nos::NodeExecuteParams execParams = params;
 
-	auto input = *execParams[NOS_NAME("Input")].ObjectHandle;
+	auto input = *execParams[NOS_NAME("Input")].Object;
 	if (!input)
 		return NOS_RESULT_FAILED;
 

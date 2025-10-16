@@ -52,10 +52,10 @@ struct ResourceInterface {
 	virtual nosResult SkipExecute(NodeExecuteParams const& params) { return NOS_RESULT_SUCCESS; }
 	virtual ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) = 0;
 	// Returns false if resource is compatible with the current sample
-	virtual bool CheckNewResource(nos::Name updateName, nosObjectHandle inObj) = 0;
-	virtual bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) = 0;
+	virtual bool CheckNewResource(nos::Name updateName, nosObjectId inObj) = 0;
+	virtual bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) = 0;
 	virtual void OnRepeatPinValue(nosCopyFromInfo* cpy) {}
-	virtual uint32_t GetRequiredRingSize(nosObjectHandle inputPinData, uint32_t ringSize) const { return ringSize; }
+	virtual uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const { return ringSize; }
 	virtual void OnPathStart() {}
 };
 
@@ -142,7 +142,7 @@ struct GPUTextureResource : ResourceInterface
 
 	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override
 	{
-		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(*pin.ObjectHandle);
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(*pin.Object);
 
 		if (!inTex.IsValid())
 			return {};
@@ -176,7 +176,7 @@ struct GPUTextureResource : ResourceInterface
 		Resource* res = GetResource<GPUTextureResource>(r);
 		res->FrameNumber = params.FrameNumber;
 
-		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(inputObj);
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(inputObj);
 		assert(inTex.IsValid());
 		auto inputInfo = *sys::vulkan::GetResourceInfo(inTex);
 		nosTextureFieldType incomingField = inputInfo.FieldType;
@@ -203,11 +203,11 @@ struct GPUTextureResource : ResourceInterface
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nos::Name updateName, nosObjectHandle newObject) override
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObject) override
 	{
 		if (updateName != NSN_Input)
 			return false;
-		auto newTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(newObject);
+		auto newTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(newObject);
 		if (!newTex.IsValid())
 			return false;
 		auto info = *sys::vulkan::GetResourceInfo(newTex);
@@ -220,10 +220,10 @@ struct GPUTextureResource : ResourceInterface
 		return true;
 	}
 
-	bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) override
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		auto curTex = TypedObjectRef<sys::vulkan::Texture>::FromHandle(curPinObj);
+		auto curTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(curPinObj);
 		auto currentInfo = *sys::vulkan::GetResourceInfo(curTex);
 		auto resInfo = *sys::vulkan::GetResourceInfo(res->TexObj);
 		if (resInfo.Height != currentInfo.Height ||
@@ -247,7 +247,7 @@ struct GPUTextureResource : ResourceInterface
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectHandle inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const override
 	{
 		if (inputPinData == 0)
 			return ringSize;
@@ -298,7 +298,7 @@ struct GPUBufferResource : ResourceInterface {
 		nosSemaphoreCreateInfo semCreateInfo {
 			.Type = NOS_SEMAPHORE_TYPE_TIMELINE,
 		};
-		nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.Handle);
+		nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.GetStorage());
 	}
 	~GPUBufferResource()
 	{
@@ -340,7 +340,7 @@ struct GPUBufferResource : ResourceInterface {
 
 	void Copy(ResourceBase* res, nosCopyFromInfo* cpy, uuid NodeId) override {
 		auto r = GetResource<GPUBufferResource>(res);
-		auto outBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(*cpy->PinObjectHandle);
+		auto outBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(*cpy->PinObjectHandle);
 		if (!outBuf.IsValid())
 			return;
 		auto outBufInfo = *sys::vulkan::GetResourceInfo(outBuf);
@@ -364,7 +364,7 @@ struct GPUBufferResource : ResourceInterface {
 	}
 
 	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override{
-		auto bufObj = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(*pin.ObjectHandle);
+		auto bufObj = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(*pin.Object);
 		if (!bufObj.IsValid())
 			return {};
 		auto bufInfo = *sys::vulkan::GetResourceInfo(bufObj);
@@ -398,7 +398,7 @@ struct GPUBufferResource : ResourceInterface {
 		Resource* res = GetResource<GPUBufferResource>(r);
 		res->FrameNumber = params.FrameNumber;
 
-		auto inBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(pinInfo);
+		auto inBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(pinInfo);
 		assert(inBuf.IsValid());
 		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
 		nosVulkan->SetResourceFieldType(res->BufObj, inBufInfo.FieldType);
@@ -429,11 +429,11 @@ struct GPUBufferResource : ResourceInterface {
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nos::Name updateName, nosObjectHandle newObj)
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObj)
 	{
 		if (updateName == NSN_Input)
 		{
-			auto newBuf = TypedObjectRef<sys::vulkan::Buffer>::FromHandle(newObj);
+			auto newBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(newObj);
 			if (!newBuf.IsValid())
 				return false;
 			auto newBufInfo = *sys::vulkan::GetResourceInfo(newBuf);
@@ -458,7 +458,7 @@ struct GPUBufferResource : ResourceInterface {
 		return true;
 	}
 
-	bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) override
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
 	{
 		Resource* res = GetResource<GPUBufferResource>(r);
 		auto curBufInfo = sys::vulkan::GetResourceInfo(curPinObj)->Buffer;
@@ -478,7 +478,7 @@ struct GPUBufferResource : ResourceInterface {
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectHandle inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const override
 	{
 		if (!inputPinData)
 			return ringSize;
@@ -544,7 +544,7 @@ struct PODResource : ResourceInterface
 
 	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override
 	{
-		return *pin.ObjectHandle;
+		return *pin.Object;
 	}
 
 	nosResult Push(ResourceBase* r,
@@ -558,9 +558,9 @@ struct PODResource : ResourceInterface
 		res->PODObj = std::move(pinInfo);
 		return NOS_RESULT_SUCCESS;
 	}
-	bool CheckNewResource(nos::Name updateName, nosObjectHandle newObj) { return false; }
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObj) { return false; }
 
-	bool BeginCopyFrom(ResourceBase* r, nosObjectHandle curPinObj, ObjectRef& outPinObj) override
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
 	{
 		outPinObj = curPinObj;
 		return true;
@@ -1004,7 +1004,7 @@ struct RingNodeBase : NodeContext
 		ObjectRef outPinObj{};
 		bool changePinValue = Ring->ResInterface->BeginCopyFrom(slot, *cpy->PinObjectHandle, outPinObj);
 		if (changePinValue) {
-			nosEngine.SetPinObjectHandleByName(NodeId, NSN_Output, outPinObj);
+			nosEngine.SetPinObjectByName(NodeId, NSN_Output, outPinObj);
 		}
 		*foundSlot = slot;
 		return NOS_RESULT_SUCCESS;

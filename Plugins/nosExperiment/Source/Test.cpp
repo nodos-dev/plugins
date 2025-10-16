@@ -46,7 +46,7 @@ public:
 	}
 	~TestNode() { nosEngine.LogI("TestNode: %s", __FUNCTION__); }
 	void OnNodeUpdated(const nosNodeUpdate* updatedNode) override { nosEngine.LogI("TestNode: %s", __FUNCTION__); }
-	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectHandle handle) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 	}
@@ -232,8 +232,8 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[4]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTest) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
-			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
-			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
+			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].Object;
+			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].Object;
 			nosVulkan->Copy(cmd, input, output, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			return NOS_RESULT_SUCCESS;
@@ -250,8 +250,8 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[5]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			nosCmd cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("(nos.experiment.CopyTestLicensed) Copy"), params->NodeId);
 			NodeExecuteParams execParams(params);
-			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].ObjectHandle;
-			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].ObjectHandle;
+			nosTextureObject input = *execParams[NOS_NAME_STATIC("Input")].Object;
+			nosTextureObject output = *execParams[NOS_NAME_STATIC("Output")].Object;
 			nosVulkan->Copy(cmd, input, output, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			return NOS_RESULT_SUCCESS;
@@ -283,13 +283,13 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			NodeExecuteParams execParams(params);
 			nosEngine.SetPinObjectHandle(execParams[NOS_NAME_STATIC("Output")].Id,
-										 *execParams[NOS_NAME_STATIC("Input")].ObjectHandle);
+										 *execParams[NOS_NAME_STATIC("Input")].Object);
 			return NOS_RESULT_SUCCESS;
 		};
 		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.experiment.LiveOutWithInput");
 		outFunctions[10]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			NodeExecuteParams pins(params);
-			nosEngine.SetPinObjectHandle(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].ObjectHandle);
+			nosEngine.SetPinObjectHandle(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].Object);
 			return NOS_RESULT_SUCCESS;
 		};
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.experiment.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);

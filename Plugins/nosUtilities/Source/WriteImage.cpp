@@ -113,7 +113,7 @@ struct WriteImage : NodeContext
 
 		auto tempSrgbInfo = *sys::vulkan::GetResourceInfo(*TempSrgbCopy);
 		TypedObjectRef<sys::vulkan::Buffer> downloadBuf{};
-		nosVulkan->Download(0, *TempSrgbCopy, &downloadBuf.Handle, "TempSrgbCopy Download");
+		nosVulkan->Download(0, *TempSrgbCopy, &downloadBuf.GetStorage(), "TempSrgbCopy Download");
 		if (!downloadBuf.IsValid())
 		{
 			nosEngine.LogE("WriteImage: Unable to download frame");

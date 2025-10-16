@@ -32,7 +32,7 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
 		newTexInfo.Height = size.y;
 		// TODO: Transfer output unscaled
 		outTex = sys::vulkan::CreateTexture(newTexInfo, "Resize Output");
-		nosEngine.SetPinObjectHandle(params->Pins[1]->Id, outTex);
+		nosEngine.SetPinObject(params->Pins[1]->Id, outTex);
 	}
 
 	// TODO: Transfer filter

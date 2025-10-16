@@ -12,7 +12,7 @@ struct Pin2JsonNode : NodeContext
 	{
 		auto& dataPin = params[NOS_NAME("Data")];
 		bool success = false;
-		if (auto serialized = SerializeObject(*dataPin.ObjectHandle))
+		if (auto serialized = SerializeObject(*dataPin.Object))
 		{
 			if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *serialized))
 			{

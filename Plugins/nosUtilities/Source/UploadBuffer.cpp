@@ -17,7 +17,7 @@ struct UploadBufferNodeContext : NodeContext
 		nosSemaphoreCreateInfo semCreateInfo{
 			.Type = NOS_SEMAPHORE_TYPE_TIMELINE
 		};
-		return nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.Handle);
+		return nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.GetStorage());
 	}
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{

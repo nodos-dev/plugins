@@ -113,7 +113,7 @@ struct StbiLoadContext : NodeContext
 			nosCmdEndParams endParams{ .ForceSubmit = true };
 			nosVulkan->End(cmd, &endParams);
 
-			nosEngine.SetPinObjectHandle(outPinId, outTex);
+			nosEngine.SetPinObject(outPinId, outTex);
 
 			free(img);
 			UpdateStatus(State::Idle, path);

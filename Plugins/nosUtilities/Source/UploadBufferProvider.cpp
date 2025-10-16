@@ -22,7 +22,7 @@ struct UploadBuffer
 	TypedObjectRef<sys::vulkan::GPUEventHolder> EventHolder{};
 	UploadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "UploadBuffer"))
 	{
-		nosVulkan->CreateGPUEventHolder(&EventHolder.Handle);
+		nosVulkan->CreateGPUEventHolder(&EventHolder.GetStorage());
 	}
 	UploadBuffer(const UploadBuffer& other) = delete;
 	UploadBuffer& operator=(const UploadBuffer& other) = delete;
