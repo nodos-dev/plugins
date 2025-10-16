@@ -14,7 +14,8 @@ struct Slot
 	nosTransferCopyDestination Handle;
 	Slot(ObjectRef src)
 	{
-		nosTransfer->CreateCopyDestination(src, &Handle);
+		auto res = nosTransfer->CreateCopyDestination(src, &Handle);
+		NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Unable to create copy destination");
 	}
 	~Slot()
 	{
