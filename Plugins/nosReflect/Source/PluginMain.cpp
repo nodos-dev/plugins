@@ -1,17 +1,14 @@
 #include <Nodos/Plugin.hpp>
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVariableSubsystem/nosVariableSubsystem.h>
 #include <nosTransfer/nosTransfer.h>
 
 NOS_INIT()
-NOS_VULKAN_INIT()
 NOS_SYS_VARIABLES_INIT()
 NOS_TRANSFER_PLUGIN_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
-	NOS_VULKAN_IMPORT()
 	NOS_SYS_VARIABLES_IMPORT()
 	NOS_TRANSFER_PLUGIN_IMPORT()
 NOS_END_IMPORT_DEPS()
@@ -39,6 +36,7 @@ enum Nodes : size_t
 	EnumToUnderlyingValue,
 	EnumFromUnderlyingValue,
 	RingBuffer,
+	BoundedQueue,
 	Count
 };
 
@@ -60,6 +58,7 @@ nosResult RegisterGetVariable(nosNodeFunctions* node);
 nosResult RegisterEnumToUnderlyingValue(nosNodeFunctions* node);
 nosResult RegisterEnumFromUnderlyingValue(nosNodeFunctions* node);
 nosResult RegisterRingBuffer(nosNodeFunctions* node);
+nosResult RegisterBoundedQueue(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -98,6 +97,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(EnumToUnderlyingValue)
 			GEN_CASE_NODE(EnumFromUnderlyingValue)
 			GEN_CASE_NODE(RingBuffer)
+			GEN_CASE_NODE(BoundedQueue)
 		}
 	}
 

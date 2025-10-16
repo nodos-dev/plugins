@@ -1,19 +1,22 @@
-#include <Nodos/Plugin.hpp>
-#include "Names.h"
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
-#include <utility>
 #include <vector>
-#include <optional>
-#include <atomic>
 
 #include <nosTransfer/nosTransfer.h>
 
+#include "Names.h"
+
 namespace nos::reflect
 {
+enum class ServeType
+{
+	WaitUntilFull, // Ring Buffer
+	Immediate // Bounded Queue
+};
 
-template <typename T>
+template <typename T, ServeType Type = ServeType::WaitUntilFull>
 class RingBuffer
 {
 public:
@@ -131,7 +134,14 @@ public:
 		if (newCapacity && *newCapacity != Capacity)
 			Capacity = *newCapacity;
 		Buffer.resize(Capacity);
-		WaitUntilFull = true;
+		if constexpr (Type == ServeType::WaitUntilFull)
+		{
+			WaitUntilFull = true;
+		}
+		else if constexpr (Type == ServeType::Immediate)
+		{
+			WaitUntilFull = false;
+		}
 		lock.unlock();
 		ExitRequested.store(false);
 		ReadyForPopCV.notify_all();
@@ -182,13 +192,15 @@ struct Slot
 	}
 };
 
-struct RingBufferNode : NodeContext
+
+template <ServeType Type>
+struct RingBufferNodeBase : NodeContext
 {
 	nosName TypeName = NSN_TypeNameGeneric;
 
-	RingBuffer<std::unique_ptr<Slot>> Ring;
-	uint32_t RingCapacity = 1;
-	RingBufferNode() : Ring(1)
+	RingBuffer<std::unique_ptr<Slot>, Type> Ring;
+	uint32_t Capacity = 1;
+	RingBufferNodeBase() : Ring(1)
 	{
 	}
 
@@ -202,10 +214,18 @@ struct RingBufferNode : NodeContext
 		nosEngine.ScheduleNode(&schedule);
 	}
 
+	void SendRingStats(std::string_view state) const
+	{
+		auto nodeName = NodeName.AsString();
+		nosEngine.WatchLog((nodeName + " Ring Size").c_str(), std::to_string(Ring.GetSize()).c_str());
+		nosEngine.WatchLog((nodeName + " Ring Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
+		nosEngine.WatchLog((nodeName + " State").c_str(), state.data());
+	}
+
 	void OnPathStart() override
 	{
-		Ring.Reset(RingCapacity);
-		SendScheduleRequest(RingCapacity);
+		Ring.Reset(Capacity);
+		SendScheduleRequest(Capacity);
 	}
 
 	void OnPathStop() override
@@ -230,8 +250,10 @@ struct RingBufferNode : NodeContext
 
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
+		SendRingStats("Pre Begin Pop");
 		if (auto srcSlot = Ring.BeginPop(100); srcSlot && *srcSlot)
 		{
+			SendRingStats("Post Begin Pop");
 			auto& slot = *srcSlot;
 			ObjectRef out;
 			nosTransfer->GetObjectReference(slot->Handle, &out.GetStorage());
@@ -252,9 +274,9 @@ struct RingBufferNode : NodeContext
 		if (NOS_NAME("Capacity") == pinName)
 		{
 			auto newCapacity = *InterpretObject<uint32_t>(handle);
-			if (newCapacity != RingCapacity)
+			if (newCapacity != Capacity)
 			{
-				RingCapacity = std::max(1u, newCapacity);
+				Capacity = std::max(1u, newCapacity);
 				SendPathRestart(NSN_Input);
 			}
 		}
@@ -287,6 +309,7 @@ struct RingBufferNode : NodeContext
 		auto capacity = *InterpretObject<uint32_t>(*params[NOS_NAME("Capacity")].Object);
 		capacity = std::max(1u, capacity);
 
+		SendRingStats("Pre Push");
 		if (auto dstSlot = Ring.BeginPush(100))
 		{
 			if (!*dstSlot)
@@ -299,6 +322,7 @@ struct RingBufferNode : NodeContext
 			}
 			auto res = slot->CopyFrom(inputObject, NodeId);
 			Ring.EndPush();
+			SendRingStats("Post Push");
 			if (res != NOS_RESULT_SUCCESS)
 				return res;
 		}
@@ -314,11 +338,5 @@ struct RingBufferNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 };
-
-nosResult RegisterRingBuffer(nosNodeFunctions* funcs)
-{
-	NOS_BIND_NODE_CLASS(NOS_NAME("RingBuffer"), RingBufferNode, funcs)
-		return NOS_RESULT_SUCCESS;
-}
 
 }
