@@ -12,7 +12,7 @@
 namespace nos::reflect
 {
 
-using RingBufferNode = RingBufferNodeBase<ServeType::WaitUntilFull>;
+using RingBufferNode = RingBufferNodeBase<ServeMode::WaitUntilFull>;
 
 nosResult RegisterRingBuffer(nosNodeFunctions* funcs)
 {

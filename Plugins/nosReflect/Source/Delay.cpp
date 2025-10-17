@@ -2,50 +2,17 @@
 
 #include "TypeCommon.h"
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
-#include <nosTransfer/nosTransfer.h>
+#include <nosTransfer/Transfer.hpp>
 
 namespace nos::reflect
 {
 
-struct Slot
-{
-	nosTransferCopyDestination Handle;
-	Slot(ObjectRef src)
-	{
-		auto res = nosTransfer->CreateCopyDestination(src, &Handle);
-		NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Unable to create copy destination");
-	}
-	~Slot()
-	{
-		nosTransfer->ReleaseCopyDestination(Handle);
-	}
-	Slot(const Slot&) = delete;
-	Slot& operator=(const Slot&) = delete;
-	nosResult CopyFrom(nosObjectId obj, uuid const& nodeId)
-	{
-		return nosTransfer->Copy(obj, Handle);
-	}
-	bool IsSlotCompatible(nosObjectId obj) const
-	{
-		return nosTransfer->CanCopy(obj, Handle) == NOS_TRUE;
-	}
-	ObjectRef GetObject() const
-	{
-		ObjectRef obj{};
-		if (nosTransfer->GetObjectReference(Handle, &obj.GetStorage()) != NOS_RESULT_SUCCESS)
-			return ObjectRef();
-		return obj;
-	}
-};
-
 struct DelayQueue {
-	std::vector<std::unique_ptr<Slot>> Slots;
-	std::queue<Ref<Slot>> ReadyQueue;
+	std::vector<std::unique_ptr<transfer::Slot>> Slots;
+	std::queue<Ref<transfer::Slot>> ReadyQueue;
 	// This is the actively used slot, which is the output pin's value, if AccountForActiveSlot is true.
-	Slot* ActiveSlot{};
-	std::queue<Ref<Slot>> FreeQueue;
+	transfer::Slot* ActiveSlot{};
+	std::queue<Ref<transfer::Slot>> FreeQueue;
 	uint32_t Delay = 0;
 	DelayQueue() {}
 	DelayQueue(const DelayQueue&) = delete;
@@ -67,20 +34,20 @@ struct DelayQueue {
 		if (!HasFree())
 			return false;
 		auto slotPtr = &*FreeQueue.front();
-		return !slotPtr->IsSlotCompatible(obj);
+		return !slotPtr->IsDestinationCompatibleWith(obj);
 	}
 
-	void DeleteSlotAndPopFromQueue(std::queue<Ref<Slot>>& queue)
+	void DeleteSlotAndPopFromQueue(std::queue<Ref<transfer::Slot>>& queue)
 	{
 		if (!queue.empty())
 		{
 			auto slotPtr = queue.front();
 			queue.pop();
-			std::erase_if(Slots, [slotPtr](const std::unique_ptr<Slot>& slot) { return slot.get() == &slotPtr; });
+			std::erase_if(Slots, [slotPtr](const std::unique_ptr<transfer::Slot>& slot) { return slot.get() == &slotPtr; });
 		}
 	}
 
-	Slot* BeginPush()
+	transfer::Slot* BeginPush()
 	{
 		if (!HasFree())
 			return nullptr;
@@ -89,14 +56,14 @@ struct DelayQueue {
 		return slotPtr;
 	}
 
-	void EndPush(Slot& slot)
+	void EndPush(transfer::Slot& slot)
 	{
 		ReadyQueue.push(slot);
 		// If there are more than Delay slots in the queue, we need to delete the oldest ones.
 		while (ReadyQueue.size() > Delay)
 			DeleteSlotAndPopFromQueue(ReadyQueue);
 	}
-	Slot* BeginPop()
+	transfer::Slot* BeginPop()
 	{
 		if (ReadyQueue.size() < Delay)
 			return nullptr;
@@ -109,7 +76,7 @@ struct DelayQueue {
 		ReadyQueue.pop();
 		return slotPtr;
 	}
-	void EndPop(Slot& popped)
+	void EndPop(transfer::Slot& popped)
 	{
 		// FreeQueue should be normally empty, but if Slot count is not enough in total, then we can keep FreeQueue non-empty
 		while (Slots.size() > GetRequiredSlotCount() && !FreeQueue.empty())
@@ -120,7 +87,7 @@ struct DelayQueue {
 		ActiveSlot = &popped;
 	}
 
-	void AddResource(std::unique_ptr<Slot> slot)
+	void AddResource(std::unique_ptr<transfer::Slot> slot)
 	{
 		if (Slots.size() >= GetRequiredSlotCount())
 			return;
@@ -137,7 +104,7 @@ struct DelayQueue {
 	{
 		if (Slots.empty())
 			return true;
-		if (!Slots.at(0)->IsSlotCompatible(obj))
+		if (!Slots.at(0)->IsDestinationCompatibleWith(obj))
 			return true;
 		return false;
 	}
@@ -223,12 +190,12 @@ struct DelayNode : NodeContext
 			Queue.Clear();
 		if (!Queue.HasFree())
 		{
-			auto slot = std::make_unique<Slot>(inputObject);
+			auto slot = std::make_unique<transfer::Slot>(inputObject);
 			Queue.AddResource(std::move(slot));
 		}
 		if (auto pushSlot = Queue.BeginPush())
 		{
-			pushSlot->CopyFrom(inputObject, NodeId);
+			pushSlot->CopyFrom(inputObject);
 			Queue.EndPush(*pushSlot);
 		}
 		return NOS_RESULT_SUCCESS;

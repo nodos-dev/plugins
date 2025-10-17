@@ -4,19 +4,19 @@
 #include <mutex>
 #include <vector>
 
-#include <nosTransfer/nosTransfer.h>
+#include <nosTransfer/Transfer.hpp>
 
 #include "Names.h"
 
 namespace nos::reflect
 {
-enum class ServeType
+enum class ServeMode
 {
 	WaitUntilFull, // Ring Buffer
 	Immediate // Bounded Queue
 };
 
-template <typename T, ServeType Type = ServeType::WaitUntilFull>
+template <typename T, ServeMode Mode = ServeMode::WaitUntilFull>
 class RingBuffer
 {
 public:
@@ -134,11 +134,11 @@ public:
 		if (newCapacity && *newCapacity != Capacity)
 			Capacity = *newCapacity;
 		Buffer.resize(Capacity);
-		if constexpr (Type == ServeType::WaitUntilFull)
+		if constexpr (Mode == ServeMode::WaitUntilFull)
 		{
 			WaitUntilFull = true;
 		}
-		else if constexpr (Type == ServeType::Immediate)
+		else if constexpr (Mode == ServeMode::Immediate)
 		{
 			WaitUntilFull = false;
 		}
@@ -162,69 +162,30 @@ private:
 	std::atomic_bool WaitUntilFull;
 };
 
-struct Slot
-{
-	nosTransferCopyDestination Handle;
-	Slot(ObjectRef src)
-	{
-		nosTransfer->CreateCopyDestination(src, &Handle);
-	}
-	~Slot()
-	{
-		nosTransfer->ReleaseCopyDestination(Handle);
-	}
-	Slot(const Slot&) = delete;
-	Slot& operator=(const Slot&) = delete;
-	nosResult CopyFrom(nosObjectId obj, uuid const& nodeId)
-	{
-		return nosTransfer->Copy(obj, Handle);
-	}
-	bool IsSlotCompatible(nosObjectId obj) const
-	{
-		return nosTransfer->CanCopy(obj, Handle) == NOS_TRUE;
-	}
-	ObjectRef GetObject() const
-	{
-		ObjectRef obj{};
-		if (nosTransfer->GetObjectReference(Handle, &obj.GetStorage()) != NOS_RESULT_SUCCESS)
-			return ObjectRef();
-		return obj;
-	}
-};
-
-
-template <ServeType Type>
+template <ServeMode Mode>
 struct RingBufferNodeBase : NodeContext
 {
 	nosName TypeName = NSN_TypeNameGeneric;
 
-	RingBuffer<std::unique_ptr<Slot>, Type> Ring;
+	RingBuffer<std::unique_ptr<transfer::Slot>, Mode> Ring;
 	uint32_t Capacity = 1;
+	uint32_t RemainingRepeatCount = 0;
 	RingBufferNodeBase() : Ring(1)
 	{
-	}
-
-	void SendScheduleRequest(uint32_t count, bool reset = false) const
-	{
-		nosScheduleNodeParams schedule{
-			.NodeId = NodeId,
-			.AddScheduleCount = count,
-			.Reset = reset
-		};
-		nosEngine.ScheduleNode(&schedule);
 	}
 
 	void SendRingStats(std::string_view state) const
 	{
 		auto nodeName = NodeName.AsString();
-		nosEngine.WatchLog((nodeName + " Ring Size").c_str(), std::to_string(Ring.GetSize()).c_str());
-		nosEngine.WatchLog((nodeName + " Ring Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
+		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetSize()).c_str());
+		nosEngine.WatchLog((nodeName + " Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
 		nosEngine.WatchLog((nodeName + " State").c_str(), state.data());
 	}
 
 	void OnPathStart() override
 	{
 		Ring.Reset(Capacity);
+		RemainingRepeatCount = Capacity;
 		SendScheduleRequest(Capacity);
 	}
 
@@ -251,6 +212,14 @@ struct RingBufferNodeBase : NodeContext
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		SendRingStats("Pre Begin Pop");
+		if constexpr (Mode == ServeMode::Immediate)
+		{
+			if (RemainingRepeatCount > 0)
+			{
+				--RemainingRepeatCount;
+				return NOS_RESULT_SUCCESS;
+			}
+		}
 		if (auto srcSlot = Ring.BeginPop(100); srcSlot && *srcSlot)
 		{
 			SendRingStats("Post Begin Pop");
@@ -313,14 +282,14 @@ struct RingBufferNodeBase : NodeContext
 		if (auto dstSlot = Ring.BeginPush(100))
 		{
 			if (!*dstSlot)
-				*dstSlot = std::make_unique<Slot>(ObjectRef(inputObject));
+				*dstSlot = std::make_unique<transfer::Slot>(inputObject);
 			auto& slot = *dstSlot;
-			if (!slot->IsSlotCompatible(inputObject))
+			if (!slot->IsDestinationCompatibleWith(inputObject))
 			{
 				SendPathRestart(NSN_Input);
 				return NOS_RESULT_FAILURE;
 			}
-			auto res = slot->CopyFrom(inputObject, NodeId);
+			auto res = slot->CopyFrom(inputObject);
 			Ring.EndPush();
 			SendRingStats("Post Push");
 			if (res != NOS_RESULT_SUCCESS)

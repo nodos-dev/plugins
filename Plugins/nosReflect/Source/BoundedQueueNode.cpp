@@ -5,7 +5,7 @@
 namespace nos::reflect
 {
 
-using BoundedQueueNode = RingBufferNodeBase<ServeType::Immediate>;
+using BoundedQueueNode = RingBufferNodeBase<ServeMode::Immediate>;
 
 nosResult RegisterBoundedQueue(nosNodeFunctions* funcs)
 {
