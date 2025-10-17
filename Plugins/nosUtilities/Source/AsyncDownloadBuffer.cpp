@@ -16,21 +16,21 @@ NOS_REGISTER_NAME(UseHostCachedMemory);
 
 namespace nos::utilities
 {
-struct UploadBuffer
+struct AsyncDownloadBuffer
 {
 	TypedObjectRef<sys::vulkan::Buffer> Buffer{};
 	TypedObjectRef<sys::vulkan::GPUEventHolder> EventHolder{};
-	UploadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "UploadBuffer"))
+	AsyncDownloadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "AsyncDownloadBuffer"))
 	{
 		nosVulkan->CreateGPUEventHolder(&EventHolder.GetStorage());
 	}
-	UploadBuffer(const UploadBuffer& other) = delete;
-	UploadBuffer& operator=(const UploadBuffer& other) = delete;
-	UploadBuffer(UploadBuffer&&) = default;
-	UploadBuffer& operator=(UploadBuffer&&) = default;
+	AsyncDownloadBuffer(const AsyncDownloadBuffer& other) = delete;
+	AsyncDownloadBuffer& operator=(const AsyncDownloadBuffer& other) = delete;
+	AsyncDownloadBuffer(AsyncDownloadBuffer&&) = default;
+	AsyncDownloadBuffer& operator=(AsyncDownloadBuffer&&) = default;
 
 
-	~UploadBuffer()
+	~AsyncDownloadBuffer()
 	{
 		if (EventHolder)
 		{
@@ -43,16 +43,21 @@ struct UploadBuffer
 	}
 };
 
-struct UploadBufferProviderNode : NodeContext
+struct AsyncDownloadBufferNode : NodeContext
 {
 	nosBufferInfo SampleBufferInfo = {
 		.Size = 0,
 		.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC),
 		.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY)};
-	std::vector<UploadBuffer> Buffers;
+	std::vector<AsyncDownloadBuffer> Buffers;
 	uint64_t QueueSize = 2;
 
 	size_t CurrentIndex = 0;
+
+    void RecreateBuffers() const
+    {
+        
+    }
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -176,9 +181,9 @@ struct UploadBufferProviderNode : NodeContext
 	}
 };
 
-nosResult RegisterUploadBufferProvider(nosNodeFunctions* functions)
+nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions* functions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBufferProvider"), UploadBufferProviderNode, functions)
+	NOS_BIND_NODE_CLASS(NOS_NAME("AsyncDownloadBuffer"), AsyncDownloadBufferNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
 } // namespace nos::utilities

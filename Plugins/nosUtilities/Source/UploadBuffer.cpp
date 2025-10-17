@@ -8,7 +8,7 @@
 
 namespace nos::utilities
 {
-struct UploadBufferNodeContext : NodeContext
+struct UploadBufferNode : NodeContext
 {
 	TypedObjectRef<sys::vulkan::Semaphore> TransferSem{};
 	uint64_t FrameNumber = 1;
@@ -76,7 +76,7 @@ struct UploadBufferNodeContext : NodeContext
 
 nosResult RegisterUploadBuffer(nosNodeFunctions* functions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBuffer"), UploadBufferNodeContext, functions)
+	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBuffer"), UploadBufferNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
 
