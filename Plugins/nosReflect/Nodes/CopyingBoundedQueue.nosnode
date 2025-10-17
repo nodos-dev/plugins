@@ -1,18 +1,19 @@
 {
   "nodes": [
     {
-      "class_name": "RingBuffer",
+      "class_name": "CopyingBoundedQueue",
       "menu_info": {
         "category": "Type",
-        "display_name": "Ring Buffer",
+        "display_name": "Copying Bounded Queue",
         "name_aliases": [
-          "circular buffer",
-          "circular queue"
+          "queue",
+          "blocking queue"
         ]
       },
       "node": {
-        "name": "RingBuffer",
-        "display_name": "Ring Buffer",
+        "name": "CopyingBoundedQueue",
+        "display_name": "Copying Bounded Queue",
+        "description": "Queues data from a producer thread and outputs them to a consumer thread.\nMakes copies of the data.",
         "contents_type": "Job",
         "pins": [
           {

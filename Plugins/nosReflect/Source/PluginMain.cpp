@@ -35,8 +35,10 @@ enum Nodes : size_t
 	GetVariable,
 	EnumToUnderlyingValue,
 	EnumFromUnderlyingValue,
-	RingBuffer,
-	BoundedQueue,
+	CopyingRingBuffer,
+	CopyingBoundedQueue,
+	ObjectRingBuffer,
+	BoundedObjectQueue,
 	Count
 };
 
@@ -57,8 +59,10 @@ nosResult RegisterSetVariable(nosNodeFunctions* node);
 nosResult RegisterGetVariable(nosNodeFunctions* node);
 nosResult RegisterEnumToUnderlyingValue(nosNodeFunctions* node);
 nosResult RegisterEnumFromUnderlyingValue(nosNodeFunctions* node);
-nosResult RegisterRingBuffer(nosNodeFunctions* node);
-nosResult RegisterBoundedQueue(nosNodeFunctions* node);
+nosResult RegisterCopyingRingBuffer(nosNodeFunctions* node);
+nosResult RegisterCopyingBoundedQueue(nosNodeFunctions* node);
+nosResult RegisterObjectRingBuffer(nosNodeFunctions* node);
+nosResult RegisterBoundedObjectQueue(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -96,8 +100,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(ArithmeticDynamic)
 			GEN_CASE_NODE(EnumToUnderlyingValue)
 			GEN_CASE_NODE(EnumFromUnderlyingValue)
-			GEN_CASE_NODE(RingBuffer)
-			GEN_CASE_NODE(BoundedQueue)
+			GEN_CASE_NODE(CopyingRingBuffer)
+			GEN_CASE_NODE(CopyingBoundedQueue)
+			GEN_CASE_NODE(ObjectRingBuffer)
+			GEN_CASE_NODE(BoundedObjectQueue)
 		}
 	}
 

@@ -1,0 +1,50 @@
+{
+  "nodes": [
+    {
+      "class_name": "CopyingRingBuffer",
+      "menu_info": {
+        "category": "Type",
+        "display_name": "Copying Ring Buffer",
+        "name_aliases": [
+          "circular buffer",
+          "circular queue"
+        ]
+      },
+      "node": {
+        "name": "CopyingRingBuffer",
+        "display_name": "Copying Ring",
+        "description": "Queues data from a producer thread, then starts outputting them to a consumer thread when capacity is reached.\nMakes copies of the data.",
+        "contents_type": "Job",
+        "pins": [
+          {
+            "name": "Thread",
+            "type_name": "nos.exe",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_ONLY"
+          },
+          {
+            "name": "Input",
+            "type_name": "nos.Generic",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_ONLY"
+          },
+          {
+            "name": "Capacity",
+            "type_name": "uint",
+            "show_as": "PROPERTY",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "data": 2,
+            "min": 1
+          },
+          {
+            "name": "Output",
+            "type_name": "nos.Generic",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "live": true
+          }
+        ]   
+      }
+    }
+  ]
+}

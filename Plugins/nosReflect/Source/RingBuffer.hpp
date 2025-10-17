@@ -162,12 +162,42 @@ private:
 	std::atomic_bool WaitUntilFull;
 };
 
-template <ServeMode Mode>
+struct CopyingSlot : transfer::Slot
+{
+	uint64_t FrameNumber = 0;
+	CopyingSlot(nosObjectId handle) : transfer::Slot(handle) {}
+};
+
+struct ObjectSlot
+{
+	uint64_t FrameNumber = 0;
+	ObjectRef Object;
+	ObjectSlot() = default;
+	ObjectSlot(ObjectRef obj) : Object(std::move(obj)) {}
+	ObjectSlot(const ObjectSlot&) = delete;
+	ObjectSlot& operator=(const ObjectSlot&) = delete;
+	nosResult CopyFrom(ObjectRef& obj)
+	{
+		Object = std::move(obj);
+		return NOS_RESULT_SUCCESS;
+	}
+	bool IsDestinationCompatibleWith(nosObjectId obj) const
+	{
+		return true;
+	}
+	nosObjectId GetObject() const
+	{
+		return Object.GetObjectId();
+	}
+	
+};
+
+template <typename SlotType, ServeMode Mode>
 struct RingBufferNodeBase : NodeContext
 {
 	nosName TypeName = NSN_TypeNameGeneric;
 
-	RingBuffer<std::unique_ptr<transfer::Slot>, Mode> Ring;
+	RingBuffer<std::unique_ptr<SlotType>, Mode> Ring;
 	uint32_t Capacity = 1;
 	uint32_t RemainingRepeatCount = 0;
 	
@@ -223,15 +253,18 @@ struct RingBufferNodeBase : NodeContext
 				return NOS_RESULT_SUCCESS;
 			}
 		}
-		if (auto srcSlot = Ring.BeginPop(100); srcSlot && *srcSlot)
+		std::unique_ptr<SlotType>* srcSlot;
+		{
+			ScopedProfilerEvent _({ .Name = "Wait For Read" });
+			srcSlot = Ring.BeginPop(100);
+		}
+		if (srcSlot && *srcSlot)
 		{
 			SendRingStats("Post Begin Pop");
 			auto& slot = *srcSlot;
-			ObjectRef out;
-			nosTransfer->GetObjectReference(slot->Handle, &out.GetStorage());
-			SetPinObject(NSN_Output, out);
+			SetPinObject(NSN_Output, slot->GetObject());
 			cpy->ShouldSetSourceFrameNumber = true;
-			cpy->FrameNumber = 0; // TODO: Store frame number in ring buffer
+			cpy->FrameNumber = slot->FrameNumber; // TODO: Store frame number in ring buffer
 			SendScheduleRequest(1);
 			Ring.EndPop();
 			return NOS_RESULT_SUCCESS;
@@ -307,16 +340,22 @@ struct RingBufferNodeBase : NodeContext
 		capacity = std::max(1u, capacity);
 
 		SendRingStats("Pre Push");
-		if (auto dstSlot = Ring.BeginPush(100))
+		std::unique_ptr<SlotType>* dstSlot;
+		{
+			ScopedProfilerEvent _({ .Name = "Wait For Empty Slot" });
+			dstSlot = Ring.BeginPush(100);
+		}
+		if (dstSlot)
 		{
 			if (!*dstSlot)
-				*dstSlot = std::make_unique<transfer::Slot>(inputObject);
+				*dstSlot = std::make_unique<SlotType>(inputObject);
 			auto& slot = *dstSlot;
 			if (!slot->IsDestinationCompatibleWith(inputObject))
 			{
 				SendPathRestart(NSN_Input);
 				return NOS_RESULT_FAILURE;
 			}
+			slot->FrameNumber = params.FrameNumber;
 			auto res = slot->CopyFrom(inputObject);
 			Ring.EndPush();
 			SendRingStats("Post Push");

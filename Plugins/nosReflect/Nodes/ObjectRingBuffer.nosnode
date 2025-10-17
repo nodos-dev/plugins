@@ -1,18 +1,19 @@
 {
   "nodes": [
     {
-      "class_name": "BoundedQueue",
+      "class_name": "ObjectRingBuffer",
       "menu_info": {
         "category": "Type",
-        "display_name": "Bounded Queue",
+        "display_name": "Object Ring Buffer",
         "name_aliases": [
-          "queue",
-          "blocking queue"
+          "circular buffer",
+          "circular queue"
         ]
       },
       "node": {
-        "name": "BoundedQueue",
-        "display_name": "Bounded Queue",
+        "name": "ObjectRingBuffer",
+        "display_name": "Object Ring",
+        "description": "Queues data from a producer thread, then starts outputting them to a consumer thread when capacity is reached.\nStores only the references to the objects, not copies.",
         "contents_type": "Job",
         "pins": [
           {
