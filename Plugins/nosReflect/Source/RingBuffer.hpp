@@ -170,6 +170,9 @@ struct RingBufferNodeBase : NodeContext
 	RingBuffer<std::unique_ptr<transfer::Slot>, Mode> Ring;
 	uint32_t Capacity = 1;
 	uint32_t RemainingRepeatCount = 0;
+	
+	bool CapacityUpdatedViaPathCommand = false;
+	
 	RingBufferNodeBase() : Ring(1)
 	{
 	}
@@ -238,6 +241,25 @@ struct RingBufferNodeBase : NodeContext
 		return NOS_RESULT_PENDING;
 	}
 
+	void OnPathCommand(const nosPathCommand* command) override
+	{
+		switch (command->Event)
+		{
+		case NOS_RING_SIZE_CHANGE: {
+				if (command->RingSize == 0)
+				{
+					nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
+					return;
+				}
+				CapacityUpdatedViaPathCommand = true;
+				SetPinValue(NOS_NAME("Capacity"), command->RingSize);
+				break;
+		}
+		default:
+			return;
+		}
+	}
+
 	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
 	{
 		if (NOS_NAME("Capacity") == pinName)
@@ -245,6 +267,12 @@ struct RingBufferNodeBase : NodeContext
 			auto newCapacity = *InterpretObject<uint32_t>(handle);
 			if (newCapacity != Capacity)
 			{
+				if (!CapacityUpdatedViaPathCommand)
+				{
+					nosPathCommand ringSizeChange{ .Event = NOS_RING_SIZE_CHANGE, .RingSize = newCapacity };
+					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
+					CapacityUpdatedViaPathCommand = false;
+				}
 				Capacity = std::max(1u, newCapacity);
 				SendPathRestart(NSN_Input);
 			}
