@@ -216,8 +216,6 @@ struct DelayNode : NodeContext
     nosName TypeName = NSN_TypeNameGeneric;
 	DelayQueue Queue;
 
-	uint64_t RemainingGuranteedExecuteCount = 0;
-
 	DelayNode(nosFbNodePtr node) : NodeContext(node), Queue(0)
 	{
 		for (auto pin : *node->pins())
