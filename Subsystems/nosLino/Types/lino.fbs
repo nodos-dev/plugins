@@ -6,4 +6,5 @@ table Channel
 {
 	name : string (id: 0);
 	size : nos.fb.vec2u (native_inline, id: 1);
+	preview : bool (id: 2);
 }
