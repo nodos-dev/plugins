@@ -94,76 +94,77 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY"
                     }
                 ],
-              "functions": [
-                {
-                  "class_name": "SetTableOfExistingTable",
-                  "description": "Sets test struct table of the Table pin's table subfield",
-                  "contents_type": "Job",
-                  "pins": []
-                },
-                {
-                  "class_name": "SetTablesWholeArray",
-                  "description": "Sets table array field of Table pin",
-                  "contents_type": "Job",
-                  "pins": []
-                },
-                {
-                  "class_name": "RemoveElement1",
-                  "description": "Remove element 1 from table array field of Table pin",
-                  "contents_type": "Job",
-                  "pins": []
-                },
-                {
-                  "class_name": "SetPinSubfieldVisualizer",
-                  "description": "Set visualizer of Table pin's table/table1/test1 subfield to given type with given name's string list using pin attributes",
-                  "contents_type": "Job",
-                  "pins": [
+                "functions": [
                     {
-                      "name": "SubfieldPath",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                        "class_name": "SetTableOfExistingTable",
+                        "description": "Sets test struct table of the Table pin's table subfield",
+                        "contents_type": "Job",
+                        "pins": []
                     },
                     {
-                      "name": "Type",
-                      "type_name": "nos.fb.VisualizerType",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                        "class_name": "SetTablesWholeArray",
+                        "description": "Sets table array field of Table pin",
+                        "contents_type": "Job",
+                        "pins": []
                     },
                     {
-                      "name": "Name",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                        "class_name": "RemoveElement1",
+                        "description": "Remove element 1 from table array field of Table pin",
+                        "contents_type": "Job",
+                        "pins": []
                     },
                     {
-                      "name": "FileExtensions",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
-                    },
-                    {
-                      "name": "DiscardedNames",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
-                    },
-                    {
-                      "name": "HideValue",
-                      "type_name": "bool",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
-                    },
-                    {
-                      "name": "FilePickerType",
-                      "type_name": "nos.fb.FilePickerType",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                        "class_name": "SetPinSubfieldVisualizer",
+                        "description": "Set visualizer of Table pin's table/table1/test1 subfield to given type with given name's string list using pin attributes",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "SubfieldPath",
+                                "type_name": "string",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "Type",
+                                "type_name": "nos.fb.VisualizerType",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "Name",
+                                "type_name": "string",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "FileExtensions",
+                                "type_name": "string",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "DiscardedNames",
+                                "type_name": "string",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "HideValue",
+                                "type_name": "bool",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            },
+                            {
+                                "name": "FilePickerType",
+                                "type_name": "nos.fb.FilePickerType",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            }
+                        ]
                     }
-                  ]
-                }
-              ]
+                ]
             }
         }
-    ]
+    ],
+    "schema_version": "1.4-v1"
 }
