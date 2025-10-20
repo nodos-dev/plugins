@@ -10,14 +10,12 @@ namespace nos::utilities
 {
 struct WaitGPUEventNode : NodeContext
 {
-	nosResult OnCreate(nosFbNodePtr node)
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		return NOS_RESULT_SUCCESS;
 	}
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		if (!inBuf.IsValid())
-			return NOS_RESULT_FAILED;
 		auto inGpuEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME_STATIC("Event"));
 		nosGPUEvent* event = nullptr;
 		if (inGpuEventHolder.IsValid())

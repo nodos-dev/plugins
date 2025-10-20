@@ -1,0 +1,38 @@
+{
+	"nodes": [
+		{
+			"class_name": "FulFillPromise",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Fulfill Promise",
+				"name_aliases": [ "signal", "sync" ]
+			},
+			"node": {
+				"class_name": "FulFillPromise",
+				"display_name": "Fulfill Promise",
+				"contents_type": "Job",
+				"description": "",
+				"pins": [
+					{
+						"name": "Trigger",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Promise",
+						"type_name": "nos.sync.Promise",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,11 @@
+include "Types/Types.fbs";
+include "Types/Sync.fbs";
+
+namespace nos.utilities;
+
+table BufferSyncEventsTuple
+{
+    buffer: nos.sys.vulkan.Buffer;
+    download_complete_gpu_event: nos.sys.vulkan.GPUEventHolder;
+    transfer_complete_promise: nos.sync.Promise;
+}

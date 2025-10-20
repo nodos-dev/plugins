@@ -1,0 +1,5 @@
+namespace nos.sync;
+
+table Promise
+{
+}

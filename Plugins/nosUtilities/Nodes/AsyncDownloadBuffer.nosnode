@@ -49,12 +49,20 @@
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					},
 					{
-						"name": "WaitEvent",
-						"display_name": "Wait Event",
+						"name": "DownloadCompleteGPUEvent",
+						"display_name": "Download Complete GPU Event",
 						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "The GPU event that can be waited on to ensure the download is complete"
+					},
+					{
+						"name": "TransferCompletePromise",
+						"display_name": "Transfer Complete Promise",
+                        "type_name": "nos.sync.Promise",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "CPU synchronization primitive for ensuring the use of the buffer is finished"
 					},
 					{
 						"name": "QueueSize",

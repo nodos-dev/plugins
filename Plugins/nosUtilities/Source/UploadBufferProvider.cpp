@@ -19,10 +19,10 @@ namespace nos::utilities
 struct UploadBuffer
 {
 	TypedObjectRef<sys::vulkan::Buffer> Buffer{};
-	TypedObjectRef<sys::vulkan::GPUEventHolder> EventHolder{};
+	TypedObjectRef<sys::vulkan::GPUEventHolder> DownloadCompleteEventHolder{};
 	UploadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "UploadBuffer"))
 	{
-		nosVulkan->CreateGPUEventHolder(&EventHolder.GetStorage());
+		nosVulkan->CreateGPUEventHolder(&DownloadCompleteEventHolder.GetStorage());
 	}
 	UploadBuffer(const UploadBuffer& other) = delete;
 	UploadBuffer& operator=(const UploadBuffer& other) = delete;
@@ -32,10 +32,10 @@ struct UploadBuffer
 
 	~UploadBuffer()
 	{
-		if (EventHolder)
+		if (DownloadCompleteEventHolder)
 		{
 			nosGPUEvent* event = nullptr;
-			auto res = nosVulkan->GetGPUEventFromHolder(EventHolder, &event);
+			auto res = nosVulkan->GetGPUEventFromHolder(DownloadCompleteEventHolder, &event);
 
 			if (res == NOS_RESULT_SUCCESS && *event)
 				nosVulkan->WaitGpuEvent(event, UINT64_MAX);
@@ -127,18 +127,18 @@ struct UploadBufferProviderNode : NodeContext
 			return NOS_RESULT_FAILED;
 		auto& nextBuf = Buffers[CurrentIndex];
 		CurrentIndex = (CurrentIndex + 1) % QueueSize;
-		if (nextBuf.EventHolder.IsValid())
+		if (nextBuf.DownloadCompleteEventHolder.IsValid())
 		{
 			util::Stopwatch sw;
 			nosGPUEvent* event = nullptr;
-			auto res = nosVulkan->GetGPUEventFromHolder(nextBuf.EventHolder, &event);
+			auto res = nosVulkan->GetGPUEventFromHolder(nextBuf.DownloadCompleteEventHolder, &event);
 			if (*event)
 				nosVulkan->WaitGpuEvent(event, UINT64_MAX);
-			nosEngine.WatchLog("UploadBufferProvider Wait", sw.ElapsedString().c_str());
+			nosEngine.WatchLog("AsyncDowloadBuffer Wait", sw.ElapsedString().c_str());
 		}
 
 		SetPinObject(NSN_Buffer, nextBuf.Buffer);
-		SetPinObject(NSN_GPUEventRef, nextBuf.EventHolder);
+		SetPinObject(NSN_GPUEventRef, nextBuf.DownloadCompleteEventHolder);
 
 		return NOS_RESULT_SUCCESS;
 	}
@@ -147,10 +147,10 @@ struct UploadBufferProviderNode : NodeContext
 	{
 		for (auto& buf : Buffers)
 		{
-			if (buf.EventHolder.IsValid())
+			if (buf.DownloadCompleteEventHolder.IsValid())
 			{
 				nosGPUEvent* event = nullptr;
-				auto res = nosVulkan->GetGPUEventFromHolder(buf.EventHolder, &event);
+				auto res = nosVulkan->GetGPUEventFromHolder(buf.DownloadCompleteEventHolder, &event);
 				if (*event)
 					nosVulkan->WaitGpuEvent(event, UINT64_MAX);
 			}

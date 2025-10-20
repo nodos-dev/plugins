@@ -6,6 +6,9 @@
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <Nodos/Utils/Stopwatch.hpp>
 
+#include <nosSync/nosSync.h>
+#include <nosSync/Sync_generated.h>
+
 NOS_REGISTER_NAME(Buffer);
 NOS_REGISTER_NAME(GPUEventRef);
 NOS_REGISTER_NAME(QueueSize);
@@ -19,10 +22,13 @@ namespace nos::utilities
 struct AsyncDownloadBuffer
 {
 	TypedObjectRef<sys::vulkan::Buffer> Buffer{};
-	TypedObjectRef<sys::vulkan::GPUEventHolder> EventHolder{};
+	TypedObjectRef<sys::vulkan::GPUEventHolder> DownloadCompleteEventHolder{};
+	TypedObjectRef<sync::Promise> TransferCompletePromise{};
+
 	AsyncDownloadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "AsyncDownloadBuffer"))
 	{
-		nosVulkan->CreateGPUEventHolder(&EventHolder.GetStorage());
+		nosVulkan->CreateGPUEventHolder(&DownloadCompleteEventHolder.GetStorage());
+		nosSync->CreatePromise("AsyncDownloadBuffer Transfer Complete", &TransferCompletePromise.GetStorage());
 	}
 	AsyncDownloadBuffer(const AsyncDownloadBuffer& other) = delete;
 	AsyncDownloadBuffer& operator=(const AsyncDownloadBuffer& other) = delete;
@@ -32,14 +38,6 @@ struct AsyncDownloadBuffer
 
 	~AsyncDownloadBuffer()
 	{
-		if (EventHolder)
-		{
-			nosGPUEvent* event = nullptr;
-			auto res = nosVulkan->GetGPUEventFromHolder(EventHolder, &event);
-
-			if (res == NOS_RESULT_SUCCESS && *event)
-				nosVulkan->WaitGpuEvent(event, UINT64_MAX);
-		}
 	}
 };
 
@@ -47,16 +45,21 @@ struct AsyncDownloadBufferNode : NodeContext
 {
 	nosBufferInfo SampleBufferInfo = {
 		.Size = 0,
-		.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC),
+		.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_DST),
 		.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY)};
 	std::vector<AsyncDownloadBuffer> Buffers;
 	uint64_t QueueSize = 2;
 
 	size_t CurrentIndex = 0;
 
-    void RecreateBuffers() const
+	TypedObjectRef<sys::vulkan::Buffer> CurrentInput;
+
+    void RecreateBuffers()
     {
-        
+		Buffers.clear();
+		for (size_t i = 0; i < QueueSize; i++)
+			Buffers.emplace_back(SampleBufferInfo);
+		CurrentIndex = 0;
     }
 
 	nosResult OnCreate(nosFbNodePtr node) override
@@ -69,30 +72,29 @@ struct AsyncDownloadBufferNode : NodeContext
 				return;
 			if (SampleBufferInfo.Size == 0)
 				return;
-			Buffers.clear();
-			for (size_t i = 0; i < QueueSize; i++)
-				Buffers.emplace_back(SampleBufferInfo);
-			CurrentIndex = 0;
+			RecreateBuffers();
 		});
-		AddPinValueWatcher<uint64_t>(NSN_BufferSize, [this](uint64_t* newSize, auto) {
-			if (*newSize == 0)
+		AddPinObjectWatcher<sys::vulkan::Buffer>(NOS_NAME("Input"), [this](TypedObjectRef<sys::vulkan::Buffer> const& newInput, auto) {
+			CurrentInput = newInput;
+			if (!newInput)
 				return;
-			if (SampleBufferInfo.Size == *newSize)
+			auto sampleInfo = sys::vulkan::GetResourceInfo(CurrentInput);
+			if (!sampleInfo)
 				return;
-			SampleBufferInfo.Size = *newSize;
-			Buffers.clear();
-			for (size_t i = 0; i < QueueSize; i++)
-				Buffers.emplace_back(SampleBufferInfo);
+			auto alignment = SampleBufferInfo.Alignment;
+			auto memflags = SampleBufferInfo.MemoryFlags;
+			SampleBufferInfo = *sampleInfo;
+			SampleBufferInfo.Alignment = alignment;
+			SampleBufferInfo.MemoryFlags = memflags;
+			RecreateBuffers();
 		});
 		AddPinValueWatcher<uint64_t>(NSN_Alignment, [this](uint64_t* newAlignment, auto) {
 			if (SampleBufferInfo.Alignment == *newAlignment)
 				return;
 			SampleBufferInfo.Alignment = *newAlignment;
-			Buffers.clear();
 			if (SampleBufferInfo.Size == 0)
 				return;
-			for (size_t i = 0; i < QueueSize; i++)
-				Buffers.emplace_back(SampleBufferInfo);
+			RecreateBuffers();
 		});
 		AddPinValueWatcher<bool>(NSN_ForceHostMemory, [this](bool* newForceHostMemory, auto) {
 			auto& memFlags = SampleBufferInfo.MemoryFlags;
@@ -102,27 +104,22 @@ struct AsyncDownloadBufferNode : NodeContext
 				memFlags = nosMemoryFlags(memFlags | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY);
 			else
 				memFlags = nosMemoryFlags(memFlags & ~NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY);
-			Buffers.clear();
 			if (SampleBufferInfo.Size == 0)
 				return;
-			for (size_t i = 0; i < QueueSize; i++)
-				Buffers.emplace_back(SampleBufferInfo);
+			RecreateBuffers();
 		});
-		AddPinValueWatcher<bool>(NSN_UseHostCachedMemory,
-						   [this](bool* newHostCached, auto) {
-							   auto& memFlags = SampleBufferInfo.MemoryFlags;
-							   if (!!(memFlags & NOS_MEMORY_FLAGS_DOWNLOAD) == *newHostCached)
-								   return;
-							   if (*newHostCached)
-								   memFlags = nosMemoryFlags(memFlags | NOS_MEMORY_FLAGS_DOWNLOAD);
-							   else
-								   memFlags = nosMemoryFlags(memFlags & ~NOS_MEMORY_FLAGS_DOWNLOAD);
-							   Buffers.clear();
-							   if (SampleBufferInfo.Size == 0)
-								   return;
-							   for (size_t i = 0; i < QueueSize; i++)
-								   Buffers.emplace_back(SampleBufferInfo);
-						   });
+		AddPinValueWatcher<bool>(NSN_UseHostCachedMemory, [this](bool* newHostCached, auto) {
+			auto& memFlags = SampleBufferInfo.MemoryFlags;
+			if (!!(memFlags & NOS_MEMORY_FLAGS_DOWNLOAD) == *newHostCached)
+				return;
+			if (*newHostCached)
+				memFlags = nosMemoryFlags(memFlags | NOS_MEMORY_FLAGS_DOWNLOAD);
+			else
+				memFlags = nosMemoryFlags(memFlags & ~NOS_MEMORY_FLAGS_DOWNLOAD);
+			if (SampleBufferInfo.Size == 0)
+				return;
+			RecreateBuffers();
+		});
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -132,18 +129,27 @@ struct AsyncDownloadBufferNode : NodeContext
 			return NOS_RESULT_FAILED;
 		auto& nextBuf = Buffers[CurrentIndex];
 		CurrentIndex = (CurrentIndex + 1) % QueueSize;
-		if (nextBuf.EventHolder.IsValid())
+		nosCmd cmd{};
+		nosGPUEvent* downloadCompleteEvent{};
+		nosCmdBeginParams beginParams{
+			.Name = NOS_NAME("AsyncDownloadBuffer Copy"),
+			.AssociatedNodeId = NodeId,
+			.OutCmdHandle = &cmd,
+		};
+		nosVulkan->Begin(&beginParams);
+		if (nextBuf.DownloadCompleteEventHolder.IsValid())
 		{
-			util::Stopwatch sw;
-			nosGPUEvent* event = nullptr;
-			auto res = nosVulkan->GetGPUEventFromHolder(nextBuf.EventHolder, &event);
-			if (*event)
-				nosVulkan->WaitGpuEvent(event, UINT64_MAX);
-			nosEngine.WatchLog("UploadBufferProvider Wait", sw.ElapsedString().c_str());
+			nosVulkan->GetGPUEventFromHolder(nextBuf.DownloadCompleteEventHolder, &downloadCompleteEvent);
 		}
+		nosVulkan->Copy(cmd, CurrentInput, nextBuf.Buffer, nullptr);
+		nosCmdEndParams endParams{
+			.OutGPUEventHandle = downloadCompleteEvent,
+		};
+		nosVulkan->End(cmd, &endParams);
 
 		SetPinObject(NSN_Buffer, nextBuf.Buffer);
-		SetPinObject(NSN_GPUEventRef, nextBuf.EventHolder);
+		SetPinObject(NOS_NAME("DownloadCompleteGPUEvent"), nextBuf.DownloadCompleteEventHolder);
+    	SetPinObject(NOS_NAME("TransferCompletePromise"), nextBuf.TransferCompletePromise);
 
 		return NOS_RESULT_SUCCESS;
 	}
@@ -152,10 +158,10 @@ struct AsyncDownloadBufferNode : NodeContext
 	{
 		for (auto& buf : Buffers)
 		{
-			if (buf.EventHolder.IsValid())
+			if (buf.DownloadCompleteEventHolder.IsValid())
 			{
 				nosGPUEvent* event = nullptr;
-				auto res = nosVulkan->GetGPUEventFromHolder(buf.EventHolder, &event);
+				auto res = nosVulkan->GetGPUEventFromHolder(buf.DownloadCompleteEventHolder, &event);
 				if (*event)
 					nosVulkan->WaitGpuEvent(event, UINT64_MAX);
 			}

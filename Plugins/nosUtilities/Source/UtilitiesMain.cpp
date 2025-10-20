@@ -7,12 +7,15 @@
 #include <Module_generated.h>
 
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
+#include <nosSync/nosSync.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
+NOS_SYNC_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
+	NOS_SYNC_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 NOS_REGISTER_NAME(Input);
@@ -62,6 +65,7 @@ enum Utilities : int
 	ReduceTexture,
 	MultiLiveOut,
 	AsyncDownloadBuffer,
+	WaitGPUEvent,
 	Count
 };
 
