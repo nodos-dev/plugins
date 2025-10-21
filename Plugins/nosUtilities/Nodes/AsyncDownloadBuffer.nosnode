@@ -68,7 +68,7 @@
 						"name": "QueueSize",
 						"type_name": "uint",
 						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 2
 					},
 					{

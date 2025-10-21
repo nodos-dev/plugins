@@ -24,6 +24,7 @@ struct AsyncDownloadBuffer
 	TypedObjectRef<sys::vulkan::Buffer> Buffer{};
 	TypedObjectRef<sys::vulkan::GPUEventHolder> DownloadCompleteEventHolder{};
 	TypedObjectRef<sync::Promise> TransferCompletePromise{};
+	bool Served = false;
 
 	AsyncDownloadBuffer(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "AsyncDownloadBuffer"))
 	{
@@ -35,10 +36,11 @@ struct AsyncDownloadBuffer
 	AsyncDownloadBuffer(AsyncDownloadBuffer&&) = default;
 	AsyncDownloadBuffer& operator=(AsyncDownloadBuffer&&) = default;
 
-
 	~AsyncDownloadBuffer()
 	{
 	}
+
+
 };
 
 struct AsyncDownloadBufferNode : NodeContext
@@ -46,7 +48,7 @@ struct AsyncDownloadBufferNode : NodeContext
 	nosBufferInfo SampleBufferInfo = {
 		.Size = 0,
 		.Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_DST),
-		.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY)};
+		.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY) };
 	std::vector<AsyncDownloadBuffer> Buffers;
 	uint64_t QueueSize = 2;
 
@@ -54,13 +56,13 @@ struct AsyncDownloadBufferNode : NodeContext
 
 	TypedObjectRef<sys::vulkan::Buffer> CurrentInput;
 
-    void RecreateBuffers()
-    {
+	void RecreateBuffers()
+	{
 		Buffers.clear();
 		for (size_t i = 0; i < QueueSize; i++)
 			Buffers.emplace_back(SampleBufferInfo);
 		CurrentIndex = 0;
-    }
+	}
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -128,6 +130,18 @@ struct AsyncDownloadBufferNode : NodeContext
 		if (Buffers.size() == 0)
 			return NOS_RESULT_FAILED;
 		auto& nextBuf = Buffers[CurrentIndex];
+		if (nextBuf.Served && nextBuf.TransferCompletePromise.IsValid())
+		{
+			auto res = nosSync->WaitPromise(nextBuf.TransferCompletePromise, 1'000'000'000);
+			if (res != NOS_RESULT_SUCCESS)
+			{
+				if (res == NOS_RESULT_TIMEOUT)
+					nosEngine.LogW("AsyncDownloadBuffer: Timeout waiting for previous transfer to complete.");
+				else
+					nosEngine.LogE("AsyncDownloadBuffer: Failed waiting for previous transfer to complete.");
+			}
+		}
+
 		CurrentIndex = (CurrentIndex + 1) % QueueSize;
 		nosCmd cmd{};
 		nosGPUEvent* downloadCompleteEvent{};
@@ -150,7 +164,8 @@ struct AsyncDownloadBufferNode : NodeContext
 
 		SetPinObject(NOS_NAME("OutputBuffer"), nextBuf.Buffer);
 		SetPinObject(NOS_NAME("DownloadCompleteGPUEvent"), nextBuf.DownloadCompleteEventHolder);
-    	SetPinObject(NOS_NAME("TransferCompletePromise"), nextBuf.TransferCompletePromise);
+		SetPinObject(NOS_NAME("TransferCompletePromise"), nextBuf.TransferCompletePromise);
+		nextBuf.Served = true;
 
 		return NOS_RESULT_SUCCESS;
 	}

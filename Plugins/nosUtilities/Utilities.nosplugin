@@ -18,6 +18,10 @@
 			{
 				"name": "nos.sync",
 				"version": "11.1"
+			},
+			{
+				"name": "nos.audio",
+				"version": "1.0"
 			}
 		],
 		"category": "Utilities"

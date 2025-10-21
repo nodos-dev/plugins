@@ -245,7 +245,7 @@ struct RingBufferNodeBase : NodeContext
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		SendRingStats("Pre Begin Pop");
-		if constexpr (Mode == ServeMode::Immediate)
+		if constexpr (Mode == ServeMode::WaitUntilFull)
 		{
 			if (RemainingRepeatCount > 0)
 			{
