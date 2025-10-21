@@ -66,6 +66,7 @@ enum Utilities : int
 	MultiLiveOut,
 	AsyncDownloadBuffer,
 	WaitGPUEvent,
+	ScheduleRequest,
 	Count
 };
 
@@ -107,6 +108,7 @@ nosResult RegisterReduceTexture(nosNodeFunctions*);
 nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions*);
 nosResult RegisterWaitGPUEvent(nosNodeFunctions*);
+nosResult RegisterScheduleRequest(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -164,6 +166,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(MultiLiveOut)
 			GEN_CASE_NODE(AsyncDownloadBuffer)
 			GEN_CASE_NODE(WaitGPUEvent)
+			GEN_CASE_NODE(ScheduleRequest)
 		}
 	}
 	

@@ -30,6 +30,13 @@
 						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "TimeoutMs",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 100
 					}
 				]
 			}

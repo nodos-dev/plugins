@@ -17,19 +17,19 @@ struct WaitGPUEventNode : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto inGpuEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME_STATIC("Event"));
+		auto timeoutMs = *params.GetPinData<uint32_t>(NOS_NAME_STATIC("TimeoutMs"));
 		nosGPUEvent* event = nullptr;
 		if (inGpuEventHolder.IsValid())
 		{
 			auto res = nosVulkan->GetGPUEventFromHolder(inGpuEventHolder, &event);
-			assert(res != NOS_RESULT_SUCCESS || *event == 0);
+			// NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS && *event != 0, "Failed to get event");
 		}
 		if (event && *event)
 		{
-			nosVulkan->WaitGpuEvent(event, UINT64_MAX);
+			return nosVulkan->WaitGpuEvent(event, timeoutMs * 1'000'000);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
-
 };
 
 nosResult RegisterWaitGPUEvent(nosNodeFunctions* functions)

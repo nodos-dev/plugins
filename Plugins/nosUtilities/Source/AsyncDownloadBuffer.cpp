@@ -143,11 +143,12 @@ struct AsyncDownloadBufferNode : NodeContext
 		}
 		nosVulkan->Copy(cmd, CurrentInput, nextBuf.Buffer, nullptr);
 		nosCmdEndParams endParams{
+			.ForceSubmit = NOS_TRUE,
 			.OutGPUEventHandle = downloadCompleteEvent,
 		};
 		nosVulkan->End(cmd, &endParams);
 
-		SetPinObject(NSN_Buffer, nextBuf.Buffer);
+		SetPinObject(NOS_NAME("OutputBuffer"), nextBuf.Buffer);
 		SetPinObject(NOS_NAME("DownloadCompleteGPUEvent"), nextBuf.DownloadCompleteEventHolder);
     	SetPinObject(NOS_NAME("TransferCompletePromise"), nextBuf.TransferCompletePromise);
 
@@ -163,7 +164,7 @@ struct AsyncDownloadBufferNode : NodeContext
 				nosGPUEvent* event = nullptr;
 				auto res = nosVulkan->GetGPUEventFromHolder(buf.DownloadCompleteEventHolder, &event);
 				if (*event)
-					nosVulkan->WaitGpuEvent(event, UINT64_MAX);
+					nosVulkan->WaitGpuEvent(event, 1'000'000'000);
 			}
 		}
 		CurrentIndex = 0;
