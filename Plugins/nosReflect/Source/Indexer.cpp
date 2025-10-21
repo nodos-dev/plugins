@@ -8,64 +8,64 @@ struct Indexer : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 
-    uint32_t Index = 0;
+	uint32_t Index = 0;
 	uint32_t ArraySize = 0;
-    
-    nosResult OnCreate(nosFbNodePtr inNode) override
-    {
-        for (auto pin : *inNode->pins())
-        {
-			if(pin->name()->string_view() == NSN_Output)
-            {
-                if (pin->type_name()->string_view() != NSN_TypeNameGeneric)
-                {
+
+	nosResult OnCreate(nosFbNodePtr inNode) override
+	{
+		for (auto pin : *inNode->pins())
+		{
+			if (pin->name()->string_view() == NSN_Output)
+			{
+				if (pin->type_name()->string_view() != NSN_TypeNameGeneric)
+				{
 					Type = nos::TypeInfo(nos::Name(pin->type_name()->string_view()));
-                }
-            }
-			else if (pin->name()->string_view() == NSN_Index) 
+				}
+			}
+			else if (pin->name()->string_view() == NSN_Index)
 			{
 				if (flatbuffers::IsFieldPresent(pin, fb::Pin::VT_DATA))
-			        Index = *(uint32_t*)pin->data()->Data();
-            }
-        }
+					Index = *(uint32_t*)pin->data()->Data();
+			}
+		}
 		return NOS_RESULT_SUCCESS;
-    }
+	}
 
-    nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
-    {
+	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
+	{
 		if (params->InstigatorPinName == NSN_Input)
 		{
-            nos::TypeInfo info(params->IncomingTypeName);
+			nos::TypeInfo info(params->IncomingTypeName);
 			if (info->BaseType != NOS_BASE_TYPE_ARRAY)
 			{
-                strcpy(params->OutErrorMessage, "Input pin must be an array type");
+				strcpy(params->OutErrorMessage, "Input pin must be an array type");
 				return NOS_RESULT_FAILED;
 			}
-            
-            nos::Name elementName = info->ElementType->TypeName;
 
-            for (size_t i = 0; i < params->PinCount; i++)
-            {
-                auto& pinInfo = params->Pins[i];
+			nos::Name elementName = info->ElementType->TypeName;
+
+			for (size_t i = 0; i < params->PinCount; i++)
+			{
+				auto& pinInfo = params->Pins[i];
 				if (pinInfo.Name == NSN_Output)
-                {
+				{
 					pinInfo.OutResolvedTypeName = elementName;
 					break;
 				}
-            }
+			}
 
-            return NOS_RESULT_SUCCESS;
-        }
-        else if (params->InstigatorPinName == NSN_Output)
-        {
-            nos::TypeInfo info(params->IncomingTypeName);
-            if (info->BaseType == NOS_BASE_TYPE_ARRAY)
-            {
+			return NOS_RESULT_SUCCESS;
+		}
+		else if (params->InstigatorPinName == NSN_Output)
+		{
+			nos::TypeInfo info(params->IncomingTypeName);
+			if (info->BaseType == NOS_BASE_TYPE_ARRAY)
+			{
 				strcpy(params->OutErrorMessage, "Output pin must not be an array type");
 				return NOS_RESULT_FAILED;
-            }
+			}
 			nos::Name arrayName = nos::Name("[" + nos::Name(info.TypeName).AsString() + "]");
-            for (size_t i = 0; i < params->PinCount; i++)
+			for (size_t i = 0; i < params->PinCount; i++)
 			{
 				auto& pinInfo = params->Pins[i];
 				if (pinInfo.Name == NSN_Input)
@@ -75,11 +75,11 @@ struct Indexer : NodeContext
 				}
 			}
 
-            return NOS_RESULT_SUCCESS;
-        }
+			return NOS_RESULT_SUCCESS;
+		}
 		return NOS_RESULT_FAILED;
 	}
-    
+
 	void OnPinUpdated(nosPinUpdate const* update) override
 	{
 		if (Type || update->UpdatedField != NOS_PIN_FIELD_TYPE_NAME)
@@ -98,21 +98,22 @@ struct Indexer : NodeContext
 			}
 			Type = nos::TypeInfo(newTypeName);
 		}
-		UpdateInputVectorSize();
 	}
 
 	bool SetIndex(uint32_t newIndex)
-    {
+	{
 		Index = newIndex;
-    	if (Index >= ArraySize)
-    	{
-			SetNodeStatusMessages({{{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true}});
+		if (Index >= ArraySize)
+		{
+			SetNodeStatusMessages({
+				{{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true}
+			});
 			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
-    		return false;
-    	}
+			return false;
+		}
 		ClearOutputState();
-    	return true;
-    }
+		return true;
+	}
 
 	void ClearOutputState()
 	{
@@ -120,70 +121,49 @@ struct Indexer : NodeContext
 		ClearNodeStatusMessages();
 	}
 
-	bool UpdateInputVectorSize() {
-		std::vector<uint8_t> data;
-
-		if (auto buf = GetDefaultValueOfType(Type->TypeName))
-		{
-			data = std::vector<uint8_t>{(uint8_t*)buf->Data(), (uint8_t*)buf->Data() + buf->Size()};
-		}
-
-		std::vector<const void*> datas = { data.data() };
-
-		auto inPin = GetPin(NSN_Input);
-		if (!inPin || !Type)
-			return false;
-
-		return AddElementToArray(inPin->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, 0 } }, { data.data(), data.size() }) == NOS_RESULT_SUCCESS;
-	}
-	
-    nosResult ExecuteNode(NodeExecuteParams const& params) override
-    {
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
+	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
-
-		// TODO: Transfer what is this?
-		// if (!params[NSN_Input].Data)
-		//{
-		//	UpdateInputVectorSize();
-		//}
-
-		auto vec = params.GetPinData<VectorObjectData<uint8_t>>(NSN_Input);
-    	ArraySize = vec->size();
-		if (!SetIndex(*params.GetPinData<uint32_t>(NSN_Index)))
-			return NOS_RESULT_FAILED;
-		auto ID = params[NSN_Output].Id;
-		auto& type = *Type;
-
-		nosQueryBufferParams queryParams = {};
-		queryParams.TypeName = nos::Name("[" + nos::Name(type->TypeName).AsString() + "]");
-		queryParams.Buffer = params.GetPinDataBuffer(NSN_Input);
-		nosDataPathComponent queryPath;
-		queryPath.ComponentType = nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT;
-		queryPath.Component.ArrayIndex = Index;
-		queryParams.Path = &queryPath;
-		queryParams.PathLength = 1;
-		auto element = QueryBuffer(queryParams);
-		if (!element)
+		
+		auto vecObj = params.GetPinObject<ArrayObjectRef>(NSN_Input);
+		if (!vecObj.IsValid())
 		{
-			SetNodeStatusMessages({ {{}, "Failed to query buffer", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
-			return NOS_RESULT_FAILED;
+			SetNodeStatusMessages({
+				{{}, "Input array is not valid", fb::NodeStatusMessageType::FAILURE, "", 5, true}
+			});
+			return NOS_RESULT_FAILURE;
 		}
-		SetPinValue(ID, *element);
-		return NOS_RESULT_SUCCESS;
-    }
+		
+		ArraySize = vecObj.GetSize();
 
-	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
-    {
-        if (pinName == NSN_Index)
-        {
-        	SetIndex(*InterpretObjectData<uint32_t>(value));
+		SetIndex(*params.GetPinData<uint32_t>(NSN_Index));
+
+		auto elem = vecObj.GetElement(Index);
+		if (!elem || !elem->IsValid())
+			return NOS_RESULT_SUCCESS;
+
+		SetPinObject(NSN_Output, *elem);
+		return NOS_RESULT_SUCCESS;
+	}
+
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId newObj) override
+	{
+		if (pinName == NSN_Index)
+		{
+			auto value = GetPrimitiveObjectDataView(newObj);
+			if (!value)
+				return;
+			SetIndex(*static_cast<uint32_t*>(value->Data));
 		}
-        else if (pinName == NSN_Input)
-        {
+		else if (pinName == NSN_Input)
+		{
 			if (!Type)
 				return;
-			ArraySize = InterpretObjectData<VectorObjectData<uint8_t>>(value)->size();
+			auto vecObj = ArrayObjectRef::FromObjectId(newObj);
+			if (!vecObj.IsValid())
+				return;
+			ArraySize = vecObj.GetSize();
 			SetIndex(Index);
 		}
 	}
@@ -194,5 +174,4 @@ nosResult RegisterIndexer(nosNodeFunctions* fn)
 	NOS_BIND_NODE_CLASS(NSN_Indexer, Indexer, fn);
 	return NOS_RESULT_SUCCESS;
 }
-
 } // namespace nos
