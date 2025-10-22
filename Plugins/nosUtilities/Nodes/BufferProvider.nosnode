@@ -1,0 +1,92 @@
+{
+	"nodes": [
+		{
+			"class_name": "BufferProvider",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Buffer Provider",
+				"name_aliases": [ "staging", "temporary", "async", "download", "upload" ]
+			},
+			"node": {
+				"class_name": "BufferProvider",
+				"display_name": "Buffer Provider",
+				"contents_type": "Job",
+				"description": "",
+				"pins": [
+					{
+						"name": "Run",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "OutputBuffer",
+						"display_name": "Output Buffer",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "OUTPUT_PIN",
+						"description": "The destination buffer that the download has started",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "GPUEventHolder",
+						"display_name": "GPU Event Holder",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Holds the GPU event that can be waited on to ensure the operation is completed on the GPU"
+					},
+					{
+						"name": "HostUseCompletePromise",
+						"display_name": "Host Use Complete Promise",
+						"type_name": "nos.sync.Promise",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Host synchronization primitive for ensuring the use of the buffer is finished"
+					},
+					{
+						"name": "Alignment",
+						"description": "Used for creating memory-aligned buffers in memory",
+						"type_name": "uint",
+						"def": 0,
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "BufferCount",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2
+					},
+					{
+						"name": "BufferSize",
+						"type_name": "ulong",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1024
+					},
+					{
+						"name": "MemoryFlags",
+						"type_name": "nos.sys.vulkan.MemoryFlags",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "HOST_VISIBLE"
+					},
+					{
+						"name": "Usage",
+						"type_name": "nos.sys.vulkan.BufferUsage",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER"
+					}
+				]
+			}
+		}
+	]
+}
