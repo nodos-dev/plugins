@@ -20,6 +20,12 @@ table AudioPacketSyncEventsTuple
 
 table VideoFrame
 {
+    audio_packet: nos.audio.AudioPacket;
+    frame_buffer: BufferSyncEventsTuple;
+}
+
+table VideoFrameWithAudioSyncEvents
+{
     audio_packet: AudioPacketSyncEventsTuple;
     frame_buffer: BufferSyncEventsTuple;
 }

@@ -39,7 +39,7 @@
 						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "Holds the GPU event that can be waited on to ensure the operation is completed on the GPU"
+						"description": "A GPU Event slot for synchronization"
 					},
 					{
 						"name": "HostUseCompletePromise",

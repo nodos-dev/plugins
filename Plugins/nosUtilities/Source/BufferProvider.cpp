@@ -115,9 +115,9 @@ struct BufferProviderNode : NodeContext
 			if (res != NOS_RESULT_SUCCESS)
 			{
 				if (res == NOS_RESULT_TIMEOUT)
-					nosEngine.LogW("Buffer: Timeout waiting for previous transfer to complete.");
+					nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.", GetDisplayName().c_str());
 				else
-					nosEngine.LogE("Buffer: Failed waiting for previous transfer to complete.");
+					nosEngine.LogE("%s: Failed waiting for previous transfer to complete.", GetDisplayName().c_str());
 			}
 		}
 
@@ -142,6 +142,7 @@ struct BufferProviderNode : NodeContext
 					nosVulkan->WaitGpuEvent(event, 1'000'000'000);
 			}
 		}
+		RecreateBuffers();
 		CurrentIndex = 0;
 	}
 

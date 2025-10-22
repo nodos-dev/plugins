@@ -69,6 +69,7 @@ enum Utilities : int
 	ScheduleRequest,
 	BufferProvider,
 	CopyBuffer,
+	HostVisibleBufferCopy,
 	Count
 };
 
@@ -113,6 +114,7 @@ nosResult RegisterWaitGPUEvent(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
 nosResult RegisterBufferProvider(nosNodeFunctions*);
 nosResult RegisterCopyBuffer(nosNodeFunctions*);
+nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -173,6 +175,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(ScheduleRequest)
 			GEN_CASE_NODE(BufferProvider)
 			GEN_CASE_NODE(CopyBuffer)
+			GEN_CASE_NODE(HostVisibleBufferCopy)
 		}
 	}
 	

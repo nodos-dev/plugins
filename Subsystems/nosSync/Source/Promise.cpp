@@ -13,7 +13,7 @@ struct PromiseObject
 {
 	std::mutex Mutex;
 	std::condition_variable Condition;
-	bool IsFulfilled{false};
+	bool IsFulfilled{ false };
 
 	~PromiseObject()
 	{
@@ -24,7 +24,7 @@ struct PromiseObject
 	void Reset()
 	{
 		{
-			std::lock_guard<std::mutex> lock(Mutex);
+			std::unique_lock lock(Mutex);
 			IsFulfilled = false;
 		}
 		Condition.notify_all();
@@ -32,20 +32,27 @@ struct PromiseObject
 
 	nosResult Wait(uint64_t timeoutNs)
 	{
-		std::unique_lock<std::mutex> lock(Mutex);
+		std::unique_lock lock(Mutex);
 		bool success = Condition.wait_for(
 			lock,
 			std::chrono::nanoseconds(timeoutNs),
 			[this] { return IsFulfilled; }
 		);
 
-		return success ? NOS_RESULT_SUCCESS : NOS_RESULT_TIMEOUT;
+		if (success)
+		{
+			// Automatically reset after successful wait
+			IsFulfilled = false;
+			return NOS_RESULT_SUCCESS;
+		}
+
+		return NOS_RESULT_TIMEOUT;
 	}
 
 	void Fulfill()
 	{
 		{
-			std::lock_guard<std::mutex> lock(Mutex);
+			std::unique_lock lock(Mutex);
 			IsFulfilled = true;
 		}
 		Condition.notify_all();
