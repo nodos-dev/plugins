@@ -26,10 +26,11 @@ struct BufferSlot
 	TypedObjectRef<sys::vulkan::GPUEventHolder> GPUEventHolder{};
 	TypedObjectRef<sync::Promise> HostUseCompletePromise{};
 	bool Served = false;
-	BufferSlot(nosBufferInfo sampleBufferInfo) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "Buffer"))
+	BufferSlot(nosBufferInfo sampleBufferInfo, bool requireHostUseCompletion) : Buffer(sys::vulkan::CreateBuffer(sampleBufferInfo, "Buffer"))
 	{
 		nosVulkan->CreateGPUEventHolder(&GPUEventHolder.GetStorage());
-		nosSync->CreatePromise("Host Use Complete", &HostUseCompletePromise.GetStorage());
+		if (requireHostUseCompletion)
+			nosSync->CreatePromise("Host Use Complete", &HostUseCompletePromise.GetStorage());
 	}
 	BufferSlot(const BufferSlot& other) = delete;
 	BufferSlot& operator=(const BufferSlot& other) = delete;
@@ -48,6 +49,8 @@ struct BufferProviderNode : NodeContext
 		.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY) };
 	std::vector<BufferSlot> Buffers;
 	uint64_t BufferCount = 2;
+	bool ResizeOnPathRingSizeChanged = true;
+	bool RequireHostUseCompletion = true;
 
 	size_t CurrentIndex = 0;
 
@@ -55,9 +58,11 @@ struct BufferProviderNode : NodeContext
 
 	void RecreateBuffers()
 	{
+		if (SampleBufferInfo.Size == 0)
+			return;
 		Buffers.clear();
 		for (size_t i = 0; i < BufferCount; i++)
-			Buffers.emplace_back(SampleBufferInfo);
+			Buffers.emplace_back(SampleBufferInfo, RequireHostUseCompletion);
 		CurrentIndex = 0;
 	}
 
@@ -69,37 +74,47 @@ struct BufferProviderNode : NodeContext
 				return;
 			if (Buffers.size() == BufferCount)
 				return;
-			if (SampleBufferInfo.Size == 0)
-				return;
 			RecreateBuffers();
 		});
 		AddPinValueWatcher<uint32_t>(NSN_Alignment, [this](uint32_t* newAlignment, auto) {
 			if (SampleBufferInfo.Alignment == *newAlignment)
 				return;
 			SampleBufferInfo.Alignment = *newAlignment;
-			if (SampleBufferInfo.Size == 0)
-				return;
 			RecreateBuffers();
 		});
 		AddPinValueWatcher<uint64_t>(NSN_BufferSize, [this](uint64_t* newSize, auto) {
 			if (SampleBufferInfo.Size == *newSize)
 				return;
 			SampleBufferInfo.Size = *newSize;
-			if (SampleBufferInfo.Size == 0)
-				return;
 			RecreateBuffers();
 		});
 		AddPinValueWatcher<nos::sys::vulkan::MemoryFlags>(NSN_MemoryFlags, [this](nos::sys::vulkan::MemoryFlags* newMemoryFlags, auto) {
-			SampleBufferInfo.MemoryFlags = nosMemoryFlags(*newMemoryFlags);
-			if (SampleBufferInfo.Size == 0)
+			auto newVal = nosMemoryFlags(*newMemoryFlags);
+			if (SampleBufferInfo.MemoryFlags == newVal)
 				return;
+			SampleBufferInfo.MemoryFlags = newVal;
 			RecreateBuffers();
 		});
 		AddPinValueWatcher<nos::sys::vulkan::BufferUsage>(NSN_Usage, [this](nos::sys::vulkan::BufferUsage* newUsage, auto) {
-			SampleBufferInfo.Usage = nosBufferUsage(*newUsage);
-			if (SampleBufferInfo.Size == 0)
+			auto newVal = nosBufferUsage(*newUsage);
+			if (SampleBufferInfo.Usage == newVal)
 				return;
+			SampleBufferInfo.Usage = newVal;
 			RecreateBuffers();
+		});
+		AddPinValueWatcher<bool>(NOS_NAME("ResizeOnPathRingSizeChanged"), [this](bool* newVal, auto) {
+			ResizeOnPathRingSizeChanged = *newVal;
+		});
+		AddPinValueWatcher<bool>(NOS_NAME("RequireHostUseCompletion"), [this](bool* newVal, auto) {
+			if (RequireHostUseCompletion != *newVal)
+			{
+				RequireHostUseCompletion = *newVal;
+				if (RequireHostUseCompletion)
+					SetPinOrphanState(NOS_NAME("HostUseCompletePromise"), fb::PinOrphanStateType::ACTIVE);
+				else
+					SetPinOrphanState(NOS_NAME("HostUseCompletePromise"), fb::PinOrphanStateType::ORPHAN, "Waiting on host use completion is disabled");
+				RecreateBuffers();
+			}
 		});
 		return NOS_RESULT_SUCCESS;
 	}
@@ -109,15 +124,34 @@ struct BufferProviderNode : NodeContext
 		if (Buffers.size() == 0)
 			return NOS_RESULT_FAILED;
 		auto& bufToServe = Buffers[CurrentIndex];
-		if (bufToServe.Served && bufToServe.HostUseCompletePromise.IsValid())
+		if (bufToServe.Served)
 		{
-			auto res = nosSync->WaitPromise(bufToServe.HostUseCompletePromise, 100'000'000);
-			if (res != NOS_RESULT_SUCCESS)
+			if (bufToServe.HostUseCompletePromise)
 			{
-				if (res == NOS_RESULT_TIMEOUT)
-					nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.", GetDisplayName().c_str());
-				else
-					nosEngine.LogE("%s: Failed waiting for previous transfer to complete.", GetDisplayName().c_str());
+				auto res = nosSync->WaitPromise(bufToServe.HostUseCompletePromise, 100'000'000);
+				if (res != NOS_RESULT_SUCCESS)
+				{
+					if (res == NOS_RESULT_TIMEOUT)
+						nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.", GetDisplayName().c_str());
+					else
+						nosEngine.LogE("%s: Failed waiting for previous transfer to complete.", GetDisplayName().c_str());
+				}
+			}
+			if (bufToServe.GPUEventHolder)
+			{
+				nosGPUEvent* event = nullptr;
+				auto res = nosVulkan->GetGPUEventFromHolder(bufToServe.GPUEventHolder, &event);
+				if (*event)
+				{
+					res = nosVulkan->WaitGpuEvent(event, 100'000'000);
+					if (res != NOS_RESULT_SUCCESS)
+					{
+						if (res == NOS_RESULT_TIMEOUT)
+							nosEngine.LogW("%s: Timeout waiting for GPU to complete operations on the buffer.", GetDisplayName().c_str());
+						else
+							nosEngine.LogE("%s: Failed waiting for GPU to complete operations on the buffer.", GetDisplayName().c_str());
+					}
+				}
 			}
 		}
 
@@ -151,6 +185,8 @@ struct BufferProviderNode : NodeContext
 		switch (command->Event)
 		{
 		case NOS_RING_SIZE_CHANGE: {
+			if (!ResizeOnPathRingSizeChanged)
+				return;
 			if (command->RingSize == 0)
 			{
 				nosEngine.LogW("Buffer provider size cannot be 0");
