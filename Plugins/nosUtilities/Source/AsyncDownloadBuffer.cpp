@@ -132,7 +132,7 @@ struct AsyncDownloadBufferNode : NodeContext
 		auto& nextBuf = Buffers[CurrentIndex];
 		if (nextBuf.Served && nextBuf.TransferCompletePromise.IsValid())
 		{
-			auto res = nosSync->WaitPromise(nextBuf.TransferCompletePromise, 1'000'000'000);
+			auto res = nosSync->WaitPromise(nextBuf.TransferCompletePromise, 100'000'000);
 			if (res != NOS_RESULT_SUCCESS)
 			{
 				if (res == NOS_RESULT_TIMEOUT)
@@ -179,7 +179,7 @@ struct AsyncDownloadBufferNode : NodeContext
 				nosGPUEvent* event = nullptr;
 				auto res = nosVulkan->GetGPUEventFromHolder(buf.DownloadCompleteEventHolder, &event);
 				if (*event)
-					nosVulkan->WaitGpuEvent(event, 1'000'000'000);
+					nosVulkan->WaitGpuEvent(event, 100'000'000);
 			}
 		}
 		CurrentIndex = 0;

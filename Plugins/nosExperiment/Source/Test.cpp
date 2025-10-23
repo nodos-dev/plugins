@@ -282,14 +282,14 @@ struct TestPluginFunctions : PluginFunctions
 		outFunctions[9]->ClassName = NOS_NAME_STATIC("nos.experiment.BypassTexture");
 		outFunctions[9]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			NodeExecuteParams execParams(params);
-			nosEngine.SetPinObjectHandle(execParams[NOS_NAME_STATIC("Output")].Id,
+			nosEngine.SetPinObject(execParams[NOS_NAME_STATIC("Output")].Id,
 										 *execParams[NOS_NAME_STATIC("Input")].Object);
 			return NOS_RESULT_SUCCESS;
 		};
 		outFunctions[10]->ClassName = NOS_NAME_STATIC("nos.experiment.LiveOutWithInput");
 		outFunctions[10]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
 			NodeExecuteParams pins(params);
-			nosEngine.SetPinObjectHandle(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].Object);
+			nosEngine.SetPinObject(pins[NOS_NAME_STATIC("Output")].Id, *pins[NOS_NAME_STATIC("Input")].Object);
 			return NOS_RESULT_SUCCESS;
 		};
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.experiment.AlwaysDirty"), AlwaysDirtyNode, outFunctions[11]);

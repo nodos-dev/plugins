@@ -68,7 +68,9 @@ enum Utilities : int
 	WaitGPUEvent,
 	ScheduleRequest,
 	BufferProvider,
+	TextureProvider,
 	CopyBuffer,
+	CopyTexture,
 	HostVisibleBufferCopy,
 	Count
 };
@@ -113,7 +115,9 @@ nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions*);
 nosResult RegisterWaitGPUEvent(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
 nosResult RegisterBufferProvider(nosNodeFunctions*);
+nosResult RegisterTextureProvider(nosNodeFunctions*);
 nosResult RegisterCopyBuffer(nosNodeFunctions*);
+nosResult RegisterCopyTexture(nosNodeFunctions*);
 nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
@@ -174,7 +178,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(WaitGPUEvent)
 			GEN_CASE_NODE(ScheduleRequest)
 			GEN_CASE_NODE(BufferProvider)
+			GEN_CASE_NODE(TextureProvider)
 			GEN_CASE_NODE(CopyBuffer)
+			GEN_CASE_NODE(CopyTexture)
 			GEN_CASE_NODE(HostVisibleBufferCopy)
 		}
 	}

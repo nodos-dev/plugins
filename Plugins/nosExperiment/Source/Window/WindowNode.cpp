@@ -33,20 +33,20 @@ bool WindowNode::CreateSwapchain()
 	createInfo.SurfaceHandle = Surface;
 	createInfo.Extent = { 800, 600 };
 	createInfo.PresentMode = NOS_PRESENT_MODE_FIFO;
-	nosResult res = nosVulkan->CreateSwapchain(&createInfo, &Swapchain.Handle, &FrameCount);
+	nosResult res = nosVulkan->CreateSwapchain(&createInfo, &Swapchain.GetStorage(), &FrameCount);
 	if (res != NOS_RESULT_SUCCESS)
 		return false;
 	nosSemaphoreCreateInfo semaphoreCreateInfo = {};
 	semaphoreCreateInfo.Type = NOS_SEMAPHORE_TYPE_BINARY;
 	Images.resize(FrameCount);
 	if (FrameCount > 0)
-		nosVulkan->GetSwapchainImages(Swapchain, &Images[0].Handle);
+		nosVulkan->GetSwapchainImages(Swapchain, &Images[0].GetStorage());
 	WaitSemaphore.resize(FrameCount);
 	SignalSemaphore.resize(FrameCount);
 	for (int i = 0; i < FrameCount; i++)
 	{
-		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i].Handle);
-		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i].Handle);
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &WaitSemaphore[i].GetStorage());
+		nosVulkan->CreateSemaphore(&semaphoreCreateInfo, &SignalSemaphore[i].GetStorage());
 	}
 	return true;
 }
@@ -157,7 +157,7 @@ void WindowNode::OnEnterRunnerThread(nosEnterRunnerThreadParams const& params)
 #error "Unsupported platform"
 #endif
 	;
-	if (nosVulkan->CreateWindowSurface((void*)windowHandle, &Surface.Handle) != NOS_RESULT_SUCCESS)
+	if (nosVulkan->CreateWindowSurface((void*)windowHandle, &Surface.GetStorage()) != NOS_RESULT_SUCCESS)
 	{
 		DestroyWindow();
 		return;

@@ -111,7 +111,7 @@ struct BufferProviderNode : NodeContext
 		auto& bufToServe = Buffers[CurrentIndex];
 		if (bufToServe.Served && bufToServe.HostUseCompletePromise.IsValid())
 		{
-			auto res = nosSync->WaitPromise(bufToServe.HostUseCompletePromise, 1'000'000'000);
+			auto res = nosSync->WaitPromise(bufToServe.HostUseCompletePromise, 100'000'000);
 			if (res != NOS_RESULT_SUCCESS)
 			{
 				if (res == NOS_RESULT_TIMEOUT)
@@ -139,7 +139,7 @@ struct BufferProviderNode : NodeContext
 				nosGPUEvent* event = nullptr;
 				auto res = nosVulkan->GetGPUEventFromHolder(buf.GPUEventHolder, &event);
 				if (*event)
-					nosVulkan->WaitGpuEvent(event, 1'000'000'000);
+					nosVulkan->WaitGpuEvent(event, 100'000'000);
 			}
 		}
 		RecreateBuffers();

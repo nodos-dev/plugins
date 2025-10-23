@@ -7,21 +7,27 @@ namespace nos.utilities;
 table BufferSyncEventsTuple
 {
     buffer: nos.sys.vulkan.Buffer;
-    download_complete_gpu_event: nos.sys.vulkan.GPUEventHolder;
-    transfer_complete_promise: nos.sync.Promise;
+    gpu_event_holder: nos.sys.vulkan.GPUEventHolder;
+    host_use_complete_promise: nos.sync.Promise;
 }
 
 table AudioPacketSyncEventsTuple
 {
     audio_packet: nos.audio.AudioPacket;
-    download_complete_gpu_event: nos.sys.vulkan.GPUEventHolder;
-    transfer_complete_promise: nos.sync.Promise;
+    gpu_event_holder: nos.sys.vulkan.GPUEventHolder;
+    host_use_complete_promise: nos.sync.Promise;
 }
 
 table VideoFrame
 {
     audio_packet: nos.audio.AudioPacket;
     frame_buffer: BufferSyncEventsTuple;
+}
+
+table AudioTexturePair
+{
+    audio_packet: nos.audio.AudioPacket;
+    texture: nos.sys.vulkan.Texture;
 }
 
 table VideoFrameWithAudioSyncEvents
