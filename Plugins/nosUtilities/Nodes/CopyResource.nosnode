@@ -1,28 +1,30 @@
 {
 	"nodes": [
 		{
-			"class_name": "CopyBuffer",
+			"class_name": "CopyResource",
 			"menu_info": {
 				"category": "Utilities",
-				"display_name": "Copy Buffer",
+				"display_name": "Copy Resource",
 				"name_aliases": [ "copy" ]
 			},
 			"node": {
-				"class_name": "CopyBuffer",
+				"class_name": "CopyResource",
 				"contents_type": "Job",
-				"description": "Copies data from one buffer to another.",
+				"description": "Copies data from one resource to another.",
 				"pins": [
 					{
 						"name": "Source",
-						"type_name": "nos.sys.vulkan.Buffer",
+						"type_name": "nos.Generic",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
+						"can_show_as": "INPUT_PIN_ONLY",
+						"connection_conditions": "resource"
 					},
 					{
 						"name": "Destination",
-						"type_name": "nos.sys.vulkan.Buffer",
+						"type_name": "nos.Generic",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
+						"can_show_as": "INPUT_PIN_ONLY",
+						"connection_conditions": "resource"
 					},
 					{
 						"name": "InGPUEventHolder",
@@ -52,7 +54,7 @@
 					{
 						"name": "OutDestination",
 						"display_name": "Destination",
-						"type_name": "nos.sys.vulkan.Buffer",
+						"type_name": "nos.Generic",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
