@@ -28,7 +28,7 @@ typedef struct nosVariableSubsystem {
 // Make sure these are same with nossys file.
 #define NOS_SYS_VARIABLES_NAME "nos.sys.variables"
 #define NOS_SYS_VARIABLES_VERSION_MAJOR 2
-#define NOS_SYS_VARIABLES_VERSION_MINOR 0
+#define NOS_SYS_VARIABLES_VERSION_MINOR 1
 
 extern struct nosPluginInfo nosVariablesSubsystemModuleInfo;
 extern nosVariableSubsystem* nosVariables;

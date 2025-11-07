@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "YADIF (Raw)",
-				"name_aliases": [ "deinterlace", "filter" ]
+				"name_aliases": [
+					"deinterlace",
+					"filter"
+				]
 			},
 			"node": {
 				"class_name": "YADIF",

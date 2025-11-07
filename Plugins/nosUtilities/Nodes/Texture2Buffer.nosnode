@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Texture To Buffer",
-				"name_aliases": [ "converter", "image" ]
+				"name_aliases": [
+					"converter",
+					"image"
+				]
 			},
 			"node": {
 				"class_name": "Texture2Buffer",

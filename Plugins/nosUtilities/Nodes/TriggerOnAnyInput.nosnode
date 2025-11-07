@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Execution",
 				"display_name": "Trigger On Any Input",
-				"aliases": [ "either", "or" ]
+				"aliases": [
+					"either",
+					"or"
+				]
 			},
 			"node": {
 				"class_name": "TriggerOnAnyInput",

@@ -1,5 +1,7 @@
-namespace nos.experiment;
+include "Builtins.fbs";
+include "Visualizer.fbs";
 
+namespace nos.experiment;
 
 struct TestStruct {
 	test1:float;
@@ -31,6 +33,7 @@ table TestTable {
 table TestTable2 {
     table1:TestTable;
     test_enum:TestEnumUint = TEST2;
+    test_color:nos.fb.vec4;
 }
 
 struct Vec2Test{
@@ -47,7 +50,7 @@ table FbTestTable{
     table_array: [TestTable2];
     string_test: string;
     string_array: [string];
-    struct_test: Vec2Test;
+    struct_test: nos.fb.vec2u (viz_type: "NAMED_VALUE", viz_name: "nos.mediaio.ResolutionVisualizer");
     struct_array: [Vec2Test];
     fixed_length_array_test: Mat2Test;
     fixed_length_array_list: [Mat2Test];

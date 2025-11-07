@@ -5,18 +5,18 @@
     "dependencies": [
       {
         "name": "nos.sys.vulkan",
-        "version": "7.0"
+        "version": "7.1"
       },
       {
         "name": "nos.py",
-        "version": "1.0"
+        "version": "1.1"
       }
     ],
     "description": "Plugin for testing purposes.",
     "display_name": "Test",
     "id": {
       "name": "nos.experiment",
-      "version": "1.0.0"
+      "version": "1.1.0"
     }
   }
 }

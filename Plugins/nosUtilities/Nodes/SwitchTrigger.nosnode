@@ -33,19 +33,18 @@
 							},
 							{
 								"name": "Case_1",
-								"display_name":"Case 1",
+								"display_name": "Case 1",
 								"type_name": "nos.exe",
 								"show_as": "OUTPUT_PIN",
 								"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 							},
 							{
 								"name": "Case_2",
-								"display_name":"Case 2",
+								"display_name": "Case 2",
 								"type_name": "nos.exe",
 								"show_as": "OUTPUT_PIN",
 								"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 							}
-
 						]
 					}
 				]

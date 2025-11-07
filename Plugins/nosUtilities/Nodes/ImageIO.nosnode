@@ -5,7 +5,20 @@
 			"menu_info": {
 				"category": "Media|Advanced",
 				"display_name": "STBI Load",
-				"name_aliases": [ "Load", "Texture", "Image", "JPEG", "JPG", "PNG", "TGA", "BMP", "PSD", "GIF", "HDR", "PIC" ]
+				"name_aliases": [
+					"Load",
+					"Texture",
+					"Image",
+					"JPEG",
+					"JPG",
+					"PNG",
+					"TGA",
+					"BMP",
+					"PSD",
+					"GIF",
+					"HDR",
+					"PIC"
+				]
 			},
 			"node": {
 				"class_name": "StbiLoad",
@@ -17,12 +30,21 @@
 						"type_name": "string",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "FILE_PICKER",
-							"file_extensions": [ "png", "jpg", "jpeg", "tga", "bmp", "psd" ],
-							"file_picker_type": "OPEN"
-						},
-						"description": "Supported filetypes (with some limitations):\nJPEG, PNG, TGA, BMP, PSD, GIF, HDR, PIC"
+						"description": "Supported filetypes (with some limitations):\nJPEG, PNG, TGA, BMP, PSD, GIF, HDR, PIC",
+						"visualizers": [
+							{
+								"type": "FILE_PICKER",
+								"file_extensions": [
+									"png",
+									"jpg",
+									"jpeg",
+									"tga",
+									"bmp",
+									"psd"
+								],
+								"file_picker_type": "OPEN"
+							}
+						]
 					},
 					{
 						"name": "sRGB",
@@ -46,7 +68,18 @@
 			"menu_info": {
 				"category": "Media",
 				"display_name": "Write Image",
-				"name_aliases": [ "Save texture to disk", "JPEG", "JPG", "PNG", "TGA", "BMP", "PSD", "GIF", "HDR", "PIC" ]
+				"name_aliases": [
+					"Save texture to disk",
+					"JPEG",
+					"JPG",
+					"PNG",
+					"TGA",
+					"BMP",
+					"PSD",
+					"GIF",
+					"HDR",
+					"PIC"
+				]
 			},
 			"node": {
 				"class_name": "WriteImage",
@@ -63,11 +96,20 @@
 								"type_name": "string",
 								"show_as": "PROPERTY",
 								"can_show_as": "INPUT_PIN_OR_PROPERTY",
-								"visualizer": {
-									"type": "FILE_PICKER",
-									"file_extensions": [ "png", "jpg", "jpeg", "tga", "bmp", "psd" ],
-									"file_picker_type": "SAVE"
-								}
+								"visualizers": [
+									{
+										"type": "FILE_PICKER",
+										"file_extensions": [
+											"png",
+											"jpg",
+											"jpeg",
+											"tga",
+											"bmp",
+											"psd"
+										],
+										"file_picker_type": "SAVE"
+									}
+								]
 							},
 							{
 								"name": "IncludeAlpha",

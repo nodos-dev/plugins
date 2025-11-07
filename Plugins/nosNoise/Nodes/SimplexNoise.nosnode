@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Noise",
 				"display_name": "Simplex Noise",
-				"name_aliases": [ "random", "image" ]
+				"name_aliases": [
+					"random",
+					"image"
+				]
 			},
 			"node": {
 				"class_name": "SimplexNoise",

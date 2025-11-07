@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Channels",
 				"display_name": "Channel Viewer",
-				"name_aliases": [ "display" ]
+				"name_aliases": [
+					"display"
+				]
 			},
 			"node": {
 				"class_name": "ChannelViewer",

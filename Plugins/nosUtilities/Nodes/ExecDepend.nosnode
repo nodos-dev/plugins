@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Execution",
 				"display_name": "Execution Dependency",
-				"name_aliases": [ "dep" ]
+				"name_aliases": [
+					"dep"
+				]
 			},
 			"node": {
 				"class_name": "ExecDepend",

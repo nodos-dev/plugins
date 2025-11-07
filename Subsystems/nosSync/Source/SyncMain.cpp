@@ -10,7 +10,7 @@
 
 #define RANDOMIZE_EVENT_ORDER 0 // For diagnosis, set to 1 to randomize the order of events when waiting for consensus
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0);
+NOS_INIT();
 
 NOS_BEGIN_IMPORT_DEPS()
 NOS_END_IMPORT_DEPS()

@@ -5,7 +5,14 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Resize",
-				"name_aliases": [ "scale", "downsample", "upsample", "filtering", "sampling", "texture" ]
+				"name_aliases": [
+					"scale",
+					"downsample",
+					"upsample",
+					"filtering",
+					"sampling",
+					"texture"
+				]
 			},
 			"node": {
 				"class_name": "Resize",
@@ -45,10 +52,12 @@
 							"y": 1080
 						},
 						"description": "Output size which the input image is scaled to",
-						"visualizer": {
-							"type": "NAMED_VALUE",
-							"name": "nos.mediaio.ResolutionVisualizer"
-						}
+						"visualizers": [
+							{
+								"type": "NAMED_VALUE",
+								"name": "nos.mediaio.ResolutionVisualizer"
+							}
+						]
 					}
 				]
 			}

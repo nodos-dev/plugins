@@ -18,13 +18,14 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": 0.0,
 						"referred_by": [],
 						"def": 0.0,
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "31e75a11-b93d-46b8-afd0-6ab3df33e8d5" },
+						"contents": {
+							"source_id": "31e75a11-b93d-46b8-afd0-6ab3df33e8d5"
+						},
 						"orphan_state": {},
 						"description": ""
 					},
@@ -35,13 +36,14 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": 0.0,
 						"referred_by": [],
 						"def": 0.0,
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "7fc134cf-7ad1-4ff7-b445-9e7e7d10aefb" },
+						"contents": {
+							"source_id": "7fc134cf-7ad1-4ff7-b445-9e7e7d10aefb"
+						},
 						"orphan_state": {},
 						"description": ""
 					},
@@ -52,13 +54,14 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": 0,
 						"referred_by": [],
 						"def": 0,
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "5750ab76-d1e1-454b-8b9f-8bf53f1875a6" },
+						"contents": {
+							"source_id": "5750ab76-d1e1-454b-8b9f-8bf53f1875a6"
+						},
 						"orphan_state": {},
 						"description": ""
 					}
@@ -82,7 +85,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": "round(A, B)",
 									"referred_by": [],
 									"def": "",
@@ -99,7 +101,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 1.0,
 									"referred_by": [],
 									"def": 0.0,
@@ -116,7 +117,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": true,
 									"referred_by": [],
 									"def": true,
@@ -134,7 +134,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.89,
 									"referred_by": [],
 									"def": 0.0,
@@ -151,7 +150,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.0,
 									"referred_by": [],
 									"def": 0.0,
@@ -167,12 +165,16 @@
 								"y": 499.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
 							"status_messages": [
-								{ "text": "round(A, B)" }
+								{
+									"text": "round(A, B)"
+								}
 							],
 							"meta_data_map": [
 								{
@@ -196,7 +198,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.0,
 									"referred_by": [],
 									"def": 0.0,
@@ -213,7 +214,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.0,
 									"referred_by": [
 										"942191b3-4836-4960-96f0-85de67c57774"
@@ -236,7 +236,9 @@
 								"y": 493.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
@@ -259,7 +261,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.0,
 									"referred_by": [],
 									"def": 0.0,
@@ -276,7 +277,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 1.0,
 									"referred_by": [
 										"678f7f18-c802-4b9e-b8f6-b237941acaf5"
@@ -299,7 +299,9 @@
 								"y": 493.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
@@ -321,7 +323,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0,
 									"referred_by": [],
 									"def": 0,
@@ -338,7 +339,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0.0,
 									"referred_by": [],
 									"def": 0.0,
@@ -354,7 +354,9 @@
 								"y": 584.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
@@ -376,7 +378,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0,
 									"referred_by": [],
 									"def": 0,
@@ -393,7 +394,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0,
 									"referred_by": [
 										"aa5446bb-998a-44ba-adce-5f4bb3dd3eb5"
@@ -416,7 +416,9 @@
 								"y": 589.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",

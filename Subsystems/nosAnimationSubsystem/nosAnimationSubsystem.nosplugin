@@ -2,14 +2,14 @@
     "info": {
         "id": {
             "name": "nos.sys.animation",
-            "version": "2.0.0"
+            "version": "2.1.0"
         },
         "display_name": "Animation Subsystem",
         "description": "",
         "dependencies": [
             {
                 "name": "nos.sys.settings",
-                "version": "2.0"
+                "version": "2.1"
             }
         ],
         "category": "Animation"

@@ -18,13 +18,14 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": {},
 						"referred_by": [],
 						"def": {},
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "b2e60afd-48ab-4f80-89dc-4c7c4323d326" },
+						"contents": {
+							"source_id": "b2e60afd-48ab-4f80-89dc-4c7c4323d326"
+						},
 						"orphan_state": {},
 						"description": ""
 					},
@@ -36,7 +37,6 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": 60.0,
 						"referred_by": [],
 						"min": 0.01,
@@ -45,7 +45,9 @@
 						"step": 9.9999,
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "b6712155-4b78-4220-81f9-4c23231ee688" },
+						"contents": {
+							"source_id": "b6712155-4b78-4220-81f9-4c23231ee688"
+						},
 						"orphan_state": {},
 						"description": ""
 					},
@@ -57,13 +59,14 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": false,
 						"referred_by": [],
 						"def": false,
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "48f150e3-ce1e-4143-9faf-a160d42f4fa2" },
+						"contents": {
+							"source_id": "48f150e3-ce1e-4143-9faf-a160d42f4fa2"
+						},
 						"orphan_state": {},
 						"advanced_property": true
 					},
@@ -75,13 +78,14 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"pin_category": "",
-						"visualizer": {},
 						"data": "Periodic",
 						"referred_by": [],
 						"def": "Periodic",
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
-						"contents": { "source_id": "9ee5e170-ce7a-4b3d-b86a-3e3bf5a81aae" },
+						"contents": {
+							"source_id": "9ee5e170-ce7a-4b3d-b86a-3e3bf5a81aae"
+						},
 						"orphan_state": {},
 						"description": "Whether to schedule nodes at an unlimited or fixed rate"
 					}
@@ -106,7 +110,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": {},
 									"referred_by": [],
 									"def": {},
@@ -124,7 +127,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 0,
 									"referred_by": [],
 									"def": 0,
@@ -140,7 +142,9 @@
 								"y": 89.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
@@ -162,7 +166,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": {},
 									"referred_by": [],
 									"def": {},
@@ -179,7 +182,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": {},
 									"referred_by": [],
 									"def": {},
@@ -197,7 +199,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": 60.0,
 									"referred_by": [
 										"44bbedd2-ea31-45c6-a979-bc6b6b16e678"
@@ -219,10 +220,8 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": true,
-									"referred_by": [
-									],
+									"referred_by": [],
 									"def": true,
 									"meta_data_map": [],
 									"contents_type": "JobPin",
@@ -237,7 +236,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": false,
 									"referred_by": [
 										"8bdd8685-8d98-4feb-b10c-52e173c948d3"
@@ -257,7 +255,6 @@
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": "Periodic",
 									"referred_by": [
 										"4100a156-de8c-4ede-81ff-58a76e11a147"
@@ -276,7 +273,9 @@
 								"y": 128.0
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",
@@ -303,7 +302,6 @@
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": {},
 									"referred_by": [],
 									"def": {},
@@ -320,7 +318,6 @@
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"pin_category": "",
-									"visualizer": {},
 									"data": {},
 									"referred_by": [
 										"4c75ff3d-45a2-49fd-a48d-da6e9813bb98"
@@ -343,7 +340,9 @@
 								"y": 108.5
 							},
 							"contents_type": "Job",
-							"contents": { "type": "" },
+							"contents": {
+								"type": ""
+							},
 							"app_key": "",
 							"functions": [],
 							"function_category": "Default Node",

@@ -1,698 +1,699 @@
 {
-  "nodes": [
-    {
-      "class_name": "Array",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Array",
-        "name_aliases": [
-          "list",
-          "vector",
-          "dynamic"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          },
-          {
-            "name": "Input 0",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ],
-        "functions": [
-          {
-            "class_name": "Add Element",
-            "contents_type": "Job"
-          },
-          {
-            "class_name": "Remove Element",
-            "contents_type": "Job"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "Break",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Break",
-        "name_aliases": [
-          "member",
-          "argument"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Input",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "MakeDynamic",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Make",
-        "name_aliases": [
-          "variable",
-          "create",
-          "new",
-          "Make *"
-        ]
-      },
-      "node": {
-        "name": "Make",
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "connection_conditions": "!resource"
-          }
-        ]   
-      }
-    },
-    {
-      "class_name": "Make",
-      "hide_in_context_menu": true,
-      "node": {
-        "contents_type": "Job"
-      }
-    },
-    {
-      "class_name": "Arithmetic",
-      "hide_in_context_menu": true,
-      "presets": [
-        {
-          "menu_info": {
-            "display_name": "Add",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "plus",
-              "sum"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "ADD"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Sub",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "minus",
-              "difference"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "SUB"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Mul",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "times",
-              "product"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "MUL"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Div",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "divide",
-              "quotient"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "DIV"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Log",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "logarithm",
-              "ln"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "LOG"
-            }
-          ]
-        }
-      ],
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "connection_conditions": "!resource"
-          },
-          {
-            "name": "A",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "connection_conditions": "!resource"
-          },
-          {
-            "name": "B",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "connection_conditions": "!resource"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "ArithmeticDynamic",
-      "hide_in_context_menu": true,
-      "node": {
-        "contents_type": "Job"
-      }
-    },
-    {
-      "class_name": "Delay",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Delay"
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Input",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          },
-          {
-            "name": "Delay",
-            "type_name": "uint",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "Indexer",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Indexer",
-        "name_aliases": [
-          "element"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Input",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Index",
-            "type_name": "uint",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "IndexOf",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Index Of",
-        "name_aliases": [
-          "array"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "InputArray",
-            "display_name": "Input Array",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Value",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Index",
-            "type_name": "int",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "IsEqual",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Is Equal",
-        "name_aliases": [
-          "compare"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "menu_info": {
-          "category": "Type",
-          "display_name": "Is Equal",
-          "name_aliases": [
-            "compare"
-          ]
-        },
-        "pins": [
-          {
-            "name": "A",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "B",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "IsEqual",
-            "display_name": "Is Equal",
-            "type_name": "bool",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "LessThan",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Less Than",
-        "name_aliases": [
-          "compare"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "description": "Compares two values and returns true if A < B for all fields",
-        "menu_info": {
-          "category": "Type",
-          "display_name": "Less Than",
-          "name_aliases": [
-            "compare"
-          ]
-        },
-        "pins": [
-          {
-            "name": "A",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "B",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "IsLess",
-            "display_name": "A < B",
-            "type_name": "bool",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "GreaterThan",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Greater Than",
-        "name_aliases": [
-          "compare"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "description": "Compares two values and returns true if A > B for all fields",
-        "menu_info": {
-          "category": "Type",
-          "display_name": "Greater Than",
-          "name_aliases": [
-            "compare"
-          ]
-        },
-        "pins": [
-          {
-            "name": "A",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "B",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "IsGreater",
-            "display_name": "A > B",
-            "type_name": "bool",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "SetVariable",
-      "menu_info": {
-        "category": "Variables",
-        "display_name": "Set Variable",
-        "name_aliases": [
-          "store",
-          "assign"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Trigger",
-            "type_name": "nos.exe",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_ONLY"
-          },
-          {
-            "name": "Continue",
-            "type_name": "nos.exe",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY"
-          },
-          {
-            "name": "Name",
-            "type_name": "string",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Value",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "connection_conditions": "!resource"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "GetVariable",
-      "menu_info": {
-        "category": "Variables",
-        "display_name": "Get Variable",
-        "name_aliases": [
-          "load",
-          "fetch",
-          "retrieve"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Name",
-            "type_name": "string",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-              "type": "COMBO_BOX",
-              "name": "nos.sys.variables.Names"
-            }
-          },
-          {
-            "name": "Value",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "connection_conditions": "!resource"
-          }
-        ],
-        "functions": [
-          {
-            "class_name": "OnVariableUpdated",
-            "scheduling_type": "Event"
-          }
-        ]
-      }
-    },
-    {
-      "class_name": "ScalarArithmetic",
-      "hide_in_context_menu": true,
-      "presets": [
-        {
-          "menu_info": {
-            "display_name": "Scalar Add",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "plus",
-              "sum"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "ADD"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Scalar Sub",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "minus",
-              "difference"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "SUB"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Scalar Mul",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "times",
-              "product"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "MUL"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Scalar Div",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "divide",
-              "quotient"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "DIV"
-            }
-          ]
-        },
-        {
-          "menu_info": {
-            "display_name": "Scalar Log",
-            "category": "Arithmetic",
-            "name_aliases": [
-              "logarithm",
-              "ln"
-            ]
-          },
-          "params": [
-            {
-              "name": "Operator",
-              "type_name": "nos.reflect.BinaryOperator",
-              "value": "LOG"
-            }
-          ]
-        }
-      ],
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "connection_conditions": "!resource"
-          },
-          {
-            "name": "A",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "connection_conditions": "!resource"
-          },
-          {
-            "name": "Scalar",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ]
-      }
-    },
-	
-	{
-      "class_name": "EnumToUnderlyingValue",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Enum To Underlying Value",
-        "name_aliases": [
-          "enum",
-		  "cast"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Value",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Enum",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ]
-      }
-    },
-	{
-      "class_name": "EnumFromUnderlyingValue",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Enum From Underlying Value",
-        "name_aliases": [
-          "enum",
-		  "cast"
-        ]
-      },
-      "node": {
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Enum",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-          },
-          {
-            "name": "Value",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY"
-          }
-        ]
-      }
-    }
-  ]
+	"nodes": [
+		{
+			"class_name": "Array",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Array",
+				"name_aliases": [
+					"list",
+					"vector",
+					"dynamic"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input 0",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				],
+				"functions": [
+					{
+						"class_name": "Add Element",
+						"contents_type": "Job"
+					},
+					{
+						"class_name": "Remove Element",
+						"contents_type": "Job"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "Break",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Break",
+				"name_aliases": [
+					"member",
+					"argument"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "MakeDynamic",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Make",
+				"name_aliases": [
+					"variable",
+					"create",
+					"new",
+					"Make *"
+				]
+			},
+			"node": {
+				"name": "Make",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"connection_conditions": "!resource"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "Make",
+			"hide_in_context_menu": true,
+			"node": {
+				"contents_type": "Job"
+			}
+		},
+		{
+			"class_name": "Arithmetic",
+			"hide_in_context_menu": true,
+			"presets": [
+				{
+					"menu_info": {
+						"display_name": "Add",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"plus",
+							"sum"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "ADD"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Sub",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"minus",
+							"difference"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "SUB"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Mul",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"times",
+							"product"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "MUL"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Div",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"divide",
+							"quotient"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "DIV"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Log",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"logarithm",
+							"ln"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "LOG"
+						}
+					]
+				}
+			],
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"connection_conditions": "!resource"
+					},
+					{
+						"name": "A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"connection_conditions": "!resource"
+					},
+					{
+						"name": "B",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"connection_conditions": "!resource"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "ArithmeticDynamic",
+			"hide_in_context_menu": true,
+			"node": {
+				"contents_type": "Job"
+			}
+		},
+		{
+			"class_name": "Delay",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Delay"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Delay",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "Indexer",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Indexer",
+				"name_aliases": [
+					"element"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Index",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "IndexOf",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Index Of",
+				"name_aliases": [
+					"array"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "InputArray",
+						"display_name": "Input Array",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Value",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Index",
+						"type_name": "int",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "IsEqual",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Is Equal",
+				"name_aliases": [
+					"compare"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"menu_info": {
+					"category": "Type",
+					"display_name": "Is Equal",
+					"name_aliases": [
+						"compare"
+					]
+				},
+				"pins": [
+					{
+						"name": "A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "B",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "IsEqual",
+						"display_name": "Is Equal",
+						"type_name": "bool",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "LessThan",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Less Than",
+				"name_aliases": [
+					"compare"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"description": "Compares two values and returns true if A < B for all fields",
+				"menu_info": {
+					"category": "Type",
+					"display_name": "Less Than",
+					"name_aliases": [
+						"compare"
+					]
+				},
+				"pins": [
+					{
+						"name": "A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "B",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "IsLess",
+						"display_name": "A < B",
+						"type_name": "bool",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "GreaterThan",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Greater Than",
+				"name_aliases": [
+					"compare"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"description": "Compares two values and returns true if A > B for all fields",
+				"menu_info": {
+					"category": "Type",
+					"display_name": "Greater Than",
+					"name_aliases": [
+						"compare"
+					]
+				},
+				"pins": [
+					{
+						"name": "A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "B",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "IsGreater",
+						"display_name": "A > B",
+						"type_name": "bool",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "SetVariable",
+			"menu_info": {
+				"category": "Variables",
+				"display_name": "Set Variable",
+				"name_aliases": [
+					"store",
+					"assign"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Trigger",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Name",
+						"type_name": "string",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Value",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"connection_conditions": "!resource"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "GetVariable",
+			"menu_info": {
+				"category": "Variables",
+				"display_name": "Get Variable",
+				"name_aliases": [
+					"load",
+					"fetch",
+					"retrieve"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Name",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizers": [
+							{
+								"type": "COMBO_BOX",
+								"name": "nos.sys.variables.Names"
+							}
+						]
+					},
+					{
+						"name": "Value",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"connection_conditions": "!resource"
+					}
+				],
+				"functions": [
+					{
+						"class_name": "OnVariableUpdated",
+						"scheduling_type": "Event"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "ScalarArithmetic",
+			"hide_in_context_menu": true,
+			"presets": [
+				{
+					"menu_info": {
+						"display_name": "Scalar Add",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"plus",
+							"sum"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "ADD"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Scalar Sub",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"minus",
+							"difference"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "SUB"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Scalar Mul",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"times",
+							"product"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "MUL"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Scalar Div",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"divide",
+							"quotient"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "DIV"
+						}
+					]
+				},
+				{
+					"menu_info": {
+						"display_name": "Scalar Log",
+						"category": "Arithmetic",
+						"name_aliases": [
+							"logarithm",
+							"ln"
+						]
+					},
+					"params": [
+						{
+							"name": "Operator",
+							"type_name": "nos.reflect.BinaryOperator",
+							"value": "LOG"
+						}
+					]
+				}
+			],
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"connection_conditions": "!resource"
+					},
+					{
+						"name": "A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"connection_conditions": "!resource"
+					},
+					{
+						"name": "Scalar",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "EnumToUnderlyingValue",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Enum To Underlying Value",
+				"name_aliases": [
+					"enum",
+					"cast"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Value",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Enum",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "EnumFromUnderlyingValue",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Enum From Underlying Value",
+				"name_aliases": [
+					"enum",
+					"cast"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Enum",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Value",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
 }

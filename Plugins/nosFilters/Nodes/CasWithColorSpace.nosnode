@@ -1,2232 +1,3151 @@
-{ "nodes": [
-    {
-      "class_name": "nos.filters.CasWithColorSpace",
-      "menu_info": {
-        "category": "Filters",
-        "display_name": "Contrast Adaptive Sharpen",
-        "name_aliases": [ "Contrast Adaptive Sharpen", "cas", "sharpen", "fx" ]
-      },
-      "node": {
-        "id": "bac7b9fd-39f2-4147-8fa5-16dfed7fc443",
-        "name": "CasWithColorSpace",
-        "class_name": "nos.filters.CasWithColorSpace",
-        "pins": [
-          {
-            "id": "1cd0c00f-cf47-4f47-abfe-d766cedd1b60",
-            "name": "Input",
-            "type_name": "nos.sys.vulkan.Texture",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_ONLY",
-            "visualizer": {
-            },
-            "data": {
-              "resolution": "HD",
-              "width": 1920,
-              "height": 1080,
-              "format": "R16G16B16A16_SFLOAT",
-              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-            },
-            "def": {
-            },
-            "advanced_property": true,
-            "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "true" },
-              { "key": "Category", "value": "" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "804b92f0-43e4-4a14-9254-38b49fd9f01c" }
-          },
-          {
-            "id": "41af957f-b861-4d5c-93b7-a954dc683509",
-            "name": "Output",
-            "type_name": "nos.sys.vulkan.Texture",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "visualizer": {
-            },
-            "data": {
-              "resolution": "HD",
-              "width": 1920,
-              "height": 1080,
-              "format": "R16G16B16A16_UNORM",
-              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-            },
-            "def": {
-              "format": "R16G16B16A16_UNORM"
-            },
-            "advanced_property": true,
-            "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "true" },
-              { "key": "Category", "value": "" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "6e8502c3-28d2-46ac-aed4-54fd5c3207b1" }
-          },
-          {
-            "id": "5730ccd2-5222-4f6a-8000-36f3e03f4022",
-            "name": "ColorSpace",
-            "type_name": "nos.mediaio.ColorSpace",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": "REC709",
-            "def": "REC709",
-            "meta_data_map": [
-              { "key": "Category", "value": "" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "280b0674-a3aa-4f93-a27a-cd3ee152a853" },
-            "display_name": "Color Space"
-          },
-          {
-            "id": "a4f00ed5-1631-43bd-ab44-0f071d9d7291",
-            "name": "Strength",
-            "type_name": "float",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": 1.0,
-            "min": 0.0,
-            "max": 1.0,
-            "def": 1.0,
-            "step": 0.01,
-            "meta_data_map": [
-              { "key": "Category", "value": "" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "cb066f43-b6f0-4a25-a1cf-b57f05524f97" }
-          },
-          {
-            "id": "123ce0bd-745a-4015-948f-3c3a56e1e80d",
-            "name": "Sharpness",
-            "type_name": "float",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": 0.5,
-            "min": 0.0,
-            "max": 1.0,
-            "def": 0.5,
-            "step": 0.01,
-            "meta_data_map": [
-              { "key": "Category", "value": "" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "f5c7ada2-191c-4fde-89aa-79e788be6a74" }
-          }
-        ],
-        "pos": { "x": 0.0, "y": 0.0 },
-        "contents_type": "Graph",
-        "contents": { "nodes": [
-            {
-              "id": "b5641726-86b4-445c-856e-8bf3de5228b9",
-              "name": "Output",
-              "class_name": "nos.internal.GraphOutput",
-              "pins": [
-                {
-                  "id": "c5b9e22a-e645-465a-a8b2-6b4db9a034e1",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_UNORM",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "def": {
-                    "format": "R16G16B16A16_UNORM"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "6e8502c3-28d2-46ac-aed4-54fd5c3207b1",
-                  "name": "Output",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_UNORM",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "referred_by": [
-                    "41af957f-b861-4d5c-93b7-a954dc683509"
-                  ],
-                  "def": {
-                    "format": "R16G16B16A16_UNORM"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 1442.036377, "y": 424.085419 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "0eac4f38-b7d1-4fca-9f9d-3a6d95e5bf77",
-              "name": "GetLumaCoeffs",
-              "class_name": "nos.mediaio.GetLumaCoeffs",
-              "pins": [
-                {
-                  "id": "20188547-33c0-4e27-91ec-134053b06e5d",
-                  "name": "Output",
-                  "type_name": "nos.fb.vec3",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "d4f02b76-57d6-4269-b050-8b0a684999bf" },
-                  "display_name": "Luma Coeffs"
-                },
-                {
-                  "id": "228617b3-f280-4d5b-97a6-89473e9f7a7a",
-                  "name": "NarrowRange",
-                  "type_name": "bool",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": false,
-                  "def": true,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "c0504ade-0f1d-4797-8867-b1c4be97a6ca" },
-                  "display_name": "Narrow Range Encoding"
-                },
-                {
-                  "id": "955fb8d4-d7b3-45fb-a221-158b46eb9e65",
-                  "name": "ColorSpace",
-                  "type_name": "nos.mediaio.ColorSpace",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": "REC709",
-                  "def": "REC709",
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "ee3d949d-89bf-4b15-ad06-79fc83b8b8f3" },
-                  "display_name": "Color Space"
-                }
-              ],
-              "pos": { "x": 395.164795, "y": 881.651672 },
-              "contents_type": "Graph",
-              "contents": { "nodes": [
-                  {
-                    "id": "794444ff-8b3d-4380-bc08-63ca68f83371",
-                    "name": "Break",
-                    "class_name": "nos.reflect.Break",
-                    "pins": [
-                      {
-                        "id": "f0f1a807-31c1-497d-befe-fa6583d76796",
-                        "name": "Input",
-                        "type_name": "nos.fb.mat4",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": { "x": 0.2126, "y": 0.7152, "z": 0.0722, "w": 0.0 }, "y": { "x": -0.114572, "y": -0.385428, "z": 0.5, "w": 0.501961 }, "z": { "x": 0.5, "y": -0.454153, "z": -0.045847, "w": 0.501961 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 } },
-                        "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "ada1360c-52db-4ca7-8b94-9a2cdb27bb0e",
-                        "name": "x",
-                        "type_name": "nos.fb.vec4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722, "w": 0.0 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "741b7761-616b-418e-9bb8-d201ccfc5493",
-                        "name": "y",
-                        "type_name": "nos.fb.vec4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": -0.114572, "y": -0.385428, "z": 0.5, "w": 0.501961 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "4edba33d-67bc-4f00-a740-0cf4d9fa50a9",
-                        "name": "z",
-                        "type_name": "nos.fb.vec4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.5, "y": -0.454153, "z": -0.045847, "w": 0.501961 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "8b50a772-f0ff-4290-84a2-098e4871b1ba",
-                        "name": "w",
-                        "type_name": "nos.fb.vec4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 658.0, "y": 183.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Break nos.fb.mat4",
-                    "plugin_version": { "major": 1, "minor": 7, "patch": 6 }
-                  },
-                  {
-                    "id": "c607ec30-1801-476c-92da-1cd99e47602e",
-                    "name": "NarrowRange",
-                    "class_name": "nos.internal.GraphInput",
-                    "pins": [
-                      {
-                        "id": "ef1370b8-d7e8-44e7-8472-1e5be76f107b",
-                        "name": "Output",
-                        "type_name": "bool",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": false,
-                        "def": true,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Use Narrow Range Encoding"
-                      },
-                      {
-                        "id": "c0504ade-0f1d-4797-8867-b1c4be97a6ca",
-                        "name": "Input",
-                        "type_name": "bool",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": false,
-                        "referred_by": [
-                          "228617b3-f280-4d5b-97a6-89473e9f7a7a"
-                        ],
-                        "def": true,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Use Narrow Range Encoding"
-                      }
-                    ],
-                    "pos": { "x": 16.0, "y": 237.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "2a33dd3b-87ee-4b8c-9f18-ede9c342f007",
-                    "name": "Transpose",
-                    "class_name": "nos.math.Transpose",
-                    "pins": [
-                      {
-                        "id": "88fd231b-2c1e-4ed5-9ec0-65566473bba0",
-                        "name": "In",
-                        "type_name": "nos.fb.mat4",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": { "x": 0.2126, "y": -0.114572, "z": 0.5, "w": 0.0 }, "y": { "x": 0.7152, "y": -0.385428, "z": -0.454153, "w": 0.0 }, "z": { "x": 0.0722, "y": 0.5, "z": -0.045847, "w": 0.0 }, "w": { "x": 0.0, "y": 0.501961, "z": 0.501961, "w": 1.0 } },
-                        "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "d25bf7b1-63ec-4172-8674-e2f2c8cce831",
-                        "name": "Out",
-                        "type_name": "nos.fb.mat4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": { "x": 0.2126, "y": 0.7152, "z": 0.0722, "w": 0.0 }, "y": { "x": -0.114572, "y": -0.385428, "z": 0.5, "w": 0.501961 }, "z": { "x": 0.5, "y": -0.454153, "z": -0.045847, "w": 0.501961 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 } },
-                        "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 460.0, "y": 149.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 1, "minor": 9, "patch": 3 }
-                  },
-                  {
-                    "id": "7a9e9f1f-4828-4f39-be45-2004680ed999",
-                    "name": "Make",
-                    "class_name": "nos.reflect.Make",
-                    "pins": [
-                      {
-                        "id": "a4f94bc4-fdc4-42cb-8cea-80b92c22ca54",
-                        "name": "Output",
-                        "type_name": "nos.fb.vec3",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "nos.fb.vec3"
-                      },
-                      {
-                        "id": "aa34c774-0580-4272-96cc-89679914f652",
-                        "name": "x",
-                        "type_name": "float",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.2126,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "c0ec4dc5-f7f9-4669-857b-4cae2b42dafa",
-                        "name": "y",
-                        "type_name": "float",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.7152,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "87aae3e4-6374-4a68-8738-6bc01a25d085",
-                        "name": "z",
-                        "type_name": "float",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.0722,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 1053.0, "y": 171.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "template_parameters": [
-                      { "name": "Type", "type_name": "string", "value": "nos.fb.vec3" }
-                    ],
-                    "plugin_version": { "major": 1, "minor": 7, "patch": 6 }
-                  },
-                  {
-                    "id": "37619b9e-f552-4d9c-b27a-62745c737c41",
-                    "name": "ColorSpaceMatrix",
-                    "class_name": "nos.mediaio.ColorSpaceMatrix",
-                    "pins": [
-                      {
-                        "id": "1f41a004-f0db-430f-b02f-87d78958122c",
-                        "name": "Output",
-                        "type_name": "nos.fb.mat4",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": { "x": 0.2126, "y": -0.114572, "z": 0.5, "w": 0.0 }, "y": { "x": 0.7152, "y": -0.385428, "z": -0.454153, "w": 0.0 }, "z": { "x": 0.0722, "y": 0.5, "z": -0.045847, "w": 0.0 }, "w": { "x": 0.0, "y": 0.501961, "z": 0.501961, "w": 1.0 } },
-                        "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "c1880d83-f9d3-40e2-b9bb-e52795c9cc5e",
-                        "name": "ColorSpace",
-                        "type_name": "nos.mediaio.ColorSpace",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "REC709",
-                        "def": "REC709",
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Color Space"
-                      },
-                      {
-                        "id": "8e0aeae7-41c4-4b9e-8165-603fe705abf4",
-                        "name": "PixelFormat",
-                        "type_name": "nos.mediaio.YCbCrPixelFormat",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "YUV8",
-                        "def": "YUV8",
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Pixel Format"
-                      },
-                      {
-                        "id": "48d7c674-edbe-4817-a59b-bc4f6c7d5dd0",
-                        "name": "Type",
-                        "type_name": "nos.mediaio.GammaConversionType",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "ENCODE",
-                        "def": "ENCODE",
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "ed60b69b-8237-4f64-8d1f-f5c1e2877828",
-                        "name": "NarrowRange",
-                        "type_name": "bool",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": false,
-                        "def": true,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Use Narrow Range Encoding"
-                      }
-                    ],
-                    "pos": { "x": 229.0, "y": 170.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Color Space Matrix",
-                    "plugin_version": { "major": 2, "minor": 5, "patch": 4 }
-                  },
-                  {
-                    "id": "8476f3d6-fe2e-40a0-a0ea-93742ddaa43e",
-                    "name": "ColorSpace",
-                    "class_name": "nos.internal.GraphInput",
-                    "pins": [
-                      {
-                        "id": "f08ebdd5-dc99-456b-a5c2-442160a9698c",
-                        "name": "Output",
-                        "type_name": "nos.mediaio.ColorSpace",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": "REC709",
-                        "def": "REC709",
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "ee3d949d-89bf-4b15-ad06-79fc83b8b8f3",
-                        "name": "Input",
-                        "type_name": "nos.mediaio.ColorSpace",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "REC709",
-                        "referred_by": [
-                          "955fb8d4-d7b3-45fb-a221-158b46eb9e65"
-                        ],
-                        "def": "REC709",
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 16.0, "y": 140.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "e0443643-ded5-40e9-945d-e6d4c09ce5c7",
-                    "name": "Break (1)",
-                    "class_name": "nos.reflect.Break",
-                    "pins": [
-                      {
-                        "id": "6f3330f8-99bd-489b-b0b8-38d5f4f3ac2b",
-                        "name": "Input",
-                        "type_name": "nos.fb.vec4",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722, "w": 0.0 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "902eb543-df93-4d4d-b3e3-d8caab1d3f66",
-                        "name": "x",
-                        "type_name": "float",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.2126,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "f88abc0a-8676-4cc9-b910-ac2bac8e42b5",
-                        "name": "y",
-                        "type_name": "float",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.7152,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "daee51ae-b894-468a-8e11-6dc222dddab0",
-                        "name": "z",
-                        "type_name": "float",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.0722,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "96df2914-5ad2-4581-a23a-1a78b071b4e6",
-                        "name": "w",
-                        "type_name": "float",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 0.0,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 864.0, "y": 181.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Break nos.fb.vec4",
-                    "plugin_version": { "major": 1, "minor": 7, "patch": 6 }
-                  },
-                  {
-                    "id": "652de513-b981-4d1d-a1f2-5cf56533719a",
-                    "name": "Output",
-                    "class_name": "nos.internal.GraphOutput",
-                    "pins": [
-                      {
-                        "id": "5937c33c-321a-46b2-8d59-f69c2ae83bf4",
-                        "name": "Input",
-                        "type_name": "nos.fb.vec3",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "nos.fb.vec3"
-                      },
-                      {
-                        "id": "d4f02b76-57d6-4269-b050-8b0a684999bf",
-                        "name": "Output",
-                        "type_name": "nos.fb.vec3",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                        "referred_by": [
-                          "20188547-33c0-4e27-91ec-134053b06e5d"
-                        ],
-                        "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "nos.fb.vec3"
-                      }
-                    ],
-                    "pos": { "x": 1209.0, "y": 159.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Luma Coeffs",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  }
-                ], "connections": [
-                  { "from": "d25bf7b1-63ec-4172-8674-e2f2c8cce831", "to": "f0f1a807-31c1-497d-befe-fa6583d76796", "id": "114f9f50-5495-46e8-a562-de43a36ee6ca" },
-                  { "from": "ef1370b8-d7e8-44e7-8472-1e5be76f107b", "to": "ed60b69b-8237-4f64-8d1f-f5c1e2877828", "id": "b43953ab-a20e-4db0-a198-209778973cda" },
-                  { "from": "ada1360c-52db-4ca7-8b94-9a2cdb27bb0e", "to": "6f3330f8-99bd-489b-b0b8-38d5f4f3ac2b", "id": "1b92f39f-9771-4e5d-951c-88c7d4090585" },
-                  { "from": "f08ebdd5-dc99-456b-a5c2-442160a9698c", "to": "c1880d83-f9d3-40e2-b9bb-e52795c9cc5e", "id": "2fd78147-c6df-4b97-9b90-eb8d9206aa4f" },
-                  { "from": "902eb543-df93-4d4d-b3e3-d8caab1d3f66", "to": "aa34c774-0580-4272-96cc-89679914f652", "id": "15e9b43b-3275-4d1f-94b1-4da291828304" },
-                  { "from": "f88abc0a-8676-4cc9-b910-ac2bac8e42b5", "to": "c0ec4dc5-f7f9-4669-857b-4cae2b42dafa", "id": "34020429-2583-42fc-b2c4-fa6371e9b107" },
-                  { "from": "daee51ae-b894-468a-8e11-6dc222dddab0", "to": "87aae3e4-6374-4a68-8738-6bc01a25d085", "id": "72db8e0a-e991-42ee-9e5c-804264898b53" },
-                  { "from": "a4f94bc4-fdc4-42cb-8cea-80b92c22ca54", "to": "5937c33c-321a-46b2-8d59-f69c2ae83bf4", "id": "01dbe646-c852-4443-b181-afa55b8bf032" },
-                  { "from": "1f41a004-f0db-430f-b02f-87d78958122c", "to": "88fd231b-2c1e-4ed5-9ec0-65566473bba0", "id": "a2cdbcfe-18d0-4351-9af1-4c1cf1993ece" }
-                ] },
-              "function_category": "Default Node",
-              "display_name": "Get Luma Coeffs",
-              "plugin_version": { "major": 2, "minor": 5, "patch": 4 }
-            },
-            {
-              "id": "efc2cb51-0c93-440b-b30d-a620e7b73e04",
-              "name": "CasFilter",
-              "class_name": "nos.filters.CasFilter",
-              "pins": [
-                {
-                  "id": "1b28e233-542f-4775-af0a-c742d4419467",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "def": {
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "b2d66170-b2e2-482d-ab4d-a650f3df7487",
-                  "name": "Sharpness",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0.5,
-                  "min": 0.0,
-                  "max": 1.0,
-                  "def": 0.0,
-                  "step": 0.01,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "9c4fe596-6e8b-47e2-8881-844a265c142b",
-                  "name": "Strength",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 1.0,
-                  "min": 0.0,
-                  "max": 1.0,
-                  "def": 1.0,
-                  "step": 0.01,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "33a6d363-839f-4a31-a65c-d17c8673b41e",
-                  "name": "LumaCoeffs",
-                  "type_name": "nos.fb.vec3",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                  "def": { "x": 0.0, "y": 1.0, "z": 0.0 },
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Luma Coefficients"
-                },
-                {
-                  "id": "a700126b-bf89-4f25-b2f6-62a5789ef957",
-                  "name": "DispatchSize",
-                  "type_name": "nos.fb.vec2u",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 240, "y": 120 },
-                  "def": { "x": 120, "y": 120 },
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Dispatch Size"
-                },
-                {
-                  "id": "1863183d-5d34-4f32-9f5e-8c9baa629e57",
-                  "name": "Output",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_UNORM",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "def": {
-                    "format": "R16G16B16A16_UNORM"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 956.128296, "y": 436.940674 },
-              "contents_type": "Job",
-              "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/CAS.comp", "stage": "COMPUTE" } },
-              "function_category": "Default Node",
-              "description": "Contrast Adaptive Sharpening",
-              "display_name": "Contrast Adaptive Sharpen",
-              "plugin_version": { "major": 1, "minor": 5, "patch": 3 }
-            },
-            {
-              "id": "e1cd48d5-3867-4fb7-96e0-f36170ca3544",
-              "name": "Sharpness",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "683c9dac-666e-45e8-9d64-f4b80bb63ff3",
-                  "name": "Output",
-                  "type_name": "float",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": 0.5,
-                  "def": 0.0,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "f5c7ada2-191c-4fde-89aa-79e788be6a74",
-                  "name": "Input",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0.5,
-                  "referred_by": [
-                    "123ce0bd-745a-4015-948f-3c3a56e1e80d"
-                  ],
-                  "min": 0.0,
-                  "max": 1.0,
-                  "def": 0.5,
-                  "step": 0.01,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": -50.318275, "y": 436.978638 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "b7a0b902-586e-4fbd-8af6-794cffcc4736",
-              "name": "Strength",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "16093d23-e063-4288-9e4f-9d182140f05f",
-                  "name": "Output",
-                  "type_name": "float",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": 1.0,
-                  "min": 0.0,
-                  "max": 1.0,
-                  "def": 1.0,
-                  "step": 0.01,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "cb066f43-b6f0-4a25-a1cf-b57f05524f97",
-                  "name": "Input",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 1.0,
-                  "referred_by": [
-                    "a4f00ed5-1631-43bd-ab44-0f071d9d7291"
-                  ],
-                  "min": 0.0,
-                  "max": 1.0,
-                  "def": 1.0,
-                  "step": 0.01,
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": -43.837921, "y": 641.898865 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "9c532cd2-6fea-41c6-bd70-11e4ce07f256",
-              "name": "Input",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "520468e4-597b-4199-9530-53a3ab44e053",
-                  "name": "Output",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "def": {
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "804b92f0-43e4-4a14-9254-38b49fd9f01c",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "referred_by": [
-                    "1cd0c00f-cf47-4f47-abfe-d766cedd1b60"
-                  ],
-                  "def": {
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": -54.724079, "y": 220.997803 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "696bf82c-b63d-4b74-8ce1-5c30b4701be5",
-              "name": "ColorSpace",
-              "class_name": "nos.internal.GraphInput",
-              "pins": [
-                {
-                  "id": "21216382-fc81-4c53-b7f4-641f0b9dc687",
-                  "name": "Output",
-                  "type_name": "nos.mediaio.ColorSpace",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": "REC709",
-                  "def": "REC709",
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Color Space"
-                },
-                {
-                  "id": "280b0674-a3aa-4f93-a27a-cd3ee152a853",
-                  "name": "Input",
-                  "type_name": "nos.mediaio.ColorSpace",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": "REC709",
-                  "referred_by": [
-                    "5730ccd2-5222-4f6a-8000-36f3e03f4022"
-                  ],
-                  "def": "REC709",
-                  "meta_data_map": [
-                    { "key": "Category", "value": "" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Color Space"
-                }
-              ],
-              "pos": { "x": -41.989983, "y": 903.646729 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "11f0751d-bbbd-4b2c-a89a-4fc4a0a854a2",
-              "name": "Reroute",
-              "class_name": "nos.internal.Reroute",
-              "pins": [
-                {
-                  "id": "8c652e3e-c8de-473c-a859-53c1c1a51872",
-                  "name": "Input",
-                  "type_name": "nos.fb.vec3",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "e2119e0e-044d-4794-9663-9d8239fa668d",
-                  "name": "Output",
-                  "type_name": "nos.fb.vec3",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 0.2126, "y": 0.7152, "z": 0.0722 },
-                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 635.428711, "y": 883.394775 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "89e7bd5c-c352-4723-bc05-7ea2ca747ea9",
-              "name": "Reroute (1)",
-              "class_name": "nos.internal.Reroute",
-              "pins": [
-                {
-                  "id": "01ecfe9f-e936-44b7-989a-add452901810",
-                  "name": "Input",
-                  "type_name": "float",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": 1.0,
-                  "def": 0.0,
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "ac0dc43f-2197-43b6-9760-cf0ed1a71fda",
-                  "name": "Output",
-                  "type_name": "float",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": 1.0,
-                  "def": 0.0,
-                  "meta_data_map": [
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 424.931427, "y": 469.916901 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "0ef37302-cc8d-4e66-aabc-6b9abce6a426",
-              "name": "Reroute (2)",
-              "class_name": "nos.internal.Reroute",
-              "pins": [
-                {
-                  "id": "aabaa211-6bdc-4724-a062-e5ab61ce6736",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "def": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                },
-                {
-                  "id": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd",
-                  "name": "Output",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "def": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "PinHidden", "value": "true" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
-                }
-              ],
-              "pos": { "x": 421.043762, "y": 416.24173 },
-              "contents_type": "Job",
-              "contents": { "type": "" },
-              "function_category": "Default Node",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            },
-            {
-              "id": "9c496db5-7765-4316-bed4-68076947374e",
-              "name": "CalculateDispatchSize",
-              "pins": [
-                {
-                  "id": "9ab69087-0e54-4d1e-851d-68f31b10a854",
-                  "name": "Input",
-                  "type_name": "nos.sys.vulkan.Texture",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                  },
-                  "def": {
-                    "resolution": "HD",
-                    "width": 1920,
-                    "height": 1080,
-                    "format": "R16G16B16A16_SFLOAT",
-                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                  },
-                  "advanced_property": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" }
-                  ],
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "e2d36a51-3a0b-4708-9f38-97aa7ed6636c" }
-                },
-                {
-                  "id": "1baba639-0722-44f7-b26f-3236c71d468b",
-                  "name": "Output",
-                  "type_name": "nos.fb.vec2u",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_ONLY",
-                  "visualizer": {
-                  },
-                  "data": { "x": 240, "y": 120 },
-                  "def": { "x": 0, "y": 0 },
-                  "contents_type": "PortalPin",
-                  "contents": { "source_id": "b05de071-499b-4a0a-9bb8-2dbde239106c" },
-                  "connection_conditions": "!array"
-                }
-              ],
-              "pos": { "x": 654.0, "y": 501.0 },
-              "contents_type": "Graph",
-              "contents": { "nodes": [
-                  {
-                    "id": "6bb024a8-130c-499f-b2b4-7355119ee67f",
-                    "name": "Break",
-                    "class_name": "nos.reflect.Break",
-                    "pins": [
-                      {
-                        "id": "d5d636df-28ae-4f8d-a7cc-aa7d6288c543",
-                        "name": "Input",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "advanced_property": true,
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "23d3624b-14ae-4895-a376-934e3c7c6897",
-                        "name": "handle",
-                        "type_name": "ulong",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1622040131168,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "23516fcb-71a4-43e5-9123-a294ef7eac88",
-                        "name": "offset",
-                        "type_name": "ulong",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 8918016,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "6470e763-8026-46df-a821-c578264d7d49",
-                        "name": "size_in_bytes",
-                        "type_name": "ulong",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 17694720,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "9a07e4ff-358d-4399-8307-94b599aae0c6",
-                        "name": "external_memory",
-                        "type_name": "nos.sys.vulkan.ExternalMemory",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": { "handle_type": 2 },
-                        "def": { "handle_type": 0 },
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "7774c66d-dfef-4417-b000-beaf8df16f3d",
-                        "name": "resolution",
-                        "type_name": "nos.sys.vulkan.SizePreset",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "HD",
-                        "def": "CUSTOM",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "9b91c7d8-4183-4189-aec0-3c4894d9d039",
-                        "name": "width",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1920,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "3dc96de9-ccec-47a7-8b75-390f17d19cdf",
-                        "name": "height",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1080,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "039bdcf7-90f7-43a6-b0a5-8e96f8c76d9e",
-                        "name": "format",
-                        "type_name": "nos.sys.vulkan.Format",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "R16G16B16A16_SFLOAT",
-                        "def": "NONE",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "bdb9ea4e-fb34-4f95-ba93-2e7fbf77a425",
-                        "name": "usage",
-                        "type_name": "nos.sys.vulkan.ImageUsage",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "def": "NONE",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "bd91a6b5-996b-4e3c-8b06-3ca25609d819",
-                        "name": "filtering",
-                        "type_name": "nos.sys.vulkan.Filtering",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "NEAREST",
-                        "def": "NEAREST",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "9bd19286-8564-40a8-8827-99cbf83baca0",
-                        "name": "unscaled",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": false,
-                        "def": false,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "019893c1-267a-4950-97ca-2752ad06c788",
-                        "name": "unmanaged",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": false,
-                        "def": false,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "b310493b-1b79-4722-a651-c040da10dfbf",
-                        "name": "field_type",
-                        "type_name": "nos.sys.vulkan.FieldType",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "PROGRESSIVE",
-                        "def": "PROGRESSIVE",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "fe4ec300-6a90-444d-909a-b52a4f849a1e",
-                        "name": "stock_texture",
-                        "type_name": "nos.sys.vulkan.StockTexture",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "NOSNOVIDEO",
-                        "def": "NOSNOVIDEO",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 661.0, "y": 682.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "display_name": "Get Resolution",
-                    "plugin_version": { "major": 1, "minor": 7, "patch": 6 }
-                  },
-                  {
-                    "id": "e528e3e3-0e59-47fb-83c7-e323d374ebbb",
-                    "name": "Eval (1)",
-                    "class_name": "nos.math.Eval",
-                    "pins": [
-                      {
-                        "id": "c6527a56-2a74-46fe-8674-64f87afdf93b",
-                        "name": "Expression",
-                        "type_name": "string",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "ceil(height / local_size_y)",
-                        "def": "",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "7c0d1081-4535-4a62-895e-e60ab2fd0103",
-                        "name": "Result",
-                        "type_name": "double",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 120.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "d42259ed-6ca7-4e1a-ba9f-812c396e4b15",
-                        "name": "Show_Expression",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": true,
-                        "def": true,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Show Expression In Node"
-                      },
-                      {
-                        "id": "e7ba7e4f-c78f-4975-b2f6-f093a4c33d09",
-                        "name": "A",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1080.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "height"
-                      },
-                      {
-                        "id": "988f10cd-a395-4a9c-afc2-c300ac41ae3b",
-                        "name": "B",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 9.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "local_size_y"
-                      }
-                    ],
-                    "pos": { "x": 1109.0, "y": 776.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "status_messages": [
-                      { "text": "ceil(height / local_size_y)" }
-                    ],
-                    "description": "Evaluates a string expression",
-                    "plugin_version": { "major": 1, "minor": 9, "patch": 3 }
-                  },
-                  {
-                    "id": "c7762154-247f-4b07-9d6f-4c9918c6e74c",
-                    "name": "uint to double",
-                    "class_name": "cast.uint-double",
-                    "pins": [
-                      {
-                        "id": "18302d1d-92fc-4776-a4e9-b13716db4842",
-                        "name": "uint",
-                        "type_name": "uint",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1920,
-                        "def": 0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "7f12eeed-73c5-434b-8ea5-b9f45cea918a",
-                        "name": "double",
-                        "type_name": "double",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 1920.0,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 944.0, "y": 641.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "8b767d1a-ffaf-410b-86df-6973e1f46ec0",
-                    "name": "double to uint",
-                    "class_name": "cast.double-uint",
-                    "pins": [
-                      {
-                        "id": "d10cf5d2-a8d7-47d8-9762-a8110427173f",
-                        "name": "double",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 240.0,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "337de76c-8a58-4181-9b1a-566af24a900b",
-                        "name": "uint",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 240,
-                        "def": 0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 1272.0, "y": 643.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "56590433-2124-4c42-9d22-79ef1225bb5e",
-                    "name": "Eval",
-                    "class_name": "nos.math.Eval",
-                    "pins": [
-                      {
-                        "id": "cf286be3-00ba-4485-b072-c235f31cbd05",
-                        "name": "Expression",
-                        "type_name": "string",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": "ceil(width / local_size_x)",
-                        "def": "",
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "acfabdce-ffd2-46ad-a33b-f3a2cc6ece68",
-                        "name": "Result",
-                        "type_name": "double",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 240.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "829f3c6e-d7d6-4c38-9174-10c0f60a90c3",
-                        "name": "Show_Expression",
-                        "type_name": "bool",
-                        "show_as": "PROPERTY",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": true,
-                        "def": true,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "Show Expression In Node"
-                      },
-                      {
-                        "id": "df13dd60-c623-4e91-bcb7-854b0a1301de",
-                        "name": "A",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1920.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "width"
-                      },
-                      {
-                        "id": "59ad4da4-fe9c-4c9c-b32b-ce9122014e05",
-                        "name": "B",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 8.0,
-                        "def": 0.0,
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "display_name": "local_size_x"
-                      }
-                    ],
-                    "pos": { "x": 1107.0, "y": 645.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "status_messages": [
-                      { "text": "ceil(width / local_size_x)" }
-                    ],
-                    "description": "Evaluates a string expression",
-                    "plugin_version": { "major": 1, "minor": 9, "patch": 3 }
-                  },
-                  {
-                    "id": "7c9f6156-3cc0-4915-8354-422892a95fe7",
-                    "name": "Make",
-                    "class_name": "nos.reflect.MakeDynamic",
-                    "pins": [
-                      {
-                        "id": "4eb19174-39c0-41a6-a88a-61c3efa09425",
-                        "name": "Output",
-                        "type_name": "nos.fb.vec2u",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 240, "y": 120 },
-                        "def": { "x": 0, "y": 0 },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "connection_conditions": "!array"
-                      },
-                      {
-                        "id": "57cd6c03-91b9-44aa-b011-87c143dfa630",
-                        "name": "x",
-                        "type_name": "uint",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 240,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "d70908dd-2a49-4e09-a6ec-427d752b4d82",
-                        "name": "y",
-                        "type_name": "uint",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 120,
-                        "def": 0,
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 1448.0, "y": 668.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "template_parameters": [
-                      { "name": "Type", "type_name": "string", "value": "nos.fb.vec2u" }
-                    ],
-                    "plugin_version": { "major": 1, "minor": 7, "patch": 6 }
-                  },
-                  {
-                    "id": "70925927-ff30-4e34-8259-da36fea174e6",
-                    "name": "uint to double (1)",
-                    "class_name": "cast.uint-double",
-                    "pins": [
-                      {
-                        "id": "696e4a6c-6b47-450a-b275-e91b8c9bfb70",
-                        "name": "uint",
-                        "type_name": "uint",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 1080,
-                        "def": 0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "82c6d113-05be-489e-8bb0-035eb14f377c",
-                        "name": "double",
-                        "type_name": "double",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 1080.0,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 944.0, "y": 778.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "9f23da84-6daf-4346-90c1-f68dd2a4f418",
-                    "name": "double to uint (1)",
-                    "class_name": "cast.double-uint",
-                    "pins": [
-                      {
-                        "id": "2f21625d-c3ec-4106-bfd3-45b7cf55b4b5",
-                        "name": "double",
-                        "type_name": "double",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": 120.0,
-                        "def": 0.0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "96936da6-77ff-4d33-8dfb-8b9e4c1b7498",
-                        "name": "uint",
-                        "type_name": "uint",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": 120,
-                        "def": 0,
-                        "meta_data_map": [
-                          { "key": "Category", "value": "" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 1274.0, "y": 777.0 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "61f941db-7570-429b-b89f-51e13c8ac183",
-                    "name": "Input",
-                    "class_name": "nos.internal.GraphInput",
-                    "pins": [
-                      {
-                        "id": "370bf6a6-3759-45ef-a640-ad0be5b3f628",
-                        "name": "Output",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "def": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "advanced_property": true,
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      },
-                      {
-                        "id": "e2d36a51-3a0b-4708-9f38-97aa7ed6636c",
-                        "name": "Input",
-                        "type_name": "nos.sys.vulkan.Texture",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                        "visualizer": {
-                        },
-                        "data": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
-                        },
-                        "referred_by": [
-                          "9ab69087-0e54-4d1e-851d-68f31b10a854"
-                        ],
-                        "def": {
-                          "resolution": "HD",
-                          "width": 1920,
-                          "height": 1080,
-                          "format": "R16G16B16A16_SFLOAT",
-                          "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                        },
-                        "advanced_property": true,
-                        "meta_data_map": [
-                          { "key": "AdvancedProperty", "value": "true" },
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { }
-                      }
-                    ],
-                    "pos": { "x": 461.0, "y": 701.25 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  },
-                  {
-                    "id": "99750bf9-62da-44e5-a29d-e83403b38b1d",
-                    "name": "Output",
-                    "class_name": "nos.internal.GraphOutput",
-                    "pins": [
-                      {
-                        "id": "6bea0578-5947-4ac9-a823-904c3ee53f14",
-                        "name": "Input",
-                        "type_name": "nos.fb.vec2u",
-                        "show_as": "INPUT_PIN",
-                        "can_show_as": "INPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 240, "y": 120 },
-                        "def": { "x": 0, "y": 0 },
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "connection_conditions": "!array"
-                      },
-                      {
-                        "id": "b05de071-499b-4a0a-9bb8-2dbde239106c",
-                        "name": "Output",
-                        "type_name": "nos.fb.vec2u",
-                        "show_as": "OUTPUT_PIN",
-                        "can_show_as": "OUTPUT_PIN_ONLY",
-                        "visualizer": {
-                        },
-                        "data": { "x": 240, "y": 120 },
-                        "referred_by": [
-                          "1baba639-0722-44f7-b26f-3236c71d468b"
-                        ],
-                        "def": { "x": 0, "y": 0 },
-                        "meta_data_map": [
-                          { "key": "PinHidden", "value": "true" }
-                        ],
-                        "contents_type": "JobPin",
-                        "contents": { },
-                        "connection_conditions": "!array"
-                      }
-                    ],
-                    "pos": { "x": 1648.0, "y": 701.25 },
-                    "contents_type": "Job",
-                    "contents": { "type": "" },
-                    "function_category": "Default Node",
-                    "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-                  }
-                ], "connections": [
-                  { "from": "7c0d1081-4535-4a62-895e-e60ab2fd0103", "to": "2f21625d-c3ec-4106-bfd3-45b7cf55b4b5", "id": "eb0d8aae-365c-4b0e-a2eb-51fa08974d8a" },
-                  { "from": "337de76c-8a58-4181-9b1a-566af24a900b", "to": "57cd6c03-91b9-44aa-b011-87c143dfa630", "id": "d6bf21d9-3a12-49a6-a22e-d199d956b01d" },
-                  { "from": "9b91c7d8-4183-4189-aec0-3c4894d9d039", "to": "18302d1d-92fc-4776-a4e9-b13716db4842", "id": "b5990f51-d8ae-48bc-ab8b-5105149f0c6c" },
-                  { "from": "acfabdce-ffd2-46ad-a33b-f3a2cc6ece68", "to": "d10cf5d2-a8d7-47d8-9762-a8110427173f", "id": "14701618-6cdc-4eda-b0c9-99f55cdd656a" },
-                  { "from": "96936da6-77ff-4d33-8dfb-8b9e4c1b7498", "to": "d70908dd-2a49-4e09-a6ec-427d752b4d82", "id": "96a88825-565e-49fa-aae2-8846effc4772" },
-                  { "from": "7f12eeed-73c5-434b-8ea5-b9f45cea918a", "to": "df13dd60-c623-4e91-bcb7-854b0a1301de", "id": "55ad3bf6-7f6c-4cc1-818a-8541ed58d038" },
-                  { "from": "82c6d113-05be-489e-8bb0-035eb14f377c", "to": "e7ba7e4f-c78f-4975-b2f6-f093a4c33d09", "id": "6d179f6b-1385-4fdc-9f2b-1ceabb735dcd" },
-                  { "from": "3dc96de9-ccec-47a7-8b75-390f17d19cdf", "to": "696e4a6c-6b47-450a-b275-e91b8c9bfb70", "id": "3a010fae-2f7d-4d7d-a552-2e3b835e3007" },
-                  { "from": "370bf6a6-3759-45ef-a640-ad0be5b3f628", "to": "d5d636df-28ae-4f8d-a7cc-aa7d6288c543", "id": "b2f2ee0f-73b6-4219-91f4-c09051cf14e5" },
-                  { "from": "4eb19174-39c0-41a6-a88a-61c3efa09425", "to": "6bea0578-5947-4ac9-a823-904c3ee53f14", "id": "6d910392-a863-4a06-a76f-f56aef069200" }
-                ] },
-              "function_category": "Default Node",
-              "display_name": "Calculate Dispatch Size",
-              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
-            }
-          ], "comments": [
-            {
-              "id": "93a94974-b7ef-4f4f-8a6c-3831a9fbfa35",
-              "name": "Comment",
-              "hint": "RealityHub Hint",
-              "content": "Computes luminance coefficients based on the selected color space and quantization mode.",
-              "pos": { "x": 465.522919, "y": 853.372009 },
-              "size": { "x": 585.620728, "y": 148.03894 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "1e1f39dd-7dd8-46fe-b9bf-cfc377237606",
-              "name": "Comment (2)",
-              "hint": "RealityHub Hint",
-              "content": "Applies contrast-adaptive sharpening using the input image, user-defined sharpness settings, and luminance coefficients.\nLuma coefficients help improve visual sharpness based on perceived brightness, especially in video or broadcast pipelines.",
-              "pos": { "x": 769.346741, "y": 424.36908 },
-              "size": { "x": 819.275513, "y": 159.085938 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "e69a4917-5f76-47ef-929d-d792c664c29a",
-              "name": "Comment (3)",
-              "hint": "RealityHub Hint",
-              "content": "Adjusts the blending strength of the sharpening effect. Works in conjunction with the Sharpness parameter.",
-              "pos": { "x": -16.652094, "y": 632.133423 },
-              "size": { "x": 310.689819, "y": 88.092529 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "45e13345-b395-4f20-9fa3-396b871b6eed",
-              "name": "Comment (5)",
-              "hint": "RealityHub Hint",
-              "content": "Input image to be processed by the CAS (Contrast Adaptive Sharpening) filter.",
-              "pos": { "x": -19.278419, "y": 202.786957 },
-              "size": { "x": 308.0, "y": 123.0 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "8b143699-8f84-47b4-ba56-9b03a6fffdf7",
-              "name": "Comment (1)",
-              "hint": "RealityHub Hint",
-              "content": "Specifies the color space used for luminance calculation (e.g., BT.709, BT.2020). Affects how Luma Coefficients are derived.\n\n",
-              "pos": { "x": -14.050234, "y": 862.496704 },
-              "size": { "x": 316.0, "y": 132.0 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "d669a59b-0957-4a08-ab51-06b2a0921d66",
-              "name": "Comment (6)",
-              "hint": "RealityHub Hint",
-              "content": "Final image output after contrast adaptive sharpen applied ",
-              "pos": { "x": 1446.957642, "y": 419.139221 },
-              "size": { "x": 401.836151, "y": 165.161438 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            },
-            {
-              "id": "30453811-b1b7-4255-9106-c2f03afb2ea2",
-              "name": "Comment (4)",
-              "hint": "RealityHub Hint",
-              "content": "Controls the overall sharpness level applied by the CAS filter. Higher values increase detail but may introduce noise.",
-              "pos": { "x": -18.725433, "y": 427.930328 },
-              "size": { "x": 305.564148, "y": 88.570435 },
-              "bg_color": { "x": 0.101961, "y": 0.776471, "z": 1.0, "w": 0.133333 }
-            }
-          ], "connections": [
-            { "from": "21216382-fc81-4c53-b7f4-641f0b9dc687", "to": "955fb8d4-d7b3-45fb-a221-158b46eb9e65", "id": "51fcd047-9508-46a0-8bc3-ebe6f3efd226" },
-            { "from": "683c9dac-666e-45e8-9d64-f4b80bb63ff3", "to": "b2d66170-b2e2-482d-ab4d-a650f3df7487", "id": "9323ebc6-2090-4a23-bbf9-7f639de00715" },
-            { "from": "20188547-33c0-4e27-91ec-134053b06e5d", "to": "8c652e3e-c8de-473c-a859-53c1c1a51872", "id": "ff69429a-b4c5-42e6-83fa-ee9c362abc18" },
-            { "from": "1863183d-5d34-4f32-9f5e-8c9baa629e57", "to": "c5b9e22a-e645-465a-a8b2-6b4db9a034e1", "id": "980eaa38-6ee6-45b3-a6b7-95f97871ff61" },
-            { "from": "e2119e0e-044d-4794-9663-9d8239fa668d", "to": "33a6d363-839f-4a31-a65c-d17c8673b41e", "id": "aabd9ff1-7f33-4eaf-ab10-3e696a407f9e" },
-            { "from": "ac0dc43f-2197-43b6-9760-cf0ed1a71fda", "to": "9c4fe596-6e8b-47e2-8881-844a265c142b", "id": "6922a579-4e6f-4d85-a846-8cf0967d9416" },
-            { "from": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd", "to": "9ab69087-0e54-4d1e-851d-68f31b10a854", "id": "8b01d21a-94cd-45af-aa06-2d60da7f7e2b" },
-            { "from": "16093d23-e063-4288-9e4f-9d182140f05f", "to": "01ecfe9f-e936-44b7-989a-add452901810", "id": "ab7ddc9e-ee7f-421a-96e7-5319e393e75e" },
-            { "from": "520468e4-597b-4199-9530-53a3ab44e053", "to": "aabaa211-6bdc-4724-a062-e5ab61ce6736", "id": "24c7103f-085d-47f3-b8f5-d81067158ab3" },
-            { "from": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd", "to": "1b28e233-542f-4775-af0a-c742d4419467", "id": "92e9f767-9485-4ea0-abcb-9f950a369a99" },
-            { "from": "1baba639-0722-44f7-b26f-3236c71d468b", "to": "a700126b-bf89-4f25-b2f6-62a5789ef957", "id": "29de2369-3d38-4635-b48c-8f045623b059" }
-          ] },
-        "function_category": "Default Node",
-        "display_name": "Contrast Adaptive Sharpen",
-        "plugin_version": { "major": 1, "minor": 2, "patch": 13 }
-      }
-    }
-  ] }
+{
+	"nodes": [
+		{
+			"class_name": "nos.filters.CasWithColorSpace",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "Contrast Adaptive Sharpen",
+				"name_aliases": [
+					"Contrast Adaptive Sharpen",
+					"cas",
+					"sharpen",
+					"fx"
+				]
+			},
+			"node": {
+				"id": "bac7b9fd-39f2-4147-8fa5-16dfed7fc443",
+				"name": "CasWithColorSpace",
+				"class_name": "nos.filters.CasWithColorSpace",
+				"pins": [
+					{
+						"id": "1cd0c00f-cf47-4f47-abfe-d766cedd1b60",
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"data": {
+							"resolution": "HD",
+							"width": 1920,
+							"height": 1080,
+							"format": "R16G16B16A16_SFLOAT",
+							"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+						},
+						"def": {},
+						"advanced_property": true,
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							},
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "804b92f0-43e4-4a14-9254-38b49fd9f01c"
+						}
+					},
+					{
+						"id": "41af957f-b861-4d5c-93b7-a954dc683509",
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": {
+							"resolution": "HD",
+							"width": 1920,
+							"height": 1080,
+							"format": "R16G16B16A16_UNORM",
+							"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+						},
+						"def": {
+							"format": "R16G16B16A16_UNORM"
+						},
+						"advanced_property": true,
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							},
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "6e8502c3-28d2-46ac-aed4-54fd5c3207b1"
+						}
+					},
+					{
+						"id": "5730ccd2-5222-4f6a-8000-36f3e03f4022",
+						"name": "ColorSpace",
+						"type_name": "nos.mediaio.ColorSpace",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "REC709",
+						"def": "REC709",
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "280b0674-a3aa-4f93-a27a-cd3ee152a853"
+						},
+						"display_name": "Color Space"
+					},
+					{
+						"id": "a4f00ed5-1631-43bd-ab44-0f071d9d7291",
+						"name": "Strength",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1.0,
+						"min": 0.0,
+						"max": 1.0,
+						"def": 1.0,
+						"step": 0.01,
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "cb066f43-b6f0-4a25-a1cf-b57f05524f97"
+						}
+					},
+					{
+						"id": "123ce0bd-745a-4015-948f-3c3a56e1e80d",
+						"name": "Sharpness",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.5,
+						"min": 0.0,
+						"max": 1.0,
+						"def": 0.5,
+						"step": 0.01,
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "f5c7ada2-191c-4fde-89aa-79e788be6a74"
+						}
+					}
+				],
+				"pos": {
+					"x": 0.0,
+					"y": 0.0
+				},
+				"contents_type": "Graph",
+				"contents": {
+					"nodes": [
+						{
+							"id": "b5641726-86b4-445c-856e-8bf3de5228b9",
+							"name": "Output",
+							"class_name": "nos.internal.GraphOutput",
+							"pins": [
+								{
+									"id": "c5b9e22a-e645-465a-a8b2-6b4db9a034e1",
+									"name": "Input",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_UNORM",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"def": {
+										"format": "R16G16B16A16_UNORM"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "6e8502c3-28d2-46ac-aed4-54fd5c3207b1",
+									"name": "Output",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_UNORM",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"referred_by": [
+										"41af957f-b861-4d5c-93b7-a954dc683509"
+									],
+									"def": {
+										"format": "R16G16B16A16_UNORM"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": 1442.036377,
+								"y": 424.085419
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "0eac4f38-b7d1-4fca-9f9d-3a6d95e5bf77",
+							"name": "GetLumaCoeffs",
+							"class_name": "nos.mediaio.GetLumaCoeffs",
+							"pins": [
+								{
+									"id": "20188547-33c0-4e27-91ec-134053b06e5d",
+									"name": "Output",
+									"type_name": "nos.fb.vec3",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"x": 0.2126,
+										"y": 0.7152,
+										"z": 0.0722
+									},
+									"def": {
+										"x": 0.0,
+										"y": 0.0,
+										"z": 0.0
+									},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "PortalPin",
+									"contents": {
+										"source_id": "d4f02b76-57d6-4269-b050-8b0a684999bf"
+									},
+									"display_name": "Luma Coeffs"
+								},
+								{
+									"id": "228617b3-f280-4d5b-97a6-89473e9f7a7a",
+									"name": "NarrowRange",
+									"type_name": "bool",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": false,
+									"def": true,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "PortalPin",
+									"contents": {
+										"source_id": "c0504ade-0f1d-4797-8867-b1c4be97a6ca"
+									},
+									"display_name": "Narrow Range Encoding"
+								},
+								{
+									"id": "955fb8d4-d7b3-45fb-a221-158b46eb9e65",
+									"name": "ColorSpace",
+									"type_name": "nos.mediaio.ColorSpace",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": "REC709",
+									"def": "REC709",
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "PortalPin",
+									"contents": {
+										"source_id": "ee3d949d-89bf-4b15-ad06-79fc83b8b8f3"
+									},
+									"display_name": "Color Space"
+								}
+							],
+							"pos": {
+								"x": 395.164795,
+								"y": 881.651672
+							},
+							"contents_type": "Graph",
+							"contents": {
+								"nodes": [
+									{
+										"id": "794444ff-8b3d-4380-bc08-63ca68f83371",
+										"name": "Break",
+										"class_name": "nos.reflect.Break",
+										"pins": [
+											{
+												"id": "f0f1a807-31c1-497d-befe-fa6583d76796",
+												"name": "Input",
+												"type_name": "nos.fb.mat4",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": {
+														"x": 0.2126,
+														"y": 0.7152,
+														"z": 0.0722,
+														"w": 0.0
+													},
+													"y": {
+														"x": -0.114572,
+														"y": -0.385428,
+														"z": 0.5,
+														"w": 0.501961
+													},
+													"z": {
+														"x": 0.5,
+														"y": -0.454153,
+														"z": -0.045847,
+														"w": 0.501961
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 1.0
+													}
+												},
+												"def": {
+													"x": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													}
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "ada1360c-52db-4ca7-8b94-9a2cdb27bb0e",
+												"name": "x",
+												"type_name": "nos.fb.vec4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": 0.2126,
+													"y": 0.7152,
+													"z": 0.0722,
+													"w": 0.0
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "741b7761-616b-418e-9bb8-d201ccfc5493",
+												"name": "y",
+												"type_name": "nos.fb.vec4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": -0.114572,
+													"y": -0.385428,
+													"z": 0.5,
+													"w": 0.501961
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "4edba33d-67bc-4f00-a740-0cf4d9fa50a9",
+												"name": "z",
+												"type_name": "nos.fb.vec4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": 0.5,
+													"y": -0.454153,
+													"z": -0.045847,
+													"w": 0.501961
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "8b50a772-f0ff-4290-84a2-098e4871b1ba",
+												"name": "w",
+												"type_name": "nos.fb.vec4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 1.0
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 658.0,
+											"y": 183.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"display_name": "Break nos.fb.mat4",
+										"plugin_version": {
+											"major": 1,
+											"minor": 7,
+											"patch": 6
+										}
+									},
+									{
+										"id": "c607ec30-1801-476c-92da-1cd99e47602e",
+										"name": "NarrowRange",
+										"class_name": "nos.internal.GraphInput",
+										"pins": [
+											{
+												"id": "ef1370b8-d7e8-44e7-8472-1e5be76f107b",
+												"name": "Output",
+												"type_name": "bool",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": false,
+												"def": true,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Use Narrow Range Encoding"
+											},
+											{
+												"id": "c0504ade-0f1d-4797-8867-b1c4be97a6ca",
+												"name": "Input",
+												"type_name": "bool",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": false,
+												"referred_by": [
+													"228617b3-f280-4d5b-97a6-89473e9f7a7a"
+												],
+												"def": true,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													},
+													{
+														"key": "PinHidden",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Use Narrow Range Encoding"
+											}
+										],
+										"pos": {
+											"x": 16.0,
+											"y": 237.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "2a33dd3b-87ee-4b8c-9f18-ede9c342f007",
+										"name": "Transpose",
+										"class_name": "nos.math.Transpose",
+										"pins": [
+											{
+												"id": "88fd231b-2c1e-4ed5-9ec0-65566473bba0",
+												"name": "In",
+												"type_name": "nos.fb.mat4",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": {
+														"x": 0.2126,
+														"y": -0.114572,
+														"z": 0.5,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.7152,
+														"y": -0.385428,
+														"z": -0.454153,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0722,
+														"y": 0.5,
+														"z": -0.045847,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.501961,
+														"z": 0.501961,
+														"w": 1.0
+													}
+												},
+												"def": {
+													"x": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													}
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "d25bf7b1-63ec-4172-8674-e2f2c8cce831",
+												"name": "Out",
+												"type_name": "nos.fb.mat4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": {
+														"x": 0.2126,
+														"y": 0.7152,
+														"z": 0.0722,
+														"w": 0.0
+													},
+													"y": {
+														"x": -0.114572,
+														"y": -0.385428,
+														"z": 0.5,
+														"w": 0.501961
+													},
+													"z": {
+														"x": 0.5,
+														"y": -0.454153,
+														"z": -0.045847,
+														"w": 0.501961
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 1.0
+													}
+												},
+												"def": {
+													"x": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													}
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 460.0,
+											"y": 149.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 1,
+											"minor": 9,
+											"patch": 3
+										}
+									},
+									{
+										"id": "7a9e9f1f-4828-4f39-be45-2004680ed999",
+										"name": "Make",
+										"class_name": "nos.reflect.Make",
+										"pins": [
+											{
+												"id": "a4f94bc4-fdc4-42cb-8cea-80b92c22ca54",
+												"name": "Output",
+												"type_name": "nos.fb.vec3",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": 0.2126,
+													"y": 0.7152,
+													"z": 0.0722
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "nos.fb.vec3"
+											},
+											{
+												"id": "aa34c774-0580-4272-96cc-89679914f652",
+												"name": "x",
+												"type_name": "float",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 0.2126,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "c0ec4dc5-f7f9-4669-857b-4cae2b42dafa",
+												"name": "y",
+												"type_name": "float",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 0.7152,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "87aae3e4-6374-4a68-8738-6bc01a25d085",
+												"name": "z",
+												"type_name": "float",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 0.0722,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 1053.0,
+											"y": 171.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"template_parameters": [
+											{
+												"name": "Type",
+												"type_name": "string",
+												"value": "nos.fb.vec3"
+											}
+										],
+										"plugin_version": {
+											"major": 1,
+											"minor": 7,
+											"patch": 6
+										}
+									},
+									{
+										"id": "37619b9e-f552-4d9c-b27a-62745c737c41",
+										"name": "ColorSpaceMatrix",
+										"class_name": "nos.mediaio.ColorSpaceMatrix",
+										"pins": [
+											{
+												"id": "1f41a004-f0db-430f-b02f-87d78958122c",
+												"name": "Output",
+												"type_name": "nos.fb.mat4",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": {
+														"x": 0.2126,
+														"y": -0.114572,
+														"z": 0.5,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.7152,
+														"y": -0.385428,
+														"z": -0.454153,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0722,
+														"y": 0.5,
+														"z": -0.045847,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.501961,
+														"z": 0.501961,
+														"w": 1.0
+													}
+												},
+												"def": {
+													"x": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"y": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"z": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													},
+													"w": {
+														"x": 0.0,
+														"y": 0.0,
+														"z": 0.0,
+														"w": 0.0
+													}
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "c1880d83-f9d3-40e2-b9bb-e52795c9cc5e",
+												"name": "ColorSpace",
+												"type_name": "nos.mediaio.ColorSpace",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "REC709",
+												"def": "REC709",
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Color Space"
+											},
+											{
+												"id": "8e0aeae7-41c4-4b9e-8165-603fe705abf4",
+												"name": "PixelFormat",
+												"type_name": "nos.mediaio.YCbCrPixelFormat",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "YUV8",
+												"def": "YUV8",
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Pixel Format"
+											},
+											{
+												"id": "48d7c674-edbe-4817-a59b-bc4f6c7d5dd0",
+												"name": "Type",
+												"type_name": "nos.mediaio.GammaConversionType",
+												"show_as": "PROPERTY",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "ENCODE",
+												"def": "ENCODE",
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "ed60b69b-8237-4f64-8d1f-f5c1e2877828",
+												"name": "NarrowRange",
+												"type_name": "bool",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": false,
+												"def": true,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Use Narrow Range Encoding"
+											}
+										],
+										"pos": {
+											"x": 229.0,
+											"y": 170.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"display_name": "Color Space Matrix",
+										"plugin_version": {
+											"major": 2,
+											"minor": 5,
+											"patch": 4
+										}
+									},
+									{
+										"id": "8476f3d6-fe2e-40a0-a0ea-93742ddaa43e",
+										"name": "ColorSpace",
+										"class_name": "nos.internal.GraphInput",
+										"pins": [
+											{
+												"id": "f08ebdd5-dc99-456b-a5c2-442160a9698c",
+												"name": "Output",
+												"type_name": "nos.mediaio.ColorSpace",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": "REC709",
+												"def": "REC709",
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "ee3d949d-89bf-4b15-ad06-79fc83b8b8f3",
+												"name": "Input",
+												"type_name": "nos.mediaio.ColorSpace",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "REC709",
+												"referred_by": [
+													"955fb8d4-d7b3-45fb-a221-158b46eb9e65"
+												],
+												"def": "REC709",
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													},
+													{
+														"key": "PinHidden",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 16.0,
+											"y": 140.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "e0443643-ded5-40e9-945d-e6d4c09ce5c7",
+										"name": "Break (1)",
+										"class_name": "nos.reflect.Break",
+										"pins": [
+											{
+												"id": "6f3330f8-99bd-489b-b0b8-38d5f4f3ac2b",
+												"name": "Input",
+												"type_name": "nos.fb.vec4",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": {
+													"x": 0.2126,
+													"y": 0.7152,
+													"z": 0.0722,
+													"w": 0.0
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0,
+													"w": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "902eb543-df93-4d4d-b3e3-d8caab1d3f66",
+												"name": "x",
+												"type_name": "float",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 0.2126,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "f88abc0a-8676-4cc9-b910-ac2bac8e42b5",
+												"name": "y",
+												"type_name": "float",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 0.7152,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "daee51ae-b894-468a-8e11-6dc222dddab0",
+												"name": "z",
+												"type_name": "float",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 0.0722,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "96df2914-5ad2-4581-a23a-1a78b071b4e6",
+												"name": "w",
+												"type_name": "float",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 0.0,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 864.0,
+											"y": 181.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"display_name": "Break nos.fb.vec4",
+										"plugin_version": {
+											"major": 1,
+											"minor": 7,
+											"patch": 6
+										}
+									},
+									{
+										"id": "652de513-b981-4d1d-a1f2-5cf56533719a",
+										"name": "Output",
+										"class_name": "nos.internal.GraphOutput",
+										"pins": [
+											{
+												"id": "5937c33c-321a-46b2-8d59-f69c2ae83bf4",
+												"name": "Input",
+												"type_name": "nos.fb.vec3",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_ONLY",
+												"data": {
+													"x": 0.2126,
+													"y": 0.7152,
+													"z": 0.0722
+												},
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "nos.fb.vec3"
+											},
+											{
+												"id": "d4f02b76-57d6-4269-b050-8b0a684999bf",
+												"name": "Output",
+												"type_name": "nos.fb.vec3",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": 0.2126,
+													"y": 0.7152,
+													"z": 0.0722
+												},
+												"referred_by": [
+													"20188547-33c0-4e27-91ec-134053b06e5d"
+												],
+												"def": {
+													"x": 0.0,
+													"y": 0.0,
+													"z": 0.0
+												},
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													},
+													{
+														"key": "PinHidden",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "nos.fb.vec3"
+											}
+										],
+										"pos": {
+											"x": 1209.0,
+											"y": 159.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"display_name": "Luma Coeffs",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									}
+								],
+								"connections": [
+									{
+										"from": "d25bf7b1-63ec-4172-8674-e2f2c8cce831",
+										"to": "f0f1a807-31c1-497d-befe-fa6583d76796",
+										"id": "114f9f50-5495-46e8-a562-de43a36ee6ca"
+									},
+									{
+										"from": "ef1370b8-d7e8-44e7-8472-1e5be76f107b",
+										"to": "ed60b69b-8237-4f64-8d1f-f5c1e2877828",
+										"id": "b43953ab-a20e-4db0-a198-209778973cda"
+									},
+									{
+										"from": "ada1360c-52db-4ca7-8b94-9a2cdb27bb0e",
+										"to": "6f3330f8-99bd-489b-b0b8-38d5f4f3ac2b",
+										"id": "1b92f39f-9771-4e5d-951c-88c7d4090585"
+									},
+									{
+										"from": "f08ebdd5-dc99-456b-a5c2-442160a9698c",
+										"to": "c1880d83-f9d3-40e2-b9bb-e52795c9cc5e",
+										"id": "2fd78147-c6df-4b97-9b90-eb8d9206aa4f"
+									},
+									{
+										"from": "902eb543-df93-4d4d-b3e3-d8caab1d3f66",
+										"to": "aa34c774-0580-4272-96cc-89679914f652",
+										"id": "15e9b43b-3275-4d1f-94b1-4da291828304"
+									},
+									{
+										"from": "f88abc0a-8676-4cc9-b910-ac2bac8e42b5",
+										"to": "c0ec4dc5-f7f9-4669-857b-4cae2b42dafa",
+										"id": "34020429-2583-42fc-b2c4-fa6371e9b107"
+									},
+									{
+										"from": "daee51ae-b894-468a-8e11-6dc222dddab0",
+										"to": "87aae3e4-6374-4a68-8738-6bc01a25d085",
+										"id": "72db8e0a-e991-42ee-9e5c-804264898b53"
+									},
+									{
+										"from": "a4f94bc4-fdc4-42cb-8cea-80b92c22ca54",
+										"to": "5937c33c-321a-46b2-8d59-f69c2ae83bf4",
+										"id": "01dbe646-c852-4443-b181-afa55b8bf032"
+									},
+									{
+										"from": "1f41a004-f0db-430f-b02f-87d78958122c",
+										"to": "88fd231b-2c1e-4ed5-9ec0-65566473bba0",
+										"id": "a2cdbcfe-18d0-4351-9af1-4c1cf1993ece"
+									}
+								]
+							},
+							"function_category": "Default Node",
+							"display_name": "Get Luma Coeffs",
+							"plugin_version": {
+								"major": 2,
+								"minor": 5,
+								"patch": 4
+							}
+						},
+						{
+							"id": "efc2cb51-0c93-440b-b30d-a620e7b73e04",
+							"name": "CasFilter",
+							"class_name": "nos.filters.CasFilter",
+							"pins": [
+								{
+									"id": "1b28e233-542f-4775-af0a-c742d4419467",
+									"name": "Input",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"def": {},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "b2d66170-b2e2-482d-ab4d-a650f3df7487",
+									"name": "Sharpness",
+									"type_name": "float",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": 0.5,
+									"min": 0.0,
+									"max": 1.0,
+									"def": 0.0,
+									"step": 0.01,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "9c4fe596-6e8b-47e2-8881-844a265c142b",
+									"name": "Strength",
+									"type_name": "float",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": 1.0,
+									"min": 0.0,
+									"max": 1.0,
+									"def": 1.0,
+									"step": 0.01,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "33a6d363-839f-4a31-a65c-d17c8673b41e",
+									"name": "LumaCoeffs",
+									"type_name": "nos.fb.vec3",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": {
+										"x": 0.2126,
+										"y": 0.7152,
+										"z": 0.0722
+									},
+									"def": {
+										"x": 0.0,
+										"y": 1.0,
+										"z": 0.0
+									},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"display_name": "Luma Coefficients"
+								},
+								{
+									"id": "a700126b-bf89-4f25-b2f6-62a5789ef957",
+									"name": "DispatchSize",
+									"type_name": "nos.fb.vec2u",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": {
+										"x": 240,
+										"y": 120
+									},
+									"def": {
+										"x": 120,
+										"y": 120
+									},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"display_name": "Dispatch Size"
+								},
+								{
+									"id": "1863183d-5d34-4f32-9f5e-8c9baa629e57",
+									"name": "Output",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_UNORM",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"def": {
+										"format": "R16G16B16A16_UNORM"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": 956.128296,
+								"y": 436.940674
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": "nos.sys.vulkan.GPUNode",
+								"options": {
+									"shader": "Shaders/CAS.comp",
+									"stage": "COMPUTE"
+								}
+							},
+							"function_category": "Default Node",
+							"description": "Contrast Adaptive Sharpening",
+							"display_name": "Contrast Adaptive Sharpen",
+							"plugin_version": {
+								"major": 1,
+								"minor": 5,
+								"patch": 3
+							}
+						},
+						{
+							"id": "e1cd48d5-3867-4fb7-96e0-f36170ca3544",
+							"name": "Sharpness",
+							"class_name": "nos.internal.GraphInput",
+							"pins": [
+								{
+									"id": "683c9dac-666e-45e8-9d64-f4b80bb63ff3",
+									"name": "Output",
+									"type_name": "float",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": 0.5,
+									"def": 0.0,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "f5c7ada2-191c-4fde-89aa-79e788be6a74",
+									"name": "Input",
+									"type_name": "float",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": 0.5,
+									"referred_by": [
+										"123ce0bd-745a-4015-948f-3c3a56e1e80d"
+									],
+									"min": 0.0,
+									"max": 1.0,
+									"def": 0.5,
+									"step": 0.01,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": -50.318275,
+								"y": 436.978638
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "b7a0b902-586e-4fbd-8af6-794cffcc4736",
+							"name": "Strength",
+							"class_name": "nos.internal.GraphInput",
+							"pins": [
+								{
+									"id": "16093d23-e063-4288-9e4f-9d182140f05f",
+									"name": "Output",
+									"type_name": "float",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": 1.0,
+									"min": 0.0,
+									"max": 1.0,
+									"def": 1.0,
+									"step": 0.01,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "cb066f43-b6f0-4a25-a1cf-b57f05524f97",
+									"name": "Input",
+									"type_name": "float",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": 1.0,
+									"referred_by": [
+										"a4f00ed5-1631-43bd-ab44-0f071d9d7291"
+									],
+									"min": 0.0,
+									"max": 1.0,
+									"def": 1.0,
+									"step": 0.01,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": -43.837921,
+								"y": 641.898865
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "9c532cd2-6fea-41c6-bd70-11e4ce07f256",
+							"name": "Input",
+							"class_name": "nos.internal.GraphInput",
+							"pins": [
+								{
+									"id": "520468e4-597b-4199-9530-53a3ab44e053",
+									"name": "Output",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"def": {},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "804b92f0-43e4-4a14-9254-38b49fd9f01c",
+									"name": "Input",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"referred_by": [
+										"1cd0c00f-cf47-4f47-abfe-d766cedd1b60"
+									],
+									"def": {},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": -54.724079,
+								"y": 220.997803
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "696bf82c-b63d-4b74-8ce1-5c30b4701be5",
+							"name": "ColorSpace",
+							"class_name": "nos.internal.GraphInput",
+							"pins": [
+								{
+									"id": "21216382-fc81-4c53-b7f4-641f0b9dc687",
+									"name": "Output",
+									"type_name": "nos.mediaio.ColorSpace",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": "REC709",
+									"def": "REC709",
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"display_name": "Color Space"
+								},
+								{
+									"id": "280b0674-a3aa-4f93-a27a-cd3ee152a853",
+									"name": "Input",
+									"type_name": "nos.mediaio.ColorSpace",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": "REC709",
+									"referred_by": [
+										"5730ccd2-5222-4f6a-8000-36f3e03f4022"
+									],
+									"def": "REC709",
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"display_name": "Color Space"
+								}
+							],
+							"pos": {
+								"x": -41.989983,
+								"y": 903.646729
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "11f0751d-bbbd-4b2c-a89a-4fc4a0a854a2",
+							"name": "Reroute",
+							"class_name": "nos.internal.Reroute",
+							"pins": [
+								{
+									"id": "8c652e3e-c8de-473c-a859-53c1c1a51872",
+									"name": "Input",
+									"type_name": "nos.fb.vec3",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {
+										"x": 0.2126,
+										"y": 0.7152,
+										"z": 0.0722
+									},
+									"def": {
+										"x": 0.0,
+										"y": 0.0,
+										"z": 0.0
+									},
+									"meta_data_map": [
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "e2119e0e-044d-4794-9663-9d8239fa668d",
+									"name": "Output",
+									"type_name": "nos.fb.vec3",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"x": 0.2126,
+										"y": 0.7152,
+										"z": 0.0722
+									},
+									"def": {
+										"x": 0.0,
+										"y": 0.0,
+										"z": 0.0
+									},
+									"meta_data_map": [
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": 635.428711,
+								"y": 883.394775
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "89e7bd5c-c352-4723-bc05-7ea2ca747ea9",
+							"name": "Reroute (1)",
+							"class_name": "nos.internal.Reroute",
+							"pins": [
+								{
+									"id": "01ecfe9f-e936-44b7-989a-add452901810",
+									"name": "Input",
+									"type_name": "float",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": 1.0,
+									"def": 0.0,
+									"meta_data_map": [
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "ac0dc43f-2197-43b6-9760-cf0ed1a71fda",
+									"name": "Output",
+									"type_name": "float",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": 1.0,
+									"def": 0.0,
+									"meta_data_map": [
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": 424.931427,
+								"y": 469.916901
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "0ef37302-cc8d-4e66-aabc-6b9abce6a426",
+							"name": "Reroute (2)",
+							"class_name": "nos.internal.Reroute",
+							"pins": [
+								{
+									"id": "aabaa211-6bdc-4724-a062-e5ab61ce6736",
+									"name": "Input",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"def": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd",
+									"name": "Output",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"def": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": 421.043762,
+								"y": 416.24173
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "9c496db5-7765-4316-bed4-68076947374e",
+							"name": "CalculateDispatchSize",
+							"pins": [
+								{
+									"id": "9ab69087-0e54-4d1e-851d-68f31b10a854",
+									"name": "Input",
+									"type_name": "nos.sys.vulkan.Texture",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+									},
+									"def": {
+										"resolution": "HD",
+										"width": 1920,
+										"height": 1080,
+										"format": "R16G16B16A16_SFLOAT",
+										"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+									},
+									"advanced_property": true,
+									"meta_data_map": [
+										{
+											"key": "AdvancedProperty",
+											"value": "true"
+										}
+									],
+									"contents_type": "PortalPin",
+									"contents": {
+										"source_id": "e2d36a51-3a0b-4708-9f38-97aa7ed6636c"
+									}
+								},
+								{
+									"id": "1baba639-0722-44f7-b26f-3236c71d468b",
+									"name": "Output",
+									"type_name": "nos.fb.vec2u",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {
+										"x": 240,
+										"y": 120
+									},
+									"def": {
+										"x": 0,
+										"y": 0
+									},
+									"contents_type": "PortalPin",
+									"contents": {
+										"source_id": "b05de071-499b-4a0a-9bb8-2dbde239106c"
+									},
+									"connection_conditions": "!array"
+								}
+							],
+							"pos": {
+								"x": 654.0,
+								"y": 501.0
+							},
+							"contents_type": "Graph",
+							"contents": {
+								"nodes": [
+									{
+										"id": "6bb024a8-130c-499f-b2b4-7355119ee67f",
+										"name": "Break",
+										"class_name": "nos.reflect.Break",
+										"pins": [
+											{
+												"id": "d5d636df-28ae-4f8d-a7cc-aa7d6288c543",
+												"name": "Input",
+												"type_name": "nos.sys.vulkan.Texture",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+												},
+												"def": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+												},
+												"advanced_property": true,
+												"meta_data_map": [
+													{
+														"key": "AdvancedProperty",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "23d3624b-14ae-4895-a376-934e3c7c6897",
+												"name": "handle",
+												"type_name": "ulong",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 1622040131168,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "23516fcb-71a4-43e5-9123-a294ef7eac88",
+												"name": "offset",
+												"type_name": "ulong",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 8918016,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "6470e763-8026-46df-a821-c578264d7d49",
+												"name": "size_in_bytes",
+												"type_name": "ulong",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 17694720,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "9a07e4ff-358d-4399-8307-94b599aae0c6",
+												"name": "external_memory",
+												"type_name": "nos.sys.vulkan.ExternalMemory",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": {
+													"handle_type": 2
+												},
+												"def": {
+													"handle_type": 0
+												},
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "7774c66d-dfef-4417-b000-beaf8df16f3d",
+												"name": "resolution",
+												"type_name": "nos.sys.vulkan.SizePreset",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "HD",
+												"def": "CUSTOM",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "9b91c7d8-4183-4189-aec0-3c4894d9d039",
+												"name": "width",
+												"type_name": "uint",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 1920,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "3dc96de9-ccec-47a7-8b75-390f17d19cdf",
+												"name": "height",
+												"type_name": "uint",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": 1080,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "039bdcf7-90f7-43a6-b0a5-8e96f8c76d9e",
+												"name": "format",
+												"type_name": "nos.sys.vulkan.Format",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "R16G16B16A16_SFLOAT",
+												"def": "NONE",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "bdb9ea4e-fb34-4f95-ba93-2e7fbf77a425",
+												"name": "usage",
+												"type_name": "nos.sys.vulkan.ImageUsage",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+												"def": "NONE",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "bd91a6b5-996b-4e3c-8b06-3ca25609d819",
+												"name": "filtering",
+												"type_name": "nos.sys.vulkan.Filtering",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "NEAREST",
+												"def": "NEAREST",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "9bd19286-8564-40a8-8827-99cbf83baca0",
+												"name": "unscaled",
+												"type_name": "bool",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": false,
+												"def": false,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "019893c1-267a-4950-97ca-2752ad06c788",
+												"name": "unmanaged",
+												"type_name": "bool",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": false,
+												"def": false,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "b310493b-1b79-4722-a651-c040da10dfbf",
+												"name": "field_type",
+												"type_name": "nos.sys.vulkan.FieldType",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "PROGRESSIVE",
+												"def": "PROGRESSIVE",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "fe4ec300-6a90-444d-909a-b52a4f849a1e",
+												"name": "stock_texture",
+												"type_name": "nos.sys.vulkan.StockTexture",
+												"show_as": "PROPERTY",
+												"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+												"data": "NOSNOVIDEO",
+												"def": "NOSNOVIDEO",
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 661.0,
+											"y": 682.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"display_name": "Get Resolution",
+										"plugin_version": {
+											"major": 1,
+											"minor": 7,
+											"patch": 6
+										}
+									},
+									{
+										"id": "e528e3e3-0e59-47fb-83c7-e323d374ebbb",
+										"name": "Eval (1)",
+										"class_name": "nos.math.Eval",
+										"pins": [
+											{
+												"id": "c6527a56-2a74-46fe-8674-64f87afdf93b",
+												"name": "Expression",
+												"type_name": "string",
+												"show_as": "PROPERTY",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "ceil(height / local_size_y)",
+												"def": "",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "7c0d1081-4535-4a62-895e-e60ab2fd0103",
+												"name": "Result",
+												"type_name": "double",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 120.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "d42259ed-6ca7-4e1a-ba9f-812c396e4b15",
+												"name": "Show_Expression",
+												"type_name": "bool",
+												"show_as": "PROPERTY",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": true,
+												"def": true,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Show Expression In Node"
+											},
+											{
+												"id": "e7ba7e4f-c78f-4975-b2f6-f093a4c33d09",
+												"name": "A",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 1080.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "height"
+											},
+											{
+												"id": "988f10cd-a395-4a9c-afc2-c300ac41ae3b",
+												"name": "B",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 9.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "local_size_y"
+											}
+										],
+										"pos": {
+											"x": 1109.0,
+											"y": 776.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"status_messages": [
+											{
+												"text": "ceil(height / local_size_y)"
+											}
+										],
+										"description": "Evaluates a string expression",
+										"plugin_version": {
+											"major": 1,
+											"minor": 9,
+											"patch": 3
+										}
+									},
+									{
+										"id": "c7762154-247f-4b07-9d6f-4c9918c6e74c",
+										"name": "uint to double",
+										"class_name": "cast.uint-double",
+										"pins": [
+											{
+												"id": "18302d1d-92fc-4776-a4e9-b13716db4842",
+												"name": "uint",
+												"type_name": "uint",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 1920,
+												"def": 0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "7f12eeed-73c5-434b-8ea5-b9f45cea918a",
+												"name": "double",
+												"type_name": "double",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 1920.0,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 944.0,
+											"y": 641.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "8b767d1a-ffaf-410b-86df-6973e1f46ec0",
+										"name": "double to uint",
+										"class_name": "cast.double-uint",
+										"pins": [
+											{
+												"id": "d10cf5d2-a8d7-47d8-9762-a8110427173f",
+												"name": "double",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 240.0,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "337de76c-8a58-4181-9b1a-566af24a900b",
+												"name": "uint",
+												"type_name": "uint",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 240,
+												"def": 0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 1272.0,
+											"y": 643.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "56590433-2124-4c42-9d22-79ef1225bb5e",
+										"name": "Eval",
+										"class_name": "nos.math.Eval",
+										"pins": [
+											{
+												"id": "cf286be3-00ba-4485-b072-c235f31cbd05",
+												"name": "Expression",
+												"type_name": "string",
+												"show_as": "PROPERTY",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": "ceil(width / local_size_x)",
+												"def": "",
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "acfabdce-ffd2-46ad-a33b-f3a2cc6ece68",
+												"name": "Result",
+												"type_name": "double",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 240.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "829f3c6e-d7d6-4c38-9174-10c0f60a90c3",
+												"name": "Show_Expression",
+												"type_name": "bool",
+												"show_as": "PROPERTY",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": true,
+												"def": true,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "Show Expression In Node"
+											},
+											{
+												"id": "df13dd60-c623-4e91-bcb7-854b0a1301de",
+												"name": "A",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 1920.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "width"
+											},
+											{
+												"id": "59ad4da4-fe9c-4c9c-b32b-ce9122014e05",
+												"name": "B",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 8.0,
+												"def": 0.0,
+												"contents_type": "JobPin",
+												"contents": {},
+												"display_name": "local_size_x"
+											}
+										],
+										"pos": {
+											"x": 1107.0,
+											"y": 645.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"status_messages": [
+											{
+												"text": "ceil(width / local_size_x)"
+											}
+										],
+										"description": "Evaluates a string expression",
+										"plugin_version": {
+											"major": 1,
+											"minor": 9,
+											"patch": 3
+										}
+									},
+									{
+										"id": "7c9f6156-3cc0-4915-8354-422892a95fe7",
+										"name": "Make",
+										"class_name": "nos.reflect.MakeDynamic",
+										"pins": [
+											{
+												"id": "4eb19174-39c0-41a6-a88a-61c3efa09425",
+												"name": "Output",
+												"type_name": "nos.fb.vec2u",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": 240,
+													"y": 120
+												},
+												"def": {
+													"x": 0,
+													"y": 0
+												},
+												"contents_type": "JobPin",
+												"contents": {},
+												"connection_conditions": "!array"
+											},
+											{
+												"id": "57cd6c03-91b9-44aa-b011-87c143dfa630",
+												"name": "x",
+												"type_name": "uint",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 240,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "d70908dd-2a49-4e09-a6ec-427d752b4d82",
+												"name": "y",
+												"type_name": "uint",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 120,
+												"def": 0,
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 1448.0,
+											"y": 668.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"template_parameters": [
+											{
+												"name": "Type",
+												"type_name": "string",
+												"value": "nos.fb.vec2u"
+											}
+										],
+										"plugin_version": {
+											"major": 1,
+											"minor": 7,
+											"patch": 6
+										}
+									},
+									{
+										"id": "70925927-ff30-4e34-8259-da36fea174e6",
+										"name": "uint to double (1)",
+										"class_name": "cast.uint-double",
+										"pins": [
+											{
+												"id": "696e4a6c-6b47-450a-b275-e91b8c9bfb70",
+												"name": "uint",
+												"type_name": "uint",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 1080,
+												"def": 0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "82c6d113-05be-489e-8bb0-035eb14f377c",
+												"name": "double",
+												"type_name": "double",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 1080.0,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 944.0,
+											"y": 778.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "9f23da84-6daf-4346-90c1-f68dd2a4f418",
+										"name": "double to uint (1)",
+										"class_name": "cast.double-uint",
+										"pins": [
+											{
+												"id": "2f21625d-c3ec-4106-bfd3-45b7cf55b4b5",
+												"name": "double",
+												"type_name": "double",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": 120.0,
+												"def": 0.0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "96936da6-77ff-4d33-8dfb-8b9e4c1b7498",
+												"name": "uint",
+												"type_name": "uint",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": 120,
+												"def": 0,
+												"meta_data_map": [
+													{
+														"key": "Category",
+														"value": ""
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 1274.0,
+											"y": 777.0
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "61f941db-7570-429b-b89f-51e13c8ac183",
+										"name": "Input",
+										"class_name": "nos.internal.GraphInput",
+										"pins": [
+											{
+												"id": "370bf6a6-3759-45ef-a640-ad0be5b3f628",
+												"name": "Output",
+												"type_name": "nos.sys.vulkan.Texture",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+												},
+												"def": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+												},
+												"advanced_property": true,
+												"meta_data_map": [
+													{
+														"key": "AdvancedProperty",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											},
+											{
+												"id": "e2d36a51-3a0b-4708-9f38-97aa7ed6636c",
+												"name": "Input",
+												"type_name": "nos.sys.vulkan.Texture",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_OR_PROPERTY",
+												"data": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+												},
+												"referred_by": [
+													"9ab69087-0e54-4d1e-851d-68f31b10a854"
+												],
+												"def": {
+													"resolution": "HD",
+													"width": 1920,
+													"height": 1080,
+													"format": "R16G16B16A16_SFLOAT",
+													"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+												},
+												"advanced_property": true,
+												"meta_data_map": [
+													{
+														"key": "AdvancedProperty",
+														"value": "true"
+													},
+													{
+														"key": "PinHidden",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {}
+											}
+										],
+										"pos": {
+											"x": 461.0,
+											"y": 701.25
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									},
+									{
+										"id": "99750bf9-62da-44e5-a29d-e83403b38b1d",
+										"name": "Output",
+										"class_name": "nos.internal.GraphOutput",
+										"pins": [
+											{
+												"id": "6bea0578-5947-4ac9-a823-904c3ee53f14",
+												"name": "Input",
+												"type_name": "nos.fb.vec2u",
+												"show_as": "INPUT_PIN",
+												"can_show_as": "INPUT_PIN_ONLY",
+												"data": {
+													"x": 240,
+													"y": 120
+												},
+												"def": {
+													"x": 0,
+													"y": 0
+												},
+												"contents_type": "JobPin",
+												"contents": {},
+												"connection_conditions": "!array"
+											},
+											{
+												"id": "b05de071-499b-4a0a-9bb8-2dbde239106c",
+												"name": "Output",
+												"type_name": "nos.fb.vec2u",
+												"show_as": "OUTPUT_PIN",
+												"can_show_as": "OUTPUT_PIN_ONLY",
+												"data": {
+													"x": 240,
+													"y": 120
+												},
+												"referred_by": [
+													"1baba639-0722-44f7-b26f-3236c71d468b"
+												],
+												"def": {
+													"x": 0,
+													"y": 0
+												},
+												"meta_data_map": [
+													{
+														"key": "PinHidden",
+														"value": "true"
+													}
+												],
+												"contents_type": "JobPin",
+												"contents": {},
+												"connection_conditions": "!array"
+											}
+										],
+										"pos": {
+											"x": 1648.0,
+											"y": 701.25
+										},
+										"contents_type": "Job",
+										"contents": {
+											"type": ""
+										},
+										"function_category": "Default Node",
+										"plugin_version": {
+											"major": 0,
+											"minor": 0,
+											"patch": 0
+										}
+									}
+								],
+								"connections": [
+									{
+										"from": "7c0d1081-4535-4a62-895e-e60ab2fd0103",
+										"to": "2f21625d-c3ec-4106-bfd3-45b7cf55b4b5",
+										"id": "eb0d8aae-365c-4b0e-a2eb-51fa08974d8a"
+									},
+									{
+										"from": "337de76c-8a58-4181-9b1a-566af24a900b",
+										"to": "57cd6c03-91b9-44aa-b011-87c143dfa630",
+										"id": "d6bf21d9-3a12-49a6-a22e-d199d956b01d"
+									},
+									{
+										"from": "9b91c7d8-4183-4189-aec0-3c4894d9d039",
+										"to": "18302d1d-92fc-4776-a4e9-b13716db4842",
+										"id": "b5990f51-d8ae-48bc-ab8b-5105149f0c6c"
+									},
+									{
+										"from": "acfabdce-ffd2-46ad-a33b-f3a2cc6ece68",
+										"to": "d10cf5d2-a8d7-47d8-9762-a8110427173f",
+										"id": "14701618-6cdc-4eda-b0c9-99f55cdd656a"
+									},
+									{
+										"from": "96936da6-77ff-4d33-8dfb-8b9e4c1b7498",
+										"to": "d70908dd-2a49-4e09-a6ec-427d752b4d82",
+										"id": "96a88825-565e-49fa-aae2-8846effc4772"
+									},
+									{
+										"from": "7f12eeed-73c5-434b-8ea5-b9f45cea918a",
+										"to": "df13dd60-c623-4e91-bcb7-854b0a1301de",
+										"id": "55ad3bf6-7f6c-4cc1-818a-8541ed58d038"
+									},
+									{
+										"from": "82c6d113-05be-489e-8bb0-035eb14f377c",
+										"to": "e7ba7e4f-c78f-4975-b2f6-f093a4c33d09",
+										"id": "6d179f6b-1385-4fdc-9f2b-1ceabb735dcd"
+									},
+									{
+										"from": "3dc96de9-ccec-47a7-8b75-390f17d19cdf",
+										"to": "696e4a6c-6b47-450a-b275-e91b8c9bfb70",
+										"id": "3a010fae-2f7d-4d7d-a552-2e3b835e3007"
+									},
+									{
+										"from": "370bf6a6-3759-45ef-a640-ad0be5b3f628",
+										"to": "d5d636df-28ae-4f8d-a7cc-aa7d6288c543",
+										"id": "b2f2ee0f-73b6-4219-91f4-c09051cf14e5"
+									},
+									{
+										"from": "4eb19174-39c0-41a6-a88a-61c3efa09425",
+										"to": "6bea0578-5947-4ac9-a823-904c3ee53f14",
+										"id": "6d910392-a863-4a06-a76f-f56aef069200"
+									}
+								]
+							},
+							"function_category": "Default Node",
+							"display_name": "Calculate Dispatch Size",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						}
+					],
+					"comments": [
+						{
+							"id": "93a94974-b7ef-4f4f-8a6c-3831a9fbfa35",
+							"name": "Comment",
+							"hint": "RealityHub Hint",
+							"content": "Computes luminance coefficients based on the selected color space and quantization mode.",
+							"pos": {
+								"x": 465.522919,
+								"y": 853.372009
+							},
+							"size": {
+								"x": 585.620728,
+								"y": 148.03894
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "1e1f39dd-7dd8-46fe-b9bf-cfc377237606",
+							"name": "Comment (2)",
+							"hint": "RealityHub Hint",
+							"content": "Applies contrast-adaptive sharpening using the input image, user-defined sharpness settings, and luminance coefficients.\nLuma coefficients help improve visual sharpness based on perceived brightness, especially in video or broadcast pipelines.",
+							"pos": {
+								"x": 769.346741,
+								"y": 424.36908
+							},
+							"size": {
+								"x": 819.275513,
+								"y": 159.085938
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "e69a4917-5f76-47ef-929d-d792c664c29a",
+							"name": "Comment (3)",
+							"hint": "RealityHub Hint",
+							"content": "Adjusts the blending strength of the sharpening effect. Works in conjunction with the Sharpness parameter.",
+							"pos": {
+								"x": -16.652094,
+								"y": 632.133423
+							},
+							"size": {
+								"x": 310.689819,
+								"y": 88.092529
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "45e13345-b395-4f20-9fa3-396b871b6eed",
+							"name": "Comment (5)",
+							"hint": "RealityHub Hint",
+							"content": "Input image to be processed by the CAS (Contrast Adaptive Sharpening) filter.",
+							"pos": {
+								"x": -19.278419,
+								"y": 202.786957
+							},
+							"size": {
+								"x": 308.0,
+								"y": 123.0
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "8b143699-8f84-47b4-ba56-9b03a6fffdf7",
+							"name": "Comment (1)",
+							"hint": "RealityHub Hint",
+							"content": "Specifies the color space used for luminance calculation (e.g., BT.709, BT.2020). Affects how Luma Coefficients are derived.\n\n",
+							"pos": {
+								"x": -14.050234,
+								"y": 862.496704
+							},
+							"size": {
+								"x": 316.0,
+								"y": 132.0
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "d669a59b-0957-4a08-ab51-06b2a0921d66",
+							"name": "Comment (6)",
+							"hint": "RealityHub Hint",
+							"content": "Final image output after contrast adaptive sharpen applied ",
+							"pos": {
+								"x": 1446.957642,
+								"y": 419.139221
+							},
+							"size": {
+								"x": 401.836151,
+								"y": 165.161438
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						},
+						{
+							"id": "30453811-b1b7-4255-9106-c2f03afb2ea2",
+							"name": "Comment (4)",
+							"hint": "RealityHub Hint",
+							"content": "Controls the overall sharpness level applied by the CAS filter. Higher values increase detail but may introduce noise.",
+							"pos": {
+								"x": -18.725433,
+								"y": 427.930328
+							},
+							"size": {
+								"x": 305.564148,
+								"y": 88.570435
+							},
+							"bg_color": {
+								"x": 0.101961,
+								"y": 0.776471,
+								"z": 1.0,
+								"w": 0.133333
+							}
+						}
+					],
+					"connections": [
+						{
+							"from": "21216382-fc81-4c53-b7f4-641f0b9dc687",
+							"to": "955fb8d4-d7b3-45fb-a221-158b46eb9e65",
+							"id": "51fcd047-9508-46a0-8bc3-ebe6f3efd226"
+						},
+						{
+							"from": "683c9dac-666e-45e8-9d64-f4b80bb63ff3",
+							"to": "b2d66170-b2e2-482d-ab4d-a650f3df7487",
+							"id": "9323ebc6-2090-4a23-bbf9-7f639de00715"
+						},
+						{
+							"from": "20188547-33c0-4e27-91ec-134053b06e5d",
+							"to": "8c652e3e-c8de-473c-a859-53c1c1a51872",
+							"id": "ff69429a-b4c5-42e6-83fa-ee9c362abc18"
+						},
+						{
+							"from": "1863183d-5d34-4f32-9f5e-8c9baa629e57",
+							"to": "c5b9e22a-e645-465a-a8b2-6b4db9a034e1",
+							"id": "980eaa38-6ee6-45b3-a6b7-95f97871ff61"
+						},
+						{
+							"from": "e2119e0e-044d-4794-9663-9d8239fa668d",
+							"to": "33a6d363-839f-4a31-a65c-d17c8673b41e",
+							"id": "aabd9ff1-7f33-4eaf-ab10-3e696a407f9e"
+						},
+						{
+							"from": "ac0dc43f-2197-43b6-9760-cf0ed1a71fda",
+							"to": "9c4fe596-6e8b-47e2-8881-844a265c142b",
+							"id": "6922a579-4e6f-4d85-a846-8cf0967d9416"
+						},
+						{
+							"from": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd",
+							"to": "9ab69087-0e54-4d1e-851d-68f31b10a854",
+							"id": "8b01d21a-94cd-45af-aa06-2d60da7f7e2b"
+						},
+						{
+							"from": "16093d23-e063-4288-9e4f-9d182140f05f",
+							"to": "01ecfe9f-e936-44b7-989a-add452901810",
+							"id": "ab7ddc9e-ee7f-421a-96e7-5319e393e75e"
+						},
+						{
+							"from": "520468e4-597b-4199-9530-53a3ab44e053",
+							"to": "aabaa211-6bdc-4724-a062-e5ab61ce6736",
+							"id": "24c7103f-085d-47f3-b8f5-d81067158ab3"
+						},
+						{
+							"from": "ff1f0af7-6820-4e67-9291-ae39ba0f20bd",
+							"to": "1b28e233-542f-4775-af0a-c742d4419467",
+							"id": "92e9f767-9485-4ea0-abcb-9f950a369a99"
+						},
+						{
+							"from": "1baba639-0722-44f7-b26f-3236c71d468b",
+							"to": "a700126b-bf89-4f25-b2f6-62a5789ef957",
+							"id": "29de2369-3d38-4635-b48c-8f045623b059"
+						}
+					]
+				},
+				"function_category": "Default Node",
+				"display_name": "Contrast Adaptive Sharpen",
+				"plugin_version": {
+					"major": 1,
+					"minor": 2,
+					"patch": 13
+				}
+			}
+		}
+	]
+}

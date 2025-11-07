@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "nosTrack",
 				"display_name": "FreeD",
-				"name_aliases": [ "virtual camera", "udp port" ]
+				"name_aliases": [
+					"virtual camera",
+					"udp port"
+				]
 			},
 			"node": {
 				"contents_type": "Job",
