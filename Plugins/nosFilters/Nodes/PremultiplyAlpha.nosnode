@@ -7,7 +7,6 @@
 				"display_name": "Premultiply Alpha"
 			},
 			"node": {
-
 				"class_name": "PremultiplyAlpha",
 				"contents_type": "Job",
 				"contents": {

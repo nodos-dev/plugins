@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Time",
-				"name_aliases": [ "timer", "clock", "delta", "elapsed" ]
+				"name_aliases": [
+					"timer",
+					"clock",
+					"delta",
+					"elapsed"
+				]
 			},
 			"node": {
 				"class_name": "Time",

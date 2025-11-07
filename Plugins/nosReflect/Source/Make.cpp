@@ -11,7 +11,7 @@ NOS_REGISTER_NAME(Type)
 struct MakeNode : NodeContext
 {
     std::optional<nos::TypeInfo> Type = {};
-    nos::Name VisualizerName = {};
+    fb::TVisualizer Visualizer = {};
 
     nosResult OnCreate(const fb::Node* node) override
     {
@@ -62,8 +62,10 @@ struct MakeNode : NodeContext
 			if (Type->TypeName == NOS_NAME_STATIC("string"))
             {
 				nosName visualizerName{};
-				nosEngine.GetPinVisualizerName(connectedPin, &visualizerName);
-				UpdateVisualizer(visualizerName);
+				nosBuffer buffer{};
+				nosEngine.GetPinVisualizer(connectedPin, "", &buffer);
+				SetPinVisualizer(NSN_Value, *InterpretPinValue<fb::Visualizer>(buffer)->UnPack());
+				nosEngine.FreeBuffer(&buffer);
 			}
 		}
     }
@@ -238,8 +240,10 @@ struct MakeNode : NodeContext
                 if (type->BaseType == NOS_BASE_TYPE_STRING)
                 {
 					nosName visName{};
-					nosEngine.GetPinVisualizerName(pin->Id, &visName);
-                    VisualizerName = visName;
+					nosBuffer buffer{};
+					nosEngine.GetPinVisualizer(pin->Id, "", &buffer);
+                    InterpretPinValue<fb::Visualizer>(buffer)->UnPackTo(&Visualizer);
+					nosEngine.FreeBuffer(&buffer);
                 }
             }
             else
@@ -328,26 +332,6 @@ struct MakeNode : NodeContext
 																				updatedDisplayName)));
 		}
     }
-
-	void UpdateVisualizer(nos::Name newVisualizerName)
-	{
-		if (Type->TypeName != NOS_NAME_STATIC("string"))
-			return;
-		if (newVisualizerName == VisualizerName)
-			return;
-		VisualizerName = newVisualizerName;
-		nos::fb::TVisualizer visualizer{};
-		if (VisualizerName)
-		{
-			visualizer.type = nos::fb::VisualizerType::COMBO_BOX;
-			visualizer.name = VisualizerName.AsCStr();
-		}
-		else
-		{
-			visualizer.type = nos::fb::VisualizerType::NONE;
-		}
-		SetPinVisualizer(NSN_Value, visualizer);
-	}
 };
 
 nosResult RegisterMake(nosNodeFunctions* fn)

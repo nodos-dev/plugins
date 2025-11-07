@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Filters",
 				"display_name": "Contrast Adaptive Sharpen (Raw)",
-				"name_aliases": [ "Contrast Adaptive Sharpen", "cas", "sharpen", "fx" ]
+				"name_aliases": [
+					"Contrast Adaptive Sharpen",
+					"cas",
+					"sharpen",
+					"fx"
+				]
 			},
 			"hide_in_context_menu": true,
 			"node": {

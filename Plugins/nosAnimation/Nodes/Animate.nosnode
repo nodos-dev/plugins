@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Animation",
 				"display_name": "Animate",
-				"name_aliases": [ "Animator" ]
+				"name_aliases": [
+					"Animator"
+				]
 			},
 			"node": {
 				"class_name": "Animate",

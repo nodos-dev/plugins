@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Noise",
 				"display_name": "FBM Noise",
-				"name_aliases": [ "fbm", "fractal", "brownian", "image" ]
+				"name_aliases": [
+					"fbm",
+					"fractal",
+					"brownian",
+					"image"
+				]
 			},
 			"node": {
 				"class_name": "FBMNoise",
@@ -89,4 +94,4 @@
 			}
 		}
 	]
-} 
+}

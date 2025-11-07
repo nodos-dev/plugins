@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Color",
-				"name_aliases": [ "texture", "rgba" ]
+				"name_aliases": [
+					"texture",
+					"rgba"
+				]
 			},
 			"node": {
 				"class_name": "Color",
@@ -29,8 +32,12 @@
 							"z": 1.0,
 							"w": 1.0
 						},
-						"visualizer": { "type": "COLOR_PICKER" },
-						"step": 0.01
+						"step": 0.01,
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "Output",

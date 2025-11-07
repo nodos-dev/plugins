@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "BoxFit",
-				"name_aliases": [ "fit", "texture" ]
+				"name_aliases": [
+					"fit",
+					"texture"
+				]
 			},
 			"node": {
 				"class_name": "BoxFit",
@@ -47,16 +50,18 @@
 						"type_name": "nos.fb.vec4",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
 						"data": {
 							"x": 0.0,
 							"y": 0.0,
 							"z": 0.0,
 							"w": 1.0
 						},
-						"description": "RGBA color for background"
+						"description": "RGBA color for background",
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "Resolution",
@@ -68,10 +73,12 @@
 							"y": 1080
 						},
 						"description": "Output resolution which the input image will be fitted into",
-						"visualizer": {
-							"type": "NAMED_VALUE",
-							"name": "nos.mediaio.ResolutionVisualizer"
-						}
+						"visualizers": [
+							{
+								"type": "NAMED_VALUE",
+								"name": "nos.mediaio.ResolutionVisualizer"
+							}
+						]
 					}
 				]
 			}

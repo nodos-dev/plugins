@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "SevenSegment",
-				"name_aliases": [ "7 segment display", "visualize number" ]
+				"name_aliases": [
+					"7 segment display",
+					"visualize number"
+				]
 			},
 			"node": {
 				"class_name": "SevenSegment",
@@ -45,15 +48,17 @@
 						"type_name": "nos.fb.vec4",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
 						"data": {
 							"x": 1,
 							"y": 0.5,
 							"z": 0.5,
 							"w": 1
-						}
+						},
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "Input",

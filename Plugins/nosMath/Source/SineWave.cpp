@@ -16,7 +16,7 @@ void RegisterSineWave(nosNodeFunctions* node)
 		fb::TNode oldNode;
 		node->UnPackTo(&oldNode);
 		
-		auto newNodeDefBuffer = nos::GetAssetAsType("Config/SineWave.nosnode",
+		auto newNodeDefBuffer = nos::GetAssetAsType("Nodes/SineWave.nosnode",
 			NOS_NAME(nos::fb::NodeDefinitions::GetFullyQualifiedName()));
 		NOS_SOFT_CHECK(newNodeDefBuffer.has_value(), "Failed to load SineWave node definition: Unable to get file contents");
 		if (!newNodeDefBuffer)

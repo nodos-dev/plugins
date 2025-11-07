@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Show Status",
-				"name_aliases": [ "print" ]
+				"name_aliases": [
+					"print"
+				]
 			},
 			"node": {
 				"class_name": "ShowStatus",

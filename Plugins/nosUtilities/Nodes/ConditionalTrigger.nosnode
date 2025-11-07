@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Execution",
 				"display_name": "Conditional Trigger",
-				"aliases": [ "if", "branch" ]
+				"aliases": [
+					"if",
+					"branch"
+				]
 			},
 			"node": {
 				"class_name": "ConditionalTrigger",

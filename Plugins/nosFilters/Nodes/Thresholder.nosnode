@@ -5,10 +5,11 @@
 			"menu_info": {
 				"category": "Filters",
 				"display_name": "Thresholder",
-				"name_aliases": [ "image segment" ]
+				"name_aliases": [
+					"image segment"
+				]
 			},
 			"node": {
-
 				"class_name": "Thresholder",
 				"contents_type": "Job",
 				"contents": {

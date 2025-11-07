@@ -26,7 +26,6 @@
 								"name": "in2",
 								"type_name": "double",
 								"show_as": "INPUT_PIN"
-
 							},
 							{
 								"name": "out",
@@ -48,7 +47,6 @@
 								"value": "TestTag1,TestTag2"
 							}
 						]
-
 					},
 					{
 						"name": "vec3d_prop",
@@ -70,9 +68,11 @@
 						"type_name": "[nos.fb.vec4]",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						}
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					}
 				]
 			}
@@ -97,7 +97,6 @@
 								"type_name": "double",
 								"show_as": "INPUT_PIN",
 								"pin_category": "A"
-
 							},
 							{
 								"name": "in2",
@@ -197,7 +196,6 @@
 								"type_name": "double",
 								"show_as": "INPUT_PIN",
 								"pin_category": "A"
-
 							},
 							{
 								"name": "in2",
@@ -221,7 +219,6 @@
 								"type_name": "double",
 								"show_as": "INPUT_PIN",
 								"pin_category": "A"
-
 							},
 							{
 								"name": "in2",
@@ -245,7 +242,6 @@
 								"type_name": "double",
 								"show_as": "INPUT_PIN",
 								"pin_category": "A"
-
 							},
 							{
 								"name": "in2",
@@ -308,7 +304,6 @@
 								"type_name": "nos.experiment.TestStruct",
 								"show_as": "INPUT_PIN",
 								"pin_category": "A"
-
 							},
 							{
 								"name": "in2",
