@@ -5,7 +5,13 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Reduce Texture",
-				"name_aliases": [ "reduce", "sum", "mean", "mse", "statistics" ]
+				"name_aliases": [
+					"reduce",
+					"sum",
+					"mean",
+					"mse",
+					"statistics"
+				]
 			},
 			"node": {
 				"class_name": "ReduceTexture",

@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "CPU Sleep",
-				"name_aliases": [ "Wait", "Milliseconds", "ms", "seconds" ]
+				"name_aliases": [
+					"Wait",
+					"Milliseconds",
+					"ms",
+					"seconds"
+				]
 			},
 			"node": {
 				"class_name": "CPUSleep",

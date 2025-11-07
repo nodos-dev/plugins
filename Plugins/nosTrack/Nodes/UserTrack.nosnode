@@ -5,10 +5,11 @@
 			"menu_info": {
 				"category": "nosTrack",
 				"display_name": "User Track",
-				"name_aliases": [ "virtual camera" ]
+				"name_aliases": [
+					"virtual camera"
+				]
 			},
 			"node": {
-
 				"class_name": "UserTrack",
 				"contents_type": "Job",
 				"always_execute": true,

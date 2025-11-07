@@ -60,10 +60,12 @@
             "type_name": "string",
             "show_as": "PROPERTY",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-              "type": "COMBO_BOX",
-              "name": "nos.sys.variables.Names"
-            }
+						"visualizers": [
+							{
+								"type": "COMBO_BOX",
+								"name": "nos.sys.variables.Names"
+							}
+						]
           },
           {
             "name": "Value",

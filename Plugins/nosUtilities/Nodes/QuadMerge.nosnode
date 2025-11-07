@@ -5,7 +5,13 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Quad Merge",
-				"name_aliases": [ "combine", "concatenate", "add", "quarter", "texture" ]
+				"name_aliases": [
+					"combine",
+					"concatenate",
+					"add",
+					"quarter",
+					"texture"
+				]
 			},
 			"node": {
 				"class_name": "QuadMerge",

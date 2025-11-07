@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Swizzle",
-				"name_aliases": [ "reorder", "shuffle", "channel replace", "texture" ]
+				"name_aliases": [
+					"reorder",
+					"shuffle",
+					"channel replace",
+					"texture"
+				]
 			},
 			"node": {
 				"class_name": "Swizzle",
@@ -52,8 +57,6 @@
 						"data": "0",
 						"step": 0.01
 					},
-
-
 					{
 						"name": "GreenSource",
 						"type_name": "nos.utilities.Source",
@@ -88,8 +91,6 @@
 						"data": "0",
 						"step": 0.01
 					},
-
-
 					{
 						"name": "BlueSource",
 						"type_name": "nos.utilities.Source",
@@ -124,8 +125,6 @@
 						"data": "0",
 						"step": 0.01
 					},
-
-
 					{
 						"name": "AlphaSource",
 						"type_name": "nos.utilities.Source",
@@ -160,7 +159,6 @@
 						"data": "0",
 						"step": 0.01
 					},
-
 					{
 						"name": "Input1",
 						"type_name": "nos.sys.vulkan.Texture",
@@ -179,15 +177,12 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
-
 					{
 						"name": "Input4",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
-
-
 					{
 						"name": "Output",
 						"type_name": "nos.sys.vulkan.Texture",

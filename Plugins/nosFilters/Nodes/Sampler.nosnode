@@ -7,7 +7,6 @@
 				"display_name": "Sampler"
 			},
 			"node": {
-
 				"class_name": "Sampler",
 				"contents_type": "Job",
 				"contents": {

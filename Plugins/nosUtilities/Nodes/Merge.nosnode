@@ -5,7 +5,11 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Merge",
-				"name_aliases": [ "combine", "concatenate", "add" ]
+				"name_aliases": [
+					"combine",
+					"concatenate",
+					"add"
+				]
 			},
 			"node": {
 				"class_name": "Merge",
@@ -17,16 +21,18 @@
 						"type_name": "nos.fb.vec4",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
 						"data": {
 							"x": 0.0,
 							"y": 0.0,
 							"z": 0.0,
 							"w": 1.0
 						},
-						"description": "Solid RGBA color for background"
+						"description": "Solid RGBA color for background",
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "Opacity_0",

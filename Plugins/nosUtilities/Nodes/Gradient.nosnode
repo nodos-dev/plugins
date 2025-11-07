@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Gradient",
-				"name_aliases": [ "linear interpolation", "lerp" ]
+				"name_aliases": [
+					"linear interpolation",
+					"lerp"
+				]
 			},
 			"node": {
 				"class_name": "Gradient",
@@ -23,32 +26,36 @@
 						"type_name": "nos.fb.vec4",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
 						"data": {
 							"x": 1,
 							"y": 1,
 							"z": 1,
 							"w": 1
 						},
-						"description": "Start color of the selected gradient type"
+						"description": "Start color of the selected gradient type",
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "EvenColor",
 						"type_name": "nos.fb.vec4",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"visualizer": {
-							"type": "COLOR_PICKER"
-						},
 						"data": {
 							"x": 0,
 							"y": 0,
 							"z": 0,
 							"w": 1
 						},
-						"description": "End color of the selected gradient type"
+						"description": "End color of the selected gradient type",
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
 					},
 					{
 						"name": "Kind",

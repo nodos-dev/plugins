@@ -1,14 +1,12 @@
 {
 	"nodes": [
 		{
-
 			"class_name": "Sobel",
 			"menu_info": {
 				"category": "Filters",
 				"display_name": "Sobel"
 			},
 			"node": {
-
 				"class_name": "Sobel",
 				"contents_type": "Job",
 				"contents": {

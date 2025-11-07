@@ -27,8 +27,8 @@ typedef struct nosAnimationSubsystem
 // Make sure these are same with nossys file.
 #define NOS_ANIMATION_SUBSYSTEM_NAME "nos.sys.animation"
 
-#define NOS_ANIMATION_SUBSYSTEM_VERSION_MAJOR 1
-#define NOS_ANIMATION_SUBSYSTEM_VERSION_MINOR 11
+#define NOS_ANIMATION_SUBSYSTEM_VERSION_MAJOR 3
+#define NOS_ANIMATION_SUBSYSTEM_VERSION_MINOR 0
 
 extern struct nosPluginInfo nosAnimationModuleInfo;
 extern nosAnimationSubsystem* nosAnimation;
