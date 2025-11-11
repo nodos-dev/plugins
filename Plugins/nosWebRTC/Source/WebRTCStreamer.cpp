@@ -368,7 +368,6 @@ struct WebRTCNodeContext : nos::NodeContext {
 			FrameSenderThread.join();
 
 			assert(SignalFrameSenderThreadStop == std::nullopt);
-			SignalFrameSenderThreadStop = std::nullopt;
 		}
 
 		p_nosWebRTC.reset();
