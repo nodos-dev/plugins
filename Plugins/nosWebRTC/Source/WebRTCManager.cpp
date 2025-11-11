@@ -101,10 +101,9 @@ bool nosWebRTCManager::AddPeerConnection() {
     p_PeerConnectionObservers.push_back(std::make_shared<nosPeerConnectionObserver>(lastIdx));
     RegisterToPeerConnectionObserverCallbacks(p_PeerConnectionObservers[lastIdx].get());
 
-    auto peerConnection = p_PeerConnectionFactory->CreatePeerConnection(
-		config, nullptr, nullptr, p_PeerConnectionObservers[lastIdx].get());
-    
-    p_PeerConnections.push_back(std::move(peerConnection));
+    p_PeerConnections.push_back(
+        p_PeerConnectionFactory->CreatePeerConnection(
+            config, nullptr, nullptr, p_PeerConnectionObservers[lastIdx].get()));
 
     if (p_PeerConnections[p_PeerConnections.size() - 1] == nullptr)
         return false;
