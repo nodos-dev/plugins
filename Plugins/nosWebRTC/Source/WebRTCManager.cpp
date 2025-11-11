@@ -232,8 +232,7 @@ void nosWebRTCManager::AddVideoSource(rtc::scoped_refptr<nosCustomVideoSource> s
     if (!p_PeerConnectionFactory)
         return;
     p_VideoSources.push_back(source);
-	auto track = p_PeerConnectionFactory->CreateVideoTrack(kVideoLabel, source);
-    p_VideoTracks.push_back(std::move(track));
+    p_VideoTracks.push_back(p_PeerConnectionFactory->CreateVideoTrack(kVideoLabel, source));
 
 }
 
