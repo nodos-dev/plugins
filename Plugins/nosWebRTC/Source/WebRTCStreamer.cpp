@@ -302,6 +302,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		if (FrameSenderThread.joinable()) {
 			shouldSendFrame = false;
 			SendFrameCV.notify_one();
+			EncodeCompletedCV.notify_one();
 			FrameSenderThread.join();
 		}
 
@@ -468,7 +469,9 @@ struct WebRTCNodeContext : nos::NodeContext {
 				{
 					if (shouldSendFrame) {
 						nosEngine.LogW("WebRTC Streamer has no frame on the ring!");
-						SendFrameCV.wait(lck);
+						SendFrameCV.wait_for(lck, std::chrono::milliseconds(100), [this] {
+							return InputRing->IsReadable() || !shouldSendFrame;
+						});
 					}
 					continue;
 				}
@@ -553,7 +556,14 @@ struct WebRTCNodeContext : nos::NodeContext {
 				{
 					nosEngine.LogW("WebRTC Streamer waits for encoding");
 					std::unique_lock lock(EncodeMutex);
-					EncodeCompletedCV.wait(lock);
+					if (!EncodeCompletedCV.wait_for(lock,
+					                                std::chrono::milliseconds(100),
+					                                [this] {
+					                                    return FreeBuffers > 0 || !shouldSendFrame;
+					                                }))
+					{
+						nosEngine.LogW("WebRTC Streamer encoder wait timed out!");
+					}
 				}
 			}
 
