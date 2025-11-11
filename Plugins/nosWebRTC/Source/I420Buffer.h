@@ -5,11 +5,14 @@
 #pragma once
 #include "api/video/i420_buffer.h"
 #include "api/video/video_frame.h"
+#include <mutex>
+
 class nosI420Buffer : public webrtc::I420BufferInterface
 {
 public:
-	nosI420Buffer(unsigned int width, unsigned int height)
-	:m_width(width), m_height(height) {
+	nosI420Buffer(unsigned int width, unsigned int height, std::function<void(const nosI420Buffer&)> onReleaseCallback)
+		: m_width(width), m_height(height), m_on_release_callback(onReleaseCallback)
+	{
 		m_strideY = width;
 		m_strideU = (width + 1) / 2;
 		m_strideV = (width + 1) / 2;
@@ -33,7 +36,7 @@ public:
 	rtc::RefCountReleaseStatus Release() const override {
 		const auto status = ref_count_.DecRef();
 		if (status == rtc::RefCountReleaseStatus::kDroppedLastRef) {
-			delete this;
+			m_on_release_callback(*this);
 		}
 		return status;
 	}
@@ -44,6 +47,7 @@ private:
 	int m_strideY;
 	int m_strideU;
 	int m_strideV;
-	mutable webrtc::webrtc_impl::RefCounter ref_count_{ 0 };
+	std::function<void(const nosI420Buffer&)> m_on_release_callback;
+	mutable webrtc::webrtc_impl::RefCounter ref_count_{0};
 
 };

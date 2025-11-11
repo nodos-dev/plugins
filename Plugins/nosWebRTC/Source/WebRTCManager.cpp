@@ -36,7 +36,6 @@
 #include "WebRTCManager.h"
 #include "CustomVideoSource.h"
 #include "WebRTCJsonConfig.h"
-#include "VideoEncoderFactory.h"
 
 using json = nlohmann::json;
 
@@ -55,16 +54,16 @@ nosWebRTCManager::nosWebRTCManager(nosWebRTCClient* client) :p_nosWebRTCClient(c
             WorkerThread->SetName("nosWebRTCWorkerThread", nullptr);
             WorkerThread->Start();
         }
-        p_encodeObserver = std::make_unique<nosEncodeImageObserver>([this]() {this->OnImageEncoded(); });
-        auto  a =webrtc::CreateBuiltinVideoEncoderFactory();
-        p_PeerConnectionFactory = webrtc::CreatePeerConnectionFactory(
-            nullptr /* network_thread */, WorkerThread.get() /* worker_thread */,
-            SignalingThread.get() /* signaling_thread */, nullptr /* default_adm */,
-            webrtc::CreateBuiltinAudioEncoderFactory(),
-            webrtc::CreateBuiltinAudioDecoderFactory(),
-            std::make_unique<nosVideoEncoderFactory>(p_encodeObserver.get()),
-            webrtc::CreateBuiltinVideoDecoderFactory(), nullptr /* audio_mixer */,
-            nullptr /* audio_processing */);
+		p_PeerConnectionFactory = webrtc::CreatePeerConnectionFactory(nullptr /* network_thread */,
+																	  WorkerThread.get() /* worker_thread */,
+																	  SignalingThread.get() /* signaling_thread */,
+																	  nullptr /* default_adm */,
+																	  webrtc::CreateBuiltinAudioEncoderFactory(),
+																	  webrtc::CreateBuiltinAudioDecoderFactory(),
+																	  webrtc::CreateBuiltinVideoEncoderFactory(),
+																	  webrtc::CreateBuiltinVideoDecoderFactory(),
+																	  nullptr /* audio_mixer */,
+																	  nullptr /* audio_processing */);
     }
 
 
@@ -102,8 +101,10 @@ bool nosWebRTCManager::AddPeerConnection() {
     p_PeerConnectionObservers.push_back(std::make_shared<nosPeerConnectionObserver>(lastIdx));
     RegisterToPeerConnectionObserverCallbacks(p_PeerConnectionObservers[lastIdx].get());
 
-    p_PeerConnections.push_back(
-        p_PeerConnectionFactory->CreatePeerConnection(config, nullptr, nullptr, p_PeerConnectionObservers[lastIdx].get()));
+    auto peerConnection = p_PeerConnectionFactory->CreatePeerConnection(
+		config, nullptr, nullptr, p_PeerConnectionObservers[lastIdx].get());
+    
+    p_PeerConnections.push_back(std::move(peerConnection));
 
     if (p_PeerConnections[p_PeerConnections.size() - 1] == nullptr)
         return false;
@@ -177,7 +178,6 @@ void nosWebRTCManager::Dispose()
     SignalingThread->Stop();
     WorkerThread->Stop();
 
-    p_encodeObserver.reset();
     p_nosWebRTCClient = nullptr;
     PeerConnectionIdx_PeerID.clear();
 
@@ -233,18 +233,14 @@ void nosWebRTCManager::AddVideoSource(rtc::scoped_refptr<nosCustomVideoSource> s
     if (!p_PeerConnectionFactory)
         return;
     p_VideoSources.push_back(source);
-    p_VideoTracks.push_back(p_PeerConnectionFactory->CreateVideoTrack(kVideoLabel, source));
+	auto track = p_PeerConnectionFactory->CreateVideoTrack(kVideoLabel, source);
+    p_VideoTracks.push_back(std::move(track));
 
 }
 
 void nosWebRTCManager::AddVideoSink(rtc::scoped_refptr<nosCustomVideoSink> sink)
 {
     p_VideoSinks.push_back(sink);
-}
-
-void nosWebRTCManager::SetImageEncodeCompletedCallback(std::function<void()> callback)
-{
-    ImageEncodeCompletedCallback = callback;
 }
 
 void nosWebRTCManager::SetPeerConnectedCallback(std::function<void()> callback)
