@@ -41,8 +41,6 @@
 #include "WebRTCManager.h"
 #include "WebRTCClient.h"
 #include "YUV420toRGB.comp.spv.dat"
-#include "LinearI420Buffer.h"
-#include "I420Buffer.h"
 #include "WebRTCCommon.h"
 
 // nosNodes

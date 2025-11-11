@@ -41,7 +41,6 @@
 #include "WebRTCManager.h"
 #include "WebRTCClient.h"
 #include "RGBtoYUV420_Linearized.comp.spv.dat"
-#include "LinearI420Buffer.h"
 #include "I420Buffer.h"
 #include "WebRTCCommon.h"
 

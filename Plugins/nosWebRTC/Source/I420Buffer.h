@@ -5,7 +5,6 @@
 #pragma once
 #include "api/video/i420_buffer.h"
 #include "api/video/video_frame.h"
-#include <mutex>
 
 class nosI420Buffer : public webrtc::I420BufferInterface
 {
