@@ -16,7 +16,6 @@
 #include "CreateSDPObserver.h"
 #include "SetSDPObserver.h"
 #include "PeerConnectionObserver.h"
-#include "EncodeImageObserver.h"
 #include "CustomVideoSink.h"
 
 typedef rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnectionPtr;
@@ -34,7 +33,6 @@ public:
     void AddVideoSource(rtc::scoped_refptr<nosCustomVideoSource> source);
     void AddVideoSink(rtc::scoped_refptr<nosCustomVideoSink> sink);
 
-    void SetImageEncodeCompletedCallback(std::function<void()> callback);
     void SetPeerConnectedCallback(std::function<void()> callback);
     void SetPeerDisconnectedCallback(std::function<void()> callback);
     void SetServerConnectionSuccesfulCallback(std::function<void()> callback);
@@ -109,9 +107,7 @@ protected:
     std::vector<rtc::scoped_refptr<nosCustomVideoSink>> p_VideoSinks;
     std::vector<rtc::scoped_refptr<webrtc::VideoTrackInterface>> p_VideoTracks;
 
-    std::unique_ptr<nosEncodeImageObserver> p_encodeObserver;
     nosWebRTCClient* p_nosWebRTCClient;
-    
     
     int targetKbps = 5000;
     bool IsDisposed = false;
