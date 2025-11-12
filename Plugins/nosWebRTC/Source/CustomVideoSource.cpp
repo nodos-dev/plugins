@@ -6,7 +6,6 @@
 nosCustomVideoSource::nosCustomVideoSource()
 : CurrentState(webrtc::MediaSourceInterface::SourceState::kInitializing)
 {
-
 }
 
 void nosCustomVideoSource::PushFrame(webrtc::VideoFrame& frame)
