@@ -25,9 +25,9 @@
 [submodule "Plugins/nosMath/External/tinyexpr-cpp"]
 	path = Plugins/nosMath/External/tinyexpr-cpp
 	url = https://github.com/Blake-Madden/tinyexpr-plusplus.git
-[submodule "Plugins/External/stb"]
-	path = Plugins/External/stb
-	url = https://github.com/nothings/stb.git
 [submodule "Plugins/nosWebRTC/Source/ssl-cert"]
 	path = Plugins/nosWebRTC/Source/ssl-cert
 	url = https://github.com/mediaz/ssl-cert.git
+[submodule "Plugins/nosUtilities/External/stb"]
+	path = Plugins/nosUtilities/External/stb
+	url = https://github.com/nothings/stb.git

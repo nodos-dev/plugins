@@ -4,8 +4,10 @@
 			"name": "nos.sys.lino",
 			"version": "2.0.0"
 		},
+		"dependencies": [],
 		"display_name": "Lino Subsystem",
 		"description": "A Nodos subsystem for Lino",
 		"category": "Media"
-	}
+	},
+	"sdk_version": "40.0"
 }

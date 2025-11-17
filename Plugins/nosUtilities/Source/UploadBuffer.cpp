@@ -4,7 +4,7 @@
 
 // External
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 namespace nos::utilities
 {

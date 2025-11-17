@@ -5,7 +5,7 @@
 #include <Nodos/Plugin.hpp>
 #include <AppService_generated.h>
 #include <AppEvents_generated.h>
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
 #include "Names.h"
 
 #include "rtc_base/ssl_adapter.h"

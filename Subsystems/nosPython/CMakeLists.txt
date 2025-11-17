@@ -1,6 +1,5 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-
 set(PYBIND11_NOPYTHON ON CACHE BOOL "" FORCE)
 
 add_library(python3 STATIC IMPORTED)
@@ -12,11 +11,9 @@ set_target_properties(python312 PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOU
 set_target_properties(python312 PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/../nosPythonDeps/3.12/include)
 
 # You must install Python with debug binaries checked
-add_subdirectory(External/pybind11 EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/External/pybind11" "${CMAKE_CURRENT_BINARY_DIR}/External/pybind11" EXCLUDE_FROM_ALL)
 
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Types" "${CMAKE_CURRENT_SOURCE_DIR}/Include/nosPython" "cpp" "" nosPython_generated)
-
-nos_add_plugin("nosPython" "${NOS_PLUGIN_SDK_TARGET};nosPython_generated;python3;python312;pybind11::embed" "${CMAKE_CURRENT_SOURCE_DIR}/Include")
-
-nos_get_targets(NOSPY_EXTERNAL_TARGETS "./External/pybind11")
+nos_get_targets(NOSPY_EXTERNAL_TARGETS "${CMAKE_CURRENT_BINARY_DIR}/External/pybind11")
 nos_group_targets("${NOSPY_EXTERNAL_TARGETS}" "External")
+
+target_link_libraries(${NOS_PLUGIN_TARGET} PRIVATE python3 python312 pybind11::embed)

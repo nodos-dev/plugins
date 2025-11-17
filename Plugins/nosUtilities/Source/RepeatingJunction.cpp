@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 namespace nos::utilities
 {
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_RepeatingJunction, "nos.utilities.RepeatingJunction")

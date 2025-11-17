@@ -2,8 +2,8 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include <random>
 

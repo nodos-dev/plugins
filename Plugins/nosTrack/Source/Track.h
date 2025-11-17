@@ -11,7 +11,7 @@
 #include <Nodos/Utils/Thread.hpp>
 #include <AppService_generated.h>
 #include "Nodos/Plugin.hpp"
-#include "Track_generated.h"
+#include "nosTrack/Track_generated.h"
 #include <glm/glm.hpp>
 #include <asio.hpp>
 #include <atomic>

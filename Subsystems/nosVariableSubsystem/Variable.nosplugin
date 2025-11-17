@@ -8,5 +8,6 @@
         "description": "",
         "dependencies": []
     },
-    "binary_path": "Binaries/nosVariableSubsystem"
+    "binary_path": "Binaries/nosSysVariables",
+    "sdk_version": "40.0"
 }

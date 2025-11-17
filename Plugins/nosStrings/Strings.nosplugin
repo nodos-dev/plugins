@@ -9,5 +9,6 @@
     "category": "Utilities",
     "dependencies": []
   },
-    "binary_path": "Binaries/nosStrings"
+  "binary_path": "Binaries/nosStrings",
+  "sdk_version": "40.0"
 }

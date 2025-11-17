@@ -1,8 +1,7 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-
 if(WIN32)
-	add_compile_definitions(
+	target_compile_definitions(${NOS_PLUGIN_TARGET} PRIVATE
 	USE_AURA=1 _HAS_EXCEPTIONS=0 __STD_C _CRT_RAND_S
 	_CRT_SECURE_NO_DEPRECATE _SCL_SECURE_NO_DEPRECATE
 	_ATL_NO_OPENGL _WINDOWS CERT_CHAIN_PARA_HAS_EXTRA_FIELDS
@@ -20,24 +19,21 @@ if(WIN32)
 	)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/External)
-find_library(webrtc NAMES webrtc.lib PATHS ${CMAKE_CURRENT_LIST_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
-find_library(jsoncpp_static NAMES jsoncpp_static.lib PATHS ${CMAKE_CURRENT_LIST_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
-find_library(websockets_static NAMES websockets_static.lib PATHS ${CMAKE_CURRENT_LIST_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
-find_library(libssl NAMES libssl.lib PATHS ${CMAKE_CURRENT_LIST_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
-find_library(libcrypto NAMES libcrypto.lib PATHS ${CMAKE_CURRENT_LIST_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
-link_directories(${CMAKE_CURRENT_LIST_DIR}/External/lib/Release)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/External)
+find_library(webrtc NAMES webrtc.lib PATHS ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
+find_library(jsoncpp_static NAMES jsoncpp_static.lib PATHS ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
+find_library(websockets_static NAMES websockets_static.lib PATHS ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
+find_library(libssl NAMES libssl.lib PATHS ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
+find_library(libcrypto NAMES libcrypto.lib PATHS ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release REQUIRED NO_DEFAULT_PATH)
+target_link_directories(${NOS_PLUGIN_TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/External/lib/Release)
 
-##Ordering of the 4 libraries (webrtc, websockets, libssl, libcrypto) matters!!!
-nos_add_plugin("nosWebRTC" 
-			"${NOS_SYS_VULKAN_TARGET};${NOS_PLUGIN_SDK_TARGET};jsoncpp_static.lib;webrtc.lib;websockets_static.lib;libssl.lib;libcrypto.lib;WS2_32.LIB;GDI32.lib;USER32.lib;WinMM.Lib;dmoguids.lib;AdvAPI32.Lib;Secur32.lib;amstrmid.lib;strmiids.lib;Crypt32.Lib;wmcodecdspuuid.lib;iphlpapi.lib;msdmo.lib;"
- "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(${NOS_PLUGIN_TARGET} PRIVATE "jsoncpp_static.lib;webrtc.lib;websockets_static.lib;libssl.lib;libcrypto.lib;WS2_32.LIB;GDI32.lib;USER32.lib;WinMM.Lib;dmoguids.lib;AdvAPI32.Lib;Secur32.lib;amstrmid.lib;strmiids.lib;Crypt32.Lib;wmcodecdspuuid.lib;iphlpapi.lib;msdmo.lib;")
 
 #Always force MD (because webrtc.lib built in Release => MD )
-target_compile_options(nosWebRTC PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/MD>)
-set_target_properties(nosWebRTC PROPERTIES OUTPUT_NAME "nosWebRTC")
+target_compile_options(${NOS_PLUGIN_TARGET} PRIVATE
+	$<$<CXX_COMPILER_ID:MSVC>:/MD>)
 
-include_directories(
-	${CMAKE_CURRENT_LIST_DIR}/External/include
-    ${SUBSYSTEMS_SOURCE_DIR}/nosVulkanSubsystem/Include)
+target_include_directories(
+	${NOS_PLUGIN_TARGET}
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/External/include)

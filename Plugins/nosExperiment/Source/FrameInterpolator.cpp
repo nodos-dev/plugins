@@ -2,10 +2,10 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include <shared_mutex>
-#include "FrameInterpolator_generated.h"
+#include "nosExperiment/FrameInterpolator_generated.h"
 
 namespace nos::experiment
 {

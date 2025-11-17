@@ -17,10 +17,11 @@
             },
             {
                 "name": "nos.mediaio",
-                "version": "3.1"
+                "version": "3.3.1"
             }
         ],
         "category": "Image Processing"
     },
-    "binary_path": "Binaries/nosFilters"
+    "binary_path": "Binaries/nosFilters",
+    "sdk_version": "40.0"
 }
