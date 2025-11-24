@@ -62,8 +62,11 @@ struct MakeNode : NodeContext
 			{
 				nosBuffer buffer{};
 				nosEngine.GetPinVisualizer(connectedPin, "", &buffer);
-				SetPinVisualizer(NSN_Value, *InterpretObjectData<fb::Visualizer>(buffer)->UnPack());
-				nosEngine.FreeBuffer(&buffer);
+				if (buffer.Size)
+				{
+					SetPinVisualizer(NSN_Value, *InterpretObjectData<fb::Visualizer>(buffer)->UnPack());
+					nosEngine.FreeBuffer(&buffer);
+				}
 			}
 		}
 	}
@@ -296,8 +299,11 @@ struct MakeNode : NodeContext
 				{
 					nosBuffer buffer{};
 					nosEngine.GetPinVisualizer(pin->Id, "", &buffer);
-					InterpretObjectData<fb::Visualizer>(buffer)->UnPackTo(&Visualizer);
-					nosEngine.FreeBuffer(&buffer);
+					if (buffer.Size)
+					{
+						InterpretObjectData<fb::Visualizer>(buffer)->UnPackTo(&Visualizer);
+						nosEngine.FreeBuffer(&buffer);
+					}
 				}
 			}
 			else
