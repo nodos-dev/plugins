@@ -68,7 +68,7 @@ struct BufferProviderNode : NodeContext
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
-		AddPinValueWatcher<uint32_t>(NSN_BufferCount, [this](uint32_t* newVal, auto) {
+		AddPinValueWatcher<uint32_t>(NSN_BufferCount, [this](const uint32_t* newVal, auto) {
 			BufferCount = *newVal;
 			if (BufferCount == 0)
 				return;
@@ -76,36 +76,38 @@ struct BufferProviderNode : NodeContext
 				return;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<uint32_t>(NSN_Alignment, [this](uint32_t* newAlignment, auto) {
+		AddPinValueWatcher<uint32_t>(NSN_Alignment, [this](const uint32_t* newAlignment, auto) {
 			if (SampleBufferInfo.Alignment == *newAlignment)
 				return;
 			SampleBufferInfo.Alignment = *newAlignment;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<uint64_t>(NSN_BufferSize, [this](uint64_t* newSize, auto) {
+		AddPinValueWatcher<uint64_t>(NSN_BufferSize, [this](const uint64_t* newSize, auto) {
 			if (SampleBufferInfo.Size == *newSize)
 				return;
 			SampleBufferInfo.Size = *newSize;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<nos::sys::vulkan::MemoryFlags>(NSN_MemoryFlags, [this](nos::sys::vulkan::MemoryFlags* newMemoryFlags, auto) {
+		AddPinValueWatcher<nos::sys::vulkan::MemoryFlags>(
+			NSN_MemoryFlags, [this](const nos::sys::vulkan::MemoryFlags* newMemoryFlags, auto) {
 			auto newVal = nosMemoryFlags(*newMemoryFlags);
 			if (SampleBufferInfo.MemoryFlags == newVal)
 				return;
 			SampleBufferInfo.MemoryFlags = newVal;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<nos::sys::vulkan::BufferUsage>(NSN_Usage, [this](nos::sys::vulkan::BufferUsage* newUsage, auto) {
+		AddPinValueWatcher<nos::sys::vulkan::BufferUsage>(NSN_Usage,
+														  [this](const nos::sys::vulkan::BufferUsage* newUsage, auto) {
 			auto newVal = nosBufferUsage(*newUsage);
 			if (SampleBufferInfo.Usage == newVal)
 				return;
 			SampleBufferInfo.Usage = newVal;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<bool>(NOS_NAME("ResizeOnPathRingSizeChanged"), [this](bool* newVal, auto) {
+		AddPinValueWatcher<bool>(NOS_NAME("ResizeOnPathRingSizeChanged"), [this](const bool* newVal, auto) {
 			ResizeOnPathRingSizeChanged = *newVal;
 		});
-		AddPinValueWatcher<bool>(NOS_NAME("RequireHostUseCompletion"), [this](bool* newVal, auto) {
+		AddPinValueWatcher<bool>(NOS_NAME("RequireHostUseCompletion"), [this](const bool* newVal, auto) {
 			if (RequireHostUseCompletion != *newVal)
 			{
 				RequireHostUseCompletion = *newVal;

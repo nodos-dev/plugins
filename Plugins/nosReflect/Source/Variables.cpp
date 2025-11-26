@@ -28,7 +28,8 @@ struct VariableNodeBase : NodeContext
 
 	~VariableNodeBase() override
 	{
-		if (!HasName()) {
+		if (!HasName())
+		{
 			return;
 		}
 		auto res = nosVariables->DeleteNodeReference(Name, NodeId);
@@ -40,7 +41,8 @@ struct VariableNodeBase : NodeContext
 		nos::TypeInfo incomingType(params->IncomingTypeName);
 		for (int i = 0; i < incomingType->AttributeCount; ++i)
 		{
-			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("resource")) {
+			if (incomingType->Attributes[i].Name == NOS_NAME_STATIC("resource"))
+			{
 				strcpy(params->OutErrorMessage, "Resource types are not supported");
 				return NOS_RESULT_FAILED;
 			}
@@ -56,7 +58,12 @@ struct VariableNodeBase : NodeContext
 		SetNodeStatusMessages(messages);
 	}
 
-	void SetStatus(VariableStatusItem item, fb::NodeStatusMessageType msgType, std::string text, std::string details, uint64_t timeout, bool popup)
+	void SetStatus(VariableStatusItem item,
+				   fb::NodeStatusMessageType msgType,
+				   std::string text,
+				   std::string details,
+				   uint64_t timeout,
+				   bool popup)
 	{
 		StatusMessages[item] = fb::TNodeStatusMessage{{}, std::move(text), msgType, details, timeout, true, popup};
 		UpdateStatus();
@@ -67,7 +74,7 @@ struct VariableNodeBase : NodeContext
 		StatusMessages.erase(item);
 		UpdateStatus();
 	}
-	
+
 	virtual void OnPinUpdated(const nosPinUpdate* pinUpdate) override
 	{
 		if (pinUpdate->UpdatedField != NOS_PIN_FIELD_TYPE_NAME)
@@ -79,25 +86,19 @@ struct VariableNodeBase : NodeContext
 		SetPinOrphanState(NSN_Value, fb::PinOrphanStateType::ACTIVE);
 	}
 
-	bool HasType() const
-	{
-		return TypeName != NSN_TypeNameGeneric;
-	}
+	bool HasType() const { return TypeName != NSN_TypeNameGeneric; }
 
-	bool HasName() const
-	{
-		return Name.IsValid() && !Name.AsString().empty();
-	}
+	bool HasName() const { return Name.IsValid() && !Name.AsString().empty(); }
 
-	std::unordered_map<VariableStatusItem,  fb::TNodeStatusMessage> StatusMessages;
+	std::unordered_map<VariableStatusItem, fb::TNodeStatusMessage> StatusMessages;
 	nos::Name Name;
 	nos::Name TypeName = NSN_TypeNameGeneric;
 	int32_t CallbackId = -1;
 };
-	
+
 struct SetVariableNode : VariableNodeBase
 {
-	nosResult OnCreate(nosFbNodePtr node) override 
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		VariableNodeBase::OnCreate(node);
 		CheckType();
@@ -115,40 +116,40 @@ struct SetVariableNode : VariableNodeBase
 				Name = nos::Name(newValue);
 				CheckName();
 				if (!HasName())
-				return;
-			CallbackId = nosVariables->RegisterVariableUpdateCallback(Name, &SetVariableNode::VariableUpdateCallback, this);
-			// Check if already exists
-			{
-				nosName outTypeName{};
-				nosBuffer outValue{};
-				auto res = nosVariables->Get(Name, &outTypeName, &outValue);
-				if (res == NOS_RESULT_SUCCESS)
+					return;
+				CallbackId =
+					nosVariables->RegisterVariableUpdateCallback(Name, &SetVariableNode::VariableUpdateCallback, this);
+				// Check if already exists
 				{
-					nosVariables->AddNodeReference(Name, NodeId);
-					// If type is already set, reset it to the correct type.
-					if (HasType())
+					nosName outTypeName{};
+					nosBuffer outValue{};
+					auto res = nosVariables->Get(Name, &outTypeName, &outValue);
+					if (res == NOS_RESULT_SUCCESS)
 					{
-						SetPinType(NOS_NAME("Value"), outTypeName);
-						SetPinValue(NOS_NAME("Value"), outValue);
+						nosVariables->AddNodeReference(Name, NodeId);
+						// If type is already set, reset it to the correct type.
+						if (HasType())
+						{
+							SetPinType(NOS_NAME("Value"), outTypeName);
+							SetPinValue(NOS_NAME("Value"), outValue);
+						}
+						else
+							TypeName = outTypeName;
+						return;
+					}
+				}
+				if (HasType())
+				{
+					if (Value)
+					{
+						nosVariables->Set(Name, TypeName, Value->GetInternal());
+						nosVariables->AddNodeReference(Name, NodeId);
 					}
 					else
-						TypeName = outTypeName;
-					return;
+						SetDefaultValue();
 				}
-			}
-			if (HasType())
-			{
-				if (Value)
-				{
-					nosVariables->Set(Name, TypeName, Value->GetInternal());
-					nosVariables->AddNodeReference(Name, NodeId);
-				}
-				else
-					SetDefaultValue();
-			}
-		});
-		AddPinValueWatcher(NOS_NAME("Value"), [this](const nos::Buffer& value,  std::optional<nos::Buffer> oldValue)
-		{
+			});
+		AddPinValueWatcher(NOS_NAME("Value"), [this](const nos::Buffer& value, std::optional<nos::Buffer> oldValue) {
 			if (!HasType())
 				return;
 			Value = value;
@@ -209,7 +210,7 @@ struct SetVariableNode : VariableNodeBase
 
 	void OnNodeMenuRequested(nosContextMenuRequestPtr request) override
 	{
-		if (HasType()) 
+		if (HasType())
 			return;
 		flatbuffers::FlatBufferBuilder fbb;
 		size_t count = 0;
@@ -244,12 +245,13 @@ struct SetVariableNode : VariableNodeBase
 			types.push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
 		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
 		items.push_back(nos::CreateContextMenuItemDirect(fbb, "Set Type", -1, &types));
-		HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
+		HandleEvent(CreateAppEvent(
+			fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
 	}
 
 	void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
 	{
-		if (HasType()) 
+		if (HasType())
 			return;
 		if (cmd >= AllTypeNames.size())
 			return;
@@ -274,11 +276,12 @@ struct SetVariableNode : VariableNodeBase
 	void CheckName()
 	{
 		if (!HasName())
-			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name", "", 5, true);
+			SetStatus(
+				VariableStatusItem::VariableName, fb::NodeStatusMessageType::WARNING, "Provide a name", "", 5, true);
 		else
 			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::INFO, Name.AsString(), "", 2, false);
 	}
-	
+
 	std::optional<nos::Buffer> Value;
 	std::vector<nosName> AllTypeNames;
 };
@@ -372,7 +375,12 @@ struct GetVariableNode : VariableNodeBase
 		auto res = nosVariables->Set(Name, valuePin->TypeName, initialValue.GetInternal());
 		if (res != NOS_RESULT_SUCCESS)
 		{
-			SetStatus(VariableStatusItem::VariableName, fb::NodeStatusMessageType::FAILURE, "Failed to set variable " + Name.AsString(), "", 5, true);
+			SetStatus(VariableStatusItem::VariableName,
+					  fb::NodeStatusMessageType::FAILURE,
+					  "Failed to set variable " + Name.AsString(),
+					  "",
+					  5,
+					  true);
 			SetPinValue(NOS_NAME("Name"), "");
 			return;
 		}
@@ -408,4 +416,4 @@ nosResult RegisterGetVariable(nosNodeFunctions* node)
 	NOS_BIND_NODE_CLASS(NSN_GetVariable, GetVariableNode, node);
 	return NOS_RESULT_SUCCESS;
 }
-}
+} // namespace nos::reflect

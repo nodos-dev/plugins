@@ -14,6 +14,12 @@ struct PromiseObject
 	std::mutex Mutex;
 	std::condition_variable Condition;
 	bool IsFulfilled{ false };
+	std::string Tag;
+
+	PromiseObject(const char* tag)
+		: Tag(tag)
+	{
+	}
 
 	~PromiseObject()
 	{
@@ -57,13 +63,21 @@ struct PromiseObject
 		}
 		Condition.notify_all();
 	}
+
+	EngineBuffer Serialize() const
+	{
+		return EngineBuffer::CopyFrom(nos::Buffer::From(TPromise{.tag = Tag}));
+	}
 };
 
-nosResult NOSAPI_CALL ConstructPromiseObject(nosBuffer buffer, nosForeignHandle* outForeignHandle)
+nosResult NOSAPI_CALL ConstructPromiseObject(nosBuffer buffer, nosForeignHandle* outForeignHandle, nosBuffer* outSerializedData)
 {
 	if (!outForeignHandle)
 		return NOS_RESULT_INVALID_ARGUMENT;
-	*outForeignHandle = new PromiseObject();
+	auto promise = InterpretObjectData<Promise>(buffer);
+	auto obj = new PromiseObject(promise->tag() ? promise->tag()->c_str() : "Untagged");
+	*outForeignHandle = static_cast<nosForeignHandle>(obj);
+	*outSerializedData = obj->Serialize().Release();
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -73,16 +87,11 @@ void NOSAPI_CALL ReleasePromiseObject(nosForeignHandle foreignHandle)
 	delete promise;
 }
 
-nosResult NOSAPI_CALL SerializePromiseObject(nosForeignHandle foreignHandle, nosBuffer* outBuffer)
-{
-	*outBuffer = EngineBuffer::CopyFrom(nos::Buffer::From(nos::sync::TPromise{})).Release();
-	return NOS_RESULT_SUCCESS;
-}
-
 nosResult NOSAPI_CALL CreatePromise(const char* tag, nosObjectReference* outPromise)
 {
 	// TODO: Pass tag
-	return nosEngine.ObjectAPI->CreateObjectForForeignHandle(NOS_NAME("nos.sync.Promise"), new PromiseObject(), outPromise);
+	auto promise = new PromiseObject(tag);
+	return nosEngine.ObjectAPI->CreateObjectForForeignHandle(NOS_NAME("nos.sync.Promise"), promise, promise->Serialize(), outPromise);
 }
 
 nosResult NOSAPI_CALL WaitPromise(nosObjectId promise, uint64_t timeoutNs)

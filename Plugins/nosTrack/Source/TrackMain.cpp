@@ -77,7 +77,10 @@ Vec3Type InterpolateRotation(const Vec3Type& start, const Vec3Type& end, const d
 	return Vec3Type(newEuler.x, newEuler.y, newEuler.z);
 }
 
-nosResult NOSAPI_CALL InterpolateTrack(const nosBuffer from, const nosBuffer to, const double t, nosBuffer* out)
+nosResult NOSAPI_CALL InterpolateTrack(const nosImmutableBuffer from,
+									   const nosImmutableBuffer to,
+									   const double t,
+									   nosBuffer* out)
 {
 	auto start = flatbuffers::GetRoot<track::Track>(from.Data);
 	auto end = flatbuffers::GetRoot<track::Track>(to.Data);
@@ -104,7 +107,10 @@ nosResult NOSAPI_CALL InterpolateTrack(const nosBuffer from, const nosBuffer to,
 	return NOS_RESULT_SUCCESS;
 }
 
-nosResult NOSAPI_CALL InterpolateTransform(const nosBuffer from, const nosBuffer to, const double t, nosBuffer* out)
+nosResult NOSAPI_CALL InterpolateTransform(const nosImmutableBuffer from,
+										   const nosImmutableBuffer to,
+										   const double t,
+										   nosBuffer* out)
 {
 	auto start = flatbuffers::GetRoot<fb::Transform>(from.Data);
 	auto end = flatbuffers::GetRoot<fb::Transform>(to.Data);

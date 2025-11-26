@@ -36,7 +36,7 @@ public:
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
-		AddPinValueWatcher<double>(NOS_NAME_STATIC("double_prop"), [this](double* newVal, std::optional<double*> oldVal) {
+		AddPinValueWatcher<double>(NOS_NAME_STATIC("double_prop"), [this](const double* newVal, std::optional<const double*> oldVal) {
 			double optOldVal = 0.0f;
 			if (oldVal)
 				optOldVal = **oldVal;

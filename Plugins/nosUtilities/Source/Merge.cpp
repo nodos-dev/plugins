@@ -113,7 +113,7 @@ struct MergeContext : NodeContext
 			if(NSN_Out == pin.Name)
 				continue;
 
-			nosBuffer val = *GetPrimitiveObjectDataView(*pin.Object);
+			nosImmutableBuffer val = *GetObjectDataView(*pin.Object);
 			if (NSN_Background_Color == pin.Name)
 			{
 				bindings.emplace_back(sys::vulkan::ShaderDataBinding(pin.Name, val));

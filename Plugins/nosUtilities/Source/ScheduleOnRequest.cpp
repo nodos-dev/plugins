@@ -25,7 +25,8 @@ struct ScheduleOnRequestNode : NodeContext
 	nosResult OnCreate(nosFbNodePtr node) 
 	{
 		// Listen to the ScheduleWhenNodeCreated pin only at construction
-		AddPinValueWatcher<bool>(NSN_ScheduleWhenNodeCreated, [this](bool* newVal, std::optional<bool*> oldVal) {
+		AddPinValueWatcher<bool>(NSN_ScheduleWhenNodeCreated,
+								 [this](const bool* newVal, std::optional<const bool*> oldVal) {
 			if (!oldVal.has_value())
 				ExecuteForOnceAtCreation = *newVal;
 		});

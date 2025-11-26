@@ -12,9 +12,9 @@ struct ScheduleRequestNode : NodeContext
 	{
 		if (pinName == NOS_NAME("DeltaSeconds"))
 		{
-			if (auto objBuf = GetPrimitiveObjectDataView(newHandle))
+			if (auto objBuf = GetObjectDataView(newHandle))
 			{
-				auto& val = *static_cast<fb::vec2u*>(objBuf->Data);
+				auto& val = *static_cast<const fb::vec2u*>(objBuf->Data);
 				if (val != DeltaSeconds)
 				{
 					DeltaSeconds = val;
@@ -24,9 +24,9 @@ struct ScheduleRequestNode : NodeContext
 		}
 		else if (pinName == NOS_NAME("Importance"))
 		{
-			if (auto objBuf = GetPrimitiveObjectDataView(newHandle))
+			if (auto objBuf = GetObjectDataView(newHandle))
 			{
-				auto& val = *static_cast<uint32_t*>(objBuf->Data);
+				auto& val = *static_cast<const uint32_t*>(objBuf->Data);
 				if (val != Importance)
 				{
 					Importance = val;
@@ -36,9 +36,9 @@ struct ScheduleRequestNode : NodeContext
 		}
 		else if (pinName == NOS_NAME("TryAgainOnFailure"))
 		{
-			if (auto objBuf = GetPrimitiveObjectDataView(newHandle))
+			if (auto objBuf = GetObjectDataView(newHandle))
 			{
-				auto& val = *static_cast<bool*>(objBuf->Data);
+				auto& val = *static_cast<const bool*>(objBuf->Data);
 				if (val != TryAgainOnFailure)
 				{
 					TryAgainOnFailure = val;

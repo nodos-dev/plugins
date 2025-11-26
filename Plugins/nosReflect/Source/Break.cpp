@@ -227,7 +227,7 @@ struct BreakNode : NodeContext
 		LastServedPinValues[pinId] = value;
 	}
 	
-    void SetOutputValues(nosBuffer buf)
+    void SetOutputValues(nosImmutableBuffer buf)
     {
         auto& type = *Type;
         switch (type->BaseType)
@@ -291,13 +291,9 @@ struct BreakNode : NodeContext
 		switch (ObjectKind)
 		{
 		case NOS_OBJECT_KIND_PRIMITIVE:
-		{
-			SetOutputValues(params.GetPinDataBuffer(NSN_Input));
-			break;
-		}
 		case NOS_OBJECT_KIND_FOREIGN:
 		{
-			SetOutputValues(*SerializeObject(params.GetPinObject(NSN_Input)));
+			SetOutputValues(params.GetPinBuffer(NSN_Input));
 			break;
 		}
 		case NOS_OBJECT_KIND_ARRAY:

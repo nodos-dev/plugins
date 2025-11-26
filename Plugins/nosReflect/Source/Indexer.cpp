@@ -151,10 +151,10 @@ struct Indexer : NodeContext
 	{
 		if (pinName == NSN_Index)
 		{
-			auto value = GetPrimitiveObjectDataView(newObj);
+			auto value = GetObjectDataView(newObj);
 			if (!value)
 				return;
-			SetIndex(*static_cast<uint32_t*>(value->Data));
+			SetIndex(*static_cast<const uint32_t*>(value->Data));
 		}
 		else if (pinName == NSN_Input)
 		{

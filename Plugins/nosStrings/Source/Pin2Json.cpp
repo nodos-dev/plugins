@@ -12,9 +12,9 @@ struct Pin2JsonNode : NodeContext
 	{
 		auto& dataPin = params[NOS_NAME("Data")];
 		bool success = false;
-		if (auto serialized = SerializeObject(*dataPin.Object))
+		if (auto data = GetObjectDataView(*dataPin.Object))
 		{
-			if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *serialized))
+			if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *data))
 			{
 				SetPinValue(NOS_NAME("Json"), outJson->AsBuffer());
 				ClearNodeStatusMessages();

@@ -148,13 +148,13 @@ struct ArithmeticNodeContext : NodeContext
 				if ("string" == templateParam->name()->string_view() ||
 					NSN_Type == templateParam->name()->string_view())
 				{
-					newTypeName = nos::Name(InterpretObjectData<const char*>((void*)templateParam->value()->Data()));
+					newTypeName = nos::Name((const char*)(templateParam->value()->Data()));
 					continue;
 				}
 				if ("nos.reflect.BinaryOperator" == templateParam->name()->string_view() ||
 					NSN_Operator == templateParam->name()->string_view())
 				{
-					Operator = *InterpretObjectData<reflect::BinaryOperator>((void*)templateParam->value()->Data());
+					Operator = *InterpretObjectData<reflect::BinaryOperator>((const void*)templateParam->value()->Data());
 					continue;
 				}
 			}
@@ -366,24 +366,24 @@ struct ArithmeticNodeContext : NodeContext
 			}
 			else
 			{
-				nos::Buffer outputBuf(params.GetPinDataBuffer(NSN_Output));
+				nos::Buffer outputBuf = params.GetPinBuffer(NSN_Output);
 				DoOp<void>(*Operator,
 						   *Type,
 						   params.GetPinData<uint8_t>(NSN_A),
 						   params.GetPinData<uint8_t>(NSN_B),
-						   InterpretObjectData<uint8_t>(outputBuf));
+						   outputBuf.As<uint8_t>());
 				SetPinValue(NSN_Output, outputBuf);
 			}
 		}
 		else
 		{
-			nos::Buffer outputBuf(params.GetPinDataBuffer(NSN_Output));
+			nos::Buffer outputBuf = params.GetPinBuffer(NSN_Output);
 			DoScalarOp(*Operator,
 					   *Type,
 					   params.GetPinData<uint8_t>(NSN_A),
 					   *ScalarType,
 					   params.GetPinData<void>(NSN_Scalar),
-					   InterpretObjectData<uint8_t>(outputBuf));
+					   outputBuf.As<uint8_t>());
 			SetPinValue(NSN_Output, outputBuf);
 		}
 

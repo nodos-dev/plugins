@@ -63,7 +63,7 @@ struct TextureProviderNode : NodeContext
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
-		AddPinValueWatcher<uint32_t>(NSN_Count, [this](uint32_t* newVal, auto) {
+		AddPinValueWatcher<uint32_t>(NSN_Count, [this](const uint32_t* newVal, auto) {
 			TextureCount = *newVal;
 			if (TextureCount == 0)
 				return;
@@ -71,20 +71,22 @@ struct TextureProviderNode : NodeContext
 				return;
 			RecreateTextures();
 		});
-		AddPinValueWatcher<nos::fb::vec2u>(NSN_Resolution, [this](nos::fb::vec2u* newSize, auto) {
+		AddPinValueWatcher<nos::fb::vec2u>(NSN_Resolution, [this](const nos::fb::vec2u* newSize, auto) {
 			if (SampleTextureInfo.Width == newSize->x() && SampleTextureInfo.Height == newSize->y())
 				return;
 			SampleTextureInfo.Width = newSize->x();
 			SampleTextureInfo.Height = newSize->y();
 			RecreateTextures();
 		});
-		AddPinValueWatcher<nos::sys::vulkan::Format>(NSN_Format, [this](nos::sys::vulkan::Format* newFormat, auto) {
+		AddPinValueWatcher<nos::sys::vulkan::Format>(NSN_Format,
+													 [this](const nos::sys::vulkan::Format* newFormat, auto) {
 			if (SampleTextureInfo.Format == nosFormat(*newFormat))
 				return;
 			SampleTextureInfo.Format = nosFormat(*newFormat);
 			RecreateTextures();
 		});
-		AddPinValueWatcher<nos::sys::vulkan::ImageUsage>(NSN_Usage, [this](nos::sys::vulkan::ImageUsage* newUsage, auto) {
+		AddPinValueWatcher<nos::sys::vulkan::ImageUsage>(NSN_Usage,
+														 [this](const nos::sys::vulkan::ImageUsage* newUsage, auto) {
 			SampleTextureInfo.Usage = nosImageUsage(*newUsage);
 			RecreateTextures();
 		});

@@ -12,7 +12,7 @@ if (NOT WITH_NODOS_WORKSPACE)
 endif()
 
 add_compile_definitions(NOS_DISABLE_DEPRECATED)
-nos_find_plugin_sdk("40.0.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
+nos_find_plugin_sdk("41.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
 nos_get_plugin("nos.sys.vulkan" "8.0" NOS_SYS_VULKAN_TARGET)
 nos_find_plugin_path("nos.sys.vulkan" "8.0" NOS_SYS_VULKAN_PATH)
 

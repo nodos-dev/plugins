@@ -25,7 +25,7 @@ nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId);
 nosResult NOSAPI_CALL UnregisterEventGroup(uint32_t eventGroupId);
 nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount);
 
-nosResult NOSAPI_CALL ConstructPromiseObject(nosBuffer buffer, nosForeignHandle* outForeignHandle);
+nosResult NOSAPI_CALL ConstructPromiseObject(nosBuffer buffer, nosForeignHandle* outForeignHandle, nosBuffer* outSerializedData);
 void NOSAPI_CALL ReleasePromiseObject(nosForeignHandle foreignHandle);
 nosResult NOSAPI_CALL SerializePromiseObject(nosForeignHandle foreignHandle, nosBuffer* outBuffer);
 
@@ -87,7 +87,6 @@ nosResult NOSAPI_CALL ExportObjectTypeInfos(size_t* outCount, nosObjectTypeInfo*
 	auto& promiseType= *outList[0];
 	promiseType.TypeName = NOS_NAME("nos.sync.Promise");
 	promiseType.Functions.Construct = ConstructPromiseObject;
-	promiseType.Functions.Serialize = SerializePromiseObject;
 	promiseType.Functions.Release = ReleasePromiseObject;
 	return NOS_RESULT_SUCCESS;
 }

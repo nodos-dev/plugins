@@ -113,7 +113,7 @@ void FieldIterator(F&& f)
 nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 {
 	NodeExecuteParams execParams(params);
-	nos::Buffer outBuf = execParams.GetPinDataBuffer(NSN_Z);
+	nos::Buffer outBuf = execParams.GetPinBuffer(NSN_Z);
 	FieldIterator<fb::Transform>([X = execParams.GetPinData<uint8_t>(NSN_X),
 								  Y = execParams.GetPinData<uint8_t>(NSN_Y),
 								  Z = outBuf.As<uint8_t>()]<u32 i, class T>(auto O) {

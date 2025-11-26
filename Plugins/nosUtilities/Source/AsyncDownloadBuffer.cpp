@@ -66,7 +66,7 @@ struct AsyncDownloadBufferNode : NodeContext
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
-		AddPinValueWatcher<uint32_t>(NSN_QueueSize, [this](uint32_t* newVal, auto) {
+		AddPinValueWatcher<uint32_t>(NSN_QueueSize, [this](const uint32_t* newVal, auto) {
 			QueueSize = *newVal;
 			if (QueueSize == 0)
 				return;
@@ -90,7 +90,7 @@ struct AsyncDownloadBufferNode : NodeContext
 			SampleBufferInfo.MemoryFlags = memflags;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<uint64_t>(NSN_Alignment, [this](uint64_t* newAlignment, auto) {
+		AddPinValueWatcher<uint64_t>(NSN_Alignment, [this](const uint64_t* newAlignment, auto) {
 			if (SampleBufferInfo.Alignment == *newAlignment)
 				return;
 			SampleBufferInfo.Alignment = *newAlignment;
@@ -98,7 +98,7 @@ struct AsyncDownloadBufferNode : NodeContext
 				return;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<bool>(NSN_ForceHostMemory, [this](bool* newForceHostMemory, auto) {
+		AddPinValueWatcher<bool>(NSN_ForceHostMemory, [this](const bool* newForceHostMemory, auto) {
 			auto& memFlags = SampleBufferInfo.MemoryFlags;
 			if (!!(memFlags & NOS_MEMORY_FLAGS_FORCE_HOST_MEMORY) == *newForceHostMemory)
 				return;
@@ -110,7 +110,7 @@ struct AsyncDownloadBufferNode : NodeContext
 				return;
 			RecreateBuffers();
 		});
-		AddPinValueWatcher<bool>(NSN_UseHostCachedMemory, [this](bool* newHostCached, auto) {
+		AddPinValueWatcher<bool>(NSN_UseHostCachedMemory, [this](const bool* newHostCached, auto) {
 			auto& memFlags = SampleBufferInfo.MemoryFlags;
 			if (!!(memFlags & NOS_MEMORY_FLAGS_DOWNLOAD) == *newHostCached)
 				return;

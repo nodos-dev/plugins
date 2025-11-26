@@ -2,4 +2,5 @@ namespace nos.sync;
 
 table Promise
 {
+    tag: string;
 }
