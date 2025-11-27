@@ -22,16 +22,17 @@ struct Buffer2TextureNodeContext : NodeContext
 		const auto& size = *params.GetPinData<fb::vec2u>(NOS_NAME("Size"));
 		const auto& format = *params.GetPinData<sys::vulkan::Format>(NOS_NAME("Format"));
 		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		auto inputFieldType = sys::vulkan::GetResourceFieldType(inBuf);
 		auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);
 		if (!outTexInfo || size.x() != outTexInfo->Width || size.y() != outTexInfo->Height || format != (nos::sys::vulkan::Format)outTexInfo->Format)
 		{
 			// Create resource
 			outTex = sys::vulkan::CreateTexture({.Width = size.x(),
 										  .Height = size.y(),
-										  .Format = nosFormat(format),
-										  .FieldType = inBufInfo.FieldType},
+										  .Format = nosFormat(format)},
 										 "Buffer2Texture Result");
 			SetPinObject(NOS_NAME_STATIC("Output"), outTex);
+			nosVulkan->SetResourceFieldType(outTex, inputFieldType);
 		}
 
 		if (!outTex.IsValid())
@@ -44,7 +45,7 @@ struct Buffer2TextureNodeContext : NodeContext
 		nosVulkan->End(cmd, &endParams);
 		nosVulkan->WaitGpuEvent(&event, UINT_MAX);
 
-		nosVulkan->SetResourceFieldType(outTex, inBufInfo.FieldType);
+		nosVulkan->SetResourceFieldType(outTex, inputFieldType);
 		return NOS_RESULT_SUCCESS;
 	}
 };

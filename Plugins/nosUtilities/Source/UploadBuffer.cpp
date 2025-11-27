@@ -34,6 +34,7 @@ struct UploadBufferNode : NodeContext
 		}
 		
 		auto inInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		auto inputFieldType = sys::vulkan::GetResourceFieldType(inBuf);
 		auto outBufInfo = sys::vulkan::GetResourceInfo(outBuf);
 		if (!outBufInfo || outBufInfo->Size != inInfo.Size)
 		{
@@ -50,11 +51,14 @@ struct UploadBufferNode : NodeContext
 		if (!outBuf.IsValid())
 			return NOS_RESULT_FAILED;
 
-		nosVulkan->SetResourceFieldType(outBuf, inInfo.FieldType);
+		nosVulkan->SetResourceFieldType(outBuf, inputFieldType);
 
 		{
 			nosCmd cmd;
-			nosCmdBeginParams cmdParams = { .Name = NOS_NAME("UploadBuffer Staging Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd,
+			nosCmdBeginParams cmdParams = {
+				.Name = NOS_NAME("UploadBuffer Staging Copy"),
+				.AssociatedNodeId = NodeId,
+				.OutCmdHandle = &cmd,
 				.PreferredQueueType = NOS_CMD_QUEUE_TYPE_TRANSFER,
 			};
 			auto res = nosVulkan->Begin(&cmdParams);

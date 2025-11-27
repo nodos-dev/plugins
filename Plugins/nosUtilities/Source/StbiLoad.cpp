@@ -87,7 +87,7 @@ struct StbiLoadContext : NodeContext
 				return NOS_RESULT_FAILED;
 			}
 
-			nosTextureInfo texInfo = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE};
+			nosTextureInfo texInfo = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM};
 
 			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
 			if (sRGB)

@@ -147,7 +147,7 @@ struct GPUTextureResource : ResourceInterface
 		if (!inTex.IsValid())
 			return {};
 		auto resInfo = *sys::vulkan::GetResourceInfo(inTex);
-		nosTextureFieldType incomingField = resInfo.FieldType;
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(inTex);
 
 		if (rejectFieldMismatch)
 		{
@@ -179,7 +179,7 @@ struct GPUTextureResource : ResourceInterface
 		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(inputObj);
 		assert(inTex.IsValid());
 		auto inputInfo = *sys::vulkan::GetResourceInfo(inTex);
-		nosTextureFieldType incomingField = inputInfo.FieldType;
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(inTex);
 		res->Params.FieldType = incomingField;
 
 		if (res->Params.WaitEvent)
@@ -247,11 +247,11 @@ struct GPUTextureResource : ResourceInterface
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
-		if (inputPinData == 0)
+		if (inputPinObj == 0)
 			return ringSize;
-		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceInfo(inputPinData)->Texture.FieldType))
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
 			ringSize =
 				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
@@ -369,7 +369,7 @@ struct GPUBufferResource : ResourceInterface {
 			return {};
 		auto bufInfo = *sys::vulkan::GetResourceInfo(bufObj);
 
-		nosTextureFieldType incomingField = bufInfo.FieldType;
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(bufObj);
 
 		if (rejectFieldMismatch)
 		{
@@ -401,7 +401,7 @@ struct GPUBufferResource : ResourceInterface {
 		auto inBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(pinInfo);
 		assert(inBuf.IsValid());
 		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
-		nosVulkan->SetResourceFieldType(res->BufObj, inBufInfo.FieldType);
+		nosVulkan->SetResourceFieldType(res->BufObj, sys::vulkan::GetResourceFieldType(inBuf));
 
 		if (res->Params.WaitEvent)
 		{
@@ -442,7 +442,6 @@ struct GPUBufferResource : ResourceInterface {
 
 			SampleBuffer.Size = newBufInfo.Size;
 			SampleBuffer.ElementType = newBufInfo.ElementType;
-			SampleBuffer.FieldType = newBufInfo.FieldType;
 			SampleBuffer.Usage = (nosBufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST);
 			SampleBuffer.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE);
 		}
@@ -478,12 +477,12 @@ struct GPUBufferResource : ResourceInterface {
 		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
-		if (!inputPinData)
+		if (!inputPinObj)
 			return ringSize;
-		auto inBufInfo = sys::vulkan::GetResourceInfo(inputPinData)->Buffer;
-		if (sys::vulkan::IsTextureFieldTypeInterlaced(inBufInfo.FieldType))
+		auto inBufInfo = sys::vulkan::GetResourceInfo(inputPinObj)->Buffer;
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
 			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
 	}

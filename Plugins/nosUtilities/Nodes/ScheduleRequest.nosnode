@@ -19,6 +19,12 @@
             "can_show_as": "INPUT_PIN_ONLY"
           },
           {
+            "name": "Sink",
+            "type_name": "nos.Generic",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_ONLY"
+          },
+          {
             "name": "DeltaSeconds",
             "type_name": "nos.fb.vec2u",
             "show_as": "INPUT_PIN",

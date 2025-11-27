@@ -22,6 +22,7 @@ struct Texture2BufferNode : nos::NodeContext
 		if (!inTex.IsValid())
 			return NOS_RESULT_FAILED;
 		auto inTexInfo = *sys::vulkan::GetResourceInfo(inTex);
+		auto inputFieldType = sys::vulkan::GetResourceFieldType(inTex);
 		auto outBuf = params.GetPinObject<sys::vulkan::Buffer>(NSN_OutputBuffer);
 		auto outBufInfo = sys::vulkan::GetResourceInfo(outBuf);
 		uint32_t currentSize = static_cast<uint32_t>(inTexInfo.SizeInBytes);
@@ -38,7 +39,7 @@ struct Texture2BufferNode : nos::NodeContext
 			SetPinObject(NSN_OutputBuffer, outBuf);
 		}
 
-		nosVulkan->SetResourceFieldType(outBuf, inTexInfo.FieldType);
+		nosVulkan->SetResourceFieldType(outBuf, inputFieldType);
 
 		nosCmd cmd = {};
 		nosCmdBeginParams beginParams = {.Name = NOS_NAME("Texture2Buffer Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
