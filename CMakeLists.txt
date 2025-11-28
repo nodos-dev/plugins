@@ -11,6 +11,11 @@ if (NOT WITH_NODOS_WORKSPACE)
     "Place this repo under nodos-workspace/Module folder and run cmake -S ./Toolchain/CMake -B Build from workspace root.")
 endif()
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
+    message("CMake version is greater than 4.0, CMAKE_POLICY_VERSION_MINIMUM will be set to '${CMAKE_MINIMUM_REQUIRED_VERSION}'")	
+    set(CMAKE_POLICY_VERSION_MINIMUM ${CMAKE_MINIMUM_REQUIRED_VERSION})
+endif()
+
 nos_find_sdk("1.2.0" NOS_PLUGIN_SDK_TARGET NOS_SUBSYSTEM_SDK_TARGET NOS_SDK_DIR)
 nos_get_module("nos.sys.vulkan" "5.8" NOS_SYS_VULKAN_TARGET_5_8)
 cmake_path(SET FLATC_EXECUTABLE "${NOS_SDK_DIR}/bin/flatc")
