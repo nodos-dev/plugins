@@ -108,11 +108,11 @@ struct ReadImageContext : NodeContext
 		OutPendingImageRefs.clear();
 	}
 
-	nosResult LoadImage(std::filesystem::path path, nosUUID outPinId, bool sRGB)
+	nosResult LoadImage(std::string path, nosUUID outPinId, bool sRGB)
 	{
 		UpdateStatus(State::Loading);
-		FilePath = path;
-		std::thread([this, outPinId, path = nos::PathToUtf8(path), sRGB]() mutable {
+		FilePath = nos::PathToUtf8(path);
+		std::thread([this, outPinId, path, sRGB]() mutable {
 			try
 			{
 				int w, h, n;
@@ -190,7 +190,7 @@ struct ReadImageContext : NodeContext
 		}
 
 		nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-		std::filesystem::path path = nos::Utf8ToPath(InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data));
+		std::string path = InterpretPinValue<const char>(nodeParams[NSN_Path].Data->Data);
 		auto outPinId = nodeParams[NSN_Out].Id;
 		auto sRGB = *InterpretPinValue<bool>(nodeParams[NSN_sRGB].Data->Data);
 
