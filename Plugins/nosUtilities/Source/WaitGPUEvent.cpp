@@ -26,7 +26,10 @@ struct WaitGPUEventNode : NodeContext
 		}
 		if (event && *event)
 		{
-			return nosVulkan->WaitGpuEvent(event, timeoutMs * 1'000'000);
+			auto res = nosVulkan->WaitGpuEvent(event, timeoutMs * 1'000'000);
+			if (res == NOS_RESULT_TIMEOUT)
+				return NOS_RESULT_PENDING;
+			return res;
 		}
 		return NOS_RESULT_SUCCESS;
 	}

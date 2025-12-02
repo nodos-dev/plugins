@@ -134,7 +134,11 @@ struct BufferProviderNode : NodeContext
 				if (res != NOS_RESULT_SUCCESS)
 				{
 					if (res == NOS_RESULT_TIMEOUT)
-						nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.", GetDisplayName().c_str());
+					{
+						nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.",
+									   GetDisplayName().c_str());
+						return NOS_RESULT_PENDING;
+					}
 					else
 						nosEngine.LogE("%s: Failed waiting for previous transfer to complete.", GetDisplayName().c_str());
 				}
@@ -149,7 +153,11 @@ struct BufferProviderNode : NodeContext
 					if (res != NOS_RESULT_SUCCESS)
 					{
 						if (res == NOS_RESULT_TIMEOUT)
-							nosEngine.LogW("%s: Timeout waiting for GPU to complete operations on the buffer.", GetDisplayName().c_str());
+						{
+							nosEngine.LogW("%s: Timeout waiting for GPU to complete operations on the buffer.",
+										   GetDisplayName().c_str());
+							return NOS_RESULT_PENDING;
+						}
 						else
 							nosEngine.LogE("%s: Failed waiting for GPU to complete operations on the buffer.", GetDisplayName().c_str());
 					}
