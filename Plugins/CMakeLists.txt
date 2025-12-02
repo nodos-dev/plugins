@@ -18,9 +18,15 @@ endif()
 add_subdirectory(External)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
+
+nos_get_module("nos.sys.shaderc" "2.1" NOS_SHADERC_TARGET)
+nos_find_module_path("nos.sys.shaderc" "2.1" NOS_SHADERC_PATH)
+
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.py
+    COMMAND ${Python3_EXECUTABLE} ${NOS_SHADERC_PATH}/Scripts/compile_shaders.py
     RESULT_VARIABLE COMPILE_SHADERS_RESULT
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 if (NOT ${COMPILE_SHADERS_RESULT} EQUAL "0")
     message(FATAL_ERROR "Failed to compile shaders. Process returned ${COMPILE_SHADERS_RESULT}.")
