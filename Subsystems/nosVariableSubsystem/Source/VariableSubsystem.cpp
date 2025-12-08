@@ -163,7 +163,10 @@ protected:
 		auto event = editor::CreateFromSubsystem(fbb, editor::FromSubsystemUnion::VariableDeleted, offset.Union());
 		fbb.Finish(event);
 		nos::Buffer buf = fbb.Release();
-		nosSendEditorMessageParams params{.Message = buf, .DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST};
+		nosSendEditorMessageParams params{
+			.TypeName = NOS_NAME("nos.sys.variables.editor.FromSubsystem"),
+			.Message = buf,
+			.DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST};
 		nosEngine.SendEditorMessage(&params);
 	}
 
@@ -178,10 +181,11 @@ protected:
 			variables.push_back(variableOffset);
 		}
 		auto offset = editor::CreateVariableListDirect(fbb, &variables);
-		auto event  = editor::CreateFromSubsystem(fbb, editor::FromSubsystemUnion::VariableList, offset.Union());
+		auto event = editor::CreateFromSubsystem(fbb, editor::FromSubsystemUnion::VariableList, offset.Union());
 		fbb.Finish(event);
 		nos::Buffer buf = fbb.Release();
-		nosSendEditorMessageParams params{.Message = buf};
+		nosSendEditorMessageParams params{.TypeName = NOS_NAME("nos.sys.variables.editor.FromSubsystem"),
+										  .Message = buf};
 		if (optEditorId)
 		{
 			params.DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_TO_SELECTED;
@@ -208,7 +212,8 @@ protected:
 		auto event  = editor::CreateFromSubsystem(fbb, editor::FromSubsystemUnion::nos_sys_variables_Variable, offset.Union());
 		fbb.Finish(event);
 		nos::Buffer msgBuf = fbb.Release();
-		nosSendEditorMessageParams params{.Message = msgBuf,
+		nosSendEditorMessageParams params{.TypeName = NOS_NAME("nos.sys.variables.editor.FromSubsystem"),
+										  .Message = msgBuf,
 										  .DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST};
 		nosEngine.SendEditorMessage(&params);
 	}
@@ -235,7 +240,8 @@ protected:
 		auto event = editor::CreateFromSubsystem(fbb, editor::FromSubsystemUnion::VariableReferences, refsEvent.Union());
 		fbb.Finish(event);
 		nos::Buffer buf = fbb.Release();
-		nosSendEditorMessageParams params{ .Message = buf };
+		nosSendEditorMessageParams params{.TypeName = NOS_NAME("nos.sys.variables.editor.FromSubsystem"),
+										  .Message = buf};
 		if (optEditorId)
 		{
 			params.DispatchType = NOS_EDITOR_MESSAGE_DISPATCH_TYPE_TO_SELECTED;
