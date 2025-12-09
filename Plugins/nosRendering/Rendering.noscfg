@@ -1,0 +1,28 @@
+{
+  "info": {
+    "id": {
+      "name": "nos.rendering",
+      "version": "0.1.0"
+    },
+    "description": "Nodes for rendering operations.",
+    "display_name": "Rendering",
+    "category": "Graphics",
+    "dependencies": [
+      {
+        "name": "nos.sys.vulkan",
+        "version": "6.0"
+      },
+	  {
+		"name": "nos.track",
+		"version": "1.9"
+	  }
+    ]
+  },
+  "custom_types": ["Config/Rendering.fbs"],
+  "node_definitions": [
+    "Config/BillboardMask.nosdef",
+    "Config/TrackToView.nosdef"
+  ],
+  "binary_path": "Binaries/nosRendering",
+  "associated_nodes": []
+}

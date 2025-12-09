@@ -1,0 +1,38 @@
+include "Common.fbs";
+
+namespace nos.rendering;
+
+
+table PerspectiveProjection
+{
+	aspect_ratio: float;
+	fov_x: float;
+}
+
+table OrthographicProjection
+{
+	width: float;
+	height: float;
+}
+
+enum ProjectionType : ubyte
+{
+	Perspective,
+	Orthographic
+}
+
+table Projection
+{
+	clip_planes: nos.fb.vec2 (native_inline);
+	shift: nos.fb.vec2 (native_inline);
+	projection_type: ProjectionType;
+	perspective: PerspectiveProjection;
+	orthographic: OrthographicProjection;
+}
+
+table RenderView
+{
+	view: nos.fb.mat4(native_inline);
+	left_handed_projection_matrix: nos.fb.mat4(native_inline);
+	projection: Projection;
+}
