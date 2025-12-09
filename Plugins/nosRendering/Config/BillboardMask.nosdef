@@ -1,0 +1,63 @@
+{
+	"nodes": [
+		{
+			"class_name": "BillboardMask",
+			"menu_info": {
+				"category": "Rendering",
+				"display_name": "Billboard Mask"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Position",
+						"type_name": "nos.fb.vec3",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Size",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 100.0,
+							"y": 100.0
+						}
+					},
+					{
+						"name": "RenderView",
+						"type_name": "nos.rendering.RenderView",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"name": "OutRenderTarget",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "OutDepth",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"data": {
+							"format": "D32_SFLOAT"
+						}
+					}
+				]
+			}
+		}
+	]
+}
