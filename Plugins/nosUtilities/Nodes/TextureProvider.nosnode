@@ -42,6 +42,14 @@
 						"description": "A GPU Event slot for synchronization"
 					},
 					{
+						"name": "HostUseCompletePromise",
+						"display_name": "Host Use Complete Promise",
+						"type_name": "nos.sync.Promise",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Host synchronization primitive for ensuring the use of the texture is finished"
+					},
+					{
 						"name": "Count",
 						"type_name": "uint",
 						"show_as": "PROPERTY",
@@ -53,7 +61,10 @@
 						"type_name": "nos.fb.vec2u",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": { "x": 1024, "y": 1024 }
+						"data": {
+							"x": 1024,
+							"y": 1024
+						}
 					},
 					{
 						"name": "Format",
@@ -68,6 +79,24 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "TRANSFER_SRC TRANSFER_DST STORAGE SAMPLED "
+					},
+					{
+						"name": "ResizeOnPathRingSizeChanged",
+						"display_name": "Resize On Path Ring Size Changed",
+						"description": "Whether to update texture count when there's a ring size update path command received along the path",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": true
+					},
+					{
+						"name": "RequireHostUseCompletion",
+						"display_name": "Require Host Use Completion",
+						"description": "Whether to give & wait a host synchronization primitive to ensure the texture is no longer in use by the host before re-providing it again",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false
 					}
 				]
 			}

@@ -30,7 +30,6 @@ struct UploadBufferNode : NodeContext
 		if (inGpuEventHolder.IsValid())
 		{
 			auto res = nosVulkan->GetGPUEventFromHolder(inGpuEventHolder, &event);
-			assert(res != NOS_RESULT_SUCCESS || *event == 0);
 		}
 		
 		auto inInfo = *sys::vulkan::GetResourceInfo(inBuf);

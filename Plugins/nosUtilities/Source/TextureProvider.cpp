@@ -23,10 +23,14 @@ struct TextureSlot
 {
 	TypedObjectRef<sys::vulkan::Texture> Texture{};
 	TypedObjectRef<sys::vulkan::GPUEventHolder> GPUEventHolder{};
+	TypedObjectRef<sync::Promise> HostUseCompletePromise{};
 	bool Served = false;
-	TextureSlot(nosTextureInfo sampleTextureInfo) : Texture(sys::vulkan::CreateTexture(sampleTextureInfo, "Texture"))
+	TextureSlot(nosTextureInfo sampleTextureInfo, bool requireHostUseCompletion)
+		: Texture(sys::vulkan::CreateTexture(sampleTextureInfo, "Texture"))
 	{
 		nosVulkan->CreateGPUEventHolder(&GPUEventHolder.GetStorage());
+		if (requireHostUseCompletion)
+			nosSync->CreatePromise("Host Use Complete", &HostUseCompletePromise.GetStorage());
 	}
 	TextureSlot(const TextureSlot& other) = delete;
 	TextureSlot& operator=(const TextureSlot& other) = delete;
@@ -37,6 +41,7 @@ struct TextureSlot
 	}
 };
 
+// TODO: ResourceProvider node instead of separate Buffer/Texture providers
 struct TextureProviderNode : NodeContext
 {
 	nosTextureInfo SampleTextureInfo = {
@@ -51,22 +56,25 @@ struct TextureProviderNode : NodeContext
 
 	TypedObjectRef<sys::vulkan::Buffer> CurrentInput;
 
+	bool RequireHostUseCompletion = true;
+	bool ResizeOnPathRingSizeChanged = true;
+
 	void RecreateTextures()
 	{
 		if (SampleTextureInfo.Width == 0 || SampleTextureInfo.Height == 0)
 			return;
 		Textures.clear();
 		for (size_t i = 0; i < TextureCount; i++)
-			Textures.emplace_back(SampleTextureInfo);
+			Textures.emplace_back(SampleTextureInfo, RequireHostUseCompletion);
 		CurrentIndex = 0;
 	}
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		AddPinValueWatcher<uint32_t>(NSN_Count, [this](const uint32_t* newVal, auto) {
-			TextureCount = *newVal;
-			if (TextureCount == 0)
-				return;
+			TextureCount = std::max(*newVal, 1u);
+			if (*newVal != TextureCount)
+				SetPinValue(NOS_NAME("Count"), Buffer::From(TextureCount));
 			if (Textures.size() == TextureCount)
 				return;
 			RecreateTextures();
@@ -90,6 +98,20 @@ struct TextureProviderNode : NodeContext
 			SampleTextureInfo.Usage = nosImageUsage(*newUsage);
 			RecreateTextures();
 		});
+		AddPinValueWatcher<bool>(NOS_NAME("ResizeOnPathRingSizeChanged"), [this](const bool* newVal, auto) {
+			ResizeOnPathRingSizeChanged = *newVal;
+		});
+		AddPinValueWatcher<bool>(NOS_NAME("RequireHostUseCompletion"), [this](const bool* newVal, auto) {
+			if (RequireHostUseCompletion != *newVal)
+			{
+				RequireHostUseCompletion = *newVal;
+				if (RequireHostUseCompletion)
+					SetPinOrphanState(NOS_NAME("HostUseCompletePromise"), fb::PinOrphanStateType::ACTIVE);
+				else
+					SetPinOrphanState(NOS_NAME("HostUseCompletePromise"), fb::PinOrphanStateType::ORPHAN, "Waiting on host use completion is disabled");
+				RecreateTextures();
+			}
+		});
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -98,9 +120,49 @@ struct TextureProviderNode : NodeContext
 		if (Textures.size() == 0)
 			return NOS_RESULT_FAILED;
 		auto& bufToServe = Textures[CurrentIndex];
+		if (bufToServe.Served)
+		{
+			if (bufToServe.HostUseCompletePromise)
+			{
+				auto res = nosSync->WaitPromise(bufToServe.HostUseCompletePromise, 100'000'000);
+				if (res != NOS_RESULT_SUCCESS)
+				{
+					if (res == NOS_RESULT_TIMEOUT)
+					{
+						nosEngine.LogW("%s: Timeout waiting for previous transfer to complete.",
+									   GetDisplayName().c_str());
+						return NOS_RESULT_PENDING;
+					}
+					else
+						nosEngine.LogE("%s: Failed waiting for previous transfer to complete.", GetDisplayName().c_str());
+				}
+			}
+			if (bufToServe.GPUEventHolder)
+			{
+				nosGPUEvent* event = nullptr;
+				auto res = nosVulkan->GetGPUEventFromHolder(bufToServe.GPUEventHolder, &event);
+				if (*event)
+				{
+					res = nosVulkan->WaitGpuEvent(event, 100'000'000);
+					if (res != NOS_RESULT_SUCCESS)
+					{
+						if (res == NOS_RESULT_TIMEOUT)
+						{
+							nosEngine.LogW("%s: Timeout waiting for GPU to complete operations on the buffer.",
+										   GetDisplayName().c_str());
+							return NOS_RESULT_PENDING;
+						}
+						else
+							nosEngine.LogE("%s: Failed waiting for GPU to complete operations on the buffer.",
+										   GetDisplayName().c_str());
+					}
+				}
+			}
+		}
 		CurrentIndex = (CurrentIndex + 1) % TextureCount;
 		SetPinObject(NOS_NAME("OutputTexture"), bufToServe.Texture);
 		SetPinObject(NOS_NAME("GPUEventHolder"), bufToServe.GPUEventHolder);
+		SetPinObject(NOS_NAME("HostUseCompletePromise"), bufToServe.HostUseCompletePromise);
 		bufToServe.Served = true;
 
 		return NOS_RESULT_SUCCESS;

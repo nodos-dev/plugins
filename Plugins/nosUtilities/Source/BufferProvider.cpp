@@ -41,6 +41,7 @@ struct BufferSlot
 	}
 };
 
+// TODO: ResourceProvider node instead of separate Buffer/Texture providers
 struct BufferProviderNode : NodeContext
 {
 	nosBufferInfo SampleBufferInfo = {
