@@ -190,7 +190,7 @@ struct TestPluginFunctions : PluginFunctions
 {
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 18;
+		outCount = 19;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -349,6 +349,14 @@ struct TestPluginFunctions : PluginFunctions
 			//nosCmdEndParams endParams{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &gpuEvent};
 			//nosVulkan->End(cmd, &endParams);
 			//nosVulkan->WaitGpuEvent(&gpuEvent, UINT64_MAX);
+			return NOS_RESULT_SUCCESS;
+		};
+		outFunctions[18]->ClassName = NOS_NAME_STATIC("nos.experiment.LeakObject");
+		outFunctions[18]->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params) {
+			nos::NodeExecuteParams execParams(params);
+			nos::ObjectRef object = execParams.GetPinObject(NOS_NAME_STATIC("ObjectToLeak"));
+			nosEngine.SetPinObject(execParams[NOS_NAME_STATIC("Output")].Id, object);
+			object.Release();
 			return NOS_RESULT_SUCCESS;
 		};
 		return NOS_RESULT_SUCCESS;
