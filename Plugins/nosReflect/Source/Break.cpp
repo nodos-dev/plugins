@@ -22,7 +22,7 @@ struct BreakNode : NodeContext
 				SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
 				return;
 			}
-			LoadPins(!preserveDisplayNames);
+			LoadPins(preserveDisplayNames);
 		}
 	}
 
