@@ -218,7 +218,7 @@ struct RingBufferNodeBase : NodeContext
 	void OnPathStart() override
 	{
 		Ring.Reset(Capacity);
-		RemainingRepeatCount = Capacity;
+		RemainingRepeatCount = Capacity - 1;
 		SendScheduleRequest(Capacity);
 	}
 
@@ -300,13 +300,13 @@ struct RingBufferNodeBase : NodeContext
 			auto newCapacity = *InterpretObject<uint32_t>(handle);
 			if (newCapacity != Capacity)
 			{
+				Capacity = std::max(1u, newCapacity);
 				if (!CapacityUpdatedViaPathCommand)
 				{
-					nosPathCommand ringSizeChange{ .Event = NOS_RING_SIZE_CHANGE, .RingSize = newCapacity };
+					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
 					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
 					CapacityUpdatedViaPathCommand = false;
 				}
-				Capacity = std::max(1u, newCapacity);
 				SendPathRestart(NSN_Input);
 			}
 		}
