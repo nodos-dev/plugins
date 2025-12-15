@@ -12,7 +12,7 @@ if (NOT WITH_NODOS_WORKSPACE)
 endif()
 
 add_compile_definitions(NOS_DISABLE_DEPRECATED)
-nos_find_plugin_sdk("40.0.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
+nos_find_plugin_sdk("40.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
 nos_get_plugin("nos.sys.vulkan" "7.1" NOS_SYS_VULKAN_TARGET)
 
 set(TOOLS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Subsystems/nosShaderCompiler/Binaries/tools/${CMAKE_SYSTEM_NAME})
