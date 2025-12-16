@@ -3,12 +3,6 @@
 
 layout(location = 0) out vec4 rt;
 
-layout (binding = 0, std430) uniform UBO 
-{
-    mat4 MVP;
-    float AlphaClip;
-} ubo;
-
 void main()
 {   
     rt = vec4(1.0);

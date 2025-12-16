@@ -31,7 +31,7 @@
 					},
 					{
 						"name": "View",
-						"type_name": "nos.rendering.RenderView",
+						"type_name": "nos.graphics.RenderView",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					}

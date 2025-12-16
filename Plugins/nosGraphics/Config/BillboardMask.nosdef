@@ -27,7 +27,7 @@
 					},
 					{
 						"name": "RenderView",
-						"type_name": "nos.rendering.RenderView",
+						"type_name": "nos.graphics.RenderView",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},

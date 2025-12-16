@@ -10,15 +10,15 @@
 
 #define NOS_DEPS NOS_DEP_OP(NOS_VULKAN)
 
-#define NOS_NAMESPACE nos::rendering
+#define NOS_NAMESPACE nos::graphics
 
-namespace nos::rendering
+namespace nos::graphics
 {
 struct PluginFunctions : nos::PluginFunctions
 {
 	nosResult NOSAPI_CALL ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outFunctions) override;
 };
-} // namespace nos::rendering
+} // namespace nos::graphics
 
 
 

@@ -1,7 +1,6 @@
 include "Common.fbs";
 
-namespace nos.rendering;
-
+namespace nos.graphics;
 
 table PerspectiveProjection
 {
@@ -35,4 +34,11 @@ table RenderView
 	view: nos.fb.mat4(native_inline);
 	left_handed_projection_matrix: nos.fb.mat4(native_inline);
 	projection: Projection;
+}
+
+struct Transform
+{
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec3d;
+    scale:    nos.fb.vec3d;
 }

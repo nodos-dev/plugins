@@ -1,11 +1,11 @@
 {
   "info": {
     "id": {
-      "name": "nos.rendering",
+      "name": "nos.graphics",
       "version": "0.1.0"
     },
-    "description": "Nodes for rendering operations.",
-    "display_name": "Rendering",
+    "description": "Types & Nodes for graphics operations.",
+    "display_name": "Graphics",
     "category": "Graphics",
     "dependencies": [
       {
@@ -18,11 +18,11 @@
 	  }
     ]
   },
-  "custom_types": ["Config/Rendering.fbs"],
+  "custom_types": ["Config/Graphics.fbs"],
   "node_definitions": [
     "Config/BillboardMask.nosdef",
     "Config/TrackToView.nosdef"
   ],
-  "binary_path": "Binaries/nosRendering",
+  "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []
 }
