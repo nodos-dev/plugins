@@ -2,7 +2,7 @@
 
 #include <Nodos/PluginHelpers.hpp>
 #include <nosTrack/Track_generated.h>
-#include <Rendering_generated.h>
+#include <Graphics_generated.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -15,7 +15,7 @@
 		return NodeName::OnRegister();                                                                                 \
 	}
 
-namespace nos::rendering
+namespace nos::graphics
 {
 glm::mat4 MakeView(glm::vec3 pos, glm::vec3 rot)
 {
@@ -99,4 +99,4 @@ struct TrackToView : NodeContext
 
 NOS_REGISTER_NODE(TrackToView)
 
-} // namespace nos::rendering
+} // namespace nos::graphics

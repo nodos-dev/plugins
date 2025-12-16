@@ -4,7 +4,6 @@
 layout (binding = 0, std430) uniform UBO 
 {
     mat4 MVP;
-    float AlphaClip;
 } ubo;
 
 const vec2 pos[6] =

@@ -1,12 +1,12 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/PluginHelpers.hpp>
-#include <Rendering_generated.h>
+#include <Graphics_generated.h>
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-namespace nos::rendering
+namespace nos::graphics
 {
 NOS_REGISTER_NAME(BillboardMask)
 
@@ -98,24 +98,26 @@ struct BillboardMask : NodeContext
 			{
 				SetPinValue(NSN_OutRenderTarget, newRt->ToPinData());
 				rt = nosResourceShareInfo(*newRt);
+				RemoveStatusMessage(StatusMessageType::FailedToCreateRenderTarget);
 			}
 		}
 
 		nosResourceShareInfo depth = vkss::DeserializeTextureInfo(pins[NSN_OutDepth].Data->Data);
-		if (depth.Info.Texture.Width != resolution.x || depth.Info.Texture.Height != resolution.y)
+		if (depth.Info.Texture.Width != resolution.x || depth.Info.Texture.Height != resolution.y ||
+			depth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
 		{
 			auto newDepth = vkss::Resource::Create(
 				nosTextureInfo{.Width = resolution.x,
 							   .Height = resolution.y,
-							   .Format = NOS_FORMAT_R8_UNORM,
+							   .Format = NOS_FORMAT_D32_SFLOAT,
 							   .Filter = NOS_TEXTURE_FILTER_LINEAR,
-							   .Usage = nosImageUsage(NOS_IMAGE_USAGE_SAMPLED | NOS_IMAGE_USAGE_RENDER_TARGET)},
+							   .Usage = nosImageUsage(NOS_IMAGE_USAGE_SAMPLED | NOS_IMAGE_USAGE_DEPTH_STENCIL)},
 				"Billboard Mask Depth");
 			if (!newDepth)
 			{
-				SetOrAddStatusMessage(StatusMessageType::FailedToCreateRenderTarget,
+				SetOrAddStatusMessage(StatusMessageType::FailedToCreateDepthBuffer,
 									  nos::fb::TNodeStatusMessage{
-										  .text = "Failed to create render target for Billboard Mask node.",
+										  .text = "Failed to create depth buffer for Billboard Mask node.",
 										  .type = nos::fb::NodeStatusMessageType::FAILURE,
 									  });
 				depth = {};
@@ -124,6 +126,7 @@ struct BillboardMask : NodeContext
 			{
 				SetPinValue(NSN_OutDepth, newDepth->ToPinData());
 				depth = nosResourceShareInfo(*newDepth);
+				RemoveStatusMessage(StatusMessageType::FailedToCreateDepthBuffer);
 			}
 		}
 
@@ -215,4 +218,4 @@ nosResult RegisterBillboardMask(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::rendering
+} // namespace nos::graphics
