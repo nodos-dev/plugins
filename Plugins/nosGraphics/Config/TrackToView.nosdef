@@ -16,13 +16,6 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
-						"name": "AspectRatio",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 1.7777778
-					},
-					{
 						"name": "Clip",
 						"type_name": "nos.fb.vec2",
 						"show_as": "INPUT_PIN",
