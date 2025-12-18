@@ -7,14 +7,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-// Inside Nodos/PluginHelpers.hpp
-#define NOS_REGISTER_NODE(NodeName)                                                                                    \
-	nosResult Register##NodeName(nosNodeFunctions* fn)                                                                 \
-	{                                                                                                                  \
-		NOS_BIND_NODE_CLASS(NOS_NAME(#NodeName), NodeName, fn);                                                        \
-		return NodeName::OnRegister();                                                                                 \
-	}
-
 namespace nos::graphics
 {
 glm::mat4 MakeView(glm::vec3 pos, glm::vec3 rot)
@@ -47,7 +39,6 @@ glm::vec2 CalculateProjectionShift(glm::vec2 sensorSize, glm::vec2 centerShift)
 }
 
 NOS_REGISTER_NAME(Track)
-NOS_REGISTER_NAME(AspectRatio)
 NOS_REGISTER_NAME(Clip)
 NOS_REGISTER_NAME(View)
 struct TrackToView : NodeContext
@@ -94,6 +85,10 @@ struct TrackToView : NodeContext
 	static nosResult OnRegister() { return NOS_RESULT_SUCCESS; }
 };
 
-NOS_REGISTER_NODE(TrackToView)
+nosResult RegisterTrackToView(nosNodeFunctions* fn)
+{
+	NOS_BIND_NODE_CLASS(NOS_NAME("TrackToView"), TrackToView, fn);
+	return NOS_RESULT_SUCCESS;
+}
 
 } // namespace nos::graphics
