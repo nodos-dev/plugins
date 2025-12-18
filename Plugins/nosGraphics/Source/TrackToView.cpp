@@ -24,21 +24,14 @@ glm::mat4 MakeView(glm::vec3 pos, glm::vec3 rot)
 	return glm::lookAtLH(pos, pos + mat[0], mat[2]);
 }
 
-glm::mat4 Perspective(f32 fovx, f32 pixelAspectRatio, glm::vec2 sensorSize, glm::vec2 centerShift, glm::vec2 clipPlanes)
+glm::mat4 Perspective(float fovx, float aspectRatio, glm::vec2 projectionShift, glm::vec2 clipPlanes)
 {
-	if (glm::vec2(0) == sensorSize)
-	{
-		sensorSize = glm::vec2(1);
-		centerShift = glm::vec2(0);
-	}
-
 	const f32 X = 1.f / tanf(glm::radians(fovx * 0.5f));
-	const f32 Y = -X * (sensorSize.x / sensorSize.y) * pixelAspectRatio;
-	const auto S = -centerShift / sensorSize;
+	const f32 Y = -X * aspectRatio;
 	const f32 Z = clipPlanes.y / (clipPlanes.y - clipPlanes.x);
 	return glm::mat4(glm::vec4(X, 0, 0, 0),
 					 glm::vec4(0, Y, 0, 0),
-					 glm::vec4(S.x, -S.y, Z, 1.0f),
+					 glm::vec4(projectionShift.x, projectionShift.y, Z, 1.0f),
 					 glm::vec4(0, 0, -clipPlanes.x * Z, 0));
 }
 
@@ -65,13 +58,16 @@ struct TrackToView : NodeContext
 	{
 		NodeExecuteParams pins(params);
 		nos::track::TTrack const& track = pins.GetPinData<nos::track::TTrack>(NSN_Track);
-		float aspectRatio = *pins.GetPinData<float>(NSN_AspectRatio);
 		nos::fb::vec2 clip = *pins.GetPinData<nos::fb::vec2>(NSN_Clip);
 
 		glm::vec2 sensorSize = reinterpret_cast<glm::vec2 const&>(track.sensor_size);
 		glm::vec2 centerShift = reinterpret_cast<glm::vec2 const&>(track.lens_distortion.center_shift());
 		glm::vec2 projShift = CalculateProjectionShift(sensorSize, centerShift);
-
+		if (glm::vec2(0) == sensorSize)
+		{
+			sensorSize = glm::vec2(1);
+		}
+		float aspectRatio = sensorSize.x / sensorSize.y * track.pixel_aspect_ratio;
 		TPerspectiveProjection perspectiveProjection{};
 		perspectiveProjection.aspect_ratio = aspectRatio;
 		perspectiveProjection.fov_x = track.fov;
@@ -83,8 +79,9 @@ struct TrackToView : NodeContext
 		glm::mat4 viewMatrix = MakeView(
 			reinterpret_cast<glm::vec3 const&>(track.location),
 										reinterpret_cast<glm::vec3 const&>(track.rotation));
+
 		glm::mat4 projectionMatrix = Perspective(
-			track.fov, track.pixel_aspect_ratio, sensorSize, centerShift, reinterpret_cast<glm::vec2 const&>(clip));
+			track.fov, aspectRatio, centerShift, reinterpret_cast<glm::vec2 const&>(clip));
 
 		TRenderView view{};
 		view.projection = std::make_unique<TProjection>(projection);

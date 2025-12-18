@@ -149,6 +149,7 @@ struct BillboardMask : NodeContext
 		modelMat[0] = glm::vec4(right, 0.0f);
 		modelMat[1] = glm::vec4(toCamera, 0.0f);
 		modelMat[2] = glm::vec4(up, 0.0f);
+		// Translation writes to the 4th column, so no need to set it again
 		modelMat = glm::scale(modelMat, glm::vec3(size.x, 1.0f, size.y));
 
 		glm::mat4 mvp = projMat * viewMat * modelMat;
