@@ -23,7 +23,7 @@ enum ProjectionType : ubyte
 table Projection
 {
 	clip_planes: nos.fb.vec2 (native_inline);
-	shift: nos.fb.vec2 (native_inline);
+	center_shift: nos.fb.vec2 (native_inline);
 	projection_type: ProjectionType;
 	perspective: PerspectiveProjection;
 	orthographic: OrthographicProjection;
@@ -42,3 +42,5 @@ struct Transform
     rotation: nos.fb.vec3d;
     scale:    nos.fb.vec3d;
 }
+
+// TODO: Move nos.fb.Transform here too
