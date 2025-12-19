@@ -2,26 +2,17 @@
 
 function(nos_plugin_common current_dir out_target_dependencies out_target_definitions)
     find_package(Python3 COMPONENTS Interpreter REQUIRED)
+	nos_get_module("nos.sys.shaderc" "2.1" NOS_SHADERC_TARGET)
+	nos_find_module_path("nos.sys.shaderc" "2.1" NOS_SHADERC_PATH)
 
-    # Create target
-    set(target_name "modules_shader_compilation")
-
-    add_custom_target(${target_name}
-        ALL
-        COMMAND ${Python3_EXECUTABLE} ${current_dir}/Plugins/compile_shaders.py
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} ${NOS_SHADERC_PATH}/Scripts/compile_shaders.py
+        RESULT_VARIABLE COMPILE_SHADERS_RESULT
         WORKING_DIRECTORY ${current_dir}
-        COMMENT "Compiling shaders..."
-        GLOBAL
     )
-
-    # Append to list
-    # Local list variable
-    set(dep_list "${target_name}")
-
-    # Export to parent
-    set(${out_target_dependencies} "${dep_list}" PARENT_SCOPE)
+    if (NOT ${COMPILE_SHADERS_RESULT} EQUAL "0")
+        message(FATAL_ERROR "Failed to compile shaders. Process returned ${COMPILE_SHADERS_RESULT}.")
+    endif()
 
     set(${out_target_definitions} "NOS_DISABLE_DEPRECATED" PARENT_SCOPE)
-
-    nos_group_targets("${target_name}" "Build Tasks")
 endfunction()
