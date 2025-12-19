@@ -5,8 +5,7 @@
             "version": "2.1.0"
         },
         "display_name": "Variable Subsystem",
-        "description": "",
-        "dependencies": []
+        "description": ""
     },
     "binary_path": "Binaries/nosSysVariables",
     "sdk_version": "40.0"

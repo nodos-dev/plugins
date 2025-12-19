@@ -6,8 +6,7 @@
     },
     "display_name": "Strings",
     "description": "Collection of string manipulation nodes",
-    "category": "Utilities",
-    "dependencies": []
+    "category": "Utilities"
   },
   "binary_path": "Binaries/nosStr",
   "sdk_version": "40.0"
