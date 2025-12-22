@@ -64,7 +64,7 @@ struct TrackToView : NodeContext
 		perspectiveProjection.fov_x = track.fov;
 		TProjection projection{};
 		projection.clip_planes = clip;
-		projection.center_shift = reinterpret_cast<nos::fb::vec2 const&>(projShift);
+		projection.center_shift = reinterpret_cast<nos::fb::vec2 const&>(centerShift);
 		projection.projection_type = ProjectionType::Perspective;
 		projection.perspective = std::make_unique<TPerspectiveProjection>(perspectiveProjection);
 		glm::mat4 viewMatrix = MakeView(
