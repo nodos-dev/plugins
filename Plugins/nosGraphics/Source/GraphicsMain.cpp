@@ -42,11 +42,13 @@ struct PluginFunctions : nos::PluginFunctions
 			auto node = outFunctions[i];
 			switch ((Nodes)i)
 			{
-			default: break; GEN_CASE_NODE(TrackToView) GEN_CASE_NODE(BillboardMask)
+				GEN_CASE_NODE(TrackToView)
+				GEN_CASE_NODE(BillboardMask)
+			default: break;
 			}
 		}
 		return NOS_RESULT_SUCCESS;
 	}
 };
 NOS_EXPORT_PLUGIN_FUNCTIONS(PluginFunctions)
-} // namespace NOS_NAMESPACE
+} // namespace nos::graphics
