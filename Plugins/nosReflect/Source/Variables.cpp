@@ -4,7 +4,7 @@
 
 #include "Names.h"
 
-#include <nosVariableSubsystem/nosVariableSubsystem.h>
+#include <nosSysVariables/nosVariableSubsystem.h>
 
 namespace nos::reflect
 {

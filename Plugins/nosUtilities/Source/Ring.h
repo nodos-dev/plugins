@@ -6,7 +6,7 @@
 #include <Nodos/Plugin.hpp>
 
  // External
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include "Nodos/Utils/Stopwatch.hpp"
 

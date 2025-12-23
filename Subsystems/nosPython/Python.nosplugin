@@ -14,5 +14,6 @@
         ],
         "category": "Scripting"
     },
-    "binary_path": "./Binaries/nosPython"
+    "binary_path": "./Binaries/nosPy",
+    "sdk_version": "40.0"
 }

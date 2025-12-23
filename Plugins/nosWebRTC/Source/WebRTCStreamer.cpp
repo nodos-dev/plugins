@@ -6,8 +6,8 @@
 #include <AppService_generated.h>
 #include <AppEvents_generated.h>
 #include <Nodos/Utils/Thread.hpp>
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 #include "Names.h"
 
 #include <Windows.h>

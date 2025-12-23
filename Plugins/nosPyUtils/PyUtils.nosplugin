@@ -14,5 +14,6 @@
             }
         ]
     },
-    "binary_path": "./Binaries/nosPyUtils"
+    "binary_path": "./Binaries/nosPyutils",
+    "sdk_version": "40.0"
 }

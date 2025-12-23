@@ -7,5 +7,6 @@
 		"display_name": "Lino Subsystem",
 		"description": "A Nodos subsystem for Lino",
 		"category": "Media"
-	}
+	},
+	"sdk_version": "40.0"
 }

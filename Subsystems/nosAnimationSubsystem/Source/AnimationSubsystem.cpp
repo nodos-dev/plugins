@@ -2,9 +2,9 @@
 
 #include <Nodos/PluginAPI.h>
 
-#include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
+#include <nosSysAnimation/AnimEditorTypes_generated.h>
 #include <PinDataAnimator.h>
-#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
+#include <nosSysSettings/nosSettingsSubsystem.h>
 
 
 NOS_INIT()

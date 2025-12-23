@@ -10,7 +10,7 @@
 #include <AppService_generated.h>
 
 // nosNodes
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include "Names.h"
 

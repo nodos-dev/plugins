@@ -2,8 +2,8 @@
 
 #include "TypeCommon.h"
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 
 namespace nos::reflect
 {

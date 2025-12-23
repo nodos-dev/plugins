@@ -1,8 +1,8 @@
 #include <Nodos/Plugin.hpp>
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVariableSubsystem/nosVariableSubsystem.h>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVariables/nosVariableSubsystem.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()

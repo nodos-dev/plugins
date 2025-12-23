@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "TypeCommon.h"
-#include "Reflect_generated.h"
+#include "nosReflect/Reflect_generated.h"
 
 namespace nos::reflect
 {

@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 #include <glm/glm.hpp>
 #include "nosUtilities/Layout_generated.h"
 
