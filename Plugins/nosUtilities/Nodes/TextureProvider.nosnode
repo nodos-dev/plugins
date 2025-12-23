@@ -5,7 +5,11 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Texture Provider",
-				"name_aliases": [ "staging", "temporary", "async" ]
+				"name_aliases": [
+					"staging",
+					"temporary",
+					"async"
+				]
 			},
 			"node": {
 				"class_name": "TextureProvider",
@@ -101,5 +105,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Fulfill Promise",
-				"name_aliases": [ "signal", "sync" ]
+				"name_aliases": [
+					"signal",
+					"sync"
+				]
 			},
 			"node": {
 				"class_name": "FulFillPromise",
@@ -34,5 +37,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

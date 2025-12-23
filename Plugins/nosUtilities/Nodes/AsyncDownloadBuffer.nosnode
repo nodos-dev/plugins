@@ -5,7 +5,12 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Async Download Buffer",
-				"name_aliases": [ "staging", "temporary", "async", "download" ]
+				"name_aliases": [
+					"staging",
+					"temporary",
+					"async",
+					"download"
+				]
 			},
 			"node": {
 				"class_name": "AsyncDownloadBuffer",
@@ -59,7 +64,7 @@
 					{
 						"name": "TransferCompletePromise",
 						"display_name": "Transfer Complete Promise",
-                        "type_name": "nos.sync.Promise",
+						"type_name": "nos.sync.Promise",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "CPU synchronization primitive for ensuring the use of the buffer is finished"
@@ -88,5 +93,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

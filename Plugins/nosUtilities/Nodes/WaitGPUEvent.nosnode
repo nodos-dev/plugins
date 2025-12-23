@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Wait GPU Event",
-				"name_aliases": [ "staging", "temporary" ]
+				"name_aliases": [
+					"staging",
+					"temporary"
+				]
 			},
 			"node": {
 				"class_name": "WaitGPUEvent",
@@ -41,5 +44,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Copy Resource",
-				"name_aliases": [ "copy" ]
+				"name_aliases": [
+					"copy"
+				]
 			},
 			"node": {
 				"class_name": "CopyResource",
@@ -61,5 +63,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

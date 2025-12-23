@@ -1,50 +1,51 @@
 {
-  "nodes": [
-    {
-      "class_name": "BoundedObjectQueue",
-      "menu_info": {
-        "category": "Type",
-        "display_name": "Bounded Object Queue",
-        "name_aliases": [
-          "queue",
-          "blocking queue"
-        ]
-      },
-      "node": {
-        "name": "BoundedObjectQueue",
-        "display_name": "Bounded Object Queue",
-        "description": "Queues data from a producer thread and outputs them to a consumer thread.\nStores only the references to the objects, not copies.",
-        "contents_type": "Job",
-        "pins": [
-          {
-            "name": "Thread",
-            "type_name": "nos.exe",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_ONLY"
-          },
-          {
-            "name": "Input",
-            "type_name": "nos.Generic",
-            "show_as": "INPUT_PIN",
-            "can_show_as": "INPUT_PIN_ONLY"
-          },
-          {
-            "name": "Capacity",
-            "type_name": "uint",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "data": 2,
-            "min": 1
-          },
-          {
-            "name": "Output",
-            "type_name": "nos.Generic",
-            "show_as": "OUTPUT_PIN",
-            "can_show_as": "OUTPUT_PIN_ONLY",
-            "live": true
-          }
-        ]   
-      }
-    }
-  ]
+	"nodes": [
+		{
+			"class_name": "BoundedObjectQueue",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Bounded Object Queue",
+				"name_aliases": [
+					"queue",
+					"blocking queue"
+				]
+			},
+			"node": {
+				"name": "BoundedObjectQueue",
+				"display_name": "Bounded Object Queue",
+				"description": "Queues data from a producer thread and outputs them to a consumer thread.\nStores only the references to the objects, not copies.",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Thread",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Capacity",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 2,
+						"min": 1
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"live": true
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
 }

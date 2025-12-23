@@ -5,7 +5,13 @@
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Buffer Provider",
-				"name_aliases": [ "staging", "temporary", "async", "download", "upload" ]
+				"name_aliases": [
+					"staging",
+					"temporary",
+					"async",
+					"download",
+					"upload"
+				]
 			},
 			"node": {
 				"class_name": "BufferProvider",
@@ -106,5 +112,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }
