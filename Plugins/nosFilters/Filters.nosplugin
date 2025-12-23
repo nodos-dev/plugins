@@ -1,27 +1,28 @@
 {
-    "info": {
-        "id": {
-            "name": "nos.filters",
-            "version": "2.2.0"
-        },
-        "display_name": "Filters",
-        "description": "Collection of image filters.",
-        "dependencies": [
-            {
-                "name": "nos.sys.vulkan",
-                "version": "7.1"
-            },
-            {
-                "name": "nos.math",
-                "version": "1.24"
-            },
-            {
-                "name": "nos.mediaio",
-                "version": "3.4"
-            }
-        ],
-        "category": "Image Processing"
-    },
-    "binary_path": "Binaries/nosFilters",
-    "sdk_version": "40.0"
+	"info": {
+		"id": {
+			"name": "nos.filters",
+			"version": "2.2.0"
+		},
+		"display_name": "Filters",
+		"description": "Collection of image filters.",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "7.1"
+			},
+			{
+				"name": "nos.math",
+				"version": "1.24"
+			},
+			{
+				"name": "nos.mediaio",
+				"version": "3.4"
+			}
+		],
+		"category": "Image Processing"
+	},
+	"binary_path": "Binaries/nosFilters",
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

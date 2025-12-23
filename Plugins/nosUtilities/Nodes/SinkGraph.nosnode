@@ -1,450 +1,437 @@
-{ "nodes": [
-    {
-        "class_name": "SinkGraph",
-        "menu_info": {
-            "category": "Utilities",
-            "display_name": "Threaded Sink"
-        },
-        "node": {
-            "id": "9c4000ea-8fc7-4683-b257-2e16cea01b1a",
-            "name": "Sink",
-            "class_name": "nos.utilities.SinkGraph",
-            "pins": [
-                {
-                    "id": "aa8b2b61-086a-44f7-817f-90c75ef4da31",
-                    "name": "Sink Input",
-                    "type_name": "nos.Generic",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY",
-                    "visualizer": {
-                    },
-                    "data": {},
-                    "def": {},
-                    "meta_data_map": [
-                        {
-                            "key": "Category",
-                            "value": ""
-                        }
-                    ],
-                    "contents_type": "PortalPin",
-                    "contents": { "source_id": "47c5a6bf-30ec-45fb-8c18-5a3bf2432517" }
-                },
-                {
-                    "id": "c7791cb8-9ed8-48b9-832d-190f43d0539f",
-                    "name": "Sink FPS",
-                    "type_name": "float",
-                    "show_as": "PROPERTY",
-                    "can_show_as": "PROPERTY_ONLY",
-                    "visualizer": {
-                    },
-                    "data": 60.0,
-                    "min": 0.01,
-                    "max": 1000.0,
-                    "def": 60.0,
-                    "step": 9.9999,
-                    "meta_data_map": [
-                        {
-                            "key": "Category",
-                            "value": ""
-                        }
-                    ],
-                    "contents_type": "PortalPin",
-                    "contents": { "source_id": "2b5ae02f-1303-4b65-b0eb-3aa2db2b3151" },
-                    "display_name": "FPS"
-                },
-                {
-                    "id": "6f9bbb5d-1eb7-4ae7-b2c0-1e43b0ef4b69",
-                    "name": "AcceptsRepeat",
-                    "type_name": "bool",
-                    "show_as": "PROPERTY",
-                    "can_show_as": "PROPERTY_ONLY",
-                    "visualizer": {
-                    },
-                    "data": false,
-                    "def": false,
-                    "advanced_property": true,
-                    "meta_data_map": [
-                        {
-                            "key": "AdvancedProperty",
-                            "value": "true"
-                        },
-                        {
-                            "key": "Category",
-                            "value": ""
-                        }
-                    ],
-                    "contents_type": "PortalPin",
-                    "contents": { "source_id": "2e293aff-300d-4d6d-88e5-2c80324b9b23" },
-                    "display_name": "Accept Repeat"
-                },
-                {
-                    "id": "52607932-ccf6-48fc-ac69-bb769a97efda",
-                    "name": "SinkMode",
-                    "type_name": "nos.utilities.SinkMode",
-                    "show_as": "PROPERTY",
-                    "can_show_as": "PROPERTY_ONLY",
-                    "visualizer": {
-                    },
-                    "data": "Periodic",
-                    "def": "Periodic",
-                    "meta_data_map": [
-                        {
-                            "key": "Category",
-                            "value": ""
-                        }
-                    ],
-                    "contents_type": "PortalPin",
-                    "contents": { "source_id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be" },
-                    "description": "Whether to schedule nodes at an unlimited or fixed rate",
-                    "display_name": "Mode"
-                },
-                {
-                    "id": "a9a32c7b-8907-4116-a252-c816d0be6c78",
-                    "name": "LatencyBudget",
-                    "type_name": "float",
-                    "show_as": "PROPERTY",
-                    "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                    "visualizer": {
-                    },
-                    "data": 1.0,
-                    "def": 1.0,
-                    "min": 0.0,
-                    "contents_type": "PortalPin",
-                    "contents": { "source_id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8" },
-                    "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
-                    "display_name": "Latency Budget (Seconds)"
-                }
-            ],
-            "pos": {
-                "x": 0.0,
-                "y": 0.0
-            },
-            "contents_type": "Graph",
-            "contents": {
-                "nodes": [
-                    {
-                        "id": "9d9691ff-b630-4117-ab66-0834166b368a",
-                        "name": "Thread",
-                        "class_name": "nos.Thread",
-                        "always_execute": true,
-                        "pins": [
-                            {
-                                "id": "692cc43f-b55a-4384-ba2f-73d2d4af2dbc",
-                                "name": "Run",
-                                "type_name": "nos.exe",
-                                "show_as": "OUTPUT_PIN",
-                                "can_show_as": "OUTPUT_PIN_ONLY",
-                                "visualizer": {
-                                },
-                                "data": {},
-                                "def": {},
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "live": true,
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            },
-                            {
-                                "id": "df233737-c6df-4897-8ee4-ca1d7d93d127",
-                                "name": "Importance",
-                                "type_name": "ulong",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "PROPERTY_ONLY",
-                                "visualizer": {
-                                },
-                                "data": 0,
-                                "def": 0,
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            }
-                        ],
-                        "pos": {
-                            "x": -738.0,
-                            "y": 89.0
-                        },
-                        "contents_type": "Job",
-                        "contents": { "type": "" },
-                        "function_category": "Default Node",
-                        "plugin_version": {
-                            "major": 0,
-                            "minor": 0,
-                            "patch": 0
-                        }
-                    },
-                    {
-                        "id": "9a8d1b3a-4097-4985-bcf5-07f153b111dc",
-                        "name": "Sink Input",
-                        "class_name": "nos.internal.GraphInput",
-                        "pins": [
-                            {
-                                "id": "b7a036be-3e8c-4846-9b53-e5d0dd1bae74",
-                                "name": "Output",
-                                "type_name": "nos.Generic",
-                                "show_as": "OUTPUT_PIN",
-                                "can_show_as": "OUTPUT_PIN_ONLY",
-                                "visualizer": {
-                                },
-                                "data": {},
-                                "def": {},
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            },
-                            {
-                                "id": "47c5a6bf-30ec-45fb-8c18-5a3bf2432517",
-                                "name": "Input",
-                                "type_name": "nos.Generic",
-                                "show_as": "INPUT_PIN",
-                                "can_show_as": "INPUT_PIN_ONLY",
-                                "visualizer": {
-                                },
-                                "data": {},
-                                "referred_by": [
-                                    "aa8b2b61-086a-44f7-817f-90c75ef4da31"
-                                ],
-                                "def": {},
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    },
-                                    {
-                                        "key": "PinHidden",
-                                        "value": "true"
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            }
-                        ],
-                        "pos": {
-                            "x": -938.0,
-                            "y": 108.5
-                        },
-                        "contents_type": "Job",
-                        "contents": { "type": "" },
-                        "function_category": "Default Node",
-                        "plugin_version": {
-                            "major": 0,
-                            "minor": 0,
-                            "patch": 0
-                        }
-                    },
-                    {
-                        "id": "860a78cc-4c8b-4a32-a4dc-d92dbc782413",
-                        "name": "Sink",
-                        "class_name": "nos.utilities.Sink",
-                        "pins": [
-                            {
-                                "id": "d6fc00c2-6adc-44ce-83cf-69f94125e335",
-                                "name": "InExe",
-                                "type_name": "nos.exe",
-                                "show_as": "INPUT_PIN",
-                                "can_show_as": "INPUT_PIN_ONLY",
-                                "visualizer": {
-                                },
-                                "data": {},
-                                "def": {},
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            },
-                            {
-                                "id": "053b9db4-b46b-4205-8f71-6fb34ab704f1",
-                                "name": "Sink Input",
-                                "type_name": "nos.Generic",
-                                "show_as": "INPUT_PIN",
-                                "can_show_as": "INPUT_PIN_ONLY",
-                                "visualizer": {
-                                },
-                                "data": {},
-                                "def": {},
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {},
-                                "display_name": "Output"
-                            },
-                            {
-                                "id": "2b5ae02f-1303-4b65-b0eb-3aa2db2b3151",
-                                "name": "Sink FPS",
-                                "type_name": "float",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "PROPERTY_ONLY",
-                                "visualizer": {
-                                },
-                                "data": 60.0,
-                                "referred_by": [
-                                    "c7791cb8-9ed8-48b9-832d-190f43d0539f"
-                                ],
-                                "min": 0.01,
-                                "max": 1000.0,
-                                "def": 60.0,
-                                "step": 9.9999,
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {}
-                            },
-                            {
-                                "id": "d3dbc2e0-7d5a-4b51-8357-f233a1047844",
-                                "name": "Wait",
-                                "type_name": "bool",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "PROPERTY_ONLY",
-                                "visualizer": {
-                                },
-                                "data": true,
-                                "def": true,
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {},
-                                "description": "Wait until gpu tasks(gpu nodes etc.) are completed."
-                            },
-                            {
-                                "id": "2e293aff-300d-4d6d-88e5-2c80324b9b23",
-                                "name": "AcceptsRepeat",
-                                "type_name": "bool",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "PROPERTY_ONLY",
-                                "visualizer": {
-                                },
-                                "data": false,
-                                "referred_by": [
-                                    "6f9bbb5d-1eb7-4ae7-b2c0-1e43b0ef4b69"
-                                ],
-                                "def": false,
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {},
-                                "description": "Wait until GPU tasks are completed.",
-                                "display_name": "Accepts Repeat"
-                            },
-                            {
-                                "id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be",
-                                "name": "SinkMode",
-                                "type_name": "nos.utilities.SinkMode",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "PROPERTY_ONLY",
-                                "visualizer": {
-                                },
-                                "data": "Periodic",
-                                "referred_by": [
-                                    "52607932-ccf6-48fc-ac69-bb769a97efda"
-                                ],
-                                "def": "Periodic",
-                                "meta_data_map": [
-                                    {
-                                        "key": "Category",
-                                        "value": ""
-                                    }
-                                ],
-                                "contents_type": "JobPin",
-                                "contents": {},
-                                "description": "Whether to schedule nodes at an unlimited or fixed rate",
-                                "display_name": "Mode"
-                            },
-                            {
-                                "id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8",
-                                "name": "LatencyBudget",
-                                "type_name": "float",
-                                "show_as": "PROPERTY",
-                                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                                "visualizer": {
-                                },
-                                "data": 1.0,
-                                "referred_by": [
-                                    "a9a32c7b-8907-4116-a252-c816d0be6c78"
-                                ],
-                                "def": 1.0,
-                                "min": 0.0,
-                                "contents_type": "JobPin",
-                                "contents": {},
-                                "description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
-                                "display_name": "Latency Budget (Seconds)"
-                            }
-                        ],
-                        "pos": {
-                            "x": -554.0,
-                            "y": 128.0
-                        },
-                        "contents_type": "Job",
-                        "contents": { "type": "" },
-                        "function_category": "Default Node",
-                        "plugin_version": {
-                            "major": 3,
-                            "minor": 13,
-                            "patch": 1
-                        }
-                    }
-                ],
-                "connections": [
-                    {
-                        "from": "692cc43f-b55a-4384-ba2f-73d2d4af2dbc",
-                        "to": "d6fc00c2-6adc-44ce-83cf-69f94125e335",
-                        "id": "ffa56295-2077-4dcc-810a-592ca1a4ce38"
-                    },
-                    {
-                        "from": "b7a036be-3e8c-4846-9b53-e5d0dd1bae74",
-                        "to": "053b9db4-b46b-4205-8f71-6fb34ab704f1",
-                        "id": "050ed3c4-2acf-4388-a539-02e86353c1ba"
-                    }
-                ]
-            },
-            "function_category": "Default Node",
-            "meta_data_map": [
-                {
-                    "key": "PluginVersion",
-                    "value": "2.7.0"
-                },
-                {
-                    "key": "NodeStatusPortal",
-                    "value": "/Sink"
-                }
-            ],
-            "plugin_version": {
-                "major": 3,
-                "minor": 13,
-                "patch": 1
-            }
-        }
-    }
-  ] }
+{
+	"nodes": [
+		{
+			"class_name": "SinkGraph",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Threaded Sink"
+			},
+			"node": {
+				"id": "9c4000ea-8fc7-4683-b257-2e16cea01b1a",
+				"name": "Sink",
+				"class_name": "nos.utilities.SinkGraph",
+				"pins": [
+					{
+						"id": "aa8b2b61-086a-44f7-817f-90c75ef4da31",
+						"name": "Sink Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"data": {},
+						"def": {},
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "47c5a6bf-30ec-45fb-8c18-5a3bf2432517"
+						}
+					},
+					{
+						"id": "c7791cb8-9ed8-48b9-832d-190f43d0539f",
+						"name": "Sink FPS",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": 60.0,
+						"min": 0.01,
+						"max": 1000.0,
+						"def": 60.0,
+						"step": 9.9999,
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "2b5ae02f-1303-4b65-b0eb-3aa2db2b3151"
+						},
+						"display_name": "FPS"
+					},
+					{
+						"id": "6f9bbb5d-1eb7-4ae7-b2c0-1e43b0ef4b69",
+						"name": "AcceptsRepeat",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": false,
+						"def": false,
+						"advanced_property": true,
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							},
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "2e293aff-300d-4d6d-88e5-2c80324b9b23"
+						},
+						"display_name": "Accept Repeat"
+					},
+					{
+						"id": "52607932-ccf6-48fc-ac69-bb769a97efda",
+						"name": "SinkMode",
+						"type_name": "nos.utilities.SinkMode",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": "Periodic",
+						"def": "Periodic",
+						"meta_data_map": [
+							{
+								"key": "Category",
+								"value": ""
+							}
+						],
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be"
+						},
+						"description": "Whether to schedule nodes at an unlimited or fixed rate",
+						"display_name": "Mode"
+					},
+					{
+						"id": "a9a32c7b-8907-4116-a252-c816d0be6c78",
+						"name": "LatencyBudget",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1.0,
+						"def": 1.0,
+						"min": 0.0,
+						"contents_type": "PortalPin",
+						"contents": {
+							"source_id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8"
+						},
+						"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
+						"display_name": "Latency Budget (Seconds)"
+					}
+				],
+				"pos": {
+					"x": 0.0,
+					"y": 0.0
+				},
+				"contents_type": "Graph",
+				"contents": {
+					"nodes": [
+						{
+							"id": "9d9691ff-b630-4117-ab66-0834166b368a",
+							"name": "Thread",
+							"class_name": "nos.Thread",
+							"always_execute": true,
+							"pins": [
+								{
+									"id": "692cc43f-b55a-4384-ba2f-73d2d4af2dbc",
+									"name": "Run",
+									"type_name": "nos.exe",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {},
+									"def": {},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"live": true,
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "df233737-c6df-4897-8ee4-ca1d7d93d127",
+									"name": "Importance",
+									"type_name": "ulong",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": 0,
+									"def": 0,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": -738.0,
+								"y": 89.0
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "9a8d1b3a-4097-4985-bcf5-07f153b111dc",
+							"name": "Sink Input",
+							"class_name": "nos.internal.GraphInput",
+							"pins": [
+								{
+									"id": "b7a036be-3e8c-4846-9b53-e5d0dd1bae74",
+									"name": "Output",
+									"type_name": "nos.Generic",
+									"show_as": "OUTPUT_PIN",
+									"can_show_as": "OUTPUT_PIN_ONLY",
+									"data": {},
+									"def": {},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "47c5a6bf-30ec-45fb-8c18-5a3bf2432517",
+									"name": "Input",
+									"type_name": "nos.Generic",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {},
+									"referred_by": [
+										"aa8b2b61-086a-44f7-817f-90c75ef4da31"
+									],
+									"def": {},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										},
+										{
+											"key": "PinHidden",
+											"value": "true"
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								}
+							],
+							"pos": {
+								"x": -938.0,
+								"y": 108.5
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 0,
+								"minor": 0,
+								"patch": 0
+							}
+						},
+						{
+							"id": "860a78cc-4c8b-4a32-a4dc-d92dbc782413",
+							"name": "Sink",
+							"class_name": "nos.utilities.Sink",
+							"pins": [
+								{
+									"id": "d6fc00c2-6adc-44ce-83cf-69f94125e335",
+									"name": "InExe",
+									"type_name": "nos.exe",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {},
+									"def": {},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "053b9db4-b46b-4205-8f71-6fb34ab704f1",
+									"name": "Sink Input",
+									"type_name": "nos.Generic",
+									"show_as": "INPUT_PIN",
+									"can_show_as": "INPUT_PIN_ONLY",
+									"data": {},
+									"def": {},
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"display_name": "Output"
+								},
+								{
+									"id": "2b5ae02f-1303-4b65-b0eb-3aa2db2b3151",
+									"name": "Sink FPS",
+									"type_name": "float",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": 60.0,
+									"referred_by": [
+										"c7791cb8-9ed8-48b9-832d-190f43d0539f"
+									],
+									"min": 0.01,
+									"max": 1000.0,
+									"def": 60.0,
+									"step": 9.9999,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {}
+								},
+								{
+									"id": "d3dbc2e0-7d5a-4b51-8357-f233a1047844",
+									"name": "Wait",
+									"type_name": "bool",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": true,
+									"def": true,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"description": "Wait until gpu tasks(gpu nodes etc.) are completed."
+								},
+								{
+									"id": "2e293aff-300d-4d6d-88e5-2c80324b9b23",
+									"name": "AcceptsRepeat",
+									"type_name": "bool",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": false,
+									"referred_by": [
+										"6f9bbb5d-1eb7-4ae7-b2c0-1e43b0ef4b69"
+									],
+									"def": false,
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"description": "Wait until GPU tasks are completed.",
+									"display_name": "Accepts Repeat"
+								},
+								{
+									"id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be",
+									"name": "SinkMode",
+									"type_name": "nos.utilities.SinkMode",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": "Periodic",
+									"referred_by": [
+										"52607932-ccf6-48fc-ac69-bb769a97efda"
+									],
+									"def": "Periodic",
+									"meta_data_map": [
+										{
+											"key": "Category",
+											"value": ""
+										}
+									],
+									"contents_type": "JobPin",
+									"contents": {},
+									"description": "Whether to schedule nodes at an unlimited or fixed rate",
+									"display_name": "Mode"
+								},
+								{
+									"id": "d9040ed3-7494-4fce-aa3d-82cfd31fadf8",
+									"name": "LatencyBudget",
+									"type_name": "float",
+									"show_as": "PROPERTY",
+									"can_show_as": "INPUT_PIN_OR_PROPERTY",
+									"data": 1.0,
+									"referred_by": [
+										"a9a32c7b-8907-4116-a252-c816d0be6c78"
+									],
+									"def": 1.0,
+									"min": 0.0,
+									"contents_type": "JobPin",
+									"contents": {},
+									"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
+									"display_name": "Latency Budget (Seconds)"
+								}
+							],
+							"pos": {
+								"x": -554.0,
+								"y": 128.0
+							},
+							"contents_type": "Job",
+							"contents": {
+								"type": ""
+							},
+							"function_category": "Default Node",
+							"plugin_version": {
+								"major": 3,
+								"minor": 13,
+								"patch": 1
+							}
+						}
+					],
+					"connections": [
+						{
+							"from": "692cc43f-b55a-4384-ba2f-73d2d4af2dbc",
+							"to": "d6fc00c2-6adc-44ce-83cf-69f94125e335",
+							"id": "ffa56295-2077-4dcc-810a-592ca1a4ce38"
+						},
+						{
+							"from": "b7a036be-3e8c-4846-9b53-e5d0dd1bae74",
+							"to": "053b9db4-b46b-4205-8f71-6fb34ab704f1",
+							"id": "050ed3c4-2acf-4388-a539-02e86353c1ba"
+						}
+					]
+				},
+				"function_category": "Default Node",
+				"meta_data_map": [
+					{
+						"key": "PluginVersion",
+						"value": "2.7.0"
+					},
+					{
+						"key": "NodeStatusPortal",
+						"value": "/Sink"
+					}
+				],
+				"plugin_version": {
+					"major": 3,
+					"minor": 13,
+					"patch": 1
+				}
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

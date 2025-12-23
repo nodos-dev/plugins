@@ -1,11 +1,15 @@
-﻿{
+{
 	"nodes": [
 		{
 			"class_name": "BoundedQueue",
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Bounded Queue",
-				"name_aliases": [ "data structure", "algorithm", "circular" ]
+				"name_aliases": [
+					"data structure",
+					"algorithm",
+					"circular"
+				]
 			},
 			"node": {
 				"class_name": "BoundedQueue",
@@ -44,5 +48,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

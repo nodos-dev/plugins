@@ -1,12 +1,13 @@
 {
-    "info": {
-        "id": {
-            "name": "nos.sys.variables",
-            "version": "2.1.0"
-        },
-        "display_name": "Variable Subsystem",
-        "description": ""
-    },
-    "binary_path": "Binaries/nosSysVariables",
-    "sdk_version": "40.0"
+	"info": {
+		"id": {
+			"name": "nos.sys.variables",
+			"version": "2.1.0"
+		},
+		"display_name": "Variable Subsystem",
+		"description": ""
+	},
+	"binary_path": "Binaries/nosSysVariables",
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

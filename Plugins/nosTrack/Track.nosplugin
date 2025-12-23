@@ -17,5 +17,6 @@
 		"Types/Defaults.json"
 	],
 	"binary_path": "Binaries/nosTrack",
-  "sdk_version": "40.0"
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

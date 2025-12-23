@@ -1,22 +1,24 @@
 {
-    "info": {
-        "id": {
-            "name": "nos.webrtc",
-            "version": "1.12.2"
-        },
-        "description": "WebRTC Nodes",
-        "display_name": "WebRTC",
-        "dependencies": [
-            {
-                "name": "nos.sys.vulkan",
-                "version": "7.1"
-            }
-        ],
-        "category": "Media I/O",
-        "tags": ["streaming"]
-    },
-    "binary_path": "Binaries/nosWebrtc",
-    "associated_nodes": [
-    ],
-    "sdk_version": "40.0"
+	"info": {
+		"id": {
+			"name": "nos.webrtc",
+			"version": "1.12.2"
+		},
+		"description": "WebRTC Nodes",
+		"display_name": "WebRTC",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "7.1"
+			}
+		],
+		"category": "Media I/O",
+		"tags": [
+			"streaming"
+		]
+	},
+	"binary_path": "Binaries/nosWebrtc",
+	"associated_nodes": [],
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

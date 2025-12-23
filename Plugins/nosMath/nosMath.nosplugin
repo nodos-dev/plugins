@@ -1,23 +1,24 @@
 {
-  "info": {
-    "id": {
-      "name": "nos.math",
-      "version": "1.24.0"
-    },
-    "description": "Nodes for math operations.",
-    "display_name": "Math",
-    "category": "Mathematics",
-    "dependencies": [
-      {
-        "name": "nos.reflect",
-        "version": "2.1"
-      }
-    ]
-  },
-  "binary_path": "Binaries/nosMath",
-  "third_party_software": [
-    "Config/Licenses.json"
-  ],
-  "associated_nodes": [],
-  "sdk_version": "40.0"
+	"info": {
+		"id": {
+			"name": "nos.math",
+			"version": "1.24.0"
+		},
+		"description": "Nodes for math operations.",
+		"display_name": "Math",
+		"category": "Mathematics",
+		"dependencies": [
+			{
+				"name": "nos.reflect",
+				"version": "2.1"
+			}
+		]
+	},
+	"binary_path": "Binaries/nosMath",
+	"third_party_software": [
+		"Config/Licenses.json"
+	],
+	"associated_nodes": [],
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

@@ -1,19 +1,20 @@
 {
-    "info": {
-        "id": {
-            "name": "nos.py",
-            "version": "1.1.0"
-        },
-        "display_name": "Python Subsystem",
-        "description": "Python subsystem for Nodos. Allows Python scripts to be run inside Nodos.\n\nConsiderations:\n- Requires Python 3 to be installed on the system.",
-        "dependencies": [
+	"info": {
+		"id": {
+			"name": "nos.py",
+			"version": "1.1.0"
+		},
+		"display_name": "Python Subsystem",
+		"description": "Python subsystem for Nodos. Allows Python scripts to be run inside Nodos.\n\nConsiderations:\n- Requires Python 3 to be installed on the system.",
+		"dependencies": [
 			{
 				"name": "nos.py.deps",
 				"version": "1.0"
 			}
-        ],
-        "category": "Scripting"
-    },
-    "binary_path": "./Binaries/nosPy",
-    "sdk_version": "40.0"
+		],
+		"category": "Scripting"
+	},
+	"binary_path": "./Binaries/nosPy",
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }

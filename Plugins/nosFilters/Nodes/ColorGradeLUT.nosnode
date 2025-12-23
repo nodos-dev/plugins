@@ -5,7 +5,10 @@
 			"menu_info": {
 				"category": "Filters",
 				"display_name": "Color Grade LUT",
-				"name_aliases": [ "post process", "color grading" ]
+				"name_aliases": [
+					"post process",
+					"color grading"
+				]
 			},
 			"node": {
 				"class_name": "ColorGradeLUT",
@@ -40,5 +43,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

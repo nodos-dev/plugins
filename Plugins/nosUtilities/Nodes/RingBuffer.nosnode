@@ -1,11 +1,15 @@
-﻿{
+{
 	"nodes": [
 		{
 			"class_name": "RingBuffer",
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Ring Buffer",
-				"name_aliases": [ "data structure", "algorithm", "circular" ]
+				"name_aliases": [
+					"data structure",
+					"algorithm",
+					"circular"
+				]
 			},
 			"node": {
 				"class_name": "RingBuffer",
@@ -70,5 +74,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

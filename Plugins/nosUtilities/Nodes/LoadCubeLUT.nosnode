@@ -5,7 +5,9 @@
 			"menu_info": {
 				"category": "Media",
 				"display_name": "Load Cube LUT",
-				"name_aliases": [ "LUT" ]
+				"name_aliases": [
+					"LUT"
+				]
 			},
 			"node": {
 				"class_name": "LoadCubeLUT",
@@ -37,5 +39,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }
