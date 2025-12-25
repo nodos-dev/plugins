@@ -27,7 +27,7 @@
 						],
 						"contents_type": "PortalPin",
 						"contents": {
-							"source_id": "b2e60afd-48ab-4f80-89dc-4c7c4323d326"
+							"source_id": "47c5a6bf-30ec-45fb-8c18-5a3bf2432517"
 						}
 					},
 					{
@@ -49,7 +49,7 @@
 						],
 						"contents_type": "PortalPin",
 						"contents": {
-							"source_id": "b6712155-4b78-4220-81f9-4c23231ee688"
+							"source_id": "2b5ae02f-1303-4b65-b0eb-3aa2db2b3151"
 						},
 						"display_name": "FPS"
 					},
@@ -74,7 +74,7 @@
 						],
 						"contents_type": "PortalPin",
 						"contents": {
-							"source_id": "48f150e3-ce1e-4143-9faf-a160d42f4fa2"
+							"source_id": "2e293aff-300d-4d6d-88e5-2c80324b9b23"
 						},
 						"display_name": "Accept Repeat"
 					},
@@ -94,7 +94,7 @@
 						],
 						"contents_type": "PortalPin",
 						"contents": {
-							"source_id": "9ee5e170-ce7a-4b3d-b86a-3e3bf5a81aae"
+							"source_id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be"
 						},
 						"description": "Whether to schedule nodes at an unlimited or fixed rate",
 						"display_name": "Mode"

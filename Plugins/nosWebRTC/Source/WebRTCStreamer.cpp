@@ -180,7 +180,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 			if (!FreeBuffersCV.wait_for(
 					lock, std::chrono::milliseconds(1000), [this]() { return FreeBuffers.size() == Buffers.size(); }))
 			{
-				NOS_SOFT_CHECK(false && "WebRTCBufferPool Clear called but some buffers are still in use!");
+				NOS_SOFT_CHECK(false, "WebRTCBufferPool Clear called but some buffers are still in use!");
 			}
 			Buffers.clear();
 		}
