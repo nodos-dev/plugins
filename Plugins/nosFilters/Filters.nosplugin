@@ -22,5 +22,7 @@
         ],
         "category": "Image Processing"
     },
-    "binary_path": "Binaries/nosFilters"
+    "binary_path": "Binaries/nosFilters",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

@@ -5,6 +5,7 @@
             "version": "3.0.0"
         },
         "display_name": "Reflect",
+		"category": "Utilities",
         "description": "Collection of type reflection nodes",
 			"dependencies": [
 				{
@@ -17,5 +18,7 @@
 				}
 			]
     },
-    "binary_path": "Binaries/nosReflect"
+    "binary_path": "Binaries/nosReflect",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

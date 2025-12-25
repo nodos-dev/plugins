@@ -217,4 +217,48 @@ bool CompareFlatBuffers(const nosTypeInfo* type,
 	}
 	return true;
 }
+inline bool IsPrimitiveType(nosTypeInfo const& typeInfo)
+{
+	switch (typeInfo.BaseType)
+	{
+	case NOS_BASE_TYPE_INT:
+	case NOS_BASE_TYPE_UINT:
+	case NOS_BASE_TYPE_FLOAT: return true;
+	default: return false;
+}}
+
+inline nos::Name PrimitiveToName(nosTypeInfo const& typeInfo)
+{
+	switch (typeInfo.BaseType)
+	{
+	case NOS_BASE_TYPE_NONE: return NOS_NAME("None");
+	case NOS_BASE_TYPE_INT: {
+		switch (typeInfo.ByteSize)
+		{
+		case 1: return NOS_NAME("byte");
+		case 2: return NOS_NAME("short");
+		case 4: return NOS_NAME("int");
+		case 8: return NOS_NAME("long");
+		}
+		break;
+	}
+	case NOS_BASE_TYPE_UINT: {
+		switch (typeInfo.ByteSize)
+		{
+		case 1: return NOS_NAME("ubyte");
+		case 2: return NOS_NAME("ushort");
+		case 4: return NOS_NAME("uint");
+		case 8: return NOS_NAME("ulong");
+		}
+		break;
+	}
+	case NOS_BASE_TYPE_FLOAT: return typeInfo.ByteSize == 4 ? NOS_NAME("float") : NOS_NAME("double");
+	}
+	return NOS_NAME("Unknown");
 }
+
+inline bool IsEnumType(nosTypeInfo const& typeInfo)
+{
+	return IsPrimitiveType(typeInfo) && PrimitiveToName(typeInfo) != typeInfo.TypeName;
+}
+} // namespace nos::reflect

@@ -6,8 +6,8 @@
 #include <AppService_generated.h>
 #include <AppEvents_generated.h>
 #include <Nodos/Utils/Thread.hpp>
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 #include "Names.h"
 
 #include <Windows.h>
@@ -41,8 +41,6 @@
 #include "WebRTCManager.h"
 #include "WebRTCClient.h"
 #include "YUV420toRGB.comp.spv.dat"
-#include "LinearI420Buffer.h"
-#include "I420Buffer.h"
 #include "WebRTCCommon.h"
 
 // nosNodes

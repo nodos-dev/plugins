@@ -6,7 +6,7 @@
 #include <Nodos/Plugin.hpp>
 
  // External
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include "Nodos/Utils/Stopwatch.hpp"
 
@@ -291,18 +291,7 @@ struct GPUBufferResource : ResourceInterface {
 					  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER),
 					  .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE) };
 
-	TypedObjectRef<nos::sys::vulkan::Semaphore> TransferSem{};
-	std::atomic_uint64_t SemValue = 1;
-
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
-		nosSemaphoreCreateInfo semCreateInfo {
-			.Type = NOS_SEMAPHORE_TYPE_TIMELINE,
-		};
-		nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.GetStorage());
-	}
-	~GPUBufferResource()
-	{
-		TransferSem = {};
 	}
 	rc<ResourceBase> CreateResource() override {
 		auto buf = sys::vulkan::CreateBuffer(SampleBuffer, "Buffer Ring Sample");
@@ -346,17 +335,11 @@ struct GPUBufferResource : ResourceInterface {
 		auto outBufInfo = *sys::vulkan::GetResourceInfo(outBuf);
 		{
 			nosCmd cmd{};
-			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
+			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, r->BufObj, outBuf, 0);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &r->Params.WaitEvent };
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosVulkan->End(cmd, &end);
-		}
-		{
-			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->End(cmd, nullptr);
 		}
 
 		nosTextureFieldType outFieldType = r->Params.FieldType;
@@ -417,14 +400,8 @@ struct GPUBufferResource : ResourceInterface {
 			beginParams = { ringExecuteName, params.NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
 			nosVulkan->Begin(&beginParams);
 			nosVulkan->Copy(cmd, inBuf, res->BufObj, 0);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, SemValue);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
 			nosVulkan->End(cmd, &end);
-		}
-		{
-			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), params.NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, SemValue++);
-			nosVulkan->End(cmd, nullptr);
 		}
 		return NOS_RESULT_SUCCESS;
 	}

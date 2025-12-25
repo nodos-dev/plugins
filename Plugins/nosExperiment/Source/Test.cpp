@@ -6,8 +6,8 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include "Window/WindowNode.h"
 #include <cstdint>
@@ -186,11 +186,14 @@ struct PrintNode : nos::NodeContext
 
 nosResult RegisterFrameInterpolator(nosNodeFunctions* nodeFunctions);
 nosResult RegisterPartialUpdateTest(nosNodeFunctions* nodeFunctions);
+nosResult RegisterPartialTextureCopy(nosNodeFunctions*);
+nosResult RegisterPartialBufferCopy(nosNodeFunctions*);
+
 struct TestPluginFunctions : PluginFunctions
 {
 	nosResult ExportNodeFunctions(size_t& outCount, nosNodeFunctions** outFunctions) override
 	{
-		outCount = 19;
+		outCount = 21;
 		if (!outFunctions)
 			return NOS_RESULT_SUCCESS;
 
@@ -359,6 +362,8 @@ struct TestPluginFunctions : PluginFunctions
 			object.Release();
 			return NOS_RESULT_SUCCESS;
 		};
+		RegisterPartialTextureCopy(outFunctions[19]);
+		RegisterPartialBufferCopy(outFunctions[20]);
 		return NOS_RESULT_SUCCESS;
 	}
 };

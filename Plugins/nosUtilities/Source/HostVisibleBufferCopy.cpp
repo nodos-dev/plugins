@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 namespace nos::utilities
 {

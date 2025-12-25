@@ -17,5 +17,7 @@
   "binary_path": "./Binaries/nosAnimation",
   "named_values": [
     "Types/AnimationExpressionPresets.json"
-  ]
+  ],
+    "sdk_version": "41.0",
+    "schema_version": "1.4-v1"
 }

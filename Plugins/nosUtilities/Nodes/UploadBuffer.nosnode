@@ -1,11 +1,14 @@
-﻿{
+{
 	"nodes": [
 		{
 			"class_name": "UploadBuffer",
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Upload Buffer",
-				"name_aliases": [ "staging", "temporary" ]
+				"name_aliases": [
+					"staging",
+					"temporary"
+				]
 			},
 			"node": {
 				"class_name": "UploadBuffer",
@@ -46,5 +49,6 @@
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

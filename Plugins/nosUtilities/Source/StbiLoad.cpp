@@ -13,7 +13,7 @@
 #include <AppService_generated.h>
 
 // nosNodes
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 #include "Names.h"
 
@@ -87,7 +87,7 @@ struct StbiLoadContext : NodeContext
 				return NOS_RESULT_FAILED;
 			}
 
-			nosTextureInfo texInfo = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R8G8B8A8_UNORM};
+			nosTextureInfo texInfo = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R16G16B16A16_UNORM };
 
 			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
 			if (sRGB)

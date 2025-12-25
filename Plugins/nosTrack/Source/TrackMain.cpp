@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "Track.h"
-#include "nosAnimationSubsystem/nosAnimationSubsystem.h"
-#include "Track_generated.h"
+#include "nosSysAnimation/nosAnimationSubsystem.h"
+#include "nosTrack/Track_generated.h"
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/ext/quaternion_common.hpp>

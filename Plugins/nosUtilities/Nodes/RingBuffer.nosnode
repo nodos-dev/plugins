@@ -1,11 +1,15 @@
-﻿{
+{
 	"nodes": [
 		{
 			"class_name": "RingBuffer",
 			"menu_info": {
 				"category": "Utilities",
 				"display_name": "Ring Buffer",
-				"name_aliases": [ "data structure", "algorithm", "circular" ]
+				"name_aliases": [
+					"data structure",
+					"algorithm",
+					"circular"
+				]
 			},
 			"node": {
 				"class_name": "RingBuffer",
@@ -62,13 +66,14 @@
 						"name": "RepeatWhenFilling",
 						"display_name": "Repeat When Filling",
 						"type_name": "bool",
-						"description": "Serves the last value while the buffer is being filled instead of waiting",
-						"def": false,
+						"description": "Serves the last value while the buffer is being filled instead of waiting & resets the ring on restart",
+						"def": true,
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					}
 				]
 			}
 		}
-	]
+	],
+	"schema_version": "1.4-v1"
 }

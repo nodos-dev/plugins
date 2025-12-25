@@ -3,8 +3,8 @@
 #include <Nodos/Name.hpp>
 #include <Nodos/Plugin.hpp>
 
-#include "nosVariableSubsystem/nosVariableSubsystem.h"
-#include "nosVariableSubsystem/EditorEvents_generated.h"
+#include "nosSysVariables/nosVariableSubsystem.h"
+#include "nosSysVariables/EditorEvents_generated.h"
 
 NOS_INIT() // APITransition: Reminder that this should be reset after next major!
 

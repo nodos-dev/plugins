@@ -15,5 +15,7 @@
         "category": "Procedural Generation"
     },
     "binary_path": "./Binaries/nosNoise",
-    "third_party_software": ["./Config/Licenses.json"]
+    "third_party_software": ["./Config/Licenses.json"],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

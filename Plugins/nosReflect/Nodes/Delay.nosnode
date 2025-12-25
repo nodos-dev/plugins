@@ -8,6 +8,7 @@
 			},
 			"node": {
 				"contents_type": "Job",
+				"always_execute": true,
 				"pins": [
 					{
 						"name": "Input",

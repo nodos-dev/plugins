@@ -21,7 +21,7 @@
 						"type_name": "nos.Generic",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"connection_conditions": "!resource"
+						"connection_conditions": "!resource && !array"
 					}
 				]
 			}

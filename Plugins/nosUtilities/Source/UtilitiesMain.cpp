@@ -6,7 +6,7 @@
 #include <Builtins_generated.h>
 #include <Module_generated.h>
 
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
 #include <nosSync/nosSync.h>
 
 NOS_INIT()
@@ -71,6 +71,8 @@ enum Utilities : int
 	TextureProvider,
 	CopyResource,
 	HostVisibleBufferCopy,
+	LoadCubeLUT,
+	RepeatingJunction,
 	Count
 };
 
@@ -117,6 +119,8 @@ nosResult RegisterBufferProvider(nosNodeFunctions*);
 nosResult RegisterTextureProvider(nosNodeFunctions*);
 nosResult RegisterCopyResource(nosNodeFunctions*);
 nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
+nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
+nosResult RegisterRepeatingJunction(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -179,6 +183,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(TextureProvider)
 			GEN_CASE_NODE(CopyResource)
 			GEN_CASE_NODE(HostVisibleBufferCopy)
+			GEN_CASE_NODE(LoadCubeLUT)
+			GEN_CASE_NODE(RepeatingJunction)
 		}
 	}
 	

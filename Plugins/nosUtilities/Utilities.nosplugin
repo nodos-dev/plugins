@@ -33,5 +33,7 @@
 			"type": "nos.sys.vulkan.Resources",
 			"path": "Types/Resources.json"
 		}
-	]
+	],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

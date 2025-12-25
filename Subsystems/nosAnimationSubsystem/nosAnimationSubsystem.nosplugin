@@ -14,5 +14,7 @@
         ],
         "category": "Animation"
     },
-    "binary_path": "./Binaries/nosAnimationSubsystem"
+    "binary_path": "./Binaries/nosSysAnimation",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

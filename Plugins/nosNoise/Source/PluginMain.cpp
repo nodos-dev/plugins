@@ -5,7 +5,7 @@
 #include <Nodos/Plugin.hpp>
 
 // Subsystem dependencies
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 NOS_INIT()
 NOS_VULKAN_INIT()

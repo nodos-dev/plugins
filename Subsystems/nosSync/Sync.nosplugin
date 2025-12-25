@@ -8,5 +8,7 @@
         "description": "Nodos subsystem for synchronization utilities",
         "category": "Utilities"
     },
-    "binary_path": "Binaries/nosSync"
+    "binary_path": "Binaries/nosSync",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

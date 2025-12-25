@@ -4,21 +4,12 @@
 
 // External
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 namespace nos::utilities
 {
 struct UploadBufferNode : NodeContext
 {
-	TypedObjectRef<sys::vulkan::Semaphore> TransferSem{};
-	uint64_t FrameNumber = 1;
-	nosResult OnCreate(nosFbNodePtr node)
-	{
-		nosSemaphoreCreateInfo semCreateInfo{
-			.Type = NOS_SEMAPHORE_TYPE_TIMELINE
-		};
-		return nosVulkan->CreateSemaphore(&semCreateInfo, &TransferSem.GetStorage());
-	}
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto outBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME_STATIC("Output"));
@@ -62,14 +53,8 @@ struct UploadBufferNode : NodeContext
 			};
 			auto res = nosVulkan->Begin(&cmdParams);
 			nosVulkan->Copy(cmd, inBuf, outBuf, 0);
-			nosVulkan->AddSignalSemaphoreToCmd(cmd, TransferSem, FrameNumber);
 			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = event };
 			nosVulkan->End(cmd, &endParams);
-		}
-		{
-			auto cmd = sys::vulkan::BeginCmd(NOS_NAME("Wait Transfer"), NodeId);
-			nosVulkan->AddWaitSemaphoreToCmd(cmd, TransferSem, FrameNumber++);
-			nosVulkan->End(cmd, nullptr);
 		}
 
 		return NOS_RESULT_SUCCESS;

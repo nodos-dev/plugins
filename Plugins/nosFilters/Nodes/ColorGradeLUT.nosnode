@@ -1,0 +1,48 @@
+{
+	"nodes": [
+		{
+			"class_name": "ColorGradeLUT",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "Color Grade LUT",
+				"name_aliases": [
+					"post process",
+					"color grading"
+				]
+			},
+			"node": {
+				"class_name": "ColorGradeLUT",
+				"display_name": "Color Grade LUT",
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "Shaders/ColorGradeLUT.frag",
+						"stage": "FRAGMENT"
+					}
+				},
+				"pins": [
+					{
+						"name": "Source",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "ColorLUT",
+						"type_name": "nos.sys.vulkan.Texture3D",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

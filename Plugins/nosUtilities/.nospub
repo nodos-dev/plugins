@@ -7,7 +7,8 @@
         "Include/**",
         "Assets/**",
         "Shaders/*.{hlsl,glsl,frag,vert,spv,comp}",
-        "Binaries/*.{dll,dylib,so}"
+        "Binaries/*.{dll,dylib,so}",
+        "Nodes/*.nosnode"
     ],
     "trigger_publish_globs": [
         "Source/**",

@@ -5,7 +5,7 @@
 #include <Nodos/Plugin.hpp>
 
 // Subsystem dependencies
-#include <nosAnimationSubsystem/nosAnimationSubsystem.h>
+#include <nosSysAnimation/nosAnimationSubsystem.h>
 
 NOS_INIT()
 NOS_ANIMATION_INIT()

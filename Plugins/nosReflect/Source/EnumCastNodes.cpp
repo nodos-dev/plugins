@@ -6,32 +6,6 @@ namespace nos::reflect
 {
 NOS_REGISTER_NAME(Enum)
 
-bool IsPrimitiveType(nosTypeInfo const& typeInfo)
-{
-	switch (typeInfo.BaseType)
-	{
-	case NOS_BASE_TYPE_INT:
-	case NOS_BASE_TYPE_UINT:
-	case NOS_BASE_TYPE_FLOAT:
-		return true;
-	default:
-		return false;
-	}
-}
-
-const char* PrimitiveToString(nosTypeInfo const& typeInfo)
-{
-	switch (typeInfo.BaseType)
-	{
-	case NOS_BASE_TYPE_NONE: return "None";
-	case NOS_BASE_TYPE_INT: return typeInfo.ByteSize == 4 ? "int" : "long";
-	case NOS_BASE_TYPE_UINT: return typeInfo.ByteSize == 4 ? "uint" : "ulong";
-	case NOS_BASE_TYPE_FLOAT: return typeInfo.ByteSize == 4 ? "float" : "double";
-	default: return "Unknown";
-	}
-}
-
-
 struct EnumCastNodeBase : NodeContext
 {
 	std::optional<nos::TypeInfo> EnumType = std::nullopt;
@@ -74,7 +48,7 @@ struct EnumCastNodeBase : NodeContext
 			strcpy(params->OutErrorMessage, "Type can only be decided by the Enum pin.");
 			return NOS_RESULT_FAILED;
 		}
-		if (!IsPrimitiveType(*info) || PrimitiveToString(*info) == nos::Name(info->TypeName))
+		if (!IsEnumType(info))
 		{
 			strcpy(params->OutErrorMessage, "Only enum types can be connected to the Enum pin.");
 			return NOS_RESULT_FAILED;
@@ -84,7 +58,7 @@ struct EnumCastNodeBase : NodeContext
 			auto& pin = params->Pins[i];
 			if (pin.Id == uuid(params->InstigatorPinId))
 				continue;
-			pin.OutResolvedTypeName = nos::Name(PrimitiveToString(*info));
+			pin.OutResolvedTypeName = nos::Name(PrimitiveToName(*info));
 		}
 		return NOS_RESULT_SUCCESS;
 	};

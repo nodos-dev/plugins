@@ -1,5 +1,5 @@
 #include <Nodos/Plugin.hpp>
-#include <nosAnimationSubsystem/nosAnimationSubsystem.h>
+#include <nosSysAnimation/nosAnimationSubsystem.h>
 
 namespace nos::animation
 {

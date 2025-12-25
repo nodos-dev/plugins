@@ -3,7 +3,7 @@
 #include <Nodos/Plugin.hpp>
 
 // External
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/Helpers.hpp>
 
 namespace nos::utilities
 {

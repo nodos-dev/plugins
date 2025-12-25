@@ -15,7 +15,7 @@
         "category": "Media I/O",
         "tags": ["streaming"]
     },
-    "binary_path": "Binaries/nosWebRTC",
-    "associated_nodes": [
-    ]
+    "binary_path": "Binaries/nosWebrtc",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

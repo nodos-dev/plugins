@@ -2,8 +2,8 @@
 #include <Nodos/PluginAPI.h>
 #include <Nodos/Plugin.hpp>
 
-#include <nosPython/Python_generated.h>
-#include <nosPython/nosPython.h>
+#include <nosPy/Python_generated.h>
+#include <nosPy/nosPython.h>
 
 // External
 #define PYBIND11_SIMPLE_GIL_MANAGEMENT

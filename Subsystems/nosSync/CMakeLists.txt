@@ -1,7 +1,0 @@
-# Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Types" "${CMAKE_CURRENT_SOURCE_DIR}/Include/nosSync" "cpp" "${NOS_SDK_DIR}/Types" nosSync_generated)
-
-list(APPEND MODULE_DEPENDENCIES_TARGETS ${NOS_PLUGIN_SDK_TARGET} nosSync_generated)
-
-list(APPEND INCLUDE_FOLDERS ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/Include")
-nos_add_plugin("nosSync" "${MODULE_DEPENDENCIES_TARGETS}" "${INCLUDE_FOLDERS}")

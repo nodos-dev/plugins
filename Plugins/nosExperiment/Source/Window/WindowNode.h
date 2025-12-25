@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Nodos/Plugin.hpp"
-#include "nosVulkanSubsystem/Helpers.hpp"
+#include "nosSysVulkan/Helpers.hpp"
 
 #include "GLFW/glfw3.h"
 

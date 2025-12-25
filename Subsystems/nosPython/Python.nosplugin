@@ -11,8 +11,10 @@
 				"name": "nos.py.deps",
 				"version": "1.0"
 			}
-        ],
-        "category": "Scripting"
-    },
-    "binary_path": "./Binaries/nosPython"
+		],
+		"category": "Scripting"
+	},
+	"binary_path": "./Binaries/nosPy",
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
 }

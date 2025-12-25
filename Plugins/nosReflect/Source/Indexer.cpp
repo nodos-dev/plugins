@@ -10,6 +10,13 @@ struct Indexer : NodeContext
 
 	uint32_t Index = 0;
 	uint32_t ArraySize = 0;
+	enum class IndexState
+	{
+		None = 0,
+		Valid = 1,
+		Invalid = 2,
+	};
+	IndexState LastState = IndexState::None;
 
 	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
@@ -100,25 +107,29 @@ struct Indexer : NodeContext
 		}
 	}
 
+	void UpdateIndexState(IndexState newState)
+	{
+		if (newState == LastState)
+			return;
+		LastState = newState;
+		if (newState == IndexState::Valid)
+		{
+			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::ACTIVE);
+			ClearNodeStatusMessages();
+		}
+		else
+		{
+			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
+			SetNodeStatusMessages({ {{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true} });
+		}
+	}
+
 	bool SetIndex(uint32_t newIndex)
 	{
 		Index = newIndex;
-		if (Index >= ArraySize)
-		{
-			SetNodeStatusMessages({
-				{{}, "Array index out of bounds", fb::NodeStatusMessageType::FAILURE, "", 5, true}
-			});
-			SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::PASSIVE, "Array index out of bounds");
-			return false;
-		}
-		ClearOutputState();
-		return true;
-	}
-
-	void ClearOutputState()
-	{
-		SetPinOrphanState(NSN_Output, fb::PinOrphanStateType::ACTIVE, "");
-		ClearNodeStatusMessages();
+		bool isValidIndex = Index < ArraySize;
+		UpdateIndexState(isValidIndex ? IndexState::Valid : IndexState::Invalid);
+		return isValidIndex;
 	}
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
@@ -137,7 +148,8 @@ struct Indexer : NodeContext
 		
 		ArraySize = vecObj.GetSize();
 
-		SetIndex(*params.GetPinData<uint32_t>(NSN_Index));
+		if (!SetIndex(*params.GetPinData<uint32_t>(NSN_Index)))
+			return NOS_RESULT_SUCCESS;
 
 		auto elem = vecObj.GetElement(Index);
 		if (!elem || !elem->IsValid())

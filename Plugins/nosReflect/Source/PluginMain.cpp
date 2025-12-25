@@ -1,7 +1,7 @@
 #include <Nodos/Plugin.hpp>
 #include <Nodos/Plugin.hpp>
 
-#include <nosVariableSubsystem/nosVariableSubsystem.h>
+#include <nosSysVariables/nosVariableSubsystem.h>
 #include <nosTransfer/nosTransfer.h>
 
 NOS_INIT()

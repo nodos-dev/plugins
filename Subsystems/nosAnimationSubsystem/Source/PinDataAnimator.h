@@ -5,9 +5,9 @@
 #pragma once
 
 #include <Nodos/PluginAPI.h>
-#include <nosAnimationSubsystem/AnimEditorTypes_generated.h>
+#include <nosSysAnimation/AnimEditorTypes_generated.h>
 #include <Nodos/Plugin.hpp>
-#include "nosAnimationSubsystem/nosAnimationSubsystem.h"
+#include "nosSysAnimation/nosAnimationSubsystem.h"
 
 namespace nos::sys::animation
 {

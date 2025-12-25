@@ -4,12 +4,16 @@
         "*.nosplugin",
         "Include/**",
         "Assets/**",
-        "Binaries/*.{dll,dylib,so}"
+        "Binaries/*.{dll,dylib,so}",
+        "Types/**",
+        "Nodes/*.nosnode"
     ],
     "trigger_publish_globs": [
         "Source/**",
         "External",
         "CMakeLists.txt"
     ],
-    "target_platforms": ["x86_64-windows"]
+    "target_platforms": [
+        "x86_64-windows"
+    ]
 }
