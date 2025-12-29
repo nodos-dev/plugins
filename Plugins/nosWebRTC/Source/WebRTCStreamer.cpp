@@ -295,7 +295,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		InputRing->SetConditionVariable(&RingNewFrameCV);
 
 		for (auto pin : *node->pins()) {
-			if (pin->show_as() == nos::fb::ShowAs::INPUT_PIN) {
+			if (NSN_In == pin->name()->string_view()) {
 				InputPinUUID = *pin->id();
 			}
 			else if (NSN_MaxFPS.Compare(pin->name()->c_str()) == 0)
@@ -321,6 +321,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		checkCallbacks = true;
 		
 		SetNodeOrphanState(DisconnectFromServerID, NOS_ORPHAN_STATE_TYPE_ORPHAN);
+		SetPinOrphanState(InputPinUUID, nos::fb::PinOrphanStateType::ORPHAN, "No peers connected");
 	}
 
 	~WebRTCNodeContext() override {
@@ -344,7 +345,6 @@ struct WebRTCNodeContext : nos::NodeContext {
 	}
 
 	void InitializeNodeInternals() {
-
 		p_nosWebRTC.reset(new nosWebRTCStreamerInterface());
 		p_nosWebRTC->manager->SetPeerConnectedCallback([this]() {this->OnPeerConnected(); });
 		p_nosWebRTC->manager->SetPeerDisconnectedCallback([this]() {this->OnPeerDisconnected(); });
@@ -365,7 +365,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 					(*SignalFrameSenderThreadStop)();
 			}
 			FrameSenderThread.join();
-
+			SetPinOrphanState(InputPinUUID, nos::fb::PinOrphanStateType::ORPHAN, "No peers connected");
 			assert(SignalFrameSenderThreadStop == std::nullopt);
 		}
 
@@ -678,6 +678,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 						flatbuffers::FlatBufferBuilder fbb;
 						HandleEvent(nos::CreateAppEvent(fbb, nos::app::CreateSetThreadNameDirect(fbb, (uint64_t)FrameSenderThread.native_handle(), "WebRTC Frame Sender")));
 					}
+					SetPinOrphanState(InputPinUUID, nos::fb::PinOrphanStateType::ACTIVE);
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}
