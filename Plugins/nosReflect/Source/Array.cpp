@@ -170,9 +170,12 @@ struct ArrayNode : NodeContext
 			inputObjects.push_back(*pin->Object);
 			arrayIndex++;
 		}
-		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &ArrayObject.GetStorage());
-		if (!ArrayObject.IsValid())
+		
+		ObjectRef newArrayObject{};
+		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &newArrayObject.GetStorage());
+		if (!newArrayObject.IsValid())
 			return NOS_RESULT_FAILED;
+		ArrayObject = std::move(newArrayObject);
 		SetPinObject(NSN_Output, ArrayObject);
 		return NOS_RESULT_SUCCESS;
 	}
