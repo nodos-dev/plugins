@@ -74,14 +74,8 @@ struct GPUTextureResource : ResourceInterface
 		struct
 		{
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-			nosGPUEvent WaitEvent = 0;
 		} Params{};
 		Resource(vkss::Resource res) : VkRes(std::move(res)) { ResourceType = RESOURCE_TYPE; }
-		~Resource()
-		{
-			if (Params.WaitEvent)
-				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
-		}
 	};
 	typedef nosResourceShareInfo PinData;
 	nosTextureFieldType WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
@@ -109,8 +103,6 @@ struct GPUTextureResource : ResourceInterface
 	void Reset(ResourceBase* r) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		if (res->Params.WaitEvent)
-			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 		res->Params = {};
 		res->FrameNumber = 0;
 	}
@@ -123,16 +115,6 @@ struct GPUTextureResource : ResourceInterface
 							  nosCopyInfo* cpy) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		if (res->Params.WaitEvent)
-		{
-			nos::util::Stopwatch sw;
-			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
-
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog((nodeTypeName + " Copy From GPU Wait: " + nodeDisplayName).c_str(),
-							   nos::util::Stopwatch::ElapsedString(elapsed).c_str());
-		}
-
 		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(vkss::ConvertTextureInfo(res->VkRes)));
 	}
 
@@ -144,7 +126,7 @@ struct GPUTextureResource : ResourceInterface
 		nosCmdBeginParams beginParams = {NOS_NAME("BoundedQueue"), NodeId, &cmd};
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &res->VkRes, &outputResource, 0);
-		nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &res->Params.WaitEvent};
+		nosCmdEndParams end{.ForceSubmit = NOS_TRUE};
 		nosVulkan->End(cmd, &end);
 
 		nosTextureFieldType outFieldType = res->VkRes.Info.Texture.FieldType;
@@ -194,23 +176,13 @@ struct GPUTextureResource : ResourceInterface
 		nosTextureFieldType incomingField = input.Info.Texture.FieldType;
 		res->VkRes.Info.Texture.FieldType = incomingField;
 
-		if (res->Params.WaitEvent)
-		{
-			nos::util::Stopwatch sw;
-			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog(
-				(ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
-				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
-		}
 		nosCmd cmd;
 		nosCmdBeginParams beginParams;
 		beginParams = {ringExecuteName, params->NodeId, &cmd};
 
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
-		nosCmdEndParams end{.ForceSubmit = NOS_TRUE,
-							.OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr};
+		nosCmdEndParams end{.ForceSubmit = NOS_TRUE};
 		nosVulkan->End(cmd, &end);
 		return NOS_RESULT_SUCCESS;
 	}
