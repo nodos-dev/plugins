@@ -127,12 +127,11 @@ struct LoadCubeLUTContext : NodeContext
 {
 	decltype(Clock::now()) TimeStarted = Clock::now();
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams execParams(params);
-		nos::uuid outPinId = execParams[NSN_Out].Id;
+		nos::uuid outPinId = params[NSN_Out].Id;
 		std::filesystem::path FilePath =
-			nos::Utf8ToPath(InterpretPinValue<const char>(execParams[NSN_Path].Data->Data));
+			nos::Utf8ToPath(params.GetPinData<const char>(NSN_Path));
 		return LoadCubeFile(FilePath, outPinId);
 	}
 
@@ -182,23 +181,20 @@ struct LoadCubeLUTContext : NodeContext
 				return NOS_RESULT_FAILED;
 			}
 
-			nosResourceShareInfo outResInfo = {
-				.Info = {.Type = NOS_RESOURCE_TYPE_TEXTURE3D,
+			nosResourceInfo resInfo = {
+				.Type = NOS_RESOURCE_TYPE_TEXTURE3D,
 						 .Texture3D = {.Base{.Width = cubeFile->LUT3DSize,
 											 .Height = cubeFile->LUT3DSize,
-											 .Format = NOS_FORMAT_R32G32B32A32_SFLOAT,
-											 .Filter = NOS_TEXTURE_FILTER_LINEAR,
-											 .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE},
-									   .Depth = cubeFile->LUT3DSize}}};
+											 .Format = NOS_FORMAT_R32G32B32A32_SFLOAT,},
+									   .Depth = cubeFile->LUT3DSize} };
 
-			auto outResOpt = vkss::Resource::Create(outResInfo, "Cube LUT");
-			if (!outResOpt)
+			auto outRes = sys::vulkan::CreateResource(resInfo, "Cube LUT");
+			if (!outRes)
 			{
 				nosEngine.LogE("Failed to create 3D texture resource for cube LUT %s.", path.c_str());
 				UpdateStatus(State::Failed, path);
 				return NOS_RESULT_FAILED;
 			}
-			auto outRes = std::move(*outResOpt);
 
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams{
@@ -208,15 +204,14 @@ struct LoadCubeLUTContext : NodeContext
 				.Usage = NOS_BUFFER_USAGE_TRANSFER_SRC,
 				.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE,
 			};
-			auto stagingBufOpt = vkss::Resource::Create(stagingBufInfo, "LoadCubeLUT_StagingBuf");
-			if (!stagingBufOpt)
+			auto stagingBuf = sys::vulkan::CreateBuffer(stagingBufInfo, "LoadCubeLUT_StagingBuf");
+			if (!stagingBuf)
 			{
 				nosEngine.LogE("Failed to create staging buffer for cube LUT file %s.", path.c_str());
 				UpdateStatus(State::Failed, path);
 				return NOS_RESULT_FAILED;
 			}
-			auto stagingBuf = std::move(*stagingBufOpt);
-			auto stagingBufPtr = nosVulkan->Map(&stagingBuf);
+			auto stagingBufPtr = nosVulkan->Map(stagingBuf);
 			if (!stagingBufPtr)
 			{
 				nosEngine.LogE("Failed to map staging buffer for cube LUT file %s.", path.c_str());
@@ -227,11 +222,11 @@ struct LoadCubeLUTContext : NodeContext
 						cubeFile->LUT3DData.data(),
 						cubeFile->LUT3DData.size() * sizeof(*cubeFile->LUT3DData.data()));
 			nosVulkan->Begin(&beginParams);
-			nosVulkan->Copy(cmd, &stagingBuf, &outRes, nullptr);
+			nosVulkan->Copy(cmd, stagingBuf, outRes, nullptr);
 			nosCmdEndParams endParams{.ForceSubmit = true};
 			nosVulkan->End(cmd, &endParams);
 
-			nosEngine.SetPinValue(outPinId, outRes.ToPinData());
+			SetPinObject(outPinId, outRes);
 			UpdateStatus(State::Loaded, path);
 		}
 		catch (const std::exception& e)

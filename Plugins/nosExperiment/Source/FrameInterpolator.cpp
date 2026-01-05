@@ -29,28 +29,22 @@ struct FrameInterpolatorNode : NodeContext
 		ShouldStop = true;
 	}
 
-	nosResult CopyFrom(nosCopyInfo* copyInfo) override
+	nosResult ExecuteNode(NodeExecuteParams const& execParams) override
 	{
-		return NOS_RESULT_SUCCESS;
-	}
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
-	{
-		NodeExecuteParams execParams(params);
 		{
 			std::unique_lock guard(Mutex);
 			DeltaNanosec = 1'000'000'000u * execParams.GetDeltaTime();
 			if (!InputPinId)
 				InputPinId = execParams[NSN_Input].Id;
 		}
-		auto inputTextureInfo = vkss::DeserializeTextureInfo(execParams[NSN_Input].Data->Data);
-		auto outputTextureInfo = vkss::DeserializeTextureInfo(execParams.GetPinData<void>(NSN_Output));
-		auto method = execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
-		switch (*method)
+		auto inputTexture = *execParams[NSN_Input].Object;
+		auto outputTexture = *execParams[NSN_Output].Object;
+		auto method = *execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
+		switch (method)
 		{
 		case FrameInterpolationMethod::REPEAT: {
-			nosCmd cmd = vkss::BeginCmd(NOS_NAME("Frame Interpolator"), NodeId);
-			nosVulkan->Copy(cmd, &inputTextureInfo, &outputTextureInfo, 0);
+			nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Frame Interpolator"), NodeId);
+			nosVulkan->Copy(cmd, inputTexture, outputTexture, 0);
 			nosVulkan->End(cmd, NOS_FALSE);
 			break;
 		}

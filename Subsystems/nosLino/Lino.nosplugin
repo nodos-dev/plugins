@@ -8,6 +8,6 @@
 		"description": "A Nodos subsystem for Lino",
 		"category": "Media"
 	},
-	"sdk_version": "40.0",
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

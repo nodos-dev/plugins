@@ -32,7 +32,7 @@ struct SinkNode : NodeContext
 		StopThread();
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (nosVulkan)
 		{

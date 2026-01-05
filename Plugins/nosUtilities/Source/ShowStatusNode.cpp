@@ -7,15 +7,13 @@ namespace nos::utilities
 	NOS_REGISTER_NAME_SPACED(Nos_Utilities_ShowStatus, "nos.utilities.ShowStatus")
 	struct ShowStatus : NodeContext
 	{
-		using NodeContext::NodeContext;
-
-		nosResult ExecuteNode(nosNodeExecuteParams* params) override
+		nosResult ExecuteNode(NodeExecuteParams const& params) override
 		{
-			NodeExecuteParams execParams(params);
 			std::string statusMessage = "";
-			if(execParams[NOS_NAME("Status")].Data->Size > 0)
-				statusMessage = std::string(reinterpret_cast<const char*>(execParams[NOS_NAME("Status")].Data->Data));
-			fb::NodeStatusMessageType statusType = *execParams.GetPinData<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
+			const char* statusMsg = params.GetPinData<const char*>(NOS_NAME("Status"));
+			if(strlen(statusMsg) > 0)
+				statusMessage = std::string(statusMsg);
+			fb::NodeStatusMessageType statusType = *params.GetPinData<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
 			if (StatusMessage == statusMessage && StatusType == statusType)
 			{
 				return NOS_RESULT_SUCCESS;

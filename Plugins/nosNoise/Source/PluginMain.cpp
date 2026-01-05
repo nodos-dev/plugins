@@ -5,7 +5,7 @@
 #include <Nodos/Plugin.hpp>
 
 // Subsystem dependencies
-#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
@@ -26,23 +26,21 @@ enum Nodes : int
 
 struct DynamicSizedNoiseNode : public NodeContext
 {
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+    nosResult ExecuteNode(NodeExecuteParams const& params) override
     {
-        auto pins = GetPinValues(params);
-        auto outTex = InterpretPinValue<sys::vulkan::Texture>(pins[NOS_NAME("Output")]);
-        auto& res = *InterpretPinValue<const fb::vec2u>(pins[NOS_NAME("Resolution")]);
-        if (res.x() != outTex->width() || res.y() != outTex->height())
+		NodeExecuteParams execParams(params);
+        auto outTex = execParams.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
+        auto& res = *execParams.GetPinData<const fb::vec2u>(NOS_NAME("Resolution"));
+		auto outTexInfo = *sys::vulkan::GetResourceInfo(outTex);
+
+        if (res.x() != outTexInfo.Width || res.y() != outTexInfo.Height)
         {
-            sys::vulkan::TTexture newTex;
-            outTex->UnPackTo(&newTex);
-            newTex.handle = 0;
-            newTex.external_memory = {};
-            newTex.width = res.x();
-            newTex.height = res.y();
-            nosEngine.LogD("Resizing texture to %dx%d", newTex.width, newTex.height);
-            nosEngine.SetPinValueByName(NodeId, NOS_NAME("Output"), nos::Buffer::From(newTex));;
+            outTexInfo.Width = res.x();
+			outTexInfo.Height = res.y();
+            nosEngine.LogD("Resizing texture to %dx%d", res.x(), res.y());
+			SetPinObject(NOS_NAME("Output"), sys::vulkan::CreateTexture(outTexInfo, "DynamicSizedNoiseResult"));
         }
-        return nosVulkan->ExecuteGPUNode(this, params);
+        return nosVulkan->ExecuteGPUNode(this, params.RawParams);
     }
 
 };

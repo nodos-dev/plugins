@@ -6,118 +6,97 @@
 
 namespace nos::track
 {
-static NOS_REGISTER_NAME(Input);
-static NOS_REGISTER_NAME(Impulse);
-static NOS_REGISTER_NAME(Decay);
-static NOS_REGISTER_NAME(Track);
+NOS_REGISTER_NAME(Input);
+NOS_REGISTER_NAME(Impulse);
+NOS_REGISTER_NAME(Decay);
+NOS_REGISTER_NAME(Track);
 
-void RegisterController(nosNodeFunctions* functions)
+
+struct UserTrack : NodeContext
 {
-	functions->ClassName = NOS_NAME_STATIC("nos.track.UserTrack");
-    struct UserTrack {
-        
-		glm::vec3 v = {};
-		float impulse = 1.0;
-		float decay = 0;
-		uuid OutTrackId;
-		uuid InTrackId;
+	glm::vec3 V = {};
+	float Impulse = 1.0;
+	float Decay = 0;
 
-		track::TTrack state;
+	track::TTrack State;
 
-        void ReadAndUpdate(track::TTrack const& track)
-        {
-			state = track;
-        	auto val = nos::Buffer::From(track);
-        	nosEngine.SetPinValue(OutTrackId, {.Data = val.Data(), .Size = val.Size()});
-        	nosEngine.SetPinValue(InTrackId, {.Data = val.Data(), .Size = val.Size()});
-        }
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
+		for (auto* pin : *node->pins())
+			if (NSN_Input == pin->name()->string_view())
+				ReadAndUpdate(InterpretObjectData<track::TTrack>((void*)pin->data()->data()));
+		return NOS_RESULT_SUCCESS;
+	}
 
-		float& yaw()
-		{
-			return ((glm::vec3&)state.rotation).z;
-		}
-		float& pitch()
-		{
-			return ((glm::vec3&)state.rotation).y;
-		}
-    };
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
+	{
+		Impulse = glm::max(*params.GetPinData<float>(NSN_Impulse), 1.f);
+		Decay = glm::max(*params.GetPinData<float>(NSN_Decay), 0.f);
+		(glm::vec3&)State.location += V;
+		V *= exp(-Decay);
+		ReadAndUpdate(params.GetPinData<track::TTrack>(NSN_Input));
+		return NOS_RESULT_SUCCESS;
+	}
 
-    functions->OnNodeCreated = [](fb::Node const* n, void** ctx) {
-        auto c = new UserTrack();
-        *ctx = c;
-		auto pins = PinMapping().Load(*n);
+	void ReadAndUpdate(track::TTrack const& track)
+	{
+		State = track;
+		SetPinValue(NSN_Track, track);
+		SetPinValue(NSN_Input, track);
+	}
 
-		auto input  = pins[NSN_Input];
-		auto output = pins[NSN_Track];
-		auto impulse = pins[NSN_Impulse];
-		auto decay   = pins[NSN_Decay];
+	float& Yaw() { return ((glm::vec3&)State.rotation).z; }
+	float& Pitch() { return ((glm::vec3&)State.rotation).y; }
 
-        c->OutTrackId = *output->id();
-        c->InTrackId = *input->id();
-
-		auto inBuf = nos::Buffer(input->data());
-		c->ReadAndUpdate(inBuf.As<nos::track::TTrack>());
-    };
-
-    functions->OnNodeDeleted = [](void* ctx, auto) {delete (UserTrack*)ctx; };
-    functions->OnKeyEvent = [](void* ctx_, nosKeyEvent const* keyEvent){
+	void OnKeyEvent(nosKeyEvent const* keyEvent) override
+	{
 		auto& key = keyEvent->Key;
-    	auto& mdelta = keyEvent->MouseDelta;
-    	auto ctx = (UserTrack*)ctx_;
+		auto& mdelta = keyEvent->MouseDelta;
 
-		glm::vec3& rot = (glm::vec3&)ctx->state.rotation;
-		glm::vec3& pos = (glm::vec3&)ctx->state.location;
+		glm::vec3& rot = (glm::vec3&)State.rotation;
+		glm::vec3& pos = (glm::vec3&)State.location;
 
-        if (32 == key) // ?
-        {
+		if (32 == key) // ?
+		{
 			rot = {};
-            pos = glm::vec3{600, 50, 100};
-        }
-		
+			pos = glm::vec3{600, 50, 100};
+		}
+
 		auto orientation = MakeRotation(rot);
 
-        glm::vec3 f = orientation[0];
-        glm::vec3 r = orientation[1];
-        glm::vec3 u = orientation[2];
-        
-        glm::vec3 pf =  f * float((key == 'W') - (key == 'S'));
-        glm::vec3 pr =  r * float((key == 'D') - (key == 'A'));
-        glm::vec3 pu =  u * float((key == 'E') - (key == 'Q'));
-        
-        ctx->v += ctx->impulse * (pf + pr + pu);
-        pos += 10.f * (pf + pr + pu);
+		glm::vec3 f = orientation[0];
+		glm::vec3 r = orientation[1];
+		glm::vec3 u = orientation[2];
 
-		//glm::mat3 roll_basis = transpose(MakeRotation(glm::vec3(ctx->state.rotation.x(), 0, 0)));
+		glm::vec3 pf = f * float((key == 'W') - (key == 'S'));
+		glm::vec3 pr = r * float((key == 'D') - (key == 'A'));
+		glm::vec3 pu = u * float((key == 'E') - (key == 'Q'));
+
+		V += Impulse * (pf + pr + pu);
+		pos += 10.f * (pf + pr + pu);
+
+		// glm::mat3 roll_basis = transpose(MakeRotation(glm::vec3(ctx->state.rotation.x(), 0, 0)));
 		//
-		//glm::mat3 delta = (glm::mat3)glm::angleAxis(mdelta.y * 0.015f, roll_basis[1]);
+		// glm::mat3 delta = (glm::mat3)glm::angleAxis(mdelta.y * 0.015f, roll_basis[1]);
 		//// delta = delta*(glm::mat3)glm::angleAxis(mdelta.x * 0.015f, roll_basis[2]);
 
-		//orientation = orientation * delta;
+		// orientation = orientation * delta;
 
 		//(glm::vec3&)ctx->state.rotation = GetEulers(glm::mat4(orientation));
-		ctx->yaw()   += glm::degrees(mdelta.x * 0.015f);
-		ctx->pitch() -= glm::degrees(mdelta.y * 0.015f);
+		Yaw() += glm::degrees(mdelta.x * 0.015f);
+		Pitch() -= glm::degrees(mdelta.y * 0.015f);
 
 		rot = glm::mod(rot, glm::vec3(360));
 
-		auto val = nos::Buffer::From(ctx->state);
-		nosEngine.SetPinValue(ctx->OutTrackId, { .Data = val.Data(), .Size = val.Size() });
-		nosEngine.SetPinValue(ctx->InTrackId, { .Data = val.Data(), .Size = val.Size() });
+		SetPinValue(NSN_Track, State);
+		SetPinValue(NSN_Input, State);
+	}
 
-    };
+};
 
-    functions->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
-    {
-        auto c = (UserTrack*)ctx;
-    	auto values = GetPinValues(params);
-		c->impulse = glm::max(*(float*)values[NSN_Impulse], 1.f);
-		c->decay = glm::max(*(float*)values[NSN_Decay], 0.f);
-        (glm::vec3&)c->state.location += c->v;
-        c->v *= exp(-c->decay);
-		auto inTrack = GetPinValue<track::TTrack>(values, NSN_Input);
-        c->ReadAndUpdate(inTrack);
-        return NOS_RESULT_SUCCESS;
-    };
+void RegisterController(nosNodeFunctions* functions)
+{
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.track.UserTrack"), UserTrack, functions);
 }
 
 }

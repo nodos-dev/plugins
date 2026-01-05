@@ -13,14 +13,14 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_ChannelViewer, "nos.utilities.ChannelView
 
 namespace nos::utilities
 {
-static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
+static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 {
-	auto values = GetPinValues(pins);
-	const nosResourceShareInfo input = vkss::DeserializeTextureInfo(values[NSN_Input]);
-	const nosResourceShareInfo output = vkss::DeserializeTextureInfo(values[NSN_Output]);
+	NodeExecuteParams params(execParams);
+	auto inTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Input);
+	auto outTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Output);
 
-	auto channel = *(uint32_t*)values[NSN_Channel];
-	auto format = *(uint32_t*)values[NSN_Format];
+	auto channel = *params.GetPinData<uint32_t>(NSN_Channel);
+	auto format = *params.GetPinData<uint32_t>(NSN_Format);
 
 	glm::vec4 val{};
 	val[channel & 3] = 1;
@@ -28,22 +28,20 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
 	constexpr glm::vec3 coeffs[3] = {{.299f, .587f, .114f}, {.2126f, .7152f, .0722f}, {.2627f, .678f, .0593f}};
 
 	glm::vec4 multipliers = glm::vec4(coeffs[format], channel > 3);
-	std::vector bindings = {
-		vkss::ShaderBinding(NSN_Input, input),
-		vkss::ShaderBinding(NSN_Channel, val), 
-		vkss::ShaderBinding(NSN_Format, multipliers)
-	};
+	std::vector bindings = {sys::vulkan::ShaderTextureBindingFromPin(params[NSN_Input].Id, NSN_Input, inTex),
+							sys::vulkan::ShaderDataBinding(NSN_Channel, val),
+							sys::vulkan::ShaderDataBinding(NSN_Format, multipliers)};
 
 	nosRunPassParams pass = {
 		.Key = NSN_Channel_Viewer_Pass,
 		.Bindings = bindings.data(),
 		.BindingCount = (uint32_t)bindings.size(),
-		.Output = output,
+		.Output = outTex,
 		.Wireframe = false,
 	};
-	auto cmd = vkss::BeginCmd(NOS_NAME("ChannelViewer"), pins->NodeId);
+	auto cmd = sys::vulkan::BeginCmd(NOS_NAME("ChannelViewer"), params.NodeId);
 	nosVulkan->RunPass(cmd, &pass);
-	vkss::EndCmd(cmd, false, nullptr);
+	sys::vulkan::EndCmd(cmd, false, nullptr);
 	return NOS_RESULT_SUCCESS;
 }
 

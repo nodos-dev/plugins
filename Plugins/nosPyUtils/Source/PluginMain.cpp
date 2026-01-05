@@ -1,8 +1,9 @@
-#include <Nodos/PluginAPI.h>
-#include <Nodos/Plugin.hpp>
 #include <Nodos/Plugin.hpp>
 
 NOS_INIT()
+
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {

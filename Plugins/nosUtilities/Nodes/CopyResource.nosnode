@@ -1,0 +1,68 @@
+{
+	"nodes": [
+		{
+			"class_name": "CopyResource",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Copy Resource",
+				"name_aliases": [
+					"copy"
+				]
+			},
+			"node": {
+				"class_name": "CopyResource",
+				"contents_type": "Job",
+				"description": "Copies data from one resource to another.",
+				"pins": [
+					{
+						"name": "Source",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"connection_conditions": "resource"
+					},
+					{
+						"name": "Destination",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"connection_conditions": "resource"
+					},
+					{
+						"name": "InGPUEventHolder",
+						"display_name": "GPU Event Holder",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"description": "Puts the GPU event that can be waited on to ensure the copy is complete, into this holder"
+					},
+					{
+						"name": "PreferTransferQueue",
+						"display_name": "Prefer Transfer Queue",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"description": "If enabled, this copy will be performed using the Vulkan transfer queue if possible."
+					},
+					{
+						"name": "OutGPUEventHolder",
+						"display_name": "GPU Event Holder",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Holds the GPU event that can be waited on to ensure the copy is complete"
+					},
+					{
+						"name": "OutDestination",
+						"display_name": "Destination",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

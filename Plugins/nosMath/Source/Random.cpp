@@ -25,9 +25,9 @@ struct RandomNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}	
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nosEngine.SetPinValueByName(NodeId, NOS_NAME("Random"), nos::Buffer::From(Dist(Generator)));
+		SetPinValue(NOS_NAME("Random"), Dist(Generator));
 		return NOS_RESULT_SUCCESS;
 	}
 

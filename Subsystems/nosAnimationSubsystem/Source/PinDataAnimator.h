@@ -22,8 +22,8 @@ inline uint64_t MillisecondsToFrameNumber(uint64_t ms, nosVec2u deltaSeconds)
 struct InterpolatorManager
 {
 	InterpolatorManager();
-	using InterpolatorFn = std::function<nosResult(const nosBuffer from, const nosBuffer to, const double t, nosBuffer* outBuf)>;
-	void AddBuiltinInterpolator(nos::Name name, std::function<nos::Buffer(const nosBuffer from, const nosBuffer to, const double t)> fn);
+	using InterpolatorFn = std::function<nosResult(nosImmutableBuffer from, nosImmutableBuffer to, double t, nosBuffer* outBuf)>;
+	void AddBuiltinInterpolator(nos::Name name, std::function<nos::Buffer(nosImmutableBuffer from, nosImmutableBuffer to, double t)> fn);
 
 	void AddCustomInterpolator(nos::fb::TPluginIdentifier moduleId, nos::Name name, InterpolatorFn fn);
 
@@ -36,7 +36,7 @@ struct InterpolatorManager
 		return Interpolators.contains(name);
 	}
 
-	nosResult Interpolate(nos::Name typeName, const nosBuffer from, const nosBuffer to, const double t, std::optional<EngineBuffer>& outBuf);
+	nosResult Interpolate(nos::Name typeName, nosImmutableBuffer from, nosImmutableBuffer to, const double t, std::optional<EngineBuffer>& outBuf);
 
 	std::unordered_set<nos::Name> GetAnimatableTypes();
 
@@ -67,7 +67,7 @@ struct PinDataAnimator
 
 	bool AddAnimation(uuid const& pinId,
 					  editor::AnimatePin const& animate);
-	void UpdatePin(uuid const& pinId, nosVec2u const& deltaSeconds, uint64_t curFSM, const nosBuffer* currentData);
+	void UpdatePin(uuid const& pinId, nosVec2u const& deltaSeconds, uint64_t curFSM, nosImmutableBuffer currentData);
 	bool IsPinAnimating(uuid const& pinId);
 	void OnPinDeleted(uuid const& pinId);
 	std::optional<PathInfo> GetPathInfo(uuid const& nodeId);

@@ -36,7 +36,7 @@
 					},
 					{
 						"name": "GPUEventRef",
-						"type_name": "nos.sys.vulkan.GPUEventResource",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					},

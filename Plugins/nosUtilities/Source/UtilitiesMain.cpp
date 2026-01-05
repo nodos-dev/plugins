@@ -7,12 +7,15 @@
 #include <Module_generated.h>
 
 #include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSync/nosSync.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
+NOS_SYNC_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
+	NOS_SYNC_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 NOS_REGISTER_NAME(Input);
@@ -61,6 +64,13 @@ enum Utilities : int
 	BoxFit,
 	ReduceTexture,
 	MultiLiveOut,
+	AsyncDownloadBuffer,
+	WaitGPUEvent,
+	ScheduleRequest,
+	BufferProvider,
+	TextureProvider,
+	CopyResource,
+	HostVisibleBufferCopy,
 	LoadCubeLUT,
 	RepeatingJunction,
 	Count
@@ -102,6 +112,13 @@ nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 nosResult RegisterReduceTexture(nosNodeFunctions*);
 nosResult RegisterMultiLiveOut(nosNodeFunctions*);
+nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions*);
+nosResult RegisterWaitGPUEvent(nosNodeFunctions*);
+nosResult RegisterScheduleRequest(nosNodeFunctions*);
+nosResult RegisterBufferProvider(nosNodeFunctions*);
+nosResult RegisterTextureProvider(nosNodeFunctions*);
+nosResult RegisterCopyResource(nosNodeFunctions*);
+nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
 nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
 nosResult RegisterRepeatingJunction(nosNodeFunctions*);
 
@@ -159,6 +176,13 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(GridOutputLayout)
 			GEN_CASE_NODE(ReduceTexture)
 			GEN_CASE_NODE(MultiLiveOut)
+			GEN_CASE_NODE(AsyncDownloadBuffer)
+			GEN_CASE_NODE(WaitGPUEvent)
+			GEN_CASE_NODE(ScheduleRequest)
+			GEN_CASE_NODE(BufferProvider)
+			GEN_CASE_NODE(TextureProvider)
+			GEN_CASE_NODE(CopyResource)
+			GEN_CASE_NODE(HostVisibleBufferCopy)
 			GEN_CASE_NODE(LoadCubeLUT)
 			GEN_CASE_NODE(RepeatingJunction)
 		}

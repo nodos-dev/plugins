@@ -9,7 +9,7 @@ struct PropagateExecutionNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Propagate"));
 		nosScheduleNodeParams schedule{

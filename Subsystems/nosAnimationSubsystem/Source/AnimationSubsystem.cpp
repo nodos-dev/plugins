@@ -49,7 +49,7 @@ struct AnimationSubsystemCtx
 			return NOS_RESULT_SUCCESS;
 		};
 		AnimationSubsystem.Interpolate =
-			[](nosName typeName, const nosBuffer from, const nosBuffer to, const double t, nosBuffer* outBuf) {
+			[](nosName typeName, const nosImmutableBuffer from, const nosImmutableBuffer to, const double t, nosBuffer* outBuf) {
 				std::optional<EngineBuffer> buf;
 				auto res = GAnimation->InterpolatorManager.Interpolate(typeName, from, to, t, buf);
 				if (res == NOS_RESULT_SUCCESS)
@@ -105,7 +105,8 @@ nosResult OnPreExecuteNode(nosNodeExecuteParams* params)
 	if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
 		deltaSec = params->TimingInfo.FixedStepTiming.DeltaSeconds;
 	for (size_t i = 0; i < params->PinCount; ++i)
-		GAnimation->Animator.UpdatePin(params->Pins[i]->Id, deltaSec, curFrame, params->Pins[i]->Data);
+		if (auto objectBuffer = GetObjectDataView(*params->Pins[i]->Object))
+			GAnimation->Animator.UpdatePin(params->Pins[i]->Id, deltaSec, curFrame, *objectBuffer);
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -184,7 +185,7 @@ void SendAnimationTypesToEditor(std::optional<uint64_t> targetEditorId = std::nu
 	flatbuffers::FlatBufferBuilder fbb;
 	fbb.Finish(editor::MakeFromAnimationOffset(fbb, editor::CreateAnimatableTypes(fbb, &types)));
 	nos::Buffer buf = fbb.Release();
-	nosSendEditorMessageParams params{.Message = buf};
+	nosSendEditorMessageParams params{ .TypeName = NOS_NAME("nos.sys.animation.editor.FromAnimation"), .Message = buf };
 	if (!targetEditorId.has_value())
 	{
 		params.DispatchType = nosEditorMessageSendType::NOS_EDITOR_MESSAGE_DISPATCH_TYPE_BROADCAST;

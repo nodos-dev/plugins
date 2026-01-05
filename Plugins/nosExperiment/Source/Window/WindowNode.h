@@ -22,7 +22,7 @@ public:
 	void DestroyWindowSurface();
 	void DestroyWindow();
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override;
+	nosResult ExecuteNode(NodeExecuteParams const& params) override;
 
 	void OnPathStop() override;
 	void OnPathStart() override;
@@ -31,15 +31,13 @@ public:
 	void OnExitRunnerThread(nosExitRunnerThreadParams const& params) override;
 
 private:
-	void WindowThread();
-
 	GLFWwindow* Window = nullptr;
-	std::vector<nosSemaphore> WaitSemaphore{};
-	std::vector<nosSemaphore> SignalSemaphore{};
-	std::vector<nosResourceShareInfo> Images{};
+	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> WaitSemaphore{};
+	std::vector<TypedObjectRef<nos::sys::vulkan::Semaphore>> SignalSemaphore{};
+	std::vector<TypedObjectRef<sys::vulkan::Texture>> Images{};
 	uint32_t FrameCount = 0;
 	uint32_t CurrentFrame = 0;
-	nosSurfaceHandle Surface{};
-	nosSwapchainHandle Swapchain{};
+	TypedObjectRef<nos::sys::vulkan::Surface> Surface{};
+	TypedObjectRef<nos::sys::vulkan::Swapchain> Swapchain{};
 };
 }

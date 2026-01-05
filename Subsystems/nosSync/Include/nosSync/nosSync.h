@@ -7,6 +7,8 @@
 
 #include <Nodos/Types.h>
 
+#include <Nodos/PluginAPI.h>
+
 #if __cplusplus
 extern "C"
 {
@@ -58,6 +60,11 @@ typedef struct nosSyncSubsystem
 	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount);
 
 	nosResult (NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
+
+	nosResult (NOSAPI_CALL* CreatePromise)(const char* tag, nosObjectReference* outPromise);
+	nosResult (NOSAPI_CALL* WaitPromise)(nosObjectId promise, uint64_t timeoutNs);
+	nosResult (NOSAPI_CALL* FulfillPromise)(nosObjectId promise);
+	nosResult (NOSAPI_CALL* ResetPromise)(nosObjectId promise);
 	/// 
 	/// ---------------------
 } nosSyncSubsystem;
@@ -66,8 +73,8 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 10
-#define NOS_SYNC_VERSION_MINOR 2
+#define NOS_SYNC_VERSION_MAJOR 11
+#define NOS_SYNC_VERSION_MINOR 1
 
 extern struct nosPluginInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;

@@ -53,7 +53,7 @@ struct SyncMultiOutletNode : NodeContext
 		std::mutex Mutex;
 		std::condition_variable InputArrivedCV;
 		std::condition_variable AllOutputsCompletedCV;
-		const nosBuffer* Data = nullptr;
+		ObjectRef Obj;
 		uint64_t FrameNumber = 0;
 		bool Requested = false;
 	} InputPin{};
@@ -103,7 +103,7 @@ struct SyncMultiOutletNode : NodeContext
 		nosEngine.ScheduleNode(&params);
 	}
 
-	nosResult CopyFrom(nosCopyInfo* cpy) override
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		std::shared_lock outPinsLock(OutPinsMutex);
 		auto& outPin = OutPins[cpy->ID];
@@ -111,45 +111,44 @@ struct SyncMultiOutletNode : NodeContext
 		uint64_t lastOutFrameNum = outPin.ProcessedFrameNumber;
 		if (auto res = WaitInput(lastOutFrameNum + 1))
 			return res == EXIT ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
-		nosEngine.SetPinValue(cpy->ID, *InputPin.Data);
-		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		SetPinObject(cpy->ID, InputPin.Obj);
+		cpy->ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = InputPin.FrameNumber;
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		/*
-			Lets output paths run, then waits for their frame to end.
-			This is to work correctly with nodos scheduler, and it is not a hack if we consider that this node simulates
-			running/signalling multiple output paths. Imagine like this: Currently, because of scheduler notation
-			limitations, a graph that uses B and C to sync looks like this: A -> Sync Multi Outlet -> [B, C]
+		Lets output paths run, then waits for their frame to end.
+		This is to work correctly with nodos scheduler, and it is not a hack if we consider that this node simulates
+		running/signalling multiple output paths. Imagine like this: Currently, because of scheduler notation
+		limitations, a graph that uses B and C to sync looks like this: A -> Sync Multi Outlet -> [B, C]
 
-			But, we actually want this:
-			A -> [B, C] -> End A Frame
-			Then, it should be the same as running B and C in this node's execute:
-			A -> Sync Multi Outlet Execute{RunAndWait(B); RunAndWait(C);} -> End A Frame
+		But, we actually want this:
+		A -> [B, C] -> End A Frame
+		Then, it should be the same as running B and C in this node's execute:
+		A -> Sync Multi Outlet Execute{RunAndWait(B); RunAndWait(C);} -> End A Frame
 
-			By writing ExecuteNode like it is now, we achieve the same result as above:
-			SyncMultiOutlet Execute { Signal(B), Signal(C), Wait(B), Wait(C); } -> End A Frame
+		By writing ExecuteNode like it is now, we achieve the same result as above:
+		SyncMultiOutlet Execute { Signal(B), Signal(C), Wait(B), Wait(C); } -> End A Frame
 		*/
-		nos::NodeExecuteParams args(params);
 		assert(InputPin.Requested);
-		InputPin.Data = args[NOS_NAME("Input")].Data;
 		std::unique_lock lock(InputPin.Mutex);
+		InputPin.Obj = params.GetPinObject(NOS_NAME("Input"));
 		++InputPin.FrameNumber;
 		InputPin.Requested = false;
 		InputPin.InputArrivedCV.notify_all();
 		// This is to ensure if there are vulkan commands, they are submitted before the output paths, 
 		// since their command buffers are separate and wont run this thread's commands.
 		nosCmdEndParams endParams = {.ForceSubmit = NOS_TRUE};
-		nosVulkan->End(nos::vkss::BeginCmd(NOS_NAME("SyncMultiOutlet Submit"), NodeId), &endParams);
-
+		nosVulkan->End(nos::sys::vulkan::BeginCmd(NOS_NAME("SyncMultiOutlet Submit"), NodeId), &endParams);
 		if (!InputPin.AllOutputsCompletedCV.wait_for(
-				lock, std::chrono::milliseconds(100), [&] { return InputPin.Requested || Exit; }))
+			lock, std::chrono::milliseconds(100), [&] { return InputPin.Requested || Exit; }))
 			return NOS_RESULT_PENDING;
 		if (Exit)
 			return NOS_RESULT_FAILED;
+		return NOS_RESULT_SUCCESS;
 		return NOS_RESULT_SUCCESS;
 	}
 

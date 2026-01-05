@@ -14,54 +14,91 @@ NOS_REGISTER_NAME(Method);
 NOS_REGISTER_NAME(Size);
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_Resize, "nos.utilities.Resize")
 
-static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* params)
+struct ResizeNode : nos::NodeContext
 {
-	nos::NodeExecuteParams nodeParams(params);
-	auto inputTex = vkss::DeserializeTextureInfo(nodeParams[NSN_Input].Data->Data);
-	auto method = *reinterpret_cast<uint32_t*>(nodeParams[NSN_Method].Data->Data);
+	using nos::NodeContext::NodeContext;
 
-	auto tex = vkss::DeserializeTextureInfo(nodeParams[NSN_Output].Data->Data);
-	auto& size = *reinterpret_cast<nosVec2u*>(nodeParams[NSN_Size].Data->Data);
-		
-	if(size.x != tex.Info.Texture.Width ||
-		size.y != tex.Info.Texture.Height)
+	static nosResult MigrateNode(nosFbNodePtr node, nosBuffer* outBuffer)
 	{
-		auto prevTex = tex;
-		prevTex.Memory = {};
-		prevTex.Info.Texture.Width = size.x;
-		prevTex.Info.Texture.Height = size.y;
-		auto texFb = vkss::ConvertTextureInfo(prevTex);
-		texFb.unscaled = true;
-		auto texFbBuf = nos::Buffer::From(texFb);
-		nosEngine.SetPinValue(params->Pins[1]->Id, {.Data = texFbBuf.Data(), .Size = texFbBuf.Size()});
+		fb::TNode fbNode;
+		node->UnPackTo(&fbNode);
+		for (auto& pin : fbNode.pins)
+		{
+			if (pin->name != "Output")
+				continue;
+			bool hasExtensionForUnscaledOutput = false;
+			for (auto& ext : pin->extensions)
+			{
+				if (ext->type_name == "nos.sys.vulkan.TexturePinOptions")
+				{
+					hasExtensionForUnscaledOutput = true;
+					break;
+				}
+			}
+			if (!hasExtensionForUnscaledOutput)
+			{
+				nos::sys::vulkan::TTexturePinOptions texPinOptions;
+				texPinOptions.unscaled = true;
+				auto buffer = nos::Buffer::From(texPinOptions);
+				auto ext = std::make_unique<fb::TPinExtension>();
+				ext->type_name = "nos.sys.vulkan.TexturePinOptions";
+				ext->data = buffer;
+				ext->name = "texture_options";
+				pin->extensions.emplace_back(std::move(ext));
+			}
+		}
+		auto fbNodeBuffer = nos::EngineBuffer::CopyFrom(nos::Buffer::From(fbNode));
+		*outBuffer = fbNodeBuffer.Release();
+		return NOS_RESULT_SUCCESS;
 	}
-    
-	std::vector bindings = {vkss::ShaderBinding(NSN_Input, inputTex), vkss::ShaderBinding(NSN_Method, method)};
-	
-	tex = vkss::DeserializeTextureInfo(nodeParams[NSN_Output].Data->Data);
-	
-	nosRunPassParams resizeParam {
-		.Key = NSN_RESIZE_PASS,
-		.Bindings = bindings.data(),
-		.BindingCount = 2,
-		.Output = tex,
-		.Wireframe = 0,
-		.Benchmark = 0,
-	};
 
-	nosCmd cmd;
-	nosCmdBeginParams beginParams {.Name = NOS_NAME("Resize"), .AssociatedNodeId = params->NodeId, .OutCmdHandle = &cmd};
-	nosVulkan->Begin(&beginParams);
-	nosVulkan->RunPass(cmd, &resizeParam);
-	nosVulkan->End(cmd, nullptr);
+	nosResult ExecuteNode(nos::NodeExecuteParams const& nodeParams) override
+	{
+		auto inTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Input);
+		auto method = *nodeParams.GetPinData<uint32_t>(NSN_Method);
 
-	return NOS_RESULT_SUCCESS;
-}
+		auto outTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Output);
+		auto& size = *nodeParams.GetPinData<nosVec2u>(NSN_Size);
+
+		auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);
+
+		if (!outTexInfo || size.x != outTexInfo->Width || size.y != outTexInfo->Height)
+		{
+			auto newTexInfo = outTexInfo.value_or(nosTextureInfo{});
+			newTexInfo.Width = size.x;
+			newTexInfo.Height = size.y;
+			// TODO: Transfer output unscaled
+			outTex = sys::vulkan::CreateTexture(newTexInfo, "Resize Output");
+			SetPinObject(NOS_NAME("Output"), outTex);
+		}
+
+		// TODO: Transfer filter
+		std::vector bindings = {sys::vulkan::ShaderTextureBindingFromPin(nodeParams[NSN_Input].Id, NSN_Input, inTex),
+								sys::vulkan::ShaderDataBinding(NSN_Method, method)};
+
+		nosRunPassParams resizeParam{
+			.Key = NSN_RESIZE_PASS,
+			.Bindings = bindings.data(),
+			.BindingCount = 2,
+			.Output = outTex,
+			.Wireframe = 0,
+			.Benchmark = 0,
+		};
+
+		nosCmd cmd;
+		nosCmdBeginParams beginParams{
+			.Name = NOS_NAME("Resize"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
+		nosVulkan->Begin(&beginParams);
+		nosVulkan->RunPass(cmd, &resizeParam);
+		nosVulkan->End(cmd, nullptr);
+
+		return NOS_RESULT_SUCCESS;
+	}
+};
 
 nosResult RegisterResize(nosNodeFunctions* out)
 {
-	out->ClassName = NSN_Nos_Utilities_Resize;
-	out->ExecuteNode = ExecuteNode;
+	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_Resize, ResizeNode, out);
 	return NOS_RESULT_SUCCESS;
 }
 

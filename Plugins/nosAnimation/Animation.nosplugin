@@ -1,23 +1,23 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.animation",
-			"version": "0.13.0"
-		},
-		"display_name": "nos.animation",
-		"description": "Animation nodes for Nodos.",
-		"category": "Animation",
-		"dependencies": [
-			{
-				"name": "nos.sys.animation",
-				"version": "2.1"
-			}
-		]
-	},
-	"binary_path": "./Binaries/nosAnimation",
-	"named_values": [
-		"Types/AnimationExpressionPresets.json"
-	],
-	"sdk_version": "40.0",
-	"schema_version": "1.4-v1"
+  "info": {
+    "id": {
+      "name": "nos.animation",
+      "version": "1.0.0"
+    },
+    "display_name": "nos.animation",
+    "description": "Animation nodes for Nodos.",
+    "category": "Animation",
+    "dependencies": [
+      {
+        "name": "nos.sys.animation",
+        "version": "3.0"
+      }
+    ]
+  },
+  "binary_path": "./Binaries/nosAnimation",
+  "named_values": [
+    "Types/AnimationExpressionPresets.json"
+  ],
+    "sdk_version": "41.0",
+    "schema_version": "1.4-v1"
 }

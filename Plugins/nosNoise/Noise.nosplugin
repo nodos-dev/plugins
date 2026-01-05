@@ -1,23 +1,21 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.noise",
-			"version": "0.14.0"
-		},
-		"display_name": "nos.noise",
-		"description": "Noise utilities for Nodos.",
-		"dependencies": [
-			{
-				"name": "nos.sys.vulkan",
-				"version": "7.1"
-			}
-		],
-		"category": "Procedural Generation"
-	},
-	"binary_path": "./Binaries/nosNoise",
-	"third_party_software": [
-		"./Config/Licenses.json"
-	],
-	"sdk_version": "40.0",
+    "info": {
+        "id": {
+            "name": "nos.noise",
+            "version": "1.0.0"
+        },
+        "display_name": "nos.noise",
+        "description": "Noise utilities for Nodos.",
+        "dependencies": [
+            {
+                "name": "nos.sys.vulkan",
+                "version": "8.0"
+            }
+        ],
+        "category": "Procedural Generation"
+    },
+    "binary_path": "./Binaries/nosNoise",
+    "third_party_software": ["./Config/Licenses.json"],
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

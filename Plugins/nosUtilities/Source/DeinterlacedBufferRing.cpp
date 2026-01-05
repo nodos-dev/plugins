@@ -35,7 +35,7 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 	{
 		if (pinName == NOS_NAME("ShouldDeinterlace"))
 		{
-			auto& shouldDeinterlace = *InterpretPinValue<bool>(value);
+			auto& shouldDeinterlace = *InterpretObjectData<bool>(value);
 			if (ShouldDeinterlace != shouldDeinterlace)
 			{
 				ShouldDeinterlace = shouldDeinterlace;
@@ -44,7 +44,7 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 		}
 	}
 
-	nosResult CopyFrom(nosCopyInfo* cpy) override {
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override {
 		NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
 		ResourceInterface::ResourceBase* slot = nullptr;
 		auto beginResult = CommonCopyFrom(cpy, &slot);
@@ -53,7 +53,7 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 
 		Ring->ResInterface->WaitForDownloadToEnd(slot, "DeinterlacedBufferRing", NodeName.AsString(), cpy);
 
-		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		cpy->ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = slot->FrameNumber;
 
 		LastPopped = slot;
@@ -61,7 +61,7 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
+	nosResult ExecuteNode(NodeExecuteParams const& params) override {
 		nosResult res = NOS_RESULT_SUCCESS;
 		auto pins = NodeExecuteParams(params);
 		auto fieldType = *pins.GetPinData<nosTextureFieldType>(NOS_NAME("FieldType"));

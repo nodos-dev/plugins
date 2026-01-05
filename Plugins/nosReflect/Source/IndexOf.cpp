@@ -114,20 +114,21 @@ struct IndexOfNode : NodeContext
 
 	int FoundIndex = -2;
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
 		auto& type = *Type;
 
-		auto pins = NodeExecuteParams(params);
 		auto indexPinId = *GetPinId(NSN_Index);
 
-		auto vec = InterpretPinValue<VectorPinData<uint8_t>>(*pins[NSN_InputArray].Data);
-		void* value = pins[NSN_Value].Data->Data;
+		auto* vec = params.GetPinData<VectorObjectData<uint8_t>>(NSN_InputArray);
+		const void* value{};
 		if (!type->ByteSize && type->BaseType != NOS_BASE_TYPE_STRING)
-			value = (void*)InterpretPinValue<flatbuffers::Table>(value);
+			value = (void*)params.GetPinData<flatbuffers::Table>(NSN_Value);
+		else
+			value = params.GetPinData<void>(NSN_Value);
 		int index =	-1;
 		if (type->ByteSize)
 		{
@@ -142,7 +143,7 @@ struct IndexOfNode : NodeContext
 		}
 		else
 		{
-			auto vecOfTables = reinterpret_cast<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*>(vec);
+			auto vecOfTables = reinterpret_cast<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Table>>*>(vec);
 			for (size_t i = 0; i < vecOfTables->size(); ++i)
 			{
 				auto elem = (void*)vecOfTables->Get(i);
@@ -168,7 +169,7 @@ struct IndexOfNode : NodeContext
 			}
 			FoundIndex = index;
 		}	
-		nosEngine.SetPinValue(indexPinId, nos::Buffer::From(FoundIndex));
+		SetPinValue(indexPinId, FoundIndex);
 		return NOS_RESULT_SUCCESS;
 	}
 };

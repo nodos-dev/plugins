@@ -1,20 +1,20 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.sys.animation",
-			"version": "2.1.1"
-		},
-		"display_name": "Animation Subsystem",
-		"description": "",
-		"dependencies": [
-			{
-				"name": "nos.sys.settings",
-				"version": "2.1"
-			}
-		],
-		"category": "Animation"
-	},
-	"binary_path": "./Binaries/nosSysAnimation",
-	"sdk_version": "40.0",
+    "info": {
+        "id": {
+            "name": "nos.sys.animation",
+            "version": "3.0.0"
+        },
+        "display_name": "Animation Subsystem",
+        "description": "",
+        "dependencies": [
+            {
+                "name": "nos.sys.settings",
+                "version": "3.0"
+            }
+        ],
+        "category": "Animation"
+    },
+    "binary_path": "./Binaries/nosSysAnimation",
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

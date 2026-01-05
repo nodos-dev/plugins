@@ -24,9 +24,8 @@ struct ResourceInterface {
 	enum class ResourceType : uint32_t {
 		GPUBuffer = 1,
 		GPUTexture,
-		CPUGeneric
+		POD
 	};
-	nos::Buffer Sample;
 	ResourceType Type;
 
 	struct ResourceBase {
@@ -44,24 +43,19 @@ struct ResourceInterface {
 		return nullptr;
 	}
 
-	template<typename T>
-	static T::PinData* GetPinData(nosPinInfo& pin) {
-		return static_cast<T::PinData*>(pin.Data);
-	}
-
 	ResourceInterface(ResourceType type) : Type(type) {}
 	virtual rc<ResourceBase> CreateResource() = 0;
 	virtual void Reset(ResourceBase* res) = 0;
-	virtual void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) = 0;
-	virtual void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) = 0;
-	virtual nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) = 0;
-	virtual nosResult SkipExecute(nosNodeExecuteParams* params) { return NOS_RESULT_SUCCESS; }
-	virtual void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) = 0;
+	virtual void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyFromInfo* cpy) = 0;
+	virtual void Copy(ResourceBase* res, nosCopyFromInfo* cpy, uuid NodeId) = 0;
+	virtual nosResult Push(ResourceBase* r, ObjectRef inObj, NodeExecuteParams const& params, nos::Name ringExecuteName, bool pushEventForCopyFrom) = 0;
+	virtual nosResult SkipExecute(NodeExecuteParams const& params) { return NOS_RESULT_SUCCESS; }
+	virtual ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) = 0;
 	// Returns false if resource is compatible with the current sample
-	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
-	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
-	virtual void OnRepeatPinValue(nosCopyInfo* cpy) {}
-	virtual uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const { return ringSize; }
+	virtual bool CheckNewResource(nos::Name updateName, nosObjectId inObj) = 0;
+	virtual bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) = 0;
+	virtual void OnRepeatPinValue(nosCopyFromInfo* cpy) {}
+	virtual uint32_t GetRequiredRingSize(nosObjectId inputPinData, uint32_t ringSize) const { return ringSize; }
 	virtual void OnPathStart() {}
 };
 
@@ -70,22 +64,22 @@ struct GPUTextureResource : ResourceInterface
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::GPUTexture;
 	struct Resource : ResourceBase
 	{
-		vkss::Resource VkRes;
+		TypedObjectRef<sys::vulkan::Texture> TexObj;
 		struct
 		{
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosGPUEvent WaitEvent = 0;
 		} Params{};
-		Resource(vkss::Resource res) : VkRes(std::move(res)) { ResourceType = RESOURCE_TYPE; }
+		Resource(TypedObjectRef<sys::vulkan::Texture> texObj) : TexObj(std::move(texObj)) { ResourceType = RESOURCE_TYPE; }
 		~Resource()
 		{
 			if (Params.WaitEvent)
 				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
 		}
 	};
-	typedef nosResourceShareInfo PinData;
+
 	nosTextureFieldType WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-	static constexpr nosTextureInfo SampleTexture = nosTextureInfo{
+	nosTextureInfo SampleTexture = nosTextureInfo{
 		.Width = 1920,
 		.Height = 1080,
 		.Format = NOS_FORMAT_R16G16B16A16_SFLOAT,
@@ -94,17 +88,13 @@ struct GPUTextureResource : ResourceInterface
 
 	GPUTextureResource() : ResourceInterface(ResourceType::GPUTexture)
 	{
-		nosResourceShareInfo shareInfo;
-		shareInfo.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
-		shareInfo.Info.Texture = SampleTexture;
-		Sample = nos::Buffer::From(vkss::ConvertTextureInfo(shareInfo));
 	}
 	rc<ResourceBase> CreateResource() override
 	{
-		if (auto texture = vkss::Resource::CreateWithSameInfo(vkss::DeserializeTextureInfo(Sample.Data()),
-															  "Texture Ring Resource"))
-			return MakeShared<Resource>(std::move(*texture));
-		return nullptr;
+		auto texture = sys::vulkan::CreateTexture(SampleTexture, "Texture Ring Resource");
+		if (!texture.IsValid())
+			return nullptr;
+		return MakeShared<Resource>(std::move(texture));
 	}
 	void Reset(ResourceBase* r) override
 	{
@@ -120,7 +110,7 @@ struct GPUTextureResource : ResourceInterface
 	void WaitForDownloadToEnd(ResourceBase* r,
 							  const std::string& nodeTypeName,
 							  const std::string& nodeDisplayName,
-							  nosCopyInfo* cpy) override
+							  nosCopyFromInfo* cpy) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
 		if (res->Params.WaitEvent)
@@ -133,66 +123,64 @@ struct GPUTextureResource : ResourceInterface
 							   nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 
-		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(vkss::ConvertTextureInfo(res->VkRes)));
+		SetPinObject(cpy->ID, res->TexObj);
 	}
 
-	void Copy(ResourceBase* r, nosCopyInfo* cpy, uuid NodeId) override
+	void Copy(ResourceBase* r, nosCopyFromInfo* cpy, uuid NodeId) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		nosResourceShareInfo outputResource = vkss::DeserializeTextureInfo(cpy->PinData->Data);
+		auto outputTex = *cpy->PinObjectHandle;
 		nosCmd cmd;
 		nosCmdBeginParams beginParams = {NOS_NAME("BoundedQueue"), NodeId, &cmd};
 		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &res->VkRes, &outputResource, 0);
+		nosVulkan->Copy(cmd, res->TexObj, outputTex, 0);
 		nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &res->Params.WaitEvent};
 		nosVulkan->End(cmd, &end);
-
-		nosTextureFieldType outFieldType = res->VkRes.Info.Texture.FieldType;
-		auto output = vkss::DeserializeTextureInfo(cpy->PinData->Data);
-		output.Info.Texture.FieldType = outFieldType;
-		sys::vulkan::TTexture texDef = vkss::ConvertTextureInfo(output);
-		texDef.unscaled = true;
-		nosEngine.SetPinValue(cpy->ID, Buffer::From(texDef));
+		nosVulkan->SetResourceFieldType(outputTex, res->Params.FieldType);
+		// TODO: Make output unscaled
 	}
 
-	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override
+	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override
 	{
-		nosResourceShareInfo input = vkss::DeserializeTextureInfo(pin.Data->Data);
-		nosTextureFieldType incomingField = input.Info.Texture.FieldType;
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(*pin.Object);
 
-		if (!input.Memory.Handle)
-			return nullptr;
+		if (!inTex.IsValid())
+			return {};
+		auto resInfo = *sys::vulkan::GetResourceInfo(inTex);
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(inTex);
 
 		if (rejectFieldMismatch)
 		{
 			if (WantedField == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
 				WantedField = incomingField;
 
-			auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(WantedField);
-			auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
+			auto outInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(WantedField);
+			auto inInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(incomingField);
 			if ((inInterlaced && outInterlaced) && incomingField != WantedField)
 			{
 				nosEngine.LogW("Field mismatch. Waiting for a new frame.");
-				return nullptr;
+				return {};
 			}
-			WantedField = vkss::FlippedField(WantedField);
+			WantedField = sys::vulkan::FlippedField(WantedField);
 		}
 
-		return pin.Data->Data;
+		return inTex;
 	}
 
 	nosResult Push(ResourceBase* r,
-				   void* pinInfo,
-				   nosNodeExecuteParams* params,
+				   ObjectRef inputObj,
+				   NodeExecuteParams const& params,
 				   nos::Name ringExecuteName,
 				   bool pushEventForCopyFrom) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		res->FrameNumber = params->FrameNumber;
+		res->FrameNumber = params.FrameNumber;
 
-		nosResourceShareInfo input = vkss::DeserializeTextureInfo(pinInfo);
-		nosTextureFieldType incomingField = input.Info.Texture.FieldType;
-		res->VkRes.Info.Texture.FieldType = incomingField;
+		auto inTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(inputObj);
+		assert(inTex.IsValid());
+		auto inputInfo = *sys::vulkan::GetResourceInfo(inTex);
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(inTex);
+		res->Params.FieldType = incomingField;
 
 		if (res->Params.WaitEvent)
 		{
@@ -200,92 +188,88 @@ struct GPUTextureResource : ResourceInterface
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 			auto elapsed = sw.Elapsed();
 			nosEngine.WatchLog(
-				(ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
+				(ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params.NodeName).AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 		nosCmd cmd;
 		nosCmdBeginParams beginParams;
-		beginParams = {ringExecuteName, params->NodeId, &cmd};
+		beginParams = {ringExecuteName, params.NodeId, &cmd};
 
 		nosVulkan->Begin(&beginParams);
-		nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
+		nosVulkan->Copy(cmd, inTex, res->TexObj, 0);
 		nosCmdEndParams end{.ForceSubmit = NOS_TRUE,
 							.OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr};
 		nosVulkan->End(cmd, &end);
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) override
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObject) override
 	{
-		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
 		if (updateName != NSN_Input)
 			return false;
-		auto info = vkss::DeserializeTextureInfo(newVal.Data);
-		if (textureInfo.format == (nos::sys::vulkan::Format)info.Info.Texture.Format &&
-			textureInfo.height == info.Info.Texture.Height && textureInfo.width == info.Info.Texture.Width)
+		auto newTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(newObject);
+		if (!newTex.IsValid())
 			return false;
-		textureInfo.format = (nos::sys::vulkan::Format)info.Info.Texture.Format;
-		textureInfo.width = info.Info.Texture.Width;
-		textureInfo.height = info.Info.Texture.Height;
-		Sample = Buffer::From(textureInfo);
+		auto info = *sys::vulkan::GetResourceInfo(newTex);
+		if (SampleTexture.Format == info.Format &&
+			SampleTexture.Height == info.Height && SampleTexture.Width == info.Width)
+			return false;
+		SampleTexture.Format = info.Format;
+		SampleTexture.Width = info.Width;
+		SampleTexture.Height = info.Height;
 		return true;
 	}
 
-	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
 	{
 		Resource* res = GetResource<GPUTextureResource>(r);
-		auto outputTextureDesc = static_cast<sys::vulkan::Texture*>(pinData.Data);
-		auto output = vkss::DeserializeTextureInfo(outputTextureDesc);
-		outPinVal = Buffer::From(vkss::ConvertTextureInfo(output));
-		if (res->VkRes.Info.Texture.Height != output.Info.Texture.Height ||
-			res->VkRes.Info.Texture.Width != output.Info.Texture.Width ||
-			res->VkRes.Info.Texture.Format != output.Info.Texture.Format)
+		auto curTex = TypedObjectRef<sys::vulkan::Texture>::FromObjectId(curPinObj);
+		auto currentInfo = *sys::vulkan::GetResourceInfo(curTex);
+		auto resInfo = *sys::vulkan::GetResourceInfo(res->TexObj);
+		if (resInfo.Height != currentInfo.Height ||
+			resInfo.Width != currentInfo.Width ||
+			resInfo.Format != currentInfo.Format)
 		{
-			output.Memory = {};
-			output.Info = res->VkRes.Info;
-			output.Info.Texture.Usage =
+			currentInfo = resInfo;
+			currentInfo.Usage =
 				nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST | NOS_IMAGE_USAGE_SAMPLED);
 
-			sys::vulkan::TTexture texDef = vkss::ConvertTextureInfo(output);
-			texDef.unscaled = true;
-			outPinVal = Buffer::From(texDef);
+			outPinObj = sys::vulkan::CreateTexture(currentInfo, "Texture Ring Output");
 			return true;
 		}
 		return false;
 	}
 
-	void OnRepeatPinValue(nosCopyInfo* cpy) override
+	void OnRepeatPinValue(nosCopyFromInfo* cpy) override
 	{
-		auto textureInfo = vkss::ConvertTextureInfo(vkss::DeserializeTextureInfo(Sample.Data()));
-		textureInfo.field_type = sys::vulkan::FieldType::PROGRESSIVE;
-		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(textureInfo));
+		if (*cpy->PinObjectHandle == 0)
+			return;
+		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
-		if (!inputPinData)
+		if (inputPinObj == 0)
 			return ringSize;
-		auto input = vkss::DeserializeTextureInfo(inputPinData);
-		if (vkss::IsTextureFieldTypeInterlaced(input.Info.Texture.FieldType))
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
 			ringSize =
 				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
 	}
 
-	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
+	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
 	{
 		// Force submit to ensure passes run correctly
-		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams->NodeId), true, nullptr);
+		sys::vulkan::EndCmd(sys::vulkan::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}
 };
 
 struct GPUBufferResource : ResourceInterface {
 	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::GPUBuffer;
-	typedef nosResourceShareInfo PinData;
 	struct Resource : ResourceBase
 	{
-		Resource(vkss::Resource bufferRes) : VkRes(std::move(bufferRes))
+		Resource(TypedObjectRef<sys::vulkan::Buffer> bufObj) : BufObj(std::move(bufObj))
 		{
 			ResourceType = RESOURCE_TYPE;
 		}
@@ -294,35 +278,26 @@ struct GPUBufferResource : ResourceInterface {
 			if (Params.WaitEvent)
 				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
 		}
-		vkss::Resource VkRes;
+		TypedObjectRef<sys::vulkan::Buffer> BufObj;
 		struct {
 			nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 			nosGPUEvent WaitEvent = 0;
 		} Params{};
 	};
 	nosTextureFieldType WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-	static constexpr nosBufferInfo SampleBuffer =
+	nosBufferInfo SampleBuffer =
 		nosBufferInfo{ .Size = 1,
 					  .Alignment = 0,
 					  .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST | NOS_BUFFER_USAGE_STORAGE_BUFFER),
 					  .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE) };
 
 	GPUBufferResource() : ResourceInterface(RESOURCE_TYPE) {
-		nosResourceShareInfo shareInfo = {};
-		shareInfo.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-		shareInfo.Info.Buffer = SampleBuffer;
-		Sample = nos::Buffer::From(vkss::ConvertBufferInfo(shareInfo));
-	}
-	~GPUBufferResource()
-	{
 	}
 	rc<ResourceBase> CreateResource() override {
-		nosResourceShareInfo bufInfo = vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)Sample.Data());
-		bufInfo.Memory = {};
-		bufInfo.Info.Buffer.Usage = nosBufferUsage(bufInfo.Info.Buffer.Usage | NOS_BUFFER_USAGE_STORAGE_BUFFER);
-		if (auto buffer = vkss::Resource::Create(bufInfo, "Buffer Ring Resource"))
-			return MakeShared<Resource>(std::move(*buffer));
-		return nullptr;
+		auto buf = sys::vulkan::CreateBuffer(SampleBuffer, "Buffer Ring Sample");
+		if (!buf.IsValid())
+			return nullptr;
+		return MakeShared<Resource>(std::move(buf));
 	}
 	void Reset(ResourceBase* res) override
 	{
@@ -338,7 +313,7 @@ struct GPUBufferResource : ResourceInterface {
 		WantedField = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 	}
 
-	void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) override {
+	void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyFromInfo* cpy) override {
 		auto r = GetResource<GPUBufferResource>(res);
 		if (r->Params.WaitEvent) {
 			nos::util::Stopwatch sw;
@@ -349,208 +324,221 @@ struct GPUBufferResource : ResourceInterface {
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 
-		nosEngine.SetPinValue(cpy->ID, r->VkRes.ToPinData());
+		SetPinObject(cpy->ID, r->BufObj);
 	}
 
-	void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) override {
+	void Copy(ResourceBase* res, nosCopyFromInfo* cpy, uuid NodeId) override {
 		auto r = GetResource<GPUBufferResource>(res);
-		nosResourceShareInfo outputResource = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(cpy->PinData->Data));
+		auto outBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(*cpy->PinObjectHandle);
+		if (!outBuf.IsValid())
+			return;
+		auto outBufInfo = *sys::vulkan::GetResourceInfo(outBuf);
 		{
-			nosCmd cmd;
+			nosCmd cmd{};
 			nosCmdBeginParams beginParams = { NOS_NAME("BoundedQueue"), NodeId, &cmd };
 			nosVulkan->Begin(&beginParams);
-			nosVulkan->Copy(cmd, &r->VkRes, &outputResource, 0);
+			nosVulkan->Copy(cmd, r->BufObj, outBuf, 0);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &r->Params.WaitEvent };
 			nosVulkan->End(cmd, &end);
 		}
 
-		nosTextureFieldType outFieldType = r->VkRes.Info.Buffer.FieldType;
-		auto outputBufferDesc = *static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
-		outputBufferDesc.mutate_field_type((sys::vulkan::FieldType)outFieldType);
-		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(outputBufferDesc));
+		nosTextureFieldType outFieldType = r->Params.FieldType;
+		nosVulkan->SetResourceFieldType(outBuf, outFieldType);
 	}
 
-	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override{
-		nosResourceShareInfo input = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(pin.Data->Data));
+	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override{
+		auto bufObj = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(*pin.Object);
+		if (!bufObj.IsValid())
+			return {};
+		auto bufInfo = *sys::vulkan::GetResourceInfo(bufObj);
 
-		nosTextureFieldType incomingField = input.Info.Buffer.FieldType;
-
-		if (!input.Memory.Handle)
-			return nullptr;
-
+		nosTextureFieldType incomingField = sys::vulkan::GetResourceFieldType(bufObj);
 
 		if (rejectFieldMismatch)
 		{
 			if (WantedField == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
 				WantedField = incomingField;
 
-			auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(WantedField);
-			auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
+			auto outInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(WantedField);
+			auto inInterlaced = sys::vulkan::IsTextureFieldTypeInterlaced(incomingField);
 			if ((inInterlaced && outInterlaced) && incomingField != WantedField)
 			{
 				nosEngine.LogW("Field mismatch. Waiting for a new frame.");
-				return nullptr;
+				return {};
 			}
-			WantedField = vkss::FlippedField(WantedField);
+			WantedField = sys::vulkan::FlippedField(WantedField);
 		}
 
-		return pin.Data->Data;
+		return bufObj;
 	}
 
-	nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) override {
+	nosResult Push(ResourceBase* r,
+				   ObjectRef pinInfo,
+				   NodeExecuteParams const& params,
+				   nos::Name ringExecuteName,
+				   bool pushEventForCopyFrom) override
+	{
 		Resource* res = GetResource<GPUBufferResource>(r);
-		res->FrameNumber = params->FrameNumber;
+		res->FrameNumber = params.FrameNumber;
 
-		nosResourceShareInfo input = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(pinInfo));
-		res->VkRes.Info.Buffer.FieldType = input.Info.Buffer.FieldType;
+		auto inBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(pinInfo);
+		assert(inBuf.IsValid());
+		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		nosVulkan->SetResourceFieldType(res->BufObj, sys::vulkan::GetResourceFieldType(inBuf));
 
 		if (res->Params.WaitEvent)
 		{
 			nos::util::Stopwatch sw;
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog((ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params->NodeName).AsString()).c_str(),
+			nosEngine.WatchLog((ringExecuteName.AsString() + " Execute GPU Wait: " + nos::Name(params.NodeName).AsString()).c_str(),
 				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 		{
 			nosCmd cmd;
 			nosCmdBeginParams beginParams;
-			beginParams = { ringExecuteName, params->NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
+			beginParams = { ringExecuteName, params.NodeId, &cmd, NOS_CMD_QUEUE_TYPE_TRANSFER };
 			nosVulkan->Begin(&beginParams);
-			nosVulkan->Copy(cmd, &input, &res->VkRes, 0);
+			nosVulkan->Copy(cmd, inBuf, res->BufObj, 0);
 			nosCmdEndParams end{ .ForceSubmit = NOS_TRUE, .OutGPUEventHandle = pushEventForCopyFrom ? &res->Params.WaitEvent : nullptr };
 			nosVulkan->End(cmd, &end);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
 
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
-		auto sampleInfo = vkss::ConvertBufferInfo(vkss::ConvertToResourceInfo(*(sys::vulkan::Buffer*)(Sample.Data())));
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObj)
+	{
 		if (updateName == NSN_Input)
 		{
-			auto info = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(newVal.Data)).Info.Buffer;
-			if (sampleInfo.size_in_bytes() == info.Size)
+			auto newBuf = TypedObjectRef<sys::vulkan::Buffer>::FromObjectId(newObj);
+			if (!newBuf.IsValid())
+				return false;
+			auto newBufInfo = *sys::vulkan::GetResourceInfo(newBuf);
+			if (SampleBuffer.Size == newBufInfo.Size)
 				return false;
 
-			sampleInfo.mutate_size_in_bytes(info.Size);
-			sampleInfo.mutate_element_type((sys::vulkan::BufferElementType)info.ElementType);
-			sampleInfo.mutate_field_type((sys::vulkan::FieldType)info.FieldType);
-			sampleInfo.mutate_alignment(info.Alignment);
-			sampleInfo.mutate_usage(
-				(sys::vulkan::BufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST));
-			sampleInfo.mutate_memory_flags(
-				(sys::vulkan::MemoryFlags)(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE));
+			SampleBuffer.Size = newBufInfo.Size;
+			SampleBuffer.ElementType = newBufInfo.ElementType;
+			SampleBuffer.Usage = (nosBufferUsage)(NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_TRANSFER_DST);
+			SampleBuffer.MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DOWNLOAD | NOS_MEMORY_FLAGS_HOST_VISIBLE);
 		}
 		else if (updateName == NSN_Alignment)
 		{
-			nos::Buffer newAlignment = newVal;
-			uint32_t alignment = *newAlignment.As<uint32_t>();
-			if (sampleInfo.alignment() == alignment)
+			uint32_t alignment = *InterpretObject<uint32_t>(newObj);
+			if (SampleBuffer.Alignment == alignment)
 				return false;
-
-			sampleInfo.mutate_alignment(alignment);
+			SampleBuffer.Alignment = alignment;
 		}
 		else
 			return false;
-		Sample = Buffer::From(sampleInfo);
 		return true;
 	}
 
-	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override{
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
+	{
 		Resource* res = GetResource<GPUBufferResource>(r);
-		auto outputBufferDesc = *static_cast<sys::vulkan::Buffer*>(pinData.Data);
-		auto output = vkss::ConvertToResourceInfo(outputBufferDesc);
-		outPinVal = Buffer::From(vkss::ConvertBufferInfo(output));
-		if (res->VkRes.Info.Buffer.Size != output.Info.Buffer.Size)
+		auto curBufInfo = sys::vulkan::GetResourceInfo(curPinObj)->Buffer;
+		auto resBufInfo = *sys::vulkan::GetResourceInfo(res->BufObj);
+		if (resBufInfo.Size != curBufInfo.Size)
 		{
-			output.Memory = {};
-			output.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
-			output.Info.Buffer = res->VkRes.Info.Buffer;
-			outPinVal = Buffer::From(vkss::ConvertBufferInfo(output));
+			outPinObj = sys::vulkan::CreateBuffer(curBufInfo, "Buffer Ring Output");
 			return true;
 		}
 		return false;
 	}
 
-	void OnRepeatPinValue(nosCopyInfo* cpy) override
+	void OnRepeatPinValue(nosCopyFromInfo* cpy) override
 	{
-		auto outputBuffer = static_cast<sys::vulkan::Buffer*>(cpy->PinData->Data);
-		outputBuffer->mutate_field_type(sys::vulkan::FieldType::PROGRESSIVE);
-		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(*outputBuffer));
+		if (*cpy->PinObjectHandle == 0)
+			return;
+		nosVulkan->SetResourceFieldType(*cpy->PinObjectHandle, NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE);
 	}
 
-	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(nosObjectId inputPinObj, uint32_t ringSize) const override
 	{
-		if (!inputPinData)
+		if (!inputPinObj)
 			return ringSize;
-		auto input = static_cast<sys::vulkan::Buffer*>(inputPinData);
-		if (vkss::IsTextureFieldTypeInterlaced((nosTextureFieldType)input->field_type()))
+		auto inBufInfo = sys::vulkan::GetResourceInfo(inputPinObj)->Buffer;
+		if (sys::vulkan::IsTextureFieldTypeInterlaced(sys::vulkan::GetResourceFieldType(inputPinObj)))
 			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
 		return ringSize;
 	}
-	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
+	nosResult SkipExecute(NodeExecuteParams const& executeParams) override
 	{
 		// Force submit to ensure passes run correctly
-		vkss::EndCmd(vkss::BeginCmd(NOS_NAME("SkipExecute"), executeParams->NodeId), true, nullptr);
+		sys::vulkan::EndCmd(sys::vulkan::BeginCmd(NOS_NAME("SkipExecute"), executeParams.NodeId), true, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}
 };
 
-struct CPUTrivialResource : ResourceInterface {
-	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::CPUGeneric;
-	typedef nosBuffer PinData;
+struct PODResource : ResourceInterface
+{
+	static constexpr ResourceType RESOURCE_TYPE = ResourceInterface::ResourceType::POD;
 	struct Resource : ResourceBase
 	{
-		nos::Buffer data = {};
+		PrimitiveObjectRef PODObj{};
 		Resource() { ResourceType = RESOURCE_TYPE; }
 	};
 
-	CPUTrivialResource() : ResourceInterface(RESOURCE_TYPE) {
-		auto defaultVal = GetDefaultValueOfType(NSN_Generic);
-		if (defaultVal)
-			Sample = defaultVal->GetBuffer();
-	}
-	rc<ResourceBase> CreateResource() override {
+	PODResource() : ResourceInterface(RESOURCE_TYPE) {}
+	rc<ResourceBase> CreateResource() override
+	{
 		rc<Resource> res = MakeShared<Resource>();
-		res->data = Sample;
 		return res;
 	}
 	void Reset(ResourceBase* res) override
 	{
-		auto r = GetResource<CPUTrivialResource>(res);
+		auto r = GetResource<PODResource>(res);
 		r->FrameNumber = 0;
+		r->PODObj = {};
 	}
 
-	void WaitForDownloadToEnd(ResourceBase* res, const std::string& nodeTypeName, const std::string& nodeDisplayName, nosCopyInfo* cpy) override {
-		auto r = GetResource<CPUTrivialResource>(res);
-		nosEngine.SetPinValue(cpy->ID, r->data);
+	void WaitForDownloadToEnd(ResourceBase* res,
+							  const std::string& nodeTypeName,
+							  const std::string& nodeDisplayName,
+							  nosCopyFromInfo* cpy) override
+	{
+		auto r = GetResource<PODResource>(res);
+		if (!r->PODObj.IsValid())
+		{
+			NOS_SOFT_CHECK(false, "POD object is not valid in WaitForDownloadToEnd of PODResource.");
+			return;
+		}
+		SetPinObject(cpy->ID, r->PODObj);
 	}
 
-	void Copy(ResourceBase* res, nosCopyInfo* cpy, uuid NodeId) override {
-		auto r = GetResource<CPUTrivialResource>(res);
-		nosEngine.SetPinValue(cpy->ID, r->data);
+	void Copy(ResourceBase* res, nosCopyFromInfo* cpy, uuid NodeId) override
+	{
+		auto r = GetResource<PODResource>(res);
+		if (!r->PODObj.IsValid())
+		{
+			NOS_SOFT_CHECK(false, "POD object is not valid in WaitForDownloadToEnd of PODResource.");
+			return;
+		}
+		SetPinObject(cpy->ID, r->PODObj);
 	}
 
-	void* GetPinInfo(nosPinInfo& pin, bool rejectFieldMismatch) override {
-		return (void*)pin.Data;
+	ObjectRef ValidateAndGetPinObject(nosPinInfo const& pin, bool rejectFieldMismatch) override
+	{
+		return *pin.Object;
 	}
 
-	nosResult Push(ResourceBase* r, void* pinInfo, nosNodeExecuteParams* params, nos::Name ringExecuteName, bool pushEventForCopyFrom) override {
-		Resource* res = GetResource<CPUTrivialResource>(r);
-		res->FrameNumber = params->FrameNumber;
-		res->data = *(nosBuffer*)pinInfo;
-
+	nosResult Push(ResourceBase* r,
+				   ObjectRef pinInfo,
+				   NodeExecuteParams const& params,
+				   nos::Name ringExecuteName,
+				   bool pushEventForCopyFrom) override
+	{
+		Resource* res = GetResource<PODResource>(r);
+		res->FrameNumber = params.FrameNumber;
+		res->PODObj = std::move(pinInfo);
 		return NOS_RESULT_SUCCESS;
 	}
-	bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) {
-		Sample = newVal;
-		return false;
-	}
+	bool CheckNewResource(nos::Name updateName, nosObjectId newObj) { return false; }
 
-	bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) override {
-		outPinVal = pinData;
-		Resource* res = GetResource<CPUTrivialResource>(r);
-
+	bool BeginCopyFrom(ResourceBase* r, nosObjectId curPinObj, ObjectRef& outPinObj) override
+	{
+		outPinObj = curPinObj;
 		return true;
 	}
 };
@@ -794,7 +782,7 @@ struct RingNodeBase : NodeContext
 		else if (TypeInfo->TypeName == NOS_NAME(sys::vulkan::Texture::GetFullyQualifiedName()))
 			resource = std::make_unique<GPUTextureResource>();
 		else
-			resource = std::make_unique<CPUTrivialResource>();
+			resource = std::make_unique<PODResource>();
 
 		Ring = std::make_unique<TRing>(1, std::move(resource));
 
@@ -805,16 +793,16 @@ struct RingNodeBase : NodeContext
 				return;
 			RequestRingResize(size);
 		});
-		AddPinValueWatcher(NSN_Input, [this](nos::Buffer const& newBuf, std::optional<nos::Buffer> oldVal) {
-			if (Ring->ResInterface->CheckNewResource(NSN_Input, newBuf, oldVal))
+		AddPinObjectWatcher(NSN_Input, [this](ObjectRef newObj, std::optional<ObjectRef>) {
+			if (Ring->ResInterface->CheckNewResource(NSN_Input, newObj))
 			{
 				SendPathRestart();
 				Ring->Stop();
 				NeedsRecreation = true;
 			}
 		});
-		AddPinValueWatcher(NSN_Alignment, [this](nos::Buffer const& newAlignment, std::optional<nos::Buffer> oldVal) {
-			if (Ring->ResInterface->CheckNewResource(NSN_Alignment, newAlignment, oldVal))
+		AddPinObjectWatcher(NSN_Alignment, [this](ObjectRef newObj, std::optional<ObjectRef>) {
+			if (Ring->ResInterface->CheckNewResource(NSN_Alignment, newObj))
 			{
 				SendPathRestart();
 				Ring->Stop();
@@ -880,33 +868,28 @@ struct RingNodeBase : NodeContext
 		TypeResolved();
 	}
 
-	nosResult SkipExecuteRingNode(nosNodeExecuteParams* params, nosName ringExecuteName) 
+	nosResult SkipExecuteRingNode(NodeExecuteParams const& params, nosName ringExecuteName) 
 	{
 		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
 			return NOS_RESULT_FAILED;
 		return Ring->ResInterface->SkipExecute(params);
 	}
 
-	nosResult ExecuteRingNode(nosNodeExecuteParams* params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
+	nosResult ExecuteRingNode(NodeExecuteParams const& params, bool pushEventForCopyFrom, nosName ringExecuteName, bool rejectFieldMismatch)
 	{
 		if (Ring->Exit || !Ring->IsResourcesValid() || !TypeInfo)
 			return NOS_RESULT_FAILED;
 
-		NodeExecuteParams pins(params);
+		auto& inputPin = params[NSN_Input];
 
-		auto it = pins.find(NSN_Input);
-		assert(it != pins.end());
-		auto& inputPin = it->second;
-		assert(inputPin.Data);
-
-		void* input = Ring->ResInterface->GetPinInfo(pins[NSN_Input], rejectFieldMismatch);
-		if (input == nullptr)
+		auto inputObj = Ring->ResInterface->ValidateAndGetPinObject(params[NSN_Input], rejectFieldMismatch);
+		if (!inputObj.IsValid())
 		{
 			SendScheduleRequest(0);
 			return NOS_RESULT_FAILED;
 		}
 		
-		auto requiredSize = Ring->ResInterface->GetRequiredRingSize(input, Ring->Size);
+		auto requiredSize = Ring->ResInterface->GetRequiredRingSize(inputObj, Ring->Size);
 		if (Ring->Size != requiredSize)
 		{
 			nosEngine.LogW("Required ring size for this data type is %lu, will resize it", requiredSize);
@@ -935,7 +918,7 @@ struct RingNodeBase : NodeContext
 			else
 				return NOS_RESULT_PENDING;
 		}
-		Ring->ResInterface->Push(slot, input, params, ringExecuteName, pushEventForCopyFrom);
+		Ring->ResInterface->Push(slot, inputObj, params, ringExecuteName, pushEventForCopyFrom);
 		
 		bool isFillComplete = false;
 		if(Mode == RingMode::FILL)
@@ -958,7 +941,7 @@ struct RingNodeBase : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult CommonCopyFrom(nosCopyInfo* cpy, ResourceInterface::ResourceBase** foundSlot) {
+	nosResult CommonCopyFrom(nosCopyFromInfo* cpy, ResourceInterface::ResourceBase** foundSlot) {
 		if (!Ring || Ring->Exit)
 			return NOS_RESULT_FAILED;
 
@@ -994,11 +977,10 @@ struct RingNodeBase : NodeContext
 			return Ring->Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
 		SendRingStats("Post Begin Pop");
 
-		nosResourceShareInfo output;
-		nos::Buffer outPinVal;
-		bool changePinValue = Ring->ResInterface->BeginCopyFrom(slot, *cpy->PinData, outPinVal);
+		ObjectRef outPinObj{};
+		bool changePinValue = Ring->ResInterface->BeginCopyFrom(slot, *cpy->PinObjectHandle, outPinObj);
 		if (changePinValue) {
-			nosEngine.SetPinValueByName(NodeId, NSN_Output, outPinVal);
+			nosEngine.SetPinObjectByName(NodeId, NSN_Output, outPinObj);
 		}
 		*foundSlot = slot;
 		return NOS_RESULT_SUCCESS;

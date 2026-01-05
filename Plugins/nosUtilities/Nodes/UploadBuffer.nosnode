@@ -17,6 +17,18 @@
 				"description": "",
 				"pins": [
 					{
+						"name": "Run",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
 						"name": "InputBuffer",
 						"type_name": "nos.sys.vulkan.Buffer",
 						"show_as": "INPUT_PIN",
@@ -24,7 +36,7 @@
 					},
 					{
 						"name": "InputGPUEventRef",
-						"type_name": "nos.sys.vulkan.GPUEventResource",
+						"type_name": "nos.sys.vulkan.GPUEventHolder",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
 					},

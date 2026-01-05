@@ -98,7 +98,7 @@ public:
 	void OnPathStart() override;	
 	void OnPathCommand(const nosPathCommand* command) override;
 	void PerformAutoSpare(uint64_t firstVBLTime);
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override;
+	nosResult ExecuteNode(NodeExecuteParams const& params) override;
 	void SignalRestart();
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer val)  override;
 	void Restart();

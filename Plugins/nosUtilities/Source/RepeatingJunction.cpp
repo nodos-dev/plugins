@@ -10,17 +10,16 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_RepeatingJunction, "nos.utilities.Repeati
 struct RepeatingJunctionNode : NodeContext
 {
 	std::mutex NewFrameMutex;
-	std::optional<nos::Buffer> NewFrame;
+	std::optional<ObjectRef> NewFrameObject;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* args) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams params(args);
-		nos::Buffer inputBuffer = *params[NOS_NAME("Input")].Data;
+		ObjectRef inputObject = params.GetPinObject(NOS_NAME("Input"));
 		bool waitGpu = *params.GetPinData<bool>(NOS_NAME("WaitGPU"));
 		SubmitAndWaitIfWanted(waitGpu);
 		{
 			std::unique_lock lock(NewFrameMutex);
-			NewFrame = std::move(inputBuffer);
+			NewFrameObject = std::move(inputObject);
 		}
 		return NOS_RESULT_SUCCESS;
 	}
@@ -39,13 +38,13 @@ struct RepeatingJunctionNode : NodeContext
 		}
 	}
 
-	nosResult CopyFrom(nosCopyInfo* cpy) override 
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override 
 	{
 		std::unique_lock lock(NewFrameMutex);
-		if (NewFrame)
+		if (NewFrameObject)
 		{
-			SetPinValue(NOS_NAME("Output"), *NewFrame);
-			NewFrame = std::nullopt;
+			SetPinObject(NOS_NAME("Output"), *NewFrameObject);
+			NewFrameObject = std::nullopt;
 			ScheduleNextFrame();
 		}
 		return NOS_RESULT_SUCCESS;

@@ -8,53 +8,51 @@
 
 namespace nos::utilities
 {
-struct UploadBufferNodeContext : NodeContext
+struct UploadBufferNode : NodeContext
 {
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto execParams = nos::NodeExecuteParams(params);
-		auto& output = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Output")].Data->Data);
-		auto& input = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("InputBuffer")].Data->Data);
-		nosGPUEventResource gpuEventRef = InterpretPinValue<sys::vulkan::GPUEventResource>(*execParams[NOS_NAME_STATIC("InputGPUEventRef")].Data)->handle();
+		auto outBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME_STATIC("Output"));
+		auto inBuf = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME_STATIC("InputBuffer"));
+		if (!inBuf.IsValid())
+			return NOS_RESULT_FAILED;
+		auto inGpuEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME_STATIC("InputGPUEventRef"));
 		nosGPUEvent* event = nullptr;
-		if (gpuEventRef)
+		if (inGpuEventHolder.IsValid())
 		{
-			auto res = nosVulkan->GetGPUEvent(gpuEventRef, &event);
-			assert(res != NOS_RESULT_SUCCESS || *event == 0);
+			auto res = nosVulkan->GetGPUEventFromHolder(inGpuEventHolder, &event);
 		}
 		
-		output.mutate_field_type(input.field_type());
-
-		if (input.size_in_bytes() != output.size_in_bytes())
+		auto inInfo = *sys::vulkan::GetResourceInfo(inBuf);
+		auto inputFieldType = sys::vulkan::GetResourceFieldType(inBuf);
+		auto outBufInfo = sys::vulkan::GetResourceInfo(outBuf);
+		if (!outBufInfo || outBufInfo->Size != inInfo.Size)
 		{
-			nosResourceShareInfo bufInfo = {
-				.Info = {.Type = NOS_RESOURCE_TYPE_BUFFER,
-						 .Buffer = nosBufferInfo{.Size = (uint32_t)input.size_in_bytes(),
+			nosBufferInfo newBufInfo {.Size = inInfo.Size,
 												 .Usage = nosBufferUsage(NOS_BUFFER_USAGE_TRANSFER_DST |
 																		 NOS_BUFFER_USAGE_TRANSFER_SRC |
 																		 NOS_BUFFER_USAGE_STORAGE_BUFFER),
-												 .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DEVICE_MEMORY)}}};
-			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
+												 .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_DEVICE_MEMORY)};
 
-			output = *InterpretPinValue<sys::vulkan::Buffer>(execParams[NOS_NAME_STATIC("Output")].Data->Data);
+			outBuf = sys::vulkan::CreateBuffer(newBufInfo, "UploadBuffer Output");
+			SetPinObject(NOS_NAME("Output"), outBuf);
 		}
 
-		if (!output.handle() || !input.handle())
-		{
-			return NOS_RESULT_SUCCESS;
-		}
+		if (!outBuf.IsValid())
+			return NOS_RESULT_FAILED;
 
-		auto OutputBuffer = vkss::ConvertToResourceInfo(output);
-		auto InputBuffer = vkss::ConvertToResourceInfo(input);
+		nosVulkan->SetResourceFieldType(outBuf, inputFieldType);
 
 		{
 			nosCmd cmd;
-			nosCmdBeginParams cmdParams = { .Name = NOS_NAME("UploadBuffer Staging Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd,
+			nosCmdBeginParams cmdParams = {
+				.Name = NOS_NAME("UploadBuffer Staging Copy"),
+				.AssociatedNodeId = NodeId,
+				.OutCmdHandle = &cmd,
 				.PreferredQueueType = NOS_CMD_QUEUE_TYPE_TRANSFER,
 			};
 			auto res = nosVulkan->Begin(&cmdParams);
-			nosVulkan->Copy(cmd, &InputBuffer, &OutputBuffer, 0);
+			nosVulkan->Copy(cmd, inBuf, outBuf, 0);
 			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = event };
 			nosVulkan->End(cmd, &endParams);
 		}
@@ -66,7 +64,7 @@ struct UploadBufferNodeContext : NodeContext
 
 nosResult RegisterUploadBuffer(nosNodeFunctions* functions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBuffer"), UploadBufferNodeContext, functions)
+	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBuffer"), UploadBufferNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
 

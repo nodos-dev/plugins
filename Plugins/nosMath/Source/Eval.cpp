@@ -83,7 +83,7 @@ struct EvalNodeContext : NodeContext
 	{
 		if (pinName == NOS_NAME("Show_Expression"))
 		{
-			auto newVal = *InterpretPinValue<bool>(value.Data);
+			auto newVal = *InterpretObjectData<bool>(value);
 			if (ShowExpressionInNode != newVal)
 			{
 				ShowExpressionInNode = newVal;
@@ -92,7 +92,7 @@ struct EvalNodeContext : NodeContext
 		}
 		else if (pinName == NOS_NAME("Expression"))
 		{
-			auto exprStr = InterpretPinValue<const char>(value.Data);
+			auto exprStr = InterpretObjectData<const char*>(value.Data);
 			if (strlen(exprStr) == 0)
 				SetStatus("No math expression is provided", fb::NodeStatusMessageType::WARNING, "", 4, true);
 			nosEngine.LogI("Compiling expression: %s", exprStr);
@@ -251,12 +251,10 @@ struct EvalNodeContext : NodeContext
 		return true;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams pins(params);
-		
 		for (auto const& [pinId, value] : Variables)
-			Variables[pinId] = *InterpretPinValue<double>(pins[*GetPinName(pinId)].Data->Data);
+			Variables[pinId] = *params.GetPinData<double>(*GetPinName(pinId));
 
 		try
 		{

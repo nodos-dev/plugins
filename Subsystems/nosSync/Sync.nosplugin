@@ -1,14 +1,14 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.sync",
-			"version": "10.2.0"
-		},
-		"display_name": "Synchronization",
-		"description": "Nodos subsystem for synchronization utilities",
-		"category": "Utilities"
-	},
-	"binary_path": "Binaries/nosSync",
-	"sdk_version": "40.0",
+    "info": {
+        "id": {
+            "name": "nos.sync",
+            "version": "11.1.0"
+        },
+        "display_name": "Synchronization",
+        "description": "Nodos subsystem for synchronization utilities",
+        "category": "Utilities"
+    },
+    "binary_path": "Binaries/nosSync",
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

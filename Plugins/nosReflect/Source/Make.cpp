@@ -10,24 +10,23 @@ namespace nos::reflect
 NOS_REGISTER_NAME(Type)
 struct MakeNode : NodeContext
 {
-    std::optional<nos::TypeInfo> Type = {};
-    fb::TVisualizer Visualizer = {};
+	std::optional<nos::TypeInfo> Type = {};
+	nosObjectKind ObjectKind = NOS_OBJECT_KIND_PRIMITIVE;
+	fb::TVisualizer Visualizer = {};
 
-    nosResult OnCreate(const fb::Node* node) override
-    {
-        if (flatbuffers::IsFieldPresent(node, fb::Node::VT_TEMPLATE_PARAMETERS) && 1 == node->template_parameters()->size())
-        {
-            auto p = node->template_parameters()->Get(0);
+	nosResult OnCreate(const fb::Node* node) override
+	{
+		if (flatbuffers::IsFieldPresent(node, fb::Node::VT_TEMPLATE_PARAMETERS) && 1 == node->template_parameters()->size())
+		{
+			auto p = node->template_parameters()->Get(0);
 			nos::Name typeName = nos::Name((const char*)p->value()->Data());
-			Type = nos::TypeInfo(typeName);
 			std::optional<std::string> updateDisplayName = std::nullopt;
-			
-            if(flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
-                updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
-            LoadPins(updateDisplayName ? updateDisplayName->c_str() : nullptr);
-        }
+			if (flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
+				updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
+			OnTypeUpdated(typeName, updateDisplayName ? updateDisplayName->c_str() : nullptr);
+		}
 		return NOS_RESULT_SUCCESS;
-    }
+	}
 	
 	// Strict mode: only builtin types are supported
 	static bool IsTypeSupported(nos::TypeInfo& info, bool strict) {
@@ -53,31 +52,29 @@ struct MakeNode : NodeContext
 		return true;
 	}
 
-    void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
-    {
-        if (pinName == NSN_Value && Type)
-        {
+	void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
+	{
+		if (pinName == NSN_Value && Type)
+		{
 			if (Type->TypeName == NOS_NAME_STATIC("string"))
-            {
-				nosName visualizerName{};
+			{
 				nosBuffer buffer{};
 				nosEngine.GetPinVisualizer(connectedPin, "", &buffer);
 				if (buffer.Size)
 				{
-					SetPinVisualizer(NSN_Value, *InterpretPinValue<fb::Visualizer>(buffer)->UnPack());
+					SetPinVisualizer(NSN_Value, *InterpretObjectData<fb::Visualizer>(buffer)->UnPack());
 					nosEngine.FreeBuffer(&buffer);
 				}
 			}
 		}
-    }
+	}
 
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
-    {
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
+	{
 		if (!Type)
 			return NOS_RESULT_SUCCESS;
 
 		flatbuffers::FlatBufferBuilder fbb;
-		NodeExecuteParams pins(params);
 		auto& type = *Type;
 		switch (type->BaseType)
 		{
@@ -86,115 +83,171 @@ struct MakeNode : NodeContext
 		case NOS_BASE_TYPE_UINT:
 		case NOS_BASE_TYPE_STRING:
 		case NOS_BASE_TYPE_UNION:
-			nosEngine.SetPinValue(pins[NSN_Output].Id, *pins[NSN_Value].Data);
+			nosEngine.SetPinValue(params[NSN_Output].Id, params.GetPinBuffer(NSN_Value));
 			return NOS_RESULT_SUCCESS;
 		}
 
-		for (auto pin : pins) {
-			if (pin.first == NSN_Output)
-				continue;
+		switch (ObjectKind)
+		{
+		case NOS_OBJECT_KIND_PRIMITIVE:
+		case NOS_OBJECT_KIND_FOREIGN:
+		{
+			for (auto const& [name, pin] : params)
+			{
+				if (name == NSN_Output)
+					continue;
 
-			SetField(pins[NSN_Output].Id, { nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = pin.first } }, *pin.second.Data);
+				SetField(params[NSN_Output].Id,
+					{ nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name} },
+					*GetObjectDataView(*pin.Object));
+			}
+			break;
+		}
+		case NOS_OBJECT_KIND_COMPOSITE:
+		{
+			std::vector<CompositeObjectField> fields;
+			for (auto const& [name, pin] : params)
+			{
+				if (name == NSN_Output)
+					continue;
+				fields.push_back({ name, *pin.Object });
+			}
+			auto obj = CompositeObjectRef::Create(type->TypeName, fields);
+			if (obj)
+				SetPinObject(params[NSN_Output].Id, *obj);
+			else
+				return NOS_RESULT_FAILURE;
+			break;
+		}
 		}
 
 		return NOS_RESULT_SUCCESS;
-    }
+	}
 
 	std::vector<nosName> AllTypeNames;
-    
-    void OnMenuRequested(nosContextMenuRequestPtr request) override
-    {
-        if(Type) 
-            return;
-		flatbuffers::FlatBufferBuilder fbb;
-    	size_t count = 0;
-		auto res = nosEngine.GetPinDataTypeNames(nullptr, &count);
-    	if (NOS_RESULT_FAILED == res)
-    		return;
-		AllTypeNames.resize(count);
-    	res = nosEngine.GetPinDataTypeNames(AllTypeNames.data(), &count);
-    	if (NOS_RESULT_FAILED == res)
-    		return;
-    	std::vector<flatbuffers::Offset<nos::ContextMenuItem>> types;
-    	uint32_t index = 0;
-    	for (auto ty : AllTypeNames)
-    		types.push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
-    	std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
-    	items.push_back(nos::CreateContextMenuItemDirect(fbb, "Set Type", -1, &types));
-    	HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
-    }
-
-    void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
-    {
+	
+	void OnMenuRequested(nosContextMenuRequestPtr request) override
+	{
 		if(Type) 
 			return;
-    	if (cmd >= AllTypeNames.size())
+		flatbuffers::FlatBufferBuilder fbb;
+		size_t count = 0;
+		auto res = nosEngine.GetPinDataTypeNames(nullptr, &count);
+		if (NOS_RESULT_FAILED == res)
 			return;
-    	auto tyName = AllTypeNames[cmd];
-    	auto typeInfo = nos::TypeInfo(tyName);
-    	SetType(typeInfo);
+		AllTypeNames.resize(count);
+		res = nosEngine.GetPinDataTypeNames(AllTypeNames.data(), &count);
+		if (NOS_RESULT_FAILED == res)
+			return;
+		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> types;
+		uint32_t index = 0;
+		std::unordered_map<std::string, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>> typeNamesByNamespace;
+		for (auto ty : AllTypeNames)
+		{
+			auto nameStr = nos::Name(ty).AsString();
+			auto namespacePos = nameStr.rfind(".");
+			if (namespacePos != std::string::npos)
+			{
+				std::string ns = nameStr.substr(0, namespacePos);
+				typeNamesByNamespace[ns].push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
+			}
+			else
+			{
+				types.push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
+			}
+		}
+		std::unordered_map<std::string, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>> groupedItems;
+		for (auto& [name, items] : typeNamesByNamespace)
+		{
+			auto menuItem = nos::CreateContextMenuItemDirect(fbb, name.c_str(), -1, &items);
+			types.push_back(menuItem);
+		}
+		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
+		items.push_back(nos::CreateContextMenuItemDirect(fbb, "Set Type", -1, &types));
+		HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
 	}
 
-    // Set the template parameter, update pin type
-    void SetType(nosTypeInfo const* typeInfo)
-    {
-	    // Set template parameter
-        flatbuffers::FlatBufferBuilder fbb;
-        
-        std::vector<uint8_t> data = nos::Buffer(nos::Name(typeInfo->TypeName).AsCStr(), 1 + nos::Name(typeInfo->TypeName).AsString().size());
+	void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
+	{
+		if(Type) 
+			return;
+		if (cmd >= AllTypeNames.size())
+			return;
+		auto tyName = AllTypeNames[cmd];
+		auto typeInfo = nos::TypeInfo(tyName);
+		SetType(typeInfo);
+	}
+
+	// Set the template parameter, update pin type
+	void SetType(nosTypeInfo const* typeInfo)
+	{
+		// Set template parameter
+		flatbuffers::FlatBufferBuilder fbb;
+		
+		std::vector<uint8_t> data = nos::Buffer(nos::Name(typeInfo->TypeName).AsCStr(), 1 + nos::Name(typeInfo->TypeName).AsString().size());
 		std::vector<flatbuffers::Offset<fb::TemplateParameter>> params = {
 			fb::CreateTemplateParameterDirect(fbb, NSN_Type.AsCStr(), "string", &data)};
-        auto paramsOffset = fbb.CreateVector(params);
+		auto paramsOffset = fbb.CreateVector(params);
 		auto typeNameOffset = fbb.CreateString(nos::Name(typeInfo->TypeName).AsCStr());
-        
-        PinResolveRequest(NSN_Output, typeInfo->TypeName);
-        PartialNodeUpdateBuilder update(fbb);
-        update.add_node_id(&NodeId);
-        update.add_template_parameters(paramsOffset);
-        HandleEvent(CreateAppEvent(fbb, update.Finish()));
-    }
+		
+		PinResolveRequest(NSN_Output, typeInfo->TypeName);
+		PartialNodeUpdateBuilder update(fbb);
+		update.add_node_id(&NodeId);
+		update.add_template_parameters(paramsOffset);
+		HandleEvent(CreateAppEvent(fbb, update.Finish()));
+	}
 
-    void OnPinUpdated(const nosPinUpdate* update) override
-    {
+	void OnPinUpdated(const nosPinUpdate* update) override
+	{
 		if (Type)
 			return;
-        if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME)
-        {
+		if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME)
+		{
 			if (update->PinName != NSN_Output)
 				return;
-			Type = nos::TypeInfo(update->TypeName);
-            LoadPins();
+			OnTypeUpdated(update->TypeName);
 		}
 	}
 
-    nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
-    { 
-        nos::TypeInfo incomingType(params->IncomingTypeName);
-        if (!IsTypeSupported(incomingType, false))
-        {
-            strcpy(params->OutErrorMessage, "Type not supported for make.");
-            return NOS_RESULT_FAILED;
-        }
-		return NOS_RESULT_SUCCESS;
-    }
+	void OnTypeUpdated(nos::Name typeName, const char* updatedDisplayName = nullptr)
+	{
+		Type = nos::TypeInfo(typeName);
+		if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetObjectKindFromTypeName(typeName, &ObjectKind))
+		{
+			SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
+			return;
+		}
+		LoadPins(updatedDisplayName);
+	}
 
-    void LoadPins(const char* updatedDisplayName = nullptr)
-    {
+	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
+	{ 
+		nos::TypeInfo incomingType(params->IncomingTypeName);
+		if (!IsTypeSupported(incomingType, false))
+		{
+			strcpy(params->OutErrorMessage, "Type not supported for make.");
+			return NOS_RESULT_FAILED;
+		}
+		return NOS_RESULT_SUCCESS;
+	}
+
+	void LoadPins(const char* updatedDisplayName = nullptr)
+	{
 		assert((*Type)->BaseType != NOS_BASE_TYPE_NONE);
 		auto& type = *Type;
-    	auto defBuf = GetDefaultValueOfType(type->TypeName); // TODO: This can be freed after type is unloaded, so beware.
+		auto defBuf = GetDefaultValueOfType(type->TypeName); // TODO: This can be freed after type is unloaded, so beware.
 		if (!defBuf)
 			return;
-    	nos::Buffer buf = defBuf->GetBuffer();
-    	std::vector<uint8_t> data = buf;
-        flatbuffers::FlatBufferBuilder fbb;
-        std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd = {};
-        std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
-        std::vector<fb::UUID> pinsToDelete = {};
+		nos::Buffer buf = defBuf->GetBuffer();
+		std::vector<uint8_t> data = buf;
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd = {};
+		std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
+		std::vector<fb::UUID> pinsToDelete = {};
 
-        std::unordered_set<nosName> pinNames = { NSN_Output };
+		std::unordered_set<nosName> pinNames = { NSN_Output };
 
-        if (auto out = GetPin(NSN_Output))
+		if (auto out = GetPin(NSN_Output))
 		{
 			if (out->TypeName != type->TypeName || out->IsOrphan)
 			{
@@ -210,83 +263,82 @@ struct MakeNode : NodeContext
 		{
 			uuid id = nosEngine.GenerateID();
 			nos::fb::TPin outPin{};
-            outPin.id = id;
-            outPin.name = nos::Name(NSN_Output).AsCStr();
-            outPin.type_name = nos::Name(Type->TypeName).AsCStr();
-            outPin.show_as = nos::fb::ShowAs::OUTPUT_PIN;
-            outPin.can_show_as = nos::fb::CanShowAs::OUTPUT_PIN_ONLY;
-            outPin.data = data;
-            outPin.display_name = nos::Name(Type->TypeName).AsCStr();
+			outPin.id = id;
+			outPin.name = nos::Name(NSN_Output).AsCStr();
+			outPin.type_name = nos::Name(Type->TypeName).AsCStr();
+			outPin.show_as = nos::fb::ShowAs::OUTPUT_PIN;
+			outPin.can_show_as = nos::fb::CanShowAs::OUTPUT_PIN_ONLY;
+			outPin.data = data;
+			outPin.display_name = nos::Name(Type->TypeName).AsCStr();
 			pinsToAdd.push_back(fb::CreatePin(fbb, &outPin));
-        }
+		}
 
-        // If the type is a primitive, then it will be constructed from a single pin named "Value"
-        switch (type->BaseType)
-        {
-        case NOS_BASE_TYPE_INT:   
-        case NOS_BASE_TYPE_UINT:  
-        case NOS_BASE_TYPE_FLOAT: 
-        case NOS_BASE_TYPE_STRING:
+		// If the type is a primitive, then it will be constructed from a single pin named "Value"
+		switch (type->BaseType)
+		{
+		case NOS_BASE_TYPE_INT:   
+		case NOS_BASE_TYPE_UINT:  
+		case NOS_BASE_TYPE_FLOAT: 
+		case NOS_BASE_TYPE_STRING:
 		case NOS_BASE_TYPE_UNION:
 			pinNames.insert(NSN_Value);
 			if (auto pin = GetPin(NSN_Value))
-            {
-                if (pin->IsOrphan)
-                {
-                    pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-                        &pin->Id,
-                        0,
-                        nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-                        nos::Name(type->TypeName).AsCStr(),
-                        nos::Name(NSN_Value).AsCStr()));
-                }
-                if (type->BaseType == NOS_BASE_TYPE_STRING)
-                {
-					nosName visName{};
+			{
+				if (pin->IsOrphan)
+				{
+					pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
+						&pin->Id,
+						0,
+						nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
+						nos::Name(type->TypeName).AsCStr(),
+						nos::Name(NSN_Value).AsCStr()));
+				}
+				if (type->BaseType == NOS_BASE_TYPE_STRING)
+				{
 					nosBuffer buffer{};
 					nosEngine.GetPinVisualizer(pin->Id, "", &buffer);
 					if (buffer.Size)
 					{
-						InterpretPinValue<fb::Visualizer>(buffer)->UnPackTo(&Visualizer);
+						InterpretObjectData<fb::Visualizer>(buffer)->UnPackTo(&Visualizer);
 						nosEngine.FreeBuffer(&buffer);
 					}
-                }
-            }
-            else
-            {
-                uuid id = nosEngine.GenerateID();
-                std::vector<uint8_t> data(type->ByteSize);
-                if (type->BaseType == NOS_BASE_TYPE_STRING)
-                {
-                    data = std::vector<uint8_t>(1, 0);
-                }
-                pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(NSN_Value).AsCStr(), nos::Name(type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
-            }
-            break;
-        case NOS_BASE_TYPE_NONE: break;
-        case NOS_BASE_TYPE_ARRAY: break;
-        case NOS_BASE_TYPE_STRUCT:
-        {
+				}
+			}
+			else
+			{
+				uuid id = nosEngine.GenerateID();
+				std::vector<uint8_t> data(type->ByteSize);
+				if (type->BaseType == NOS_BASE_TYPE_STRING)
+				{
+					data = std::vector<uint8_t>(1, 0);
+				}
+				pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(NSN_Value).AsCStr(), nos::Name(type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
+			}
+			break;
+		case NOS_BASE_TYPE_NONE: break;
+		case NOS_BASE_TYPE_ARRAY: break;
+		case NOS_BASE_TYPE_STRUCT:
+		{
 			auto rootIftable = type->ByteSize ? nullptr : buf.As<flatbuffers::Table>();
-            for (int i = 0; i < type->FieldCount; ++i)
-            {
-                auto field = type->Fields[i];
-                pinNames.insert(field.Name);
-                if (auto f = GetPin(field.Name))
-                {
-                    if (f->TypeName != field.Type->TypeName || f->IsOrphan)
-                    {
-                        pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-                            &f->Id,
-                            0,
-                            nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-                            nos::Name(field.Type->TypeName).AsCStr(),
-                            nos::Name(field.Name).AsCStr()));
-                    }
-                }
-                else
-                {
-                    uuid id = nosEngine.GenerateID();
+			for (int i = 0; i < type->FieldCount; ++i)
+			{
+				auto field = type->Fields[i];
+				pinNames.insert(field.Name);
+				if (auto f = GetPin(field.Name))
+				{
+					if (f->TypeName != field.Type->TypeName || f->IsOrphan)
+					{
+						pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
+							&f->Id,
+							0,
+							nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
+							nos::Name(field.Type->TypeName).AsCStr(),
+							nos::Name(field.Name).AsCStr()));
+					}
+				}
+				else
+				{
+					uuid id = nosEngine.GenerateID();
 					data = {};
 					nosQueryBufferParams params = {};
 					params.Buffer = buf;
@@ -301,20 +353,20 @@ struct MakeNode : NodeContext
 						data = std::vector<uint8_t>{ (uint8_t*)field.DefaultValue.Data, ((uint8_t*)field.DefaultValue.Data) + field.DefaultValue.Size };
 					else if (queriedField) // If field is an empty array, queriedField will be empty
 						data = std::vector<uint8_t>{ (uint8_t*)queriedField->Data(), ((uint8_t*)queriedField->Data()) + queriedField->Size()};
-                    pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
-                }
-            }
-        }
-            break;
-        }
+					pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
+				}
+			}
+		}
+			break;
+		}
 
-        for (auto& [name, id]: PinName2Id )
-            if (!pinNames.contains(name))
-                pinsToDelete.push_back(id);
+		for (auto& [name, id]: PinName2Id )
+			if (!pinNames.contains(name))
+				pinsToDelete.push_back(id);
 
-        if (!pinsToAdd.empty() ||
-            !pinsToDelete.empty() ||
-            !pinsToUpdate.empty())
+		if (!pinsToAdd.empty() ||
+			!pinsToDelete.empty() ||
+			!pinsToUpdate.empty())
 		{
 			std::vector<uint8_t> data =
 				nos::Buffer(nos::Name(Type->TypeName).AsCStr(), 1 + nos::Name(Type->TypeName).AsString().size());
@@ -337,7 +389,7 @@ struct MakeNode : NodeContext
 																				&params,
 																				updatedDisplayName)));
 		}
-    }
+	}
 };
 
 nosResult RegisterMake(nosNodeFunctions* fn)

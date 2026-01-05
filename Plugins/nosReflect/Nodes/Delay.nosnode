@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{
+			"class_name": "Delay",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Delay"
+			},
+			"node": {
+				"contents_type": "Job",
+				"always_execute": true,
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Delay",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

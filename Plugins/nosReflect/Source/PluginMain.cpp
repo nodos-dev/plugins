@@ -1,16 +1,16 @@
 #include <Nodos/Plugin.hpp>
 #include <Nodos/Plugin.hpp>
 
-#include <nosSysVulkan/nosVulkanSubsystem.h>
 #include <nosSysVariables/nosVariableSubsystem.h>
+#include <nosTransfer/nosTransfer.h>
 
 NOS_INIT()
-NOS_VULKAN_INIT()
 NOS_SYS_VARIABLES_INIT()
+NOS_TRANSFER_PLUGIN_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
-	NOS_VULKAN_IMPORT()
 	NOS_SYS_VARIABLES_IMPORT()
+	NOS_TRANSFER_PLUGIN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 namespace nos::reflect
@@ -35,6 +35,10 @@ enum Nodes : size_t
 	GetVariable,
 	EnumToUnderlyingValue,
 	EnumFromUnderlyingValue,
+	CopyingRingBuffer,
+	CopyingBoundedQueue,
+	ObjectRingBuffer,
+	BoundedObjectQueue,
 	Count
 };
 
@@ -55,6 +59,10 @@ nosResult RegisterSetVariable(nosNodeFunctions* node);
 nosResult RegisterGetVariable(nosNodeFunctions* node);
 nosResult RegisterEnumToUnderlyingValue(nosNodeFunctions* node);
 nosResult RegisterEnumFromUnderlyingValue(nosNodeFunctions* node);
+nosResult RegisterCopyingRingBuffer(nosNodeFunctions* node);
+nosResult RegisterCopyingBoundedQueue(nosNodeFunctions* node);
+nosResult RegisterObjectRingBuffer(nosNodeFunctions* node);
+nosResult RegisterBoundedObjectQueue(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -92,6 +100,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(ArithmeticDynamic)
 			GEN_CASE_NODE(EnumToUnderlyingValue)
 			GEN_CASE_NODE(EnumFromUnderlyingValue)
+			GEN_CASE_NODE(CopyingRingBuffer)
+			GEN_CASE_NODE(CopyingBoundedQueue)
+			GEN_CASE_NODE(ObjectRingBuffer)
+			GEN_CASE_NODE(BoundedObjectQueue)
 		}
 	}
 

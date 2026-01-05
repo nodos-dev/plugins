@@ -8,19 +8,17 @@ struct Json2PinNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams execParams(params);
-		auto& jsonPin = execParams[NOS_NAME("Json")];
-		auto& outPin = execParams[NOS_NAME("Out")];
-		if(outPin.TypeName == NOS_NAME("nos.Generic"))
+		auto& outPin = params[NOS_NAME("Out")];
+		if (outPin.TypeName == NOS_NAME(nos::Generic::GetFullyQualifiedName()))
 		{
 			SetNodeStatusMessages({{{}, "Out pin is not connected to typed pin", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 			return NOS_RESULT_FAILED;
 		}
-		if (auto buf = GenerateBufferFromJson(outPin.TypeName, (const char*)(*jsonPin.Data).Data))
+		if (auto buf = GenerateBufferFromJson(outPin.TypeName, params.GetPinData<const char*>(NOS_NAME("Json"))))
 		{
-			SetPinValue(outPin.Name, *buf);
+			SetPinValue(outPin.Id, *buf);
 			ClearNodeStatusMessages();
 		}
 		else
@@ -32,7 +30,7 @@ struct Json2PinNode : NodeContext
 	{
 		if (pinName == NOS_NAME("Out"))
 		{
-			SetPinType(NOS_NAME("Out"), NOS_NAME("nos.Generic"));
+			SetPinType(NOS_NAME("Out"), NOS_NAME(nos::Generic::GetFullyQualifiedName()));
 		}
 	}
 };

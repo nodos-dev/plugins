@@ -94,53 +94,59 @@ struct MergeContext : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto values = GetPinValues(params);
-		const nosResourceShareInfo output = vkss::DeserializeTextureInfo(values[NSN_Out]);
+		auto outTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Out);
 
 		std::vector<nosShaderBinding> bindings;
-		auto textureCount = GetTextureCount(params->PinCount);
-		std::vector<nosResourceShareInfo> textures(textureCount);
+		auto textureCount = GetTextureCount(params.size());
+		std::vector<nosObjectId> textures(textureCount);
+		std::vector<nosTextureFilter> textureFilters(textureCount);
 
 		std::array<int, 16> blends = {};
 		std::array<float, 16> opacities = {};
 		
 		uint32_t curr = 0;
 		
-		for (size_t i = 0; i < params->PinCount; ++i)
+		for (auto const& [_, pin] : params)
 		{
-			if(NSN_Out == params->Pins[i]->Name)
+			if(NSN_Out == pin.Name)
 				continue;
 
-			auto val = params->Pins[i]->Data;
-			if (NSN_Background_Color == params->Pins[i]->Name)
+			nosImmutableBuffer val = *GetObjectDataView(*pin.Object);
+			if (NSN_Background_Color == pin.Name)
 			{
-				bindings.emplace_back(nosShaderBinding{ .Name = Name(params->Pins[i]->Name), .Data = val->Data, .Size = val->Size });
+				bindings.emplace_back(sys::vulkan::ShaderDataBinding(pin.Name, val));
 				continue;
 			}
 
-			std::string name = Name(params->Pins[i]->Name).AsString();
+			std::string name = Name(pin.Name).AsString();
 			uint32_t idx = std::stoi(name.substr(name.find_last_of('_') + 1));
 		
 			switch (name[0])
 			{
-			case 'T': textures[idx] = vkss::DeserializeTextureInfo(val->Data); break;
-			case 'B': blends[idx] = *(int*)val->Data; break;
-			case 'O': opacities[idx] = *(float*)val->Data; break;
+			case 'T':
+			{
+				textures[idx] = *pin.Object;
+				nosVulkan->GetPinTextureFilter(pin.Id, &textureFilters[idx]);
+				break;
+			}
+			case 'B': blends[idx] = *(int*)val.Data; break;
+			case 'O': opacities[idx] = *(float*)val.Data; break;
 			}
 		}
 
-		bindings.emplace_back(vkss::ShaderBinding(NSN_Blends, blends));
-		bindings.emplace_back(vkss::ShaderBinding(NSN_Opacities, opacities));
-		bindings.emplace_back(vkss::ShaderBinding(NSN_Texture_Count, textureCount));
-		bindings.emplace_back(vkss::ShaderBinding(NSN_Textures, textures.data(), textures.size()));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Blends, blends));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Opacities, opacities));
+		bindings.emplace_back(sys::vulkan::ShaderDataBinding(NSN_Texture_Count, textureCount));
+		bindings.emplace_back(
+			sys::vulkan::ShaderTextureArrayBinding(NSN_Textures, textures.data(), textureFilters.data(), textures.size()));
 
 		nosRunPassParams mergePass{
 			.Key = NSN_Merge_Pass,
 			.Bindings = bindings.data(),
 			.BindingCount = static_cast<uint32_t>(bindings.size()),
-			.Output = output,
+			.Output = outTex,
 		};
 
 		nosCmd cmd{};
@@ -214,6 +220,7 @@ struct MergeContext : NodeContext
 				                    fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY,
 				                    0,
 				                    &opacityData,
+									0,
 				                    0,
 				                    &opacityMinData,
 				                    &opacityMaxData),

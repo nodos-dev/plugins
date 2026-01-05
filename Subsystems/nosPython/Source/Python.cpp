@@ -130,11 +130,8 @@ public:
 
 	std::optional<pyb::memoryview> GetPinValue(std::string pinName) const
 	{
-		auto it = this->find(nos::Name(pinName));
-		if (it == this->end())
-			return std::nullopt;
-		auto buf = it->second.Data;
-		return pyb::memoryview::from_memory(buf->Data, buf->Size);
+		auto buf = GetPinBuffer(nos::Name(pinName));
+		return pyb::memoryview::from_memory(buf.Data, buf.Size);
 	}
 	std::optional<nosUUID> GetPinId(std::string pinName) const
 	{
@@ -368,13 +365,13 @@ public:
 		}
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto m = GetPyObject();
 		if (!m)
 			return NOS_RESULT_NOT_FOUND;
 
-		return CallMethod<nosResult>("execute_node", PyNativeNodeExecuteParams(params));
+		return CallMethod<nosResult>("execute_node", PyNativeNodeExecuteParams(params.RawParams));
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override

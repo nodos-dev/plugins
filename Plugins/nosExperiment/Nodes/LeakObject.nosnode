@@ -1,0 +1,31 @@
+{
+	"nodes": [
+		{
+			"class_name": "LeakObject",
+			"menu_info": {
+				"category": "Test|LeakObject",
+				"display_name": "Leak Object"
+			},
+			"node": {
+				"class_name": "LeakObject",
+				"contents_type": "Job",
+				"description": "Test leak object node",
+				"pins": [
+					{
+						"name": "ObjectToLeak",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

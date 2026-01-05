@@ -12,14 +12,13 @@ struct PartialTextureCopy : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto pins = GetPinValues(params);
-		auto input = GetPinValue<sys::vulkan::Texture>(pins, NOS_NAME("Input"));
-		auto srcOffset = GetPinValue<nos::fb::vec2i>(pins, NOS_NAME("SrcOffset"));
-		auto dstOffset = GetPinValue<nos::fb::vec2i>(pins, NOS_NAME("DstOffset"));
-		auto size = GetPinValue<nos::fb::vec2u>(pins, NOS_NAME("Size"));
-		auto output = GetPinValue<sys::vulkan::Texture>(pins, NOS_NAME("Output"));
+		auto input = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Input"));
+		auto srcOffset = params.GetPinData<nos::fb::vec2i>(NOS_NAME("SrcOffset"));
+		auto dstOffset = params.GetPinData<nos::fb::vec2i>(NOS_NAME("DstOffset"));
+		auto size = params.GetPinData<nos::fb::vec2u>(NOS_NAME("Size"));
+		auto output = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
 
 		if (!input || !output)
 			return NOS_RESULT_INVALID_ARGUMENT;
@@ -33,14 +32,12 @@ struct PartialTextureCopy : NodeContext
 		region.TextureCopy.DstOffset = { dstOffset->x(), dstOffset->y(), 0};
 		region.TextureCopy.Extent = { size->x(), size->y(), 1 };
 		copyParams.Regions = &region;
-		auto src = vkss::DeserializeResourceFBInfo(*input);
-		auto dst = vkss::DeserializeResourceFBInfo(*output);
 
 		nosCmd cmd{};
 		nosCmdBeginParams beginParams{ .Name = NOS_NAME("Partial Texture Copy"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd };
 		nosVulkan->Begin(&beginParams);
-		nosVulkan->Clear(cmd, &dst, nosVec4{ 0, 0, 0, 1 });
-		nosVulkan->Copy(cmd, &src, &dst, &copyParams);
+		nosVulkan->Clear(cmd, output, nosVec4{ 0, 0, 0, 1 });
+		nosVulkan->Copy(cmd, input, output, &copyParams);
 		nosVulkan->End(cmd, nullptr);
 		return NOS_RESULT_SUCCESS;
 	}

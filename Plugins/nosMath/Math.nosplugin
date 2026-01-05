@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.math",
-			"version": "1.24.0"
+      "version": "2.0.0"
 		},
 		"description": "Nodes for math operations.",
 		"display_name": "Math",
@@ -10,7 +10,7 @@
 		"dependencies": [
 			{
 				"name": "nos.reflect",
-				"version": "2.1"
+        "version": "3.0"
 			}
 		]
 	},
@@ -18,7 +18,6 @@
 	"third_party_software": [
 		"Config/Licenses.json"
 	],
-	"associated_nodes": [],
-	"sdk_version": "40.0",
+  "sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

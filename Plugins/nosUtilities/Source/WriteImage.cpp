@@ -18,131 +18,145 @@ namespace nos::utilities
 NOS_REGISTER_NAME(IncludeAlpha);
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_WriteImage, "nos.utilities.WriteImage")
 
-struct WriteImage : NodeContext {
-    std::filesystem::path Path;
-    std::optional<vkss::Resource> TempSrgbCopy;
-    bool IncludeAlpha = false;
-    nosGPUEvent Event = 0;
-    std::atomic_bool WriteRequested = false;
-    std::condition_variable CV;
-    std::mutex Mutex;
-    std::thread Worker;
-    std::atomic_bool Write = false;
-    std::atomic_bool ShouldStop = false;
+struct WriteImage : NodeContext
+{
+	std::filesystem::path Path;
+	std::optional<TypedObjectRef<sys::vulkan::Texture>> TempSrgbCopy;
+	bool IncludeAlpha = false;
+	nosGPUEvent Event = 0;
+	std::atomic_bool WriteRequested = false;
+	std::condition_variable CV;
+	std::mutex Mutex;
+	std::thread Worker;
+	std::atomic_bool Write = false;
+	std::atomic_bool ShouldStop = false;
 
-    nosResult OnCreate(nosFbNodePtr node) override
-    {
-        Worker = std::thread([this] {
-            while (!ShouldStop) {
-                std::unique_lock<std::mutex> lock(Mutex);
-                CV.wait(lock, [this] { return Write || ShouldStop; });
-                if (ShouldStop)
-                    break;
-                if(Event)
-                    nosVulkan->WaitGpuEvent(&Event, UINT64_MAX);
-                if (this->Write) {
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
+		Worker = std::thread([this] {
+			while (!ShouldStop)
+			{
+				std::unique_lock<std::mutex> lock(Mutex);
+				CV.wait(lock, [this] { return Write || ShouldStop; });
+				if (ShouldStop)
+					break;
+				if (Event)
+					nosVulkan->WaitGpuEvent(&Event, UINT64_MAX);
+				if (this->Write)
+				{
 					this->Write = false;
 					this->WriteImageToFile();
 				}
-            }
-        });
-        if (node->pins()) {
-            for (auto* pin : *node->pins()) {
-                auto* pinData = pin->data();
-                nosBuffer value = { .Data = (void*)pinData->data(), .Size = pinData->size() };
-                OnPinValueChanged(nos::Name(pin->name()->c_str()), *pin->id(), value);
-            }
-        }
+			}
+		});
+		if (node->pins())
+		{
+			for (auto* pin : *node->pins())
+			{
+				auto* pinData = pin->data();
+				nosBuffer value = {.Data = (void*)pinData->data(), .Size = pinData->size()};
+				OnPinValueChanged(nos::Name(pin->name()->c_str()), *pin->id(), value);
+			}
+		}
 		return NOS_RESULT_SUCCESS;
-    }
+	}
 
-    ~WriteImage() {
+	~WriteImage()
+	{
 		ShouldStop = true;
 		CV.notify_all();
 		Worker.join();
 	}
 
-    void SendWriteRequest(nosFunctionExecuteParams* params)
-    {
-        nosEngine.LogI("WriteImage: Write requested");
+	void SendWriteRequest(nosFunctionExecuteParams* params)
+	{
+		nosEngine.LogI("WriteImage: Write requested");
 
-        nos::NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
-        
-        std::unique_lock<std::mutex> lock(Mutex);
-        Path = nos::Utf8ToPath(std::string((const char*)execParams[NSN_Path].Data->Data, execParams[NSN_Path].Data->Size));
-        IncludeAlpha = *(bool*)execParams[NSN_IncludeAlpha].Data->Data;
-        assert(Event == 0);
-        nosCmd cmd = vkss::BeginCmd(NOS_NAME("Write Image Copy To"), NodeId);
-        auto inputTex = vkss::DeserializeTextureInfo(execParams[NSN_In].Data->Data);
-        TempSrgbCopy = {};
+		nos::NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
 
-        nosResourceShareInfo tempSrgbInfo = inputTex;
-		tempSrgbInfo.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
-		tempSrgbInfo.Info.Texture.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST);
-		TempSrgbCopy = vkss::Resource::Create(tempSrgbInfo, "TempSrgbCopy");
-        
-        nosVulkan->Copy(cmd, &inputTex, &*TempSrgbCopy, 0);
-        nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = &Event };
-        nosVulkan->End(cmd, &endParams);
-        Write = true;
-        CV.notify_all();
-    }
+		std::unique_lock<std::mutex> lock(Mutex);
+		Path = nos::Utf8ToPath(std::string(execParams.GetPinData<const char*>(NSN_Path)));
+		IncludeAlpha = *execParams.GetPinData<bool>(NSN_IncludeAlpha);
+		assert(Event == 0);
+		nosCmd cmd = sys::vulkan::BeginCmd(NOS_NAME("Write Image Copy To"), NodeId);
+		auto inputTex = execParams.GetPinObject<sys::vulkan::Texture>(NSN_In);
+		TempSrgbCopy = {};
 
-    void WriteImageToFile() {
-        std::string utf8Path = nos::PathToUtf8(this->Path);
-        try {
-            if (!std::filesystem::exists(this->Path.parent_path()))
-                std::filesystem::create_directories(this->Path.parent_path());
-        }
-        catch (std::filesystem::filesystem_error& e) {
-            nosEngine.LogE("WriteImage - %s: %s", utf8Path.c_str(), e.what());
-            return;
-        }
-        nosEngine.LogI("WriteImage: Writing frame to file %s", utf8Path.c_str());
+		auto texInfo = *sys::vulkan::GetResourceInfo(inputTex);
 
-		auto optBuf = vkss::Resource::DownloadTextureSync(*TempSrgbCopy, "TempSrgbCopy Downloaded");
-        if (!optBuf) {
-            nosEngine.LogE("WriteImage: Unable to download frame");
-            return;
-        }
-        auto buf = std::move(*optBuf);
+		texInfo.Format = NOS_FORMAT_R8G8B8A8_SRGB;
+		texInfo.Usage = nosImageUsage(NOS_IMAGE_USAGE_TRANSFER_SRC | NOS_IMAGE_USAGE_TRANSFER_DST);
+		TempSrgbCopy = sys::vulkan::CreateTexture(texInfo, "TempSrgbCopy");
 
-        if (auto buf2write = nosVulkan->Map(&buf))
-        {
-            if(!IncludeAlpha)
-                for (size_t i = 3; i < buf.Info.Buffer.Size; i += 4)
-                    buf2write[i] = 0xff;
+		nosVulkan->Copy(cmd, inputTex, *TempSrgbCopy, 0);
+		nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &Event};
+		nosVulkan->End(cmd, &endParams);
+		Write = true;
+		CV.notify_all();
+	}
 
-            if (!stbi_write_png(utf8Path.c_str(), TempSrgbCopy->Info.Texture.Width, TempSrgbCopy->Info.Texture.Height, 4, buf2write, TempSrgbCopy->Info.Texture.Width * 4))
-                nosEngine.LogE("WriteImage: Unable to write frame to file", "");
-            else
-                nosEngine.LogI("WriteImage: Wrote frame to file %s", utf8Path.c_str());
-        }
-        TempSrgbCopy = {};
-    }
+	void WriteImageToFile()
+	{
+		assert(TempSrgbCopy.has_value());
+		std::string utf8Path = nos::PathToUtf8(this->Path);
+		try
+		{
+			if (!std::filesystem::exists(this->Path.parent_path()))
+				std::filesystem::create_directories(this->Path.parent_path());
+		}
+		catch (std::filesystem::filesystem_error& e)
+		{
+			nosEngine.LogE("WriteImage - %s: %s", utf8Path.c_str(), e.what());
+			return;
+		}
+		nosEngine.LogI("WriteImage: Writing frame to file %s", utf8Path.c_str());
 
-    static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
-    {
-        *count = 1;
-        if (!names || !fns)
-            return NOS_RESULT_SUCCESS;
+		auto tempSrgbInfo = *sys::vulkan::GetResourceInfo(*TempSrgbCopy);
+		TypedObjectRef<sys::vulkan::Buffer> downloadBuf{};
+		nosVulkan->Download(0, *TempSrgbCopy, &downloadBuf.GetStorage(), "TempSrgbCopy Download");
+		if (!downloadBuf.IsValid())
+		{
+			nosEngine.LogE("WriteImage: Unable to download frame");
+			return;
+		}
+		auto bufInfo = *sys::vulkan::GetResourceInfo(downloadBuf);
 
-        *names = NOS_NAME_STATIC("WriteImage_Save");
-        *fns = [](void* ctx, nosFunctionExecuteParams* params)
-        {
-            auto writeImage = (WriteImage*)ctx;
-            writeImage->SendWriteRequest(params);
-            return NOS_RESULT_SUCCESS;
-        };
+		if (auto buf2write = nosVulkan->Map(downloadBuf))
+		{
+			if (!IncludeAlpha)
+				for (size_t i = 3; i < bufInfo.Size; i += 4)
+					buf2write[i] = 0xff;
 
-        return NOS_RESULT_SUCCESS;
-    }
+			if (!stbi_write_png(
+					utf8Path.c_str(), tempSrgbInfo.Width, tempSrgbInfo.Height, 4, buf2write, tempSrgbInfo.Width * 4))
+				nosEngine.LogE("WriteImage: Unable to write frame to file", "");
+			else
+				nosEngine.LogI("WriteImage: Wrote frame to file %s", utf8Path.c_str());
+		}
+		TempSrgbCopy = {};
+	}
+
+	static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
+	{
+		*count = 1;
+		if (!names || !fns)
+			return NOS_RESULT_SUCCESS;
+
+		*names = NOS_NAME_STATIC("WriteImage_Save");
+		*fns = [](void* ctx, nosFunctionExecuteParams* params) {
+			auto writeImage = (WriteImage*)ctx;
+			writeImage->SendWriteRequest(params);
+			return NOS_RESULT_SUCCESS;
+		};
+
+		return NOS_RESULT_SUCCESS;
+	}
 };
 
 nosResult RegisterWriteImage(nosNodeFunctions* fn)
 {
-    NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_WriteImage, WriteImage, fn);
-    return NOS_RESULT_SUCCESS;
+	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_WriteImage, WriteImage, fn);
+	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos
+} // namespace nos::utilities

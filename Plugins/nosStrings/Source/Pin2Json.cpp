@@ -8,17 +8,21 @@ struct Pin2JsonNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams execParams(params);
-		auto& dataPin = execParams[NOS_NAME("Data")];
-		auto& jsonPin = execParams[NOS_NAME("Json")];
-		if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *dataPin.Data))
+		auto& dataPin = params[NOS_NAME("Data")];
+		bool success = false;
+		if (auto data = GetObjectDataView(*dataPin.Object))
 		{
-			SetPinValue(jsonPin.Name, outJson->AsBuffer());
-			ClearNodeStatusMessages();
+			if (auto outJson = GenerateJsonFromBuffer(dataPin.TypeName, *data))
+			{
+				SetPinValue(NOS_NAME("Json"), outJson->AsBuffer());
+				ClearNodeStatusMessages();
+				success = true;
+			}
 		}
-		else
+		
+		if (!success)
 			SetNodeStatusMessages({{{}, "Unable to convert pin value to JSON", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 		return NOS_RESULT_SUCCESS;
 	}

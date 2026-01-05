@@ -1,20 +1,19 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.pyutils",
-			"version": "0.13.1"
-		},
-		"display_name": "nos.pyutils",
-		"description": "",
-		"category": "Utilities",
-		"dependencies": [
-			{
-				"name": "nos.py",
-				"version": "1.1"
-			}
-		]
-	},
-	"binary_path": "./Binaries/nosPyutils",
-	"sdk_version": "40.0",
+    "info": {
+        "id": {
+            "name": "nos.pyutils",
+            "version": "1.0"
+        },
+        "display_name": "nos.pyutils",
+        "description": "",
+        "dependencies": [
+            {
+                "name": "nos.py",
+                "version": "2.0"
+            }
+        ]
+    },
+    "binary_path": "./Binaries/nosPyutils",
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

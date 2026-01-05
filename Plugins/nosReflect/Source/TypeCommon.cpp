@@ -17,8 +17,8 @@ namespace nos::reflect
 {
 
 bool AreFlatBuffersEqual(const nosTypeInfo* type,
-		                 void* first,
-		                 void* second)
+		                 const void* first,
+		                 const void* second)
 {
 	switch (type->BaseType)
 	{
@@ -29,8 +29,8 @@ bool AreFlatBuffersEqual(const nosTypeInfo* type,
 				return memcmp(first, second, type->ByteSize) == 0;
 			}
 			// This is a table.
-			auto firstTable = static_cast<flatbuffers::Table*>(first);
-			auto secondTable = static_cast<flatbuffers::Table*>(second);
+			auto firstTable = static_cast<const flatbuffers::Table*>(first);
+			auto secondTable = static_cast<const flatbuffers::Table*>(second);
 			for (int i = 0; i < type->FieldCount; ++i)
 			{
 				auto field = &type->Fields[i];

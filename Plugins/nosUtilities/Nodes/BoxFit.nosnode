@@ -32,9 +32,15 @@
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"data": {
-							"unscaled": true
-						}
+						"extensions": [
+							{
+								"name": "texture_options",
+								"type_name": "nos.sys.vulkan.TexturePinOptions",
+								"data": {
+									"unscaled": true
+								}
+							}
+						]
 					},
 					{
 						"name": "FitMode",

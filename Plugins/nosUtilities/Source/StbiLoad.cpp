@@ -38,11 +38,10 @@ struct StbiLoadContext : NodeContext
 {
 	decltype(Clock::now()) TimeStarted = Clock::now();
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
-		nos::NodeExecuteParams execParams(params);
-		nos::uuid outPinId = execParams[NSN_Out].Id;
-		bool sRGB = *InterpretPinValue<bool>(execParams[NSN_sRGB].Data->Data);
-		std::filesystem::path FilePath = nos::Utf8ToPath(InterpretPinValue<const char>(execParams[NSN_Path].Data->Data));
+	nosResult ExecuteNode(NodeExecuteParams const& params) override {
+		nos::uuid outPinId = params[NSN_Out].Id;
+		bool sRGB = *params.GetPinData<bool>(NSN_sRGB);
+		std::filesystem::path FilePath = nos::Utf8ToPath(params.GetPinData<const char*>(NSN_Path));
 		return LoadImage(FilePath, outPinId, sRGB);
 	}
 
@@ -88,22 +87,19 @@ struct StbiLoadContext : NodeContext
 				return NOS_RESULT_FAILED;
 			}
 
-			nosResourceShareInfo outResInfo = {
-				.Info = {.Type = NOS_RESOURCE_TYPE_TEXTURE,
-							.Texture = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R16G16B16A16_UNORM, .FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE}} };
+			nosTextureInfo texInfo = {.Width = (uint32_t)w, .Height = (uint32_t)h, .Format = NOS_FORMAT_R16G16B16A16_UNORM };
 
 			// unless reading raw bytes, this is useless since samplers convert to linear space automatically
 			if (sRGB)
-				outResInfo.Info.Texture.Format = NOS_FORMAT_R8G8B8A8_SRGB;
+				texInfo.Format = NOS_FORMAT_R8G8B8A8_SRGB;
 
-			auto outResOpt = vkss::Resource::Create(outResInfo, "ReadImage Texture");
-			if (!outResOpt)
+			auto outTex = sys::vulkan::CreateTexture(texInfo, "ReadImage Texture");
+			if (!outTex.IsValid())
 			{
 				nosEngine.LogE("Failed to create texture resource for image %s.", path.c_str());
 				UpdateStatus(State::Failed, path);
 				return NOS_RESULT_FAILED;
 			}
-			auto outRes = std::move(*outResOpt);
 
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams{
@@ -112,11 +108,12 @@ struct StbiLoadContext : NodeContext
 			.OutCmdHandle = &cmd
 			};
 			nosVulkan->Begin(&beginParams);
-			nosVulkan->ImageLoad(cmd, img, nosVec2u(w, h), NOS_FORMAT_R8G8B8A8_SRGB, &outRes, nullptr);
+			// TODO: Transfer filter?
+			nosVulkan->ImageLoad(cmd, img, nosVec2u(w, h), NOS_FORMAT_R8G8B8A8_SRGB, outTex, NOS_TEXTURE_FILTER_NEAREST);
 			nosCmdEndParams endParams{ .ForceSubmit = true };
 			nosVulkan->End(cmd, &endParams);
 
-			nosEngine.SetPinValue(outPinId, outRes.ToPinData());
+			nosEngine.SetPinObject(outPinId, outTex);
 
 			free(img);
 			UpdateStatus(State::Idle, path);

@@ -8,9 +8,8 @@ struct PrintLog : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* rawParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nos::NodeExecuteParams params(rawParams);
 		const char* log = params.GetPinData<const char>(NOS_NAME("Log"));
 		nos::log::LogLevel level = *params.GetPinData<nos::log::LogLevel>(NOS_NAME("LogLevel"));
 		switch (level)

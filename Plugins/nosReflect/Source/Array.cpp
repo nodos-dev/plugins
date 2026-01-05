@@ -9,6 +9,7 @@ struct ArrayNode : NodeContext
 	std::optional<nos::TypeInfo> Type = std::nullopt;
 	bool invalidNode = false;
 	static constexpr char InputElementPrefix[] = "Input ";
+	ObjectRef ArrayObject{};
 	nosResult OnCreate(nosFbNodePtr inNode) override
 	{
 		for (auto& pin : Pins | std::views::values)
@@ -34,14 +35,19 @@ struct ArrayNode : NodeContext
 			}
 		}
 		LoadPins();
-		UpdateOutputVectorSize();
 		return NOS_RESULT_SUCCESS;
+	}
+
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId newHandle) override
+	{
+		if (pinName == NSN_Output)
+			ArrayObject = newHandle;
 	}
 
 	void OnNodeUpdated(const nosNodeUpdate* update) override
 	{
-		if (update->Type == NOS_NODE_UPDATE_PIN_DELETED || update->Type == NOS_NODE_UPDATE_PIN_CREATED)
-			UpdateOutputVectorSize();
+		//if (update->Type == NOS_NODE_UPDATE_PIN_DELETED || update->Type == NOS_NODE_UPDATE_PIN_CREATED)
+		//	UpdateOutputVectorSize();
 	}
 
 	size_t GetInputElementIndexFromName(nos::Name name) {
@@ -111,7 +117,6 @@ struct ArrayNode : NodeContext
 			newTypeName = typeInfo->ElementType->TypeName;
 		}
 		Type = nos::TypeInfo(newTypeName);
-		UpdateOutputVectorSize();
 	}
 
 	std::vector<const NodePin*> GetInputs()
@@ -127,20 +132,6 @@ struct ArrayNode : NodeContext
 			i++;
 		}
 		return inputs;
-	}
-
-	bool SendOutputArray(std::vector<nosBuffer> const& values)
-	{
-		auto outPin = GetPin(NSN_Output);
-		if (!outPin || !Type)
-			return false;
-
-		uint32_t i = 0;
-		for (auto value : values) {
-			if (SetField(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, i++ } }, value) != NOS_RESULT_SUCCESS)
-				AddElementToArray(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, values.size() - 1} }, value);
-		}
-		return true;
 	}
 
 	void LoadPins()
@@ -159,34 +150,34 @@ struct ArrayNode : NodeContext
 		}
 	}
 
-	void UpdateOutputVectorSize()
-	{
-		if (!Type)
-			return;
-
-		if (auto buf = GetDefaultValueOfType(Type->TypeName))
-		{
-			std::vector<nosBuffer> datas;
-			for (unsigned int i = 0; i < GetInputs().size(); i++)
-				datas.push_back(*buf);
-
-			SendOutputArray(datas);
-		}
-	}
-
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
-		std::vector<nosBuffer> datas(params->PinCount - 1);
-		for (size_t i = 0, j = 0; i < params->PinCount; ++i)
+		auto& rawParams = *params.RawParams;
+		size_t arrayIndex = 0;
+		std::vector<nosObjectId> inputObjects;
+		nosName outputTypeName{};
+		for (size_t pinIndex = 0; pinIndex < rawParams.PinCount; pinIndex++)
 		{
-			if (params->Pins[i]->Name == NSN_Output)
+			auto& pin = rawParams.Pins[pinIndex];
+			if (pin->Name == NSN_Output)
+			{
+				outputTypeName = pin->TypeName;
 				continue;
-			datas[j++] = *params->Pins[i]->Data;
+			}
+			inputObjects.push_back(*pin->Object);
+			arrayIndex++;
 		}
-		return SendOutputArray(datas) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+		
+		ObjectRef newArrayObject{};
+		nosEngine.ObjectAPI->CreateArrayObject(outputTypeName, inputObjects.data(), inputObjects.size(), &newArrayObject.GetStorage());
+		if (!newArrayObject.IsValid())
+			return NOS_RESULT_FAILED;
+		ArrayObject = std::move(newArrayObject);
+		SetPinObject(NSN_Output, ArrayObject);
+		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnMenuRequested(nosContextMenuRequestPtr request) override
@@ -241,10 +232,25 @@ struct ArrayNode : NodeContext
 		if (!Type)
 			return;
 
-		AddElementToArray(GetPin(NSN_Output)->Id, { {nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, inputs.size()} }, { data.data(), data.size() });
+		// TODO: Transfer: Helpers.
+		ObjectRef newElement{};
+		auto res = nosEngine.ObjectAPI->Construct(typeName, {.Data = data.data(), .Size = data.size()}, &newElement.GetStorage());
+		if (res != NOS_RESULT_SUCCESS || !newElement.IsValid())
+		{
+			nosEngine.LogE("Failed to construct new element of type %s", typeName.AsString().c_str());
+			return;
+		}
+		nosArrayObjectDelta delta{
+			.Type = NOS_ARRAY_OBJECT_DELTA_TYPE_APPEND,
+			.Append = {
+				.Element = newElement
+			}
+		};
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
+		SetPinObject(NSN_Output, ArrayObject);
 	}
 
-	void SendRemoveElementRequest(std::optional<size_t> elementIndx = std::nullopt) {
+	void SendRemoveElementRequest(std::optional<size_t> elementIndex = std::nullopt) {
 		auto inputs = GetInputs();
 		if (inputs.size() == 0) {
 			nosEngine.LogE("You can't remove element from an empty array");
@@ -252,14 +258,21 @@ struct ArrayNode : NodeContext
 		}
 		flatbuffers::FlatBufferBuilder fbb;
 
-		if (!elementIndx)
-			elementIndx = inputs.size() - 1;
+		if (!elementIndex)
+			elementIndex = inputs.size() - 1;
 
-		std::vector<fb::UUID> id = { inputs[*elementIndx]->Id};
+		std::vector<fb::UUID> id = { inputs[*elementIndex]->Id};
 		HandleEvent(
 			CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &id)));
 
-		RemoveElementFromArray(GetPin(NSN_Output)->Id, { { nosDataPathComponentType::NOS_DATA_PATH_ARRAY_ELEMENT, *elementIndx } });
+		nosArrayObjectDelta delta{
+			.Type = NOS_ARRAY_OBJECT_DELTA_TYPE_REMOVE_ELEMENT,
+			.Remove = {
+				.Index = *elementIndex
+			}
+		};
+		nosEngine.ObjectAPI->CopyArrayObjectWithEdits(ArrayObject, &delta, 1, &ArrayObject.GetStorage());
+		SetPinObject(NSN_Output, ArrayObject);
 	}
 
 	void OnMenuCommand(uuid const& itemId, uint32_t cmd) override

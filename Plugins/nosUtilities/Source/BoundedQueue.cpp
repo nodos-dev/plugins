@@ -24,7 +24,7 @@ struct BoundedQueueNodeContext : RingNodeBase
 		return "BoundedQueue";
 	}
 	
-	nosResult CopyFrom(nosCopyInfo* cpy) override {
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override {
 		ResourceInterface::ResourceBase* slot = nullptr;
 		auto beginResult = CommonCopyFrom(cpy, &slot);
 		if(beginResult != NOS_RESULT_SUCCESS || !slot)
@@ -32,7 +32,7 @@ struct BoundedQueueNodeContext : RingNodeBase
 
 		Ring->ResInterface->Copy(slot, cpy, NodeId);
 
-		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		cpy->ShouldSetSourceFrameNumber = true;
 		cpy->FrameNumber = slot->FrameNumber;
 
 		Ring->EndPop(slot);
@@ -41,7 +41,7 @@ struct BoundedQueueNodeContext : RingNodeBase
 		return NOS_RESULT_SUCCESS;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override {
+	nosResult ExecuteNode(NodeExecuteParams const& params) override {
 		return ExecuteRingNode(params, false, NOS_NAME_STATIC("BoundedQueue"), false);
 	}
 };

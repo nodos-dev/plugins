@@ -437,43 +437,6 @@
 			}
 		},
 		{
-			"class_name": "PyPow",
-			"menu_info": {
-				"category": "Test",
-				"display_name": "PyPow"
-			},
-			"node": {
-				"class_name": "PyPow",
-				"contents_type": "Job",
-				"contents": {
-					"type": "nos.py.PythonNode",
-					"options": {
-						"source": "./Source/PowNode.py"
-					}
-				},
-				"pins": [
-					{
-						"name": "Base",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Exponent",
-						"type_name": "float",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "Result",
-						"type_name": "float",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-					}
-				]
-			}
-		},
-		{
 			"class_name": "CopyBuffer",
 			"menu_info": {
 				"category": "Test",

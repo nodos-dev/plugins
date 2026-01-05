@@ -11,11 +11,10 @@ struct CPUSleepNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto pins = GetPinValues(params);
-		bool busyWait = *GetPinValue<bool>(pins, NSN_BusyWait);
-		auto milliseconds = *GetPinValue<double>(pins, NSN_WaitTimeMS);
+		bool busyWait = *params.GetPinData<bool>(NSN_BusyWait);
+		auto milliseconds = *params.GetPinData<double>(NSN_WaitTimeMS);
 		if (busyWait)
 		{
 			auto end = std::chrono::high_resolution_clock::now() + std::chrono::nanoseconds(uint64_t(milliseconds * 1.0e6));

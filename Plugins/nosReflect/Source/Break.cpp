@@ -7,7 +7,24 @@ namespace nos::reflect
 struct BreakNode : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = std::nullopt;
+	nosObjectKind ObjectKind = NOS_OBJECT_KIND_PRIMITIVE;
 	size_t ArraySize = 0;
+
+	void OnTypeUpdated(nos::Name typeName, bool preserveDisplayNames)
+	{
+		if (typeName == NSN_TypeNameGeneric)
+			Type = std::nullopt;
+		else
+		{
+			Type = nos::TypeInfo(typeName);
+			if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetObjectKindFromTypeName(typeName, &ObjectKind))
+			{
+				SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
+				return;
+			}
+			LoadPins(preserveDisplayNames);
+		}
+	}
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -22,22 +39,25 @@ struct BreakNode : NodeContext
 			if (!ty)
 				// Has typename but not a valid type
 				return NOS_RESULT_FAILED;
-			Type = std::move(ty);
-			LoadPins(false);
+			OnTypeUpdated(typeName, true);
             break;
         }
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId newHandle) override
 	{ 
 		if (!Type || (*Type)->BaseType != NOS_BASE_TYPE_ARRAY || pinName != NSN_Input)
 			return;
-		auto pin = GetPin(pinName);
-		auto* vec = InterpretPinValue<VectorPinData<uint8_t>>(value);
-		if (vec->size() != ArraySize)
+		size_t size = 0;
+		if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArraySize(newHandle, &size))
 		{
-			ArraySize = vec->size();
+			SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid array object");
+			return;
+		}
+		if (size != ArraySize)
+		{
+			ArraySize = size;
 			SetOutputCount();
 		}
 	}
@@ -50,8 +70,7 @@ struct BreakNode : NodeContext
 		{
 			if (update->PinName != NSN_Input)
 				return;
-			Type = nos::TypeInfo(update->TypeName);
-			LoadPins(true);
+			OnTypeUpdated(update->TypeName, false);
 		}
 	}
 
@@ -72,7 +91,7 @@ struct BreakNode : NodeContext
 		}
 	};
 
-    void LoadPins(bool setDisplayName)
+    void LoadPins(bool preserveDisplayNames)
     {
         flatbuffers::FlatBufferBuilder fbb;
 		std::vector<flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate;
@@ -146,7 +165,7 @@ struct BreakNode : NodeContext
 				pinsToDelete.push_back(id);
 
         HandleEvent(CreateAppEvent(
-			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, setDisplayName ? typeName.c_str() : 0)));
+			fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToDelete, &pinsToCreate, 0, 0, 0, 0, 0, &pinsToUpdate, 0, 0, 0, preserveDisplayNames ? 0 : typeName.c_str())));
     }
 
 	void SetOutputCount()
@@ -204,27 +223,24 @@ struct BreakNode : NodeContext
 		auto it = LastServedPinValues.find(pinId);
 		if (it != LastServedPinValues.end() && it->second == value)
 			return;
-        nosEngine.SetPinValueDirect(pinId, value);
+        SetPinValue(pinId, value);
 		LastServedPinValues[pinId] = value;
 	}
 	
-    void SetOutputValues(const nosBuffer* buf)
+    void SetOutputValues(nosImmutableBuffer buf)
     {
-        if(!buf)
-			return;
-
         auto& type = *Type;
         switch (type->BaseType)
         {
         case NOS_BASE_TYPE_ARRAY: {
-        	const flatbuffers::Vector<uint8_t>* vec = InterpretPinValue<VectorPinData<uint8_t>>(*buf);
+        	const flatbuffers::Vector<uint8_t>* vec = InterpretObjectData<VectorObjectData<uint8_t>>(buf);
         	for (size_t i = 0; i < vec->size(); ++i)
         	{
         		auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
         		if (!pinId)
         			continue;
 				nosQueryBufferParams params = {};
-				params.Buffer = *buf;
+				params.Buffer = buf;
 				nosDataPathComponent path = { NOS_DATA_PATH_ARRAY_ELEMENT, i };
 				params.Path = &path;
 				params.PathLength = 1;
@@ -240,7 +256,7 @@ struct BreakNode : NodeContext
         }
         case NOS_BASE_TYPE_STRUCT:
         {
-            auto root = type->ByteSize ? (flatbuffers::Table*)buf->Data : InterpretPinValue<flatbuffers::Table>(*buf);
+			auto root = type->ByteSize ? (flatbuffers::Table*)buf.Data : InterpretObjectData<flatbuffers::Table>(buf);
             for (int i = 0; i < type->FieldCount; ++i)
             {
 				auto& field = type->Fields[i];
@@ -249,7 +265,7 @@ struct BreakNode : NodeContext
 					continue;
 
 				nosQueryBufferParams params = {};
-				params.Buffer = *buf;
+				params.Buffer = buf;
 				nosDataPathComponent path = {};
 				path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
 				path.Component.FieldName = field.Name;
@@ -266,13 +282,51 @@ struct BreakNode : NodeContext
         }
     }
 
-    nosResult ExecuteNode(nosNodeExecuteParams* params) override
+    nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if(!Type)
 			return NOS_RESULT_SUCCESS;
-		auto pins = NodeExecuteParams(params);
-		SetOutputValues(pins[NSN_Input].Data);
-		params->MarkAllOutsDirty = false;
+
+
+		switch (ObjectKind)
+		{
+		case NOS_OBJECT_KIND_PRIMITIVE:
+		case NOS_OBJECT_KIND_FOREIGN:
+		{
+			SetOutputValues(params.GetPinBuffer(NSN_Input));
+			break;
+		}
+		case NOS_OBJECT_KIND_ARRAY:
+		{
+			for (size_t i = 0; i < ArraySize; ++i)
+			{
+				auto pinId = GetPinId(nos::Name("Output " + std::to_string(i)));
+				if (!pinId)
+					continue;
+				ObjectRef elementRef;
+				if (NOS_RESULT_SUCCESS != nosEngine.ObjectAPI->GetArrayElement(params.GetPinObject(NSN_Input), i, &elementRef.GetStorage()))
+				{
+					nosEngine.LogE("Failed to get array element %d", i);
+					continue;
+				}
+				SetPinObject(*pinId, elementRef);
+			}
+			break;
+		}
+		case NOS_OBJECT_KIND_COMPOSITE:
+		{
+			auto inputObj = params.GetPinObject<CompositeObjectRef>(NSN_Input);
+			for (auto& field : inputObj)
+			{
+				auto pin = GetPin(field.Name);
+				if (!pin)
+					continue;
+				SetPinObject(pin->Id, field.Object);
+			}
+			break;
+		}
+		}
+		params.MarkAllOutsDirty = false;
 		return NOS_RESULT_SUCCESS;
 	}
 };

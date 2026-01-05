@@ -2,18 +2,26 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.31.4"
+			"version": "4.0.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
-				"version": "7.1"
+				"version": "8.0"
 			},
 			{
 				"name": "nos.math",
-				"version": "1.24"
+				"version": "2.0"
+			},
+			{
+				"name": "nos.sync",
+				"version": "11.1"
+			},
+			{
+				"name": "nos.audio",
+				"version": "1.0"
 			}
 		],
 		"category": "Utilities"
@@ -26,6 +34,6 @@
 			"path": "Types/Resources.json"
 		}
 	],
-	"sdk_version": "40.0",
+	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
 }

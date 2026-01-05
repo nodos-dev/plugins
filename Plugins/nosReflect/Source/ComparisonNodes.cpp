@@ -28,26 +28,23 @@ struct ComparisonNode : NodeContext
 			Type = nos::TypeInfo(update->TypeName);
 	}
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		if (!Type)
 			return NOS_RESULT_FAILED;
 
 		auto& type = *Type;
 
-		auto pins = NodeExecuteParams(params);
-		auto& A = pins[NSN_A];
-		auto& B = pins[NSN_B];
-		void* aPtr, *bPtr;
+		const void* aPtr, *bPtr;
 		if (!type->ByteSize && type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			aPtr = (void*)InterpretPinValue<flatbuffers::Table>(*A.Data);
-			bPtr = (void*)InterpretPinValue<flatbuffers::Table>(*B.Data);
+			aPtr = params.GetPinData<flatbuffers::Table>(NSN_A);
+			bPtr = params.GetPinData<flatbuffers::Table>(NSN_B);
 		}
 		else
 		{
-			aPtr = A.Data->Data;
-			bPtr = B.Data->Data;
+			aPtr = params.GetPinData<void>(NSN_A);
+			bPtr = params.GetPinData<void>(NSN_B);
 		}
 		bool yes = CompareFlatBuffers<TCompareResult>(type, aPtr, bPtr);
 		nos::Name pinName;
@@ -57,7 +54,7 @@ struct ComparisonNode : NodeContext
 			pinName = NSN_IsLess;
 		else if constexpr (TCompareResult == CompareResult::Greater)
 			pinName = NSN_IsGreater;
-		nosEngine.SetPinValueByName(NodeId, pinName, nosBuffer{.Data = &yes, .Size = sizeof(bool)});
+		SetPinValue(pinName, yes);
 		return NOS_RESULT_SUCCESS;
 	}
 };

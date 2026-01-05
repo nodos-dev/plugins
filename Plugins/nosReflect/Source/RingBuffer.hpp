@@ -1,0 +1,378 @@
+#pragma once
+
+#include <condition_variable>
+#include <mutex>
+#include <vector>
+
+#include <nosTransfer/Transfer.hpp>
+
+#include "Names.h"
+
+namespace nos::reflect
+{
+enum class ServeMode
+{
+	WaitUntilFull, // Ring Buffer
+	Immediate // Bounded Queue
+};
+
+template <typename T, ServeMode Mode = ServeMode::WaitUntilFull>
+class RingBuffer
+{
+public:
+	explicit RingBuffer(size_t capacity)
+		: Capacity(capacity),
+		Buffer(capacity),
+		Head(0),
+		Tail(0),
+		Size(0),
+		ExitRequested(false)
+	{
+	}
+
+	RingBuffer(const RingBuffer&) = delete;
+	RingBuffer& operator=(const RingBuffer&) = delete;
+
+	T* BeginPush(uint32_t timeoutMs)
+	{
+		std::unique_lock lock(Mutex);
+		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+			[this]() -> bool {
+				return Size < Capacity || ExitRequested.load();
+			}))
+			return nullptr; // timeout
+
+		if (ExitRequested.load())
+			return nullptr;
+
+		return &Buffer[Head];
+	}
+
+	void EndPush()
+	{
+		std::unique_lock lock(Mutex);
+		Head = (Head + 1) % Capacity;
+		++Size;
+		if (!WaitUntilFull || Size == Capacity)
+		{
+			WaitUntilFull = false;
+			ReadyForPopCV.notify_one();
+		}
+	}
+
+	T* BeginPop(uint32_t timeoutMs)
+	{
+		std::unique_lock lock(Mutex);
+		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+			[this]() -> bool {
+				if (ExitRequested)
+					return true;
+				if (WaitUntilFull)
+					return Size == Capacity;
+				return Size > 0;
+			}))
+			return nullptr; // timeout
+
+		if (ExitRequested.load())
+			return nullptr;
+
+		return &Buffer[Tail];
+	}
+
+	void EndPop()
+	{
+		std::unique_lock lock(Mutex);
+		Tail = (Tail + 1) % Capacity;
+		if (Size > 0)
+			--Size;
+		lock.unlock();
+		ReadyForPushCV.notify_one();
+	}
+
+	void Shutdown()
+	{
+		ExitRequested.store(true);
+		ReadyForPopCV.notify_all();
+		ReadyForPushCV.notify_all();
+	}
+
+	bool IsShuttingDown() const noexcept
+	{
+		return ExitRequested.load();
+	}
+
+	bool IsEmpty() const
+	{
+		std::unique_lock lock(Mutex);
+		return Size == 0;
+	}
+
+	bool IsFull() const
+	{
+		std::unique_lock lock(Mutex);
+		return Size == Capacity;
+	}
+
+	size_t GetSize() const
+	{
+		std::unique_lock lock(Mutex);
+		return Size;
+	}
+
+	size_t GetCapacity() const noexcept
+	{
+		return Capacity;
+	}
+
+	void Reset(std::optional<size_t> newCapacity = std::nullopt)
+	{
+		std::unique_lock lock(Mutex);
+		Head = 0;
+		Tail = 0;
+		Size = 0;
+		Buffer.clear();
+		if (newCapacity && *newCapacity != Capacity)
+			Capacity = *newCapacity;
+		Buffer.resize(Capacity);
+		if constexpr (Mode == ServeMode::WaitUntilFull)
+		{
+			WaitUntilFull = true;
+		}
+		else if constexpr (Mode == ServeMode::Immediate)
+		{
+			WaitUntilFull = false;
+		}
+		lock.unlock();
+		ExitRequested.store(false);
+		ReadyForPopCV.notify_all();
+		ReadyForPushCV.notify_all();
+	}
+
+private:
+	size_t Capacity;
+	std::vector<T> Buffer;
+	size_t Head;
+	size_t Tail;
+	size_t Size;
+
+	mutable std::mutex Mutex;
+	std::condition_variable ReadyForPopCV;
+	std::condition_variable ReadyForPushCV;
+	std::atomic_bool ExitRequested;
+	std::atomic_bool WaitUntilFull;
+};
+
+struct CopyingSlot : transfer::Slot
+{
+	uint64_t FrameNumber = 0;
+	CopyingSlot(nosObjectId handle) : transfer::Slot(handle) {}
+};
+
+struct ObjectSlot
+{
+	uint64_t FrameNumber = 0;
+	ObjectRef Object;
+	ObjectSlot() = default;
+	ObjectSlot(ObjectRef obj) : Object(std::move(obj)) {}
+	ObjectSlot(const ObjectSlot&) = delete;
+	ObjectSlot& operator=(const ObjectSlot&) = delete;
+	nosResult CopyFrom(ObjectRef& obj)
+	{
+		Object = std::move(obj);
+		return NOS_RESULT_SUCCESS;
+	}
+	bool IsDestinationCompatibleWith(nosObjectId obj) const
+	{
+		return true;
+	}
+	nosObjectId GetObject() const
+	{
+		return Object.GetObjectId();
+	}
+	
+};
+
+template <typename SlotType, ServeMode Mode>
+struct RingBufferNodeBase : NodeContext
+{
+	nosName TypeName = NSN_TypeNameGeneric;
+
+	RingBuffer<std::unique_ptr<SlotType>, Mode> Ring;
+	uint32_t Capacity = 1;
+	uint32_t RemainingRepeatCount = 0;
+	
+	bool CapacityUpdatedViaPathCommand = false;
+	
+	RingBufferNodeBase() : Ring(1)
+	{
+	}
+
+	void SendRingStats(std::string_view state) const
+	{
+		auto nodeName = NodeName.AsString();
+		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetSize()).c_str());
+		nosEngine.WatchLog((nodeName + " Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
+		nosEngine.WatchLog((nodeName + " State").c_str(), state.data());
+	}
+
+	void OnPathStart() override
+	{
+		Ring.Reset(Capacity);
+		RemainingRepeatCount = Capacity - 1;
+		SendScheduleRequest(Capacity);
+	}
+
+	void OnPathStop() override
+	{
+		Ring.Shutdown();
+	}
+
+	nosResult OnCreate(nosFbNodePtr node) override
+	{
+		for (auto pin : *node->pins())
+		{
+			auto name = nos::Name(pin->name()->c_str());
+			if (NSN_Output == name)
+			{
+				if (pin->type_name()->c_str() == NSN_TypeNameGeneric.AsString())
+					continue;
+				SetType(nos::Name(pin->type_name()->c_str()));
+			}
+		}
+		return NOS_RESULT_SUCCESS;
+	}
+
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override
+	{
+		SendRingStats("Pre Begin Pop");
+		if constexpr (Mode == ServeMode::WaitUntilFull)
+		{
+			if (RemainingRepeatCount > 0)
+			{
+				--RemainingRepeatCount;
+				return NOS_RESULT_SUCCESS;
+			}
+		}
+		std::unique_ptr<SlotType>* srcSlot;
+		{
+			ScopedProfilerEvent _({ .Name = "Wait For Read" });
+			srcSlot = Ring.BeginPop(100);
+		}
+		if (srcSlot && *srcSlot)
+		{
+			SendRingStats("Post Begin Pop");
+			auto& slot = *srcSlot;
+			SetPinObject(NSN_Output, slot->GetObject());
+			cpy->ShouldSetSourceFrameNumber = true;
+			cpy->FrameNumber = slot->FrameNumber; // TODO: Store frame number in ring buffer
+			SendScheduleRequest(1);
+			Ring.EndPop();
+			return NOS_RESULT_SUCCESS;
+		}
+		if (Ring.IsShuttingDown())
+			return NOS_RESULT_FAILED;
+		return NOS_RESULT_PENDING;
+	}
+
+	void OnPathCommand(const nosPathCommand* command) override
+	{
+		switch (command->Event)
+		{
+		case NOS_RING_SIZE_CHANGE: {
+				if (command->RingSize == 0)
+				{
+					nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
+					return;
+				}
+				CapacityUpdatedViaPathCommand = true;
+				SetPinValue(NOS_NAME("Capacity"), command->RingSize);
+				break;
+		}
+		default:
+			return;
+		}
+	}
+
+	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
+	{
+		if (NOS_NAME("Capacity") == pinName)
+		{
+			auto newCapacity = *InterpretObject<uint32_t>(handle);
+			if (newCapacity != Capacity)
+			{
+				Capacity = std::max(1u, newCapacity);
+				if (!CapacityUpdatedViaPathCommand)
+				{
+					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
+					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
+					CapacityUpdatedViaPathCommand = false;
+				}
+				SendPathRestart(NSN_Input);
+			}
+		}
+	}
+
+	void OnPinUpdated(nosPinUpdate const* update) override
+	{
+		if (TypeName != NSN_TypeNameGeneric)
+			return;
+		if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME)
+		{
+			if (update->PinName != NSN_Input)
+				return;
+			SetType(update->TypeName);
+		}
+	}
+
+	void SetType(nos::Name typeName)
+	{
+		TypeName = typeName;
+	}
+
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
+	{
+		if (NSN_TypeNameGeneric == TypeName)
+			return NOS_RESULT_FAILED;
+		auto inputObject = ObjectRef(*params[NSN_Input].Object);
+		if (!inputObject)
+			return NOS_RESULT_FAILURE;
+		auto capacity = *InterpretObject<uint32_t>(*params[NOS_NAME("Capacity")].Object);
+		capacity = std::max(1u, capacity);
+
+		SendRingStats("Pre Push");
+		std::unique_ptr<SlotType>* dstSlot;
+		{
+			ScopedProfilerEvent _({ .Name = "Wait For Empty Slot" });
+			dstSlot = Ring.BeginPush(100);
+		}
+		if (dstSlot)
+		{
+			if (!*dstSlot)
+				*dstSlot = std::make_unique<SlotType>(inputObject);
+			auto& slot = *dstSlot;
+			if (!slot->IsDestinationCompatibleWith(inputObject))
+			{
+				SendPathRestart(NSN_Input);
+				return NOS_RESULT_FAILURE;
+			}
+			slot->FrameNumber = params.FrameNumber;
+			auto res = slot->CopyFrom(inputObject);
+			Ring.EndPush();
+			SendRingStats("Post Push");
+			if (res != NOS_RESULT_SUCCESS)
+				return res;
+		}
+		else if (Ring.IsShuttingDown())
+		{
+			return NOS_RESULT_FAILED;
+		}
+		else
+		{
+			// Timeout
+			return NOS_RESULT_PENDING;
+		}
+		return NOS_RESULT_SUCCESS;
+	}
+};
+
+}

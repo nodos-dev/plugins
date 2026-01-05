@@ -81,21 +81,21 @@ T LerpVec(T start, T end, const double t)
 }
 
 template <typename T>
-nos::Buffer ScalarInterpolator(const nosBuffer from, const nosBuffer to, const double t)
+nos::Buffer ScalarInterpolator(const nosImmutableBuffer from, const nosImmutableBuffer to, const double t)
 {
 	T newData{};
-	T start = *reinterpret_cast<T const*>(from.Data);
-	T end = *reinterpret_cast<T const*>(to.Data);
+	T start = *static_cast<T const*>(from.Data);
+	T end = *static_cast<T const*>(to.Data);
 	newData = Lerp(start, end, t);
 	return nos::Buffer(&newData, sizeof(T));
 }
 
 template <typename T, size_t Dim>
-nos::Buffer VectorInterpolator(const nosBuffer from, const nosBuffer to, const double t)
+nos::Buffer VectorInterpolator(const nosImmutableBuffer from, const nosImmutableBuffer to, const double t)
 {
 	T newData{};
-	T start = *reinterpret_cast<T const*>(from.Data);
-	T end = *reinterpret_cast<T const*>(to.Data);
+	T start = *static_cast<T const*>(from.Data);
+	T end = *static_cast<T const*>(to.Data);
 	newData = LerpVec<T, Dim>(start, end, t);
 	return nos::Buffer(&newData, sizeof(T));
 }
@@ -138,10 +138,10 @@ InterpolatorManager::InterpolatorManager()
 	AddVectorInterpolators<fb::vec4u8, 4>(*this, NOS_NAME("nos.fb.vec4u8"));
 }
 
-void InterpolatorManager::AddBuiltinInterpolator(nos::Name name, std::function<nos::Buffer(const nosBuffer from, const nosBuffer to, const double t)> fn)
+void InterpolatorManager::AddBuiltinInterpolator(nos::Name name, std::function<nos::Buffer(nosImmutableBuffer from, nosImmutableBuffer to, double t)> fn)
 {
 	std::unique_lock lock(InterpolatorsMutex);
-	Interpolators[name] = [fn = std::move(fn)](const nosBuffer from, const nosBuffer to, const double t, nosBuffer* out)
+	Interpolators[name] = [fn = std::move(fn)](nosImmutableBuffer from, nosImmutableBuffer to, double t, nosBuffer* out)
 		{
 			*out = EngineBuffer::CopyFrom(fn(from, to, t)).Release();
 			return NOS_RESULT_SUCCESS;
@@ -167,7 +167,7 @@ bool InterpolatorManager::PluginUnloaded(nos::fb::TPluginIdentifier moduleId)
 	return true;
 }
 
-nosResult InterpolatorManager::Interpolate(nos::Name typeName, const nosBuffer from, const nosBuffer to, const double t, std::optional<EngineBuffer>& outBuf)
+nosResult InterpolatorManager::Interpolate(nos::Name typeName, const nosImmutableBuffer from, const nosImmutableBuffer to, const double t, std::optional<EngineBuffer>& outBuf)
 {
 	std::shared_lock lock(InterpolatorsMutex);
 	auto it = Interpolators.find(typeName);
@@ -227,7 +227,7 @@ bool PinDataAnimator::AddAnimation(uuid const& pinId,
 void PinDataAnimator::UpdatePin(uuid const& pinId, 
 								nosVec2u const& deltaSeconds,
 								uint64_t curFSM,
-								const nosBuffer* currentData)
+								nosImmutableBuffer currentData)
 {	
 	std::shared_lock lock(AnimationsMutex);
 	auto it = Animations.find(pinId);
@@ -253,13 +253,17 @@ void PinDataAnimator::UpdatePin(uuid const& pinId,
 		case editor::Interpolation::Lerp: {
 			auto* lerp = const_cast<editor::TLerp*>(animData.Interp.AsLerp());
 			if (lerp->start.empty())
-				lerp->start = std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData->Data), reinterpret_cast<uint8_t const*>(currentData->Data) + currentData->Size);
+				lerp->start =
+					std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData.Data),
+										 reinterpret_cast<uint8_t const*>(currentData.Data) + currentData.Size);
 			break;
 		}
 		case editor::Interpolation::CubicBezier: {
 			auto* cubic = const_cast<editor::TCubicBezier*>(animData.Interp.AsCubicBezier());
 			if (cubic->start.empty())
-				cubic->start = std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData->Data), reinterpret_cast<uint8_t const*>(currentData->Data) + currentData->Size);
+				cubic->start =
+					std::vector<uint8_t>(reinterpret_cast<uint8_t const*>(currentData.Data),
+										 reinterpret_cast<uint8_t const*>(currentData.Data) + currentData.Size);
 			break;
 		}
 		default: break;
