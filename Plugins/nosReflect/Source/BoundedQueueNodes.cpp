@@ -5,8 +5,17 @@
 namespace nos::reflect
 {
 
-using CopyingBoundedQueueNode = RingBufferNodeBase<CopyingSlot, ServeMode::Immediate>;
-using BoundedObjectQueueNode = RingBufferNodeBase<ObjectSlot, ServeMode::Immediate>;
+struct CopyingBoundedQueueNode : RingBufferNodeBase<CopyingSlot>
+{
+	CopyingBoundedQueueNode()
+		: RingBufferNodeBase(RingBufferServeMode::ServeImmediately) {}
+};
+
+struct BoundedObjectQueueNode : RingBufferNodeBase<ObjectSlot>
+{
+	BoundedObjectQueueNode()
+		: RingBufferNodeBase(RingBufferServeMode::ServeImmediately) {}
+};
 
 nosResult RegisterCopyingBoundedQueue(nosNodeFunctions* funcs)
 {

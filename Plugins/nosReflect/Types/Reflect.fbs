@@ -9,3 +9,9 @@ enum BinaryOperator : uint
     EXP,
     LOG,
 }
+
+enum RingBufferServeMode : uint
+{
+    WaitUntilFull,
+    ServeImmediately,
+}

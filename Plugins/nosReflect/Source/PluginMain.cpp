@@ -39,6 +39,7 @@ enum Nodes : size_t
 	CopyingBoundedQueue,
 	ObjectRingBuffer,
 	BoundedObjectQueue,
+	FrameRateConverter,
 	Count
 };
 
@@ -63,6 +64,7 @@ nosResult RegisterCopyingRingBuffer(nosNodeFunctions* node);
 nosResult RegisterCopyingBoundedQueue(nosNodeFunctions* node);
 nosResult RegisterObjectRingBuffer(nosNodeFunctions* node);
 nosResult RegisterBoundedObjectQueue(nosNodeFunctions* node);
+nosResult RegisterFrameRateConverter(nosNodeFunctions* node);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outFunctions)
 {
@@ -104,6 +106,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(CopyingBoundedQueue)
 			GEN_CASE_NODE(ObjectRingBuffer)
 			GEN_CASE_NODE(BoundedObjectQueue)
+			GEN_CASE_NODE(FrameRateConverter)
 		}
 	}
 

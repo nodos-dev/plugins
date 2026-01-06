@@ -12,8 +12,17 @@
 namespace nos::reflect
 {
 
-using CopyingRingBufferNode = RingBufferNodeBase<CopyingSlot, ServeMode::WaitUntilFull>;
-using ObjectRingBufferNode = RingBufferNodeBase<ObjectSlot, ServeMode::WaitUntilFull>;
+struct ObjectRingBufferNode : RingBufferNodeBase<ObjectSlot>
+{
+	ObjectRingBufferNode()
+		: RingBufferNodeBase(RingBufferServeMode::WaitUntilFull) {}
+};
+
+struct CopyingRingBufferNode : RingBufferNodeBase<CopyingSlot>
+{
+	CopyingRingBufferNode()
+		: RingBufferNodeBase(RingBufferServeMode::WaitUntilFull) {}
+};
 
 nosResult RegisterCopyingRingBuffer(nosNodeFunctions* funcs)
 {

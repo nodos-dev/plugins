@@ -7,27 +7,23 @@
 #include <nosTransfer/Transfer.hpp>
 
 #include "Names.h"
+#include "nosReflect/Reflect_generated.h"
 
 namespace nos::reflect
 {
-enum class ServeMode
-{
-	WaitUntilFull, // Ring Buffer
-	Immediate // Bounded Queue
-};
-
-template <typename T, ServeMode Mode = ServeMode::WaitUntilFull>
+template <typename T>
 class RingBuffer
 {
 public:
-	explicit RingBuffer(size_t capacity)
+	explicit RingBuffer(size_t capacity, RingBufferServeMode mode = RingBufferServeMode::WaitUntilFull)
 		: Capacity(capacity),
-		Buffer(capacity),
+		Buffer(),
 		Head(0),
 		Tail(0),
 		Size(0),
 		ExitRequested(false)
 	{
+		Reset(capacity, mode);
 	}
 
 	RingBuffer(const RingBuffer&) = delete;
@@ -53,9 +49,9 @@ public:
 		std::unique_lock lock(Mutex);
 		Head = (Head + 1) % Capacity;
 		++Size;
-		if (!WaitUntilFull || Size == Capacity)
+		if (State == RingState::Filling && Size == Capacity)
 		{
-			WaitUntilFull = false;
+			State = RingState::Serving;
 			ReadyForPopCV.notify_one();
 		}
 	}
@@ -67,7 +63,7 @@ public:
 			[this]() -> bool {
 				if (ExitRequested)
 					return true;
-				if (WaitUntilFull)
+				if (State == RingState::Filling)
 					return Size == Capacity;
 				return Size > 0;
 			}))
@@ -124,7 +120,7 @@ public:
 		return Capacity;
 	}
 
-	void Reset(std::optional<size_t> newCapacity = std::nullopt)
+	void Reset(std::optional<size_t> newCapacity = std::nullopt, std::optional<RingBufferServeMode> newMode = std::nullopt)
 	{
 		std::unique_lock lock(Mutex);
 		Head = 0;
@@ -134,18 +130,26 @@ public:
 		if (newCapacity && *newCapacity != Capacity)
 			Capacity = *newCapacity;
 		Buffer.resize(Capacity);
-		if constexpr (Mode == ServeMode::WaitUntilFull)
+		if (newMode)
+			Mode = *newMode;
+		switch (Mode)
 		{
-			WaitUntilFull = true;
-		}
-		else if constexpr (Mode == ServeMode::Immediate)
-		{
-			WaitUntilFull = false;
+		case RingBufferServeMode::ServeImmediately:
+			State = RingState::Serving;
+			break;
+		case RingBufferServeMode::WaitUntilFull:
+			State = RingState::Filling;
+			break;
 		}
 		lock.unlock();
 		ExitRequested.store(false);
 		ReadyForPopCV.notify_all();
 		ReadyForPushCV.notify_all();
+	}
+
+	RingBufferServeMode GetMode() const
+	{
+		return Mode;
 	}
 
 private:
@@ -155,11 +159,18 @@ private:
 	size_t Tail;
 	size_t Size;
 
+	enum class RingState
+	{
+		Filling,
+		Serving
+	};
+
 	mutable std::mutex Mutex;
 	std::condition_variable ReadyForPopCV;
 	std::condition_variable ReadyForPushCV;
 	std::atomic_bool ExitRequested;
-	std::atomic_bool WaitUntilFull;
+	RingState State = RingState::Filling;
+	RingBufferServeMode Mode = RingBufferServeMode::WaitUntilFull;
 };
 
 struct CopyingSlot : transfer::Slot
@@ -192,19 +203,39 @@ struct ObjectSlot
 	
 };
 
-template <typename SlotType, ServeMode Mode>
+template <typename SlotType>
 struct RingBufferNodeBase : NodeContext
 {
 	nosName TypeName = NSN_TypeNameGeneric;
 
-	RingBuffer<std::unique_ptr<SlotType>, Mode> Ring;
+	RingBuffer<std::unique_ptr<SlotType>> Ring;
 	uint32_t Capacity = 1;
 	uint32_t RemainingRepeatCount = 0;
-	
+
 	bool CapacityUpdatedViaPathCommand = false;
-	
-	RingBufferNodeBase() : Ring(1)
+
+	RingBufferNodeBase(RingBufferServeMode mode) : Ring(1, mode)
 	{
+		AddPinValueWatcher<uint32_t>(NOS_NAME("Capacity"), [this](const uint32_t* newCapacity, std::optional<const uint32_t*> oldCapacity)
+		{
+			if (*newCapacity != Capacity)
+			{
+				Capacity = std::max(1u, *newCapacity);
+				if (*newCapacity != Capacity)
+				{
+					nosEngine.LogW("%s: Capacity cannot be %lu.",  GetItemPath(NodeId).value_or("<unknown>").c_str(), *newCapacity);
+					SetPinValue(NOS_NAME("Capacity"), Capacity);
+					return;
+				}
+				if (!CapacityUpdatedViaPathCommand)
+				{
+					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
+					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
+					CapacityUpdatedViaPathCommand = false;
+				}
+				SendPathRestart(NSN_Input);
+			}
+		});
 	}
 
 	void SendRingStats(std::string_view state) const
@@ -245,7 +276,7 @@ struct RingBufferNodeBase : NodeContext
 	nosResult CopyFrom(nosCopyFromInfo* cpy) override
 	{
 		SendRingStats("Pre Begin Pop");
-		if constexpr (Mode == ServeMode::WaitUntilFull)
+		if (Ring.GetMode() == RingBufferServeMode::WaitUntilFull)
 		{
 			if (RemainingRepeatCount > 0)
 			{
@@ -290,25 +321,6 @@ struct RingBufferNodeBase : NodeContext
 		}
 		default:
 			return;
-		}
-	}
-
-	void OnPinObjectChanged(nos::Name pinName, uuid const& pinId, nosObjectId handle) override
-	{
-		if (NOS_NAME("Capacity") == pinName)
-		{
-			auto newCapacity = *InterpretObject<uint32_t>(handle);
-			if (newCapacity != Capacity)
-			{
-				Capacity = std::max(1u, newCapacity);
-				if (!CapacityUpdatedViaPathCommand)
-				{
-					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
-					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
-					CapacityUpdatedViaPathCommand = false;
-				}
-				SendPathRestart(NSN_Input);
-			}
 		}
 	}
 
