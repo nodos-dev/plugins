@@ -96,7 +96,7 @@ struct FrameRateConverterNode : NodeContext
 	void SendRingStats(const char* state) const
 	{
 		auto nodeName = NodeName.AsString();
-		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetSize()).c_str());
+		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetCurrentSize()).c_str());
 		nosEngine.WatchLog((nodeName + " Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
 		nosEngine.WatchLog((nodeName + " State").c_str(), state);
 	}
@@ -200,6 +200,8 @@ struct FrameRateConverterNode : NodeContext
 			SetPinObject(NSN_Output, outputArrayObject);
 			cpy->ShouldSetSourceFrameNumber = true;
 			cpy->FrameNumber = frameNumber;
+
+			// Maintain the ratio by distributing extra frames across multiple schedules
 			PendingScheduleRemainder += Ratio.y() % Ratio.x();
 			uint32_t newCount = Ratio.y() / Ratio.x();
 			newCount += PendingScheduleRemainder / Ratio.x();

@@ -20,7 +20,7 @@ public:
 		Buffer(capacity),
 		Head(0),
 		Tail(0),
-		Size(0),
+		CurrentSize(0),
 		Mode(mode),
 		ExitRequested(false)
 	{
@@ -43,7 +43,7 @@ public:
 		std::unique_lock lock(Mutex);
 		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
 			[this, count]() -> bool {
-				return (Size + count) <= Capacity || ExitRequested.load();
+				return (CurrentSize + count) <= Capacity || ExitRequested.load();
 			}))
 			return std::nullopt; // timeout
 
@@ -60,8 +60,9 @@ public:
 	{
 		std::unique_lock lock(Mutex);
 		Head = (Head + count) % Capacity;
-		Size += count;
-		if (State == RingState::Filling && Size == Capacity)
+		CurrentSize += count;
+		NOS_SOFT_CHECK(CurrentSize <= Capacity, "Push count cannot exceed ring capacity!");
+		if (State == RingState::Filling && CurrentSize == Capacity)
 		{
 			State = RingState::Serving;
 			ReadyForPopCV.notify_all();
@@ -84,8 +85,8 @@ public:
 				if (ExitRequested)
 					return true;
 				if (State == RingState::Filling)
-					return Size == Capacity;
-				return Size >= count;
+					return CurrentSize == Capacity;
+				return CurrentSize >= count;
 			}))
 			return std::nullopt; // timeout
 
@@ -102,7 +103,8 @@ public:
 	{
 		std::unique_lock lock(Mutex);
 		Tail = (Tail + count) % Capacity;
-		Size = (Size >= count) ? (Size - count) : 0;
+		NOS_SOFT_CHECK(CurrentSize >= count, "Pop count cannot be smaller than current ring size!");
+		CurrentSize = (CurrentSize >= count) ? (CurrentSize - count) : 0;
 		lock.unlock();
 		ReadyForPushCV.notify_all();
 	}
@@ -122,19 +124,19 @@ public:
 	bool IsEmpty() const
 	{
 		std::unique_lock lock(Mutex);
-		return Size == 0;
+		return CurrentSize == 0;
 	}
 
 	bool IsFull() const
 	{
 		std::unique_lock lock(Mutex);
-		return Size == Capacity;
+		return CurrentSize == Capacity;
 	}
 
-	size_t GetSize() const
+	size_t GetCurrentSize() const
 	{
 		std::unique_lock lock(Mutex);
-		return Size;
+		return CurrentSize;
 	}
 
 	size_t GetCapacity() const noexcept
@@ -147,7 +149,7 @@ public:
 		std::unique_lock lock(Mutex);
 		Head = 0;
 		Tail = 0;
-		Size = 0;
+		CurrentSize = 0;
 		Buffer.clear();
 		if (newCapacity && *newCapacity != Capacity)
 			Capacity = *newCapacity;
@@ -179,7 +181,7 @@ private:
 	std::vector<T> Buffer;
 	size_t Head;
 	size_t Tail;
-	size_t Size;
+	size_t CurrentSize;
 
 	enum class RingState
 	{
@@ -263,7 +265,7 @@ struct RingBufferNodeBase : NodeContext
 	void SendRingStats(std::string_view state) const
 	{
 		auto nodeName = NodeName.AsString();
-		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetSize()).c_str());
+		nosEngine.WatchLog((nodeName + " Size").c_str(), std::to_string(Ring.GetCurrentSize()).c_str());
 		nosEngine.WatchLog((nodeName + " Capacity").c_str(), std::to_string(Ring.GetCapacity()).c_str());
 		nosEngine.WatchLog((nodeName + " State").c_str(), state.data());
 	}
