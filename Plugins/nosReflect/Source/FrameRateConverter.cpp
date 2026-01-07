@@ -19,6 +19,7 @@ struct FrameRateConverterNode : NodeContext
 	uint32_t EffectiveCapacity = 1;
 	uint32_t RemainingRepeatCount = 0;
 	fb::vec2u Ratio = {1, 1};
+	uint32_t PendingScheduleRemainder = 0;
 
 	enum class StatusType
 	{
@@ -111,7 +112,18 @@ struct FrameRateConverterNode : NodeContext
 		auto producerExecCount = EffectiveCapacity / Ratio.x();
 		auto consumerExecCount = EffectiveCapacity / Ratio.y();
 		RemainingRepeatCount = consumerExecCount - 1;
+		PendingScheduleRemainder = 0;
 		SendScheduleRequest(producerExecCount);
+	}
+
+	void OverrideConsumerDeltaSeconds(nosVec2u& inoutDeltaSeconds) override
+	{
+		auto consumerDeltaSeconds = inoutDeltaSeconds;
+		// My producer arm will run Y frames producing X objects and consumer arm will run X frames consuming Y objects.
+		// Calculating the delta-seconds of my producer arm:
+		auto producerDeltaSeconds = nosVec2u{consumerDeltaSeconds.x * Ratio.x(), consumerDeltaSeconds.y * Ratio.y()};
+		// Override it:
+		inoutDeltaSeconds = producerDeltaSeconds;
 	}
 
 	void OnPathStop() override { Ring.Shutdown(); }
@@ -188,7 +200,12 @@ struct FrameRateConverterNode : NodeContext
 			SetPinObject(NSN_Output, outputArrayObject);
 			cpy->ShouldSetSourceFrameNumber = true;
 			cpy->FrameNumber = frameNumber;
-			SendScheduleRequest(1);
+			PendingScheduleRemainder += Ratio.y() % Ratio.x();
+			uint32_t newCount = Ratio.y() / Ratio.x();
+			newCount += PendingScheduleRemainder / Ratio.x();
+			PendingScheduleRemainder = PendingScheduleRemainder % Ratio.x();
+			if (newCount)
+				SendScheduleRequest(newCount);
 			return NOS_RESULT_SUCCESS;
 		}
 		return NOS_RESULT_PENDING;
