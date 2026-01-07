@@ -132,7 +132,7 @@ struct FrameRateConverterNode : NodeContext
 		std::optional<std::vector<Slot*>> maybeSrcSlots;
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Read"});
-			maybeSrcSlots = Ring.BeginPopMultiple(popCount, 100);
+			maybeSrcSlots = Ring.BeginPop(popCount, 100);
 		}
 		if (maybeSrcSlots)
 		{
@@ -140,7 +140,7 @@ struct FrameRateConverterNode : NodeContext
 			for (auto& srcSlot : srcSlots)
 				outputObjectRefs.push_back(std::move(srcSlot->Object));
 			frameNumber = srcSlots[0]->FrameNumber;
-			Ring.EndPopMultiple(popCount);
+			Ring.EndPop(popCount);
 			SendRingStats("Post Begin Pop");
 		}
 		else if (Ring.IsShuttingDown())
@@ -234,7 +234,7 @@ struct FrameRateConverterNode : NodeContext
 		std::optional<std::vector<Slot*>> maybeDstSlots;
 		{
 			ScopedProfilerEvent _({.Name = "Wait For Empty Slot"});
-			maybeDstSlots = Ring.BeginPushMultiple(pushCount, 100);
+			maybeDstSlots = Ring.BeginPush(pushCount, 100);
 		}
 		if (maybeDstSlots)
 		{
@@ -246,7 +246,7 @@ struct FrameRateConverterNode : NodeContext
 						  "Input array size (" + std::to_string(inSize) + ") does not match required input size (" +
 							  std::to_string(pushCount) + ")!",
 						  fb::NodeStatusMessageType::FAILURE);
-				Ring.EndPushMultiple(pushCount);
+				Ring.EndPush(pushCount);
 				SendRingStats("Post Push");
 				return NOS_RESULT_FAILED;
 			}
@@ -259,7 +259,7 @@ struct FrameRateConverterNode : NodeContext
 				dstSlot->Object = elem;
 				dstSlot->FrameNumber = params.FrameNumber;
 			}
-			Ring.EndPushMultiple(pushCount);
+			Ring.EndPush(pushCount);
 			SendRingStats("Post Push");
 			return NOS_RESULT_SUCCESS;
 		}

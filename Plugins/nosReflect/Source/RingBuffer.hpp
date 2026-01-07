@@ -17,10 +17,11 @@ class RingBuffer
 public:
 	explicit RingBuffer(size_t capacity, RingBufferServeMode mode = RingBufferServeMode::WaitUntilFull)
 		: Capacity(capacity),
-		Buffer(),
+		Buffer(capacity),
 		Head(0),
 		Tail(0),
 		Size(0),
+		Mode(mode),
 		ExitRequested(false)
 	{
 		Reset(capacity, mode);
@@ -31,20 +32,13 @@ public:
 
 	T* BeginPush(uint32_t timeoutMs)
 	{
-		std::unique_lock lock(Mutex);
-		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
-			[this]() -> bool {
-				return Size < Capacity || ExitRequested.load();
-			}))
-			return nullptr; // timeout
-
-		if (ExitRequested.load())
+		auto ret = BeginPush(1, timeoutMs);
+		if (!ret)
 			return nullptr;
-
-		return &Buffer[Head];
+		return (*ret)[0];
 	}
 
-	std::optional<std::vector<T*>> BeginPushMultiple(size_t count, uint32_t timeoutMs)
+	std::optional<std::vector<T*>> BeginPush(size_t count, uint32_t timeoutMs)
 	{
 		std::unique_lock lock(Mutex);
 		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
@@ -62,19 +56,7 @@ public:
 		return result;
 	}
 
-	void EndPush()
-	{
-		std::unique_lock lock(Mutex);
-		Head = (Head + 1) % Capacity;
-		++Size;
-		if (State == RingState::Filling && Size == Capacity)
-		{
-			State = RingState::Serving;
-			ReadyForPopCV.notify_one();
-		}
-	}
-
-	void EndPushMultiple(size_t count)
+	void EndPush(size_t count = 1)
 	{
 		std::unique_lock lock(Mutex);
 		Head = (Head + count) % Capacity;
@@ -88,24 +70,13 @@ public:
 
 	T* BeginPop(uint32_t timeoutMs)
 	{
-		std::unique_lock lock(Mutex);
-		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
-			[this]() -> bool {
-				if (ExitRequested)
-					return true;
-				if (State == RingState::Filling)
-					return Size == Capacity;
-				return Size > 0;
-			}))
-			return nullptr; // timeout
-
-		if (ExitRequested.load())
+		auto ret = BeginPop(1, timeoutMs);
+		if (!ret)
 			return nullptr;
-
-		return &Buffer[Tail];
+		return (*ret)[0];
 	}
 
-	std::optional<std::vector<T*>> BeginPopMultiple(size_t count, uint32_t timeoutMs)
+	std::optional<std::vector<T*>> BeginPop(size_t count, uint32_t timeoutMs)
 	{
 		std::unique_lock lock(Mutex);
 		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
@@ -127,17 +98,7 @@ public:
 		return result;
 	}
 
-	void EndPop()
-	{
-		std::unique_lock lock(Mutex);
-		Tail = (Tail + 1) % Capacity;
-		if (Size > 0)
-			--Size;
-		lock.unlock();
-		ReadyForPushCV.notify_one();
-	}
-
-	void EndPopMultiple(size_t count)
+	void EndPop(size_t count = 1)
 	{
 		std::unique_lock lock(Mutex);
 		Tail = (Tail + count) % Capacity;
