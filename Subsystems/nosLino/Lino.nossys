@@ -2,11 +2,11 @@
 	"info": {
 		"id": {
 			"name": "nos.sys.lino",
-			"version": "1.0.5"
+			"version": "1.0.6"
 		},
 		"display_name": "Lino Subsystem",
 		"description": "A Nodos subsystem for Lino",
 		"category": "Media"
 	},
-	"custom_types": [ "Types/Lino.fbs" ]
+	"custom_types": [ "Types/lino.fbs" ]
 }
