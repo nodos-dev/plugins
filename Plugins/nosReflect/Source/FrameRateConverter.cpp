@@ -13,6 +13,7 @@ struct FrameRateConverterNode : NodeContext
 
 	nos::Name TypeName = NSN_TypeNameGeneric;
 
+	RingBufferServeMode Mode = RingBufferServeMode::WaitUntilFull;
 	RingBuffer<Slot> Ring;
 	uint32_t Capacity = 1;
 	uint32_t EffectiveCapacity = 1;
@@ -23,17 +24,20 @@ struct FrameRateConverterNode : NodeContext
 	{
 		Ratio,
 		Capacity,
+		Mode,
+		Repeating
 	};
 
 	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
 
 	bool CapacityUpdatedViaPathCommand = false;
 
-	FrameRateConverterNode() : Ring(1, RingBufferServeMode::WaitUntilFull)
+	FrameRateConverterNode() : Ring(1, Mode)
 	{
-		Ring.Reset(EffectiveCapacity);
+		Ring.Reset(EffectiveCapacity, Mode);
 		AddPinValueWatcher<uint32_t>(NOS_NAME("Capacity"), std::bind(&FrameRateConverterNode::OnCapacityPinValueChanged, this, std::placeholders::_1, std::placeholders::_2));
 		AddPinValueWatcher<fb::vec2u>(NOS_NAME("Ratio"), std::bind(&FrameRateConverterNode::OnRatioPinValueChanged, this, std::placeholders::_1, std::placeholders::_2));
+		AddPinValueWatcher<RingBufferServeMode>(NOS_NAME("Mode"), std::bind(&FrameRateConverterNode::OnModePinValueChanged, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void OnRatioPinValueChanged(fb::vec2u const* newRatio, std::optional<fb::vec2u const*> oldRatio)
@@ -79,6 +83,15 @@ struct FrameRateConverterNode : NodeContext
 		SendPathRestart(NSN_Input);
 	}
 
+	void OnModePinValueChanged(RingBufferServeMode const* newMode, std::optional<RingBufferServeMode const*> oldMode)
+	{
+		if (*newMode != Mode)
+		{
+			Mode = *newMode;
+			SendPathRestart(NodeId);
+		}
+	}
+
 	void SendRingStats(const char* state) const
 	{
 		auto nodeName = NodeName.AsString();
@@ -93,9 +106,12 @@ struct FrameRateConverterNode : NodeContext
 		SetStatus(StatusType::Capacity,
 				  "Capacity: " + std::to_string(Capacity) + " (Effective: " + std::to_string(EffectiveCapacity) + ")",
 				  fb::NodeStatusMessageType::INFO);
-		Ring.Reset(EffectiveCapacity);
-		RemainingRepeatCount = Capacity - 1;
-		SendScheduleRequest(Capacity);
+		SetStatus(StatusType::Mode, "Starting Mode: " + std::string(Mode == RingBufferServeMode::WaitUntilFull ? "Wait Until Full" : "Serve Immediately"), fb::NodeStatusMessageType::INFO);
+		Ring.Reset(EffectiveCapacity, Mode);
+		auto producerExecCount = EffectiveCapacity / Ratio.x();
+		auto consumerExecCount = EffectiveCapacity / Ratio.y();
+		RemainingRepeatCount = consumerExecCount - 1;
+		SendScheduleRequest(producerExecCount);
 	}
 
 	void OnPathStop() override { Ring.Shutdown(); }
@@ -122,12 +138,16 @@ struct FrameRateConverterNode : NodeContext
 		{
 			if (RemainingRepeatCount > 0)
 			{
+				SetStatus(StatusType::Repeating,
+						  "Repeating: " + std::to_string(RemainingRepeatCount) + " repeats remaining",
+						  fb::NodeStatusMessageType::WARNING);
 				--RemainingRepeatCount;
 				return NOS_RESULT_SUCCESS;
 			}
 		}
+		ClearStatus(StatusType::Repeating);
 		std::vector<ObjectRef> outputObjectRefs;
-		uint64_t frameNumber = 0;
+		uint64_t frameNumber;
 		uint32_t popCount = Ratio.y();
 		std::optional<std::vector<Slot*>> maybeSrcSlots;
 		{
@@ -291,7 +311,6 @@ struct FrameRateConverterNode : NodeContext
 
 	void UpdateStatus()
 	{
-		ClearNodeStatusMessages();
 		std::vector<fb::TNodeStatusMessage> messages;
 		for (auto const& [_, msg] : StatusMessages)
 			messages.push_back(msg);

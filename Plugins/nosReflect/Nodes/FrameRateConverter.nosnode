@@ -58,6 +58,13 @@
 							"x": 1,
 							"y": 1
 						}
+					},
+					{
+						"name": "Mode",
+						"type_name": "nos.reflect.RingBufferServeMode",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "WaitUntilFull"
 					}
 				]
 			}
