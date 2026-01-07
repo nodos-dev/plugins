@@ -5,52 +5,78 @@ namespace nos::reflect
 
 struct FrameRateConverterNode : NodeContext
 {
+	struct Slot
+	{
+		ObjectRef Object;
+		uint64_t FrameNumber = 0;
+	};
+
 	nos::Name TypeName = NSN_TypeNameGeneric;
 
-	RingBuffer<std::unique_ptr<ObjectSlot>> Ring;
+	RingBuffer<Slot> Ring;
 	uint32_t Capacity = 1;
+	uint32_t EffectiveCapacity = 1;
 	uint32_t RemainingRepeatCount = 0;
 	fb::vec2u Ratio = {1, 1};
 
+	enum class StatusType
+	{
+		Ratio,
+		Capacity,
+	};
+
+	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
+
 	bool CapacityUpdatedViaPathCommand = false;
-	
+
 	FrameRateConverterNode() : Ring(1, RingBufferServeMode::WaitUntilFull)
 	{
-		Ring.Reset(Capacity);
-		AddPinValueWatcher<uint32_t>(NOS_NAME("Capacity"), [this](const uint32_t* newCapacity, std::optional<const uint32_t*> oldCapacity)
+		Ring.Reset(EffectiveCapacity);
+		AddPinValueWatcher<uint32_t>(NOS_NAME("Capacity"), std::bind(&FrameRateConverterNode::OnCapacityPinValueChanged, this, std::placeholders::_1, std::placeholders::_2));
+		AddPinValueWatcher<fb::vec2u>(NOS_NAME("Ratio"), std::bind(&FrameRateConverterNode::OnRatioPinValueChanged, this, std::placeholders::_1, std::placeholders::_2));
+	}
+
+	void OnRatioPinValueChanged(fb::vec2u const* newRatio, std::optional<fb::vec2u const*> oldRatio)
+	{
+		if (*newRatio == Ratio)
+			return;
+		if (newRatio->x() == 0 || newRatio->y() == 0)
 		{
-			if (*newCapacity != Capacity)
-			{
-				Capacity = std::max(1u, *newCapacity);
-				if (*newCapacity != Capacity)
-				{
-					nosEngine.LogW("%s: Capacity cannot be %lu.",  GetItemPath(NodeId).value_or("<unknown>").c_str(), *newCapacity);
-					SetPinValue(NOS_NAME("Capacity"), Capacity);
-					return;
-				}
-				if (!CapacityUpdatedViaPathCommand)
-				{
-					nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
-					nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
-					CapacityUpdatedViaPathCommand = false;
-				}
-				SendPathRestart(NSN_Input);
-			}
-		});
-		AddPinValueWatcher<fb::vec2u>(NOS_NAME("Ratio"), [this](const fb::vec2u* newRatio, std::optional<const fb::vec2u*> oldRatio)
+			nosEngine.LogW("%s: Ratio components cannot be 0.", GetItemPath(NodeId).value_or("<unknown>").c_str());
+			SetPinValue(NOS_NAME("Ratio"), Ratio);
+			return;
+		}
+		Ratio = *newRatio;
+		auto lcm = std::lcm(Ratio.x(), Ratio.y());
+		auto requiredEffectiveCapacity = lcm * Capacity;
+		if (requiredEffectiveCapacity != EffectiveCapacity)
 		{
-			if (*newRatio != Ratio)
-			{
-				if (newRatio->x() == 0 || newRatio->y() == 0)
-				{
-					nosEngine.LogW("%s: Ratio components cannot be 0.",  GetItemPath(NodeId).value_or("<unknown>").c_str());
-					SetPinValue(NOS_NAME("Ratio"), Ratio);
-					return;
-				}
-				Ratio = *newRatio;
-				SendPathRestart(NodeId);
-			}
-		});
+			EffectiveCapacity = requiredEffectiveCapacity;
+		}
+		SendPathRestart(NodeId);
+	}
+
+	void OnCapacityPinValueChanged(uint32_t const* newCapacity, std::optional<uint32_t const*> oldCapacity)
+	{
+		if (*newCapacity == Capacity)
+			return;
+		Capacity = std::max(1u, *newCapacity);
+		EffectiveCapacity = std::lcm(Ratio.x(), Ratio.y()) * Capacity;
+		if (*newCapacity != Capacity)
+		{
+			nosEngine.LogW("%s: Capacity cannot be %u.",
+						   GetItemPath(NodeId).value_or("<unknown>").c_str(),
+						   *newCapacity);
+			SetPinValue(NOS_NAME("Capacity"), Capacity);
+			return;
+		}
+		if (!CapacityUpdatedViaPathCommand)
+		{
+			nosPathCommand ringSizeChange{.Event = NOS_RING_SIZE_CHANGE, .RingSize = Capacity};
+			nosEngine.SendPathCommand(*GetPinId(NSN_Input), ringSizeChange);
+			CapacityUpdatedViaPathCommand = false;
+		}
+		SendPathRestart(NSN_Input);
 	}
 
 	void SendRingStats(const char* state) const
@@ -63,15 +89,16 @@ struct FrameRateConverterNode : NodeContext
 
 	void OnPathStart() override
 	{
-		Ring.Reset(Capacity);
+		nosEngine.LogD("%s: Effective Capacity set to %u", GetItemPath(NodeId).value_or("<unknown>").c_str(), EffectiveCapacity);
+		SetStatus(StatusType::Capacity,
+				  "Capacity: " + std::to_string(Capacity) + " (Effective: " + std::to_string(EffectiveCapacity) + ")",
+				  fb::NodeStatusMessageType::INFO);
+		Ring.Reset(EffectiveCapacity);
 		RemainingRepeatCount = Capacity - 1;
 		SendScheduleRequest(Capacity);
 	}
 
-	void OnPathStop() override
-	{
-		Ring.Shutdown();
-	}
+	void OnPathStop() override { Ring.Shutdown(); }
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -99,22 +126,21 @@ struct FrameRateConverterNode : NodeContext
 				return NOS_RESULT_SUCCESS;
 			}
 		}
-	uint32_t popCount = Ratio.y();
-	std::vector<ObjectRef> outputObjectRefs;
-	uint64_t frameNumber = 0;
-	while (popCount > 0)
-	{
-		std::unique_ptr<ObjectSlot>* srcSlot;
+		std::vector<ObjectRef> outputObjectRefs;
+		uint64_t frameNumber = 0;
+		uint32_t popCount = Ratio.y();
+		std::optional<std::vector<Slot*>> maybeSrcSlots;
 		{
-			ScopedProfilerEvent _({ .Name = "Wait For Read" });
-			srcSlot = Ring.BeginPop(100);
+			ScopedProfilerEvent _({.Name = "Wait For Read"});
+			maybeSrcSlots = Ring.BeginPopMultiple(popCount, 100);
 		}
-		if (srcSlot && *srcSlot)
+		if (maybeSrcSlots)
 		{
-			auto& slot = *srcSlot;
-			frameNumber = slot->FrameNumber;
-			outputObjectRefs.push_back(std::move(slot->Object));
-			Ring.EndPop();
+			auto& srcSlots = *maybeSrcSlots;
+			for (auto& srcSlot : srcSlots)
+				outputObjectRefs.push_back(std::move(srcSlot->Object));
+			frameNumber = srcSlots[0]->FrameNumber;
+			Ring.EndPopMultiple(popCount);
 			SendRingStats("Post Begin Pop");
 		}
 		else if (Ring.IsShuttingDown())
@@ -124,29 +150,27 @@ struct FrameRateConverterNode : NodeContext
 		else
 		{
 			// Timeout
-			if (outputObjectRefs.empty())
-				return NOS_RESULT_PENDING;
-			break;
+			return NOS_RESULT_PENDING;
 		}
-		--popCount;
-	}
-	if (!outputObjectRefs.empty())
-	{
-		// Convert ObjectRefs to IDs for the API call
-		std::vector<nosObjectId> outputObjects;
-		outputObjects.reserve(outputObjectRefs.size());
-		for (const auto& ref : outputObjectRefs)
-			outputObjects.push_back(ref.GetObjectId());
-		
-		ObjectRef outputArrayObject;
-		auto res = nosEngine.ObjectAPI->CreateArrayObject(
-			TypeName, outputObjects.data(), outputObjects.size(), &outputArrayObject.GetStorage());
-		if (res != NOS_RESULT_SUCCESS)
-			return res;
-		SetPinObject(NSN_Output, outputArrayObject);
-		SendScheduleRequest(1);
-		return NOS_RESULT_SUCCESS;
-	}
+		if (!outputObjectRefs.empty())
+		{
+			// Convert ObjectRefs to IDs for the API call
+			std::vector<nosObjectId> outputObjects;
+			outputObjects.reserve(outputObjectRefs.size());
+			for (const auto& ref : outputObjectRefs)
+				outputObjects.push_back(ref.GetObjectId());
+
+			ObjectRef outputArrayObject;
+			auto res = nosEngine.ObjectAPI->CreateArrayObject(
+				TypeName, outputObjects.data(), outputObjects.size(), &outputArrayObject.GetStorage());
+			if (res != NOS_RESULT_SUCCESS)
+				return res;
+			SetPinObject(NSN_Output, outputArrayObject);
+			cpy->ShouldSetSourceFrameNumber = true;
+			cpy->FrameNumber = frameNumber;
+			SendScheduleRequest(1);
+			return NOS_RESULT_SUCCESS;
+		}
 		return NOS_RESULT_PENDING;
 	}
 
@@ -155,17 +179,16 @@ struct FrameRateConverterNode : NodeContext
 		switch (command->Event)
 		{
 		case NOS_RING_SIZE_CHANGE: {
-				if (command->RingSize == 0)
-				{
-					nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
-					return;
-				}
-				CapacityUpdatedViaPathCommand = true;
-				SetPinValue(NOS_NAME("Capacity"), command->RingSize);
-				break;
+			if (command->RingSize == 0)
+			{
+				nosEngine.LogW((GetDisplayName() + " capacity cannot be 0.").c_str());
+				return;
+			}
+			CapacityUpdatedViaPathCommand = true;
+			SetPinValue(NOS_NAME("Capacity"), command->RingSize);
+			break;
 		}
-		default:
-			return;
+		default: return;
 		}
 	}
 
@@ -205,52 +228,74 @@ struct FrameRateConverterNode : NodeContext
 		ArrayObjectRef inputArrayObject = params.GetPinObject(NSN_Input);
 		if (!inputArrayObject)
 			return NOS_RESULT_FAILURE;
-		auto capacity = *InterpretObject<uint32_t>(*params[NOS_NAME("Capacity")].Object);
-		capacity = std::max(1u, capacity);
 
 		SendRingStats("Pre Push");
 		uint32_t pushCount = Ratio.x();
-		for (auto inputObject : inputArrayObject)
+		std::optional<std::vector<Slot*>> maybeDstSlots;
 		{
-			std::unique_ptr<ObjectSlot>* dstSlot;
+			ScopedProfilerEvent _({.Name = "Wait For Empty Slot"});
+			maybeDstSlots = Ring.BeginPushMultiple(pushCount, 100);
+		}
+		if (maybeDstSlots)
+		{
+			auto& dstSlots = *maybeDstSlots;
+			auto inSize = inputArrayObject.GetSize();
+			if (inSize != pushCount)
 			{
-				ScopedProfilerEvent _({ .Name = "Wait For Empty Slot" });
-				dstSlot = Ring.BeginPush(100);
-			}
-			if (dstSlot)
-			{
-				if (!*dstSlot)
-					*dstSlot = std::make_unique<ObjectSlot>(inputArrayObject);
-				auto& slot = *dstSlot;
-				if (!slot->IsDestinationCompatibleWith(inputArrayObject))
-				{
-					SendPathRestart(NSN_Input);
-					return NOS_RESULT_FAILURE;
-				}
-				slot->FrameNumber = params.FrameNumber;
-				auto res = slot->CopyFrom(inputObject);
-				Ring.EndPush();
+				SetStatus(StatusType::Ratio,
+						  "Input array size (" + std::to_string(inSize) + ") does not match required input size (" +
+							  std::to_string(pushCount) + ")!",
+						  fb::NodeStatusMessageType::FAILURE);
+				Ring.EndPushMultiple(pushCount);
 				SendRingStats("Post Push");
-				if (res != NOS_RESULT_SUCCESS)
-					return res;
-			}
-			else if (Ring.IsShuttingDown())
-			{
 				return NOS_RESULT_FAILED;
 			}
-			else
+			// TODO: Maybe a more understandable message here?
+			SetStatus(StatusType::Ratio, "In " + std::to_string(Ratio.x()) + ":" + std::to_string(Ratio.y()) + " Out", fb::NodeStatusMessageType::INFO);
+			uint32_t i = 0;
+			for (auto& elem : inputArrayObject)
 			{
-				// Timeout
-				return NOS_RESULT_PENDING;
+				auto& dstSlot = dstSlots[i++];
+				dstSlot->Object = elem;
+				dstSlot->FrameNumber = params.FrameNumber;
 			}
-			if (pushCount == 0)
-				nosEngine.LogW("%s: Item count in array exceeded input ratio!",  GetItemPath(NodeId).value_or("<unknown>").c_str());
-			if (pushCount != 0)
-				--pushCount;
+			Ring.EndPushMultiple(pushCount);
+			SendRingStats("Post Push");
+			return NOS_RESULT_SUCCESS;
 		}
-		if (pushCount > 0)
-			nosEngine.LogW("%s: Fewer items in input array than specified in ratio!",  GetItemPath(NodeId).value_or("<unknown>").c_str());
-		return NOS_RESULT_SUCCESS;
+		if (Ring.IsShuttingDown())
+			return NOS_RESULT_FAILED;
+		// Timeout
+		return NOS_RESULT_PENDING;
+	}
+
+	void SetStatus(StatusType statusType, std::string const& message, fb::NodeStatusMessageType messageType)
+	{
+		auto msg = fb::TNodeStatusMessage{{}, message, messageType};
+		if (StatusMessages[statusType] != msg)
+		{
+			StatusMessages[statusType] = msg;
+			UpdateStatus();
+		}
+	}
+
+	void ClearStatus(StatusType statusType)
+	{
+		auto it = StatusMessages.find(statusType);
+		if (it != StatusMessages.end())
+		{
+			StatusMessages.erase(it);
+			UpdateStatus();
+		}
+	}
+
+	void UpdateStatus()
+	{
+		ClearNodeStatusMessages();
+		std::vector<fb::TNodeStatusMessage> messages;
+		for (auto const& [_, msg] : StatusMessages)
+			messages.push_back(msg);
+		SetNodeStatusMessages(messages);
 	}
 };
 
@@ -260,4 +305,4 @@ nosResult RegisterFrameRateConverter(nosNodeFunctions* node)
 	return NOS_RESULT_SUCCESS;
 }
 
-}
+} // namespace nos::reflect

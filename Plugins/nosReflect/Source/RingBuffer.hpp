@@ -44,6 +44,24 @@ public:
 		return &Buffer[Head];
 	}
 
+	std::optional<std::vector<T*>> BeginPushMultiple(size_t count, uint32_t timeoutMs)
+	{
+		std::unique_lock lock(Mutex);
+		if (!ReadyForPushCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+			[this, count]() -> bool {
+				return (Size + count) <= Capacity || ExitRequested.load();
+			}))
+			return std::nullopt; // timeout
+
+		if (ExitRequested.load())
+			return std::nullopt;
+
+		std::vector<T*> result(count);
+		for (size_t i = 0; i < count; ++i)
+			result[i] = &Buffer[(Head + i) % Capacity];
+		return result;
+	}
+
 	void EndPush()
 	{
 		std::unique_lock lock(Mutex);
@@ -53,6 +71,18 @@ public:
 		{
 			State = RingState::Serving;
 			ReadyForPopCV.notify_one();
+		}
+	}
+
+	void EndPushMultiple(size_t count)
+	{
+		std::unique_lock lock(Mutex);
+		Head = (Head + count) % Capacity;
+		Size += count;
+		if (State == RingState::Filling && Size == Capacity)
+		{
+			State = RingState::Serving;
+			ReadyForPopCV.notify_all();
 		}
 	}
 
@@ -75,6 +105,28 @@ public:
 		return &Buffer[Tail];
 	}
 
+	std::optional<std::vector<T*>> BeginPopMultiple(size_t count, uint32_t timeoutMs)
+	{
+		std::unique_lock lock(Mutex);
+		if (!ReadyForPopCV.wait_for(lock, std::chrono::milliseconds(timeoutMs),
+			[this, count]() -> bool {
+				if (ExitRequested)
+					return true;
+				if (State == RingState::Filling)
+					return Size == Capacity;
+				return Size >= count;
+			}))
+			return std::nullopt; // timeout
+
+		if (ExitRequested.load())
+			return std::nullopt;
+
+		std::vector<T*> result(count);
+		for (size_t i = 0; i < count; ++i)
+			result[i] = &Buffer[(Tail + i) % Capacity];
+		return result;
+	}
+
 	void EndPop()
 	{
 		std::unique_lock lock(Mutex);
@@ -83,6 +135,15 @@ public:
 			--Size;
 		lock.unlock();
 		ReadyForPushCV.notify_one();
+	}
+
+	void EndPopMultiple(size_t count)
+	{
+		std::unique_lock lock(Mutex);
+		Tail = (Tail + count) % Capacity;
+		Size = (Size >= count) ? (Size - count) : 0;
+		lock.unlock();
+		ReadyForPushCV.notify_all();
 	}
 
 	void Shutdown()
@@ -187,7 +248,7 @@ struct ObjectSlot
 	ObjectSlot(ObjectRef obj) : Object(std::move(obj)) {}
 	ObjectSlot(const ObjectSlot&) = delete;
 	ObjectSlot& operator=(const ObjectSlot&) = delete;
-	nosResult CopyFrom(ObjectRef& obj)
+	nosResult CopyFrom(ObjectRef&& obj)
 	{
 		Object = std::move(obj);
 		return NOS_RESULT_SUCCESS;
@@ -368,7 +429,7 @@ struct RingBufferNodeBase : NodeContext
 				return NOS_RESULT_FAILURE;
 			}
 			slot->FrameNumber = params.FrameNumber;
-			auto res = slot->CopyFrom(inputObject);
+			auto res = slot->CopyFrom(std::move(inputObject));
 			Ring.EndPush();
 			SendRingStats("Post Push");
 			if (res != NOS_RESULT_SUCCESS)
