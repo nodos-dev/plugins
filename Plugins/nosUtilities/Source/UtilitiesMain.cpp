@@ -73,6 +73,7 @@ enum Utilities : int
 	HostVisibleBufferCopy,
 	LoadCubeLUT,
 	RepeatingJunction,
+	AlwaysDirty,
 	Count
 };
 
@@ -121,6 +122,7 @@ nosResult RegisterCopyResource(nosNodeFunctions*);
 nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
 nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
 nosResult RegisterRepeatingJunction(nosNodeFunctions*);
+nosResult RegisterAlwaysDirty(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -185,6 +187,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(HostVisibleBufferCopy)
 			GEN_CASE_NODE(LoadCubeLUT)
 			GEN_CASE_NODE(RepeatingJunction)
+			GEN_CASE_NODE(AlwaysDirty)
 		}
 	}
 	
