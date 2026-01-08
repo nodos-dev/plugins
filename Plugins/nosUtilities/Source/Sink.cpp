@@ -25,7 +25,7 @@ struct SinkNode : NodeContext
 	std::atomic<int64_t> PendingRequests = 0;
 	std::atomic<float> LatencyBudget = 1.0f;
 	bool HasDroppingMessage = false;
-	std::vector<nosGPUEvent> GPUFrameSyncEvents;
+	std::vector<nosGPUEvent> GPUFrameSyncEvents = std::vector<nosGPUEvent>(1);
 	uint64_t CurrentGPUEventIndex = 0;
 
 
