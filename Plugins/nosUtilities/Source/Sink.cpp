@@ -43,19 +43,18 @@ struct SinkNode : NodeContext
 		if (nosVulkan)
 		{
 			auto& gpuEvent = GPUFrameSyncEvents[CurrentGPUEventIndex];
+			if (gpuEvent)
+			{
+				if (nosVulkan->WaitGpuEvent(&gpuEvent, 100'000'000) != NOS_RESULT_SUCCESS)
+					return NOS_RESULT_PENDING;
+				gpuEvent = {};
+			}
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams = {.Name = NOS_NAME("Sink Submit"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 			nosVulkan->Begin(&beginParams);
 			nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &gpuEvent};
 			nosVulkan->End(cmd, &endParams);
-			uint64_t nextGPUEventIndex = (CurrentGPUEventIndex + 1) % GPUFrameSyncEvents.size();
-			auto& nextGpuEvent = GPUFrameSyncEvents[nextGPUEventIndex];
-			if (nextGpuEvent)
-			{
-				nosVulkan->WaitGpuEvent(&nextGpuEvent, UINT64_MAX);
-				nextGpuEvent = {};
-			}
-			CurrentGPUEventIndex = nextGPUEventIndex;
+			CurrentGPUEventIndex = (CurrentGPUEventIndex + 1) % GPUFrameSyncEvents.size();
 		}
 
 		if (!IsPeriodic())
@@ -100,7 +99,7 @@ struct SinkNode : NodeContext
 				for (auto& event : GPUFrameSyncEvents)
 				{
 					if (event)
-						nosVulkan->WaitGpuEvent(&event, 1000000000);
+						nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 					event = {};
 				}
 				GPUFrameSyncEvents.resize(newBufferSize);

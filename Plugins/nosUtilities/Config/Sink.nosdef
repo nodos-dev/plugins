@@ -34,6 +34,7 @@
 					},
 					{
 						"name": "GPUFrameBuffering",
+						"display_name": "GPU Frame Buffering",
 						"type_name": "ulong",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
