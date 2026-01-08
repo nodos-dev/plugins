@@ -33,13 +33,13 @@
 						"max": 1000.0
 					},
 					{
-						"name": "Wait",
-						"type_name": "bool",
+						"name": "GPUFrameBuffering",
+						"type_name": "ulong",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
-						"data": true,
-						"description": "Wait until GPU tasks are completed",
-						"advanced_property": true
+						"data": 3,
+						"min": 1,
+						"description": "Number of frames to buffer on the GPU before waiting. Higher values can improve performance."
 					},
 					{
 						"name": "AcceptsRepeat",

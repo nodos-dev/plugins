@@ -25,6 +25,8 @@ struct SinkNode : NodeContext
 	std::atomic<int64_t> PendingRequests = 0;
 	std::atomic<float> LatencyBudget = 1.0f;
 	bool HasDroppingMessage = false;
+	std::vector<nosGPUEvent> GPUFrameSyncEvents;
+	uint64_t CurrentGPUEventIndex = 0;
 
 
 	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode)
@@ -40,18 +42,20 @@ struct SinkNode : NodeContext
 	{
 		if (nosVulkan)
 		{
+			auto& gpuEvent = GPUFrameSyncEvents[CurrentGPUEventIndex];
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams = {.Name = NOS_NAME("Sink Submit"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 			nosVulkan->Begin(&beginParams);
-			nosGPUEvent event{};
-			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = Wait ? &event : nullptr };
+			nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &gpuEvent};
 			nosVulkan->End(cmd, &endParams);
-			if (Wait)
+			uint64_t nextGPUEventIndex = (CurrentGPUEventIndex + 1) % GPUFrameSyncEvents.size();
+			auto& nextGpuEvent = GPUFrameSyncEvents[nextGPUEventIndex];
+			if (nextGpuEvent)
 			{
-				util::Stopwatch sw;
-				nosVulkan->WaitGpuEvent(&event, 1000000000);
-				nosEngine.WatchLog("Sink GPU Wait", sw.ElapsedString().c_str());
+				nosVulkan->WaitGpuEvent(&nextGpuEvent, UINT64_MAX);
+				nextGpuEvent = {};
 			}
+			CurrentGPUEventIndex = nextGPUEventIndex;
 		}
 
 		if (!IsPeriodic())
@@ -85,6 +89,23 @@ struct SinkNode : NodeContext
 		if (NOS_NAME("LatencyBudget") == pinName)
 		{
 			LatencyBudget = *static_cast<float*>(value.Data);
+		}
+		if (NOS_NAME("GPUFrameBuffering") == pinName)
+		{
+			size_t newBufferSize = *static_cast<size_t*>(value.Data);
+			if (newBufferSize == 0)
+				newBufferSize = 1;
+			if (newBufferSize != GPUFrameSyncEvents.size())
+			{
+				for (auto& event : GPUFrameSyncEvents)
+				{
+					if (event)
+						nosVulkan->WaitGpuEvent(&event, 1000000000);
+					event = {};
+				}
+				GPUFrameSyncEvents.resize(newBufferSize);
+				CurrentGPUEventIndex = 0;
+			}
 		}
 	}
 
@@ -148,6 +169,13 @@ struct SinkNode : NodeContext
 	{
 		if (IsPeriodic())
 			StopThread();
+		// Wait all GPU events
+		for (auto& event : GPUFrameSyncEvents)
+		{
+			if (event)
+				nosVulkan->WaitGpuEvent(&event, 1000000000);
+			event = {};
+		}
 	}
 
 	void SinkThread()
