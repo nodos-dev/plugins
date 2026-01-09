@@ -13,6 +13,9 @@ namespace nos::utilities
 {
 using clock = std::chrono::high_resolution_clock;
 
+constexpr uint64_t VULKAN_TIMEOUT_BEFORE_LEAK =
+	3'000'000'000; // 3 seconds. This exists in case a GPU event is never signaled, we prefer to leak than hang forever.
+
 struct SinkNode : NodeContext
 {
 	std::mutex Mutex;
@@ -43,11 +46,7 @@ struct SinkNode : NodeContext
 							   {
 								   // Clear GPU events
 								   for (auto& event : *GPUFrameSyncEvents)
-								   {
-									   if (event)
-										   nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
-									   event = {};
-								   }
+									   DestroyGPUEvent(event);
 								   GPUFrameSyncEvents = std::nullopt;
 							   }
 							   else
@@ -66,11 +65,7 @@ struct SinkNode : NodeContext
 			if (GPUFrameBuffering != GPUFrameSyncEvents->size())
 			{
 				for (auto& event : *GPUFrameSyncEvents)
-				{
-					if (event)
-						nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
-					event = {};
-				}
+					DestroyGPUEvent(event);
 				GPUFrameSyncEvents->resize(GPUFrameBuffering);
 				CurrentGPUEventIndex = 0;
 			}
@@ -80,6 +75,18 @@ struct SinkNode : NodeContext
 	~SinkNode() override
 	{
 		StopThread();
+	}
+
+	void DestroyGPUEvent(nosGPUEvent& event)
+	{
+		if (event)
+		{
+			if (nosVulkan->WaitGpuEvent(&event, VULKAN_TIMEOUT_BEFORE_LEAK) != NOS_RESULT_SUCCESS)
+			{
+				nosEngine.LogW("Sink Node timed out waiting for GPU event during destruction, leaking the event to avoid hang.");
+			}
+			event = {};
+		}
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -200,9 +207,7 @@ struct SinkNode : NodeContext
 			// Wait all GPU events
 			for (auto& event : *GPUFrameSyncEvents)
 			{
-				if (event)
-					nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
-				event = {};
+				DestroyGPUEvent(event);
 			}
 		}
 	}
