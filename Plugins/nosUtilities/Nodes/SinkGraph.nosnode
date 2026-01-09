@@ -306,24 +306,6 @@
 									"contents": {}
 								},
 								{
-									"id": "d3dbc2e0-7d5a-4b51-8357-f233a1047844",
-									"name": "Wait",
-									"type_name": "bool",
-									"show_as": "PROPERTY",
-									"can_show_as": "PROPERTY_ONLY",
-									"data": true,
-									"def": true,
-									"meta_data_map": [
-										{
-											"key": "Category",
-											"value": ""
-										}
-									],
-									"contents_type": "JobPin",
-									"contents": {},
-									"description": "Wait until gpu tasks(gpu nodes etc.) are completed."
-								},
-								{
 									"id": "2e293aff-300d-4d6d-88e5-2c80324b9b23",
 									"name": "AcceptsRepeat",
 									"type_name": "bool",
@@ -383,6 +365,28 @@
 									"contents": {},
 									"description": "If schedule requests are arriving faster than they can be processed, the node will restart the path. This pins control the maximum time between request and fulfillment.",
 									"display_name": "Latency Budget (Seconds)"
+								},
+								{
+									"name": "HasGPUWork",
+									"display_name": "Has GPU Work",
+									"type_name": "bool",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": true,
+									"description": "Whether operations in this path involve GPU work. If true, the sink will communicate with the GPU & do frame buffering."
+								},
+								{
+									"id": "c2c62a65-c485-4e54-9833-b2f4c54001b8",
+									"name": "GPUFrameBuffering",
+									"type_name": "ulong",
+									"show_as": "PROPERTY",
+									"can_show_as": "PROPERTY_ONLY",
+									"data": 3,
+									"min": 1,
+									"def": 3,
+									"contents_type": "JobPin",
+									"contents": {},
+									"description": "Number of frames to buffer on the GPU before waiting. Higher values can improve performance."
 								}
 							],
 							"pos": {
