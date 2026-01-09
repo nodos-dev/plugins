@@ -62,7 +62,7 @@ public:
 		Head = (Head + count) % Capacity;
 		CurrentSize += count;
 		NOS_SOFT_CHECK(CurrentSize <= Capacity, "Push count cannot exceed ring capacity!");
-		if (State == RingState::Filling && CurrentSize == Capacity)
+		if (State != RingState::Filling || CurrentSize == Capacity)
 		{
 			State = RingState::Serving;
 			ReadyForPopCV.notify_all();
