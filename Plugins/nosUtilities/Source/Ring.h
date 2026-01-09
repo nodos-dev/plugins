@@ -798,7 +798,7 @@ struct RingNodeBase : NodeContext
 			resource->CheckNewResource(NSN_Input, *inputVal, std::nullopt);
 		if (auto alignmentVal = GetWatchedPinValue(NSN_Alignment))
 			resource->CheckNewResource(NSN_Alignment, *alignmentVal, std::nullopt);
-		size_t size = 1;
+		uint32_t size = 1;
 		if (auto sizeVal = GetWatchedPinValue(NSN_Size))
 			size = *InterpretPinValue<uint32_t>(*sizeVal);
 		Ring = std::make_unique<TRing>(size, std::move(resource));
