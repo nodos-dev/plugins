@@ -33,13 +33,23 @@
 						"max": 1000.0
 					},
 					{
-						"name": "Wait",
+						"name": "HasGPUWork",
+						"display_name": "Has GPU Work",
 						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"data": true,
-						"description": "Wait until GPU tasks are completed",
-						"advanced_property": true
+						"description": "Whether operations in this path involve GPU work. If true, the sink will communicate with the GPU & do frame buffering."
+					},
+					{
+						"name": "GPUFrameBuffering",
+						"display_name": "GPU Frame Buffering",
+						"type_name": "ulong",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": 3,
+						"min": 1,
+						"description": "Number of frames to buffer on the GPU before waiting. Higher values can improve performance."
 					},
 					{
 						"name": "AcceptsRepeat",

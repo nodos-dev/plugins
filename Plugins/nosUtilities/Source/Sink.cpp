@@ -13,6 +13,9 @@ namespace nos::utilities
 {
 using clock = std::chrono::high_resolution_clock;
 
+constexpr uint64_t VULKAN_TIMEOUT_BEFORE_LEAK =
+	3'000'000'000; // 3 seconds. This exists in case a GPU event is never signaled, we prefer to leak than hang forever.
+
 struct SinkNode : NodeContext
 {
 	std::mutex Mutex;
@@ -25,10 +28,48 @@ struct SinkNode : NodeContext
 	std::atomic<int64_t> PendingRequests = 0;
 	std::atomic<float> LatencyBudget = 1.0f;
 	bool HasDroppingMessage = false;
+	std::optional<std::vector<nosGPUEvent>> GPUFrameSyncEvents = std::nullopt;
+	size_t GPUFrameBuffering = 1;
+	uint64_t CurrentGPUEventIndex = 0;
 
 
-	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode)
-	{
+	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode) {
+		AddPinValueWatcher(NOS_NAME("HasGPUWork"),
+						   [this](nosBuffer const& newVal, std::optional<nos::Buffer> oldValue) {
+							   bool hasGpuWork = *static_cast<bool*>(newVal.Data);
+				SetPinOrphanState(NOS_NAME("GPUFrameBuffering"),
+								  hasGpuWork ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::ORPHAN,
+								  hasGpuWork ? nullptr : "Sink does not have GPU work to buffer.");
+							   if (hasGpuWork == GPUFrameSyncEvents.has_value())
+								   return;
+							   if (!hasGpuWork)
+							   {
+								   // Clear GPU events
+								   for (auto& event : *GPUFrameSyncEvents)
+									   DestroyGPUEvent(event);
+								   GPUFrameSyncEvents = std::nullopt;
+							   }
+							   else
+							   {
+								   GPUFrameSyncEvents = std::vector<nosGPUEvent>(GPUFrameBuffering);
+								   CurrentGPUEventIndex = 0;
+							   }
+						   });
+		AddPinValueWatcher(NOS_NAME("GPUFrameBuffering"), [this](nosBuffer const& newVal, auto&&) {
+			size_t newBufferSize = *static_cast<size_t*>(newVal.Data);
+			if (newBufferSize == 0)
+				newBufferSize = 1;
+			GPUFrameBuffering = newBufferSize;
+			if (!GPUFrameSyncEvents.has_value())
+				return;
+			if (GPUFrameBuffering != GPUFrameSyncEvents->size())
+			{
+				for (auto& event : *GPUFrameSyncEvents)
+					DestroyGPUEvent(event);
+				GPUFrameSyncEvents->resize(GPUFrameBuffering);
+				CurrentGPUEventIndex = 0;
+			}
+		});
 	}
 
 	~SinkNode() override
@@ -36,22 +77,35 @@ struct SinkNode : NodeContext
 		StopThread();
 	}
 
+	void DestroyGPUEvent(nosGPUEvent& event)
+	{
+		if (event)
+		{
+			if (nosVulkan->WaitGpuEvent(&event, VULKAN_TIMEOUT_BEFORE_LEAK) != NOS_RESULT_SUCCESS)
+			{
+				nosEngine.LogW("Sink Node timed out waiting for GPU event during destruction, leaking the event to avoid hang.");
+			}
+			event = {};
+		}
+	}
+
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		if (nosVulkan)
+		if (nosVulkan && GPUFrameSyncEvents)
 		{
+			auto& gpuEvent = (*GPUFrameSyncEvents)[CurrentGPUEventIndex];
+			if (gpuEvent)
+			{
+				if (nosVulkan->WaitGpuEvent(&gpuEvent, 100'000'000) != NOS_RESULT_SUCCESS)
+					return NOS_RESULT_PENDING;
+				gpuEvent = {};
+			}
 			nosCmd cmd{};
 			nosCmdBeginParams beginParams = {.Name = NOS_NAME("Sink Submit"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 			nosVulkan->Begin(&beginParams);
-			nosGPUEvent event{};
-			nosCmdEndParams endParams{ .ForceSubmit = true, .OutGPUEventHandle = Wait ? &event : nullptr };
+			nosCmdEndParams endParams{.ForceSubmit = true, .OutGPUEventHandle = &gpuEvent};
 			nosVulkan->End(cmd, &endParams);
-			if (Wait)
-			{
-				util::Stopwatch sw;
-				nosVulkan->WaitGpuEvent(&event, 1000000000);
-				nosEngine.WatchLog("Sink GPU Wait", sw.ElapsedString().c_str());
-			}
+			CurrentGPUEventIndex = (CurrentGPUEventIndex + 1) % GPUFrameSyncEvents->size();
 		}
 
 		if (!IsPeriodic())
@@ -148,6 +202,14 @@ struct SinkNode : NodeContext
 	{
 		if (IsPeriodic())
 			StopThread();
+		if (GPUFrameSyncEvents)
+		{
+			// Wait all GPU events
+			for (auto& event : *GPUFrameSyncEvents)
+			{
+				DestroyGPUEvent(event);
+			}
+		}
 	}
 
 	void SinkThread()
