@@ -201,7 +201,7 @@ struct SinkNode : NodeContext
 			for (auto& event : *GPUFrameSyncEvents)
 			{
 				if (event)
-					nosVulkan->WaitGpuEvent(&event, 1000000000);
+					nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 				event = {};
 			}
 		}
