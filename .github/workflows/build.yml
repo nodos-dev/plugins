@@ -34,11 +34,6 @@ on:
         required: false
         default: false
         type: boolean
-      last_build_tag:
-        description: 'Last Build Tag'
-        required: false
-        default: ''
-        type: string
       linux:
         description: 'Release for Linux'
         required: false
@@ -88,7 +83,6 @@ jobs:
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
-      last_build_tag: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.last_build_tag || '' }}
       linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
       run_tests: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.run_tests) || false }}
