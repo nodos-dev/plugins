@@ -1,4 +1,9 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+if (NOT WIN32)
+	nos_message(STATUS "nosWebRTC plugin is only supported on Windows platform.")
+	set_target_properties(${NOS_PLUGIN_TARGET} PROPERTIES EXCLUDE_FROM_ALL TRUE)
+	return()
+endif()
 
 if(WIN32)
 	target_compile_definitions(${NOS_PLUGIN_TARGET} PRIVATE
