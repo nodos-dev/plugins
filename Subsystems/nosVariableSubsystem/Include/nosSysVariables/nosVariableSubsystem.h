@@ -5,14 +5,11 @@
 #ifndef NOS_SYS_VARIABLES_H_INCLUDED
 #define NOS_SYS_VARIABLES_H_INCLUDED
 
-#if __cplusplus
-extern "C"
-{
-#endif
+NOS_BEGIN_C_LINKAGE
 
 #include <Nodos/Types.h>
 
-typedef void (*nosVariableUpdateCallback)(nosName name, void* userData, nosName typeName, const nosBuffer* value);
+typedef void (NOSAPI_CALL *nosVariableUpdateCallback)(nosName name, void* userData, nosName typeName, const nosBuffer* value);
 
 typedef struct nosVariableSubsystem {
 	nosResult (NOSAPI_CALL *Get)(nosName name, nosName* outTypeName, nosBuffer* outValue);
@@ -41,8 +38,6 @@ extern nosVariableSubsystem* nosVariables;
 
 #pragma endregion
 
-#if __cplusplus
-}
-#endif
+NOS_END_C_LINKAGE
 
 #endif

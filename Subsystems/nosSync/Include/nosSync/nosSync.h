@@ -9,10 +9,7 @@
 
 #include <Nodos/PluginAPI.h>
 
-#if __cplusplus
-extern "C"
-{
-#endif
+NOS_BEGIN_C_LINKAGE
 
 #define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1UL
 #define NOS_SYNC_NO_SYNC_EVENT_GROUP_ID 0UL
@@ -22,8 +19,8 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
-typedef nosResult (*nosResetEventPfn)(void* userData);
-typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
+typedef nosResult (NOSAPI_CALL *nosResetEventPfn)(void* userData);
+typedef nosResult(NOSAPI_CALL * nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
@@ -87,8 +84,6 @@ extern nosSyncSubsystem* nosSync;
 
 #pragma endregion
 
-#if __cplusplus
-}
-#endif
+NOS_END_C_LINKAGE
 
 #endif

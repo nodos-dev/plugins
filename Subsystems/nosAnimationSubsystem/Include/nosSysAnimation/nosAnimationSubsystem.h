@@ -6,7 +6,9 @@
 #define NOS_ANIMATION_SUBSYSTEM_H_INCLUDED
 #include "Nodos/Types.h"
 
-typedef nosResult(*nosAnimationInterpolateCallback)(nosImmutableBuffer from, nosImmutableBuffer to, double t, nosBuffer* outBuf);
+NOS_BEGIN_C_LINKAGE
+
+typedef nosResult(NOSAPI_CALL *nosAnimationInterpolateCallback)(nosImmutableBuffer from, nosImmutableBuffer to, double t, nosBuffer* outBuf);
 
 typedef struct nosAnimationInterpolator
 {
@@ -41,5 +43,6 @@ extern nosAnimationSubsystem* nosAnimation;
 
 #pragma endregion
 
+NOS_END_C_LINKAGE
 
 #endif // NOS_ANIMATION_SUBSYSTEM_H_INCLUDED
