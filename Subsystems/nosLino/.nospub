@@ -1,6 +1,6 @@
 {
     "release_globs": [
-        "*.nossys",
+        "*.nosplugin",
         "Types/**",
         "Include/**"
     ]
