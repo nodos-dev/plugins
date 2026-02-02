@@ -1,0 +1,208 @@
+{
+	"nodes": [
+		{
+			"class_name": "TextureMapper",
+			"menu_info": {
+				"category": "Mapping",
+				"display_name": "Texture Mapper",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.fb.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "AlphaBlend",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"display_name": "Alpha Blend",
+						"pin_category": "Advanced"
+					},
+					{
+						"name": "OutputResolution",
+						"display_name": "Output Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 3840,
+							"y": 2160
+						}
+					},
+					{
+						"name": "Input1",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input2",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input3",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input4",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"pin_category": "Texture1",
+						"name": "Texture1Resolution",
+						"display_name": "Resolution",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture1",
+						"name": "Texture1Pan",
+						"display_name": "Pan",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0,
+							"y": 0
+						}
+					},
+					{
+						"pin_category": "Texture1",
+						"name": "Texture1Rotation",
+						"display_name": "Rotation",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"min": "0",
+						"max": "360",
+						"step": "1"
+					},
+					{
+						"pin_category": "Texture2",
+						"name": "Texture2Resolution",
+						"display_name": "Resolution",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture2",
+						"name": "Texture2Pan",
+						"display_name": "Pan",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 0
+						}
+					},
+					{
+						"pin_category": "Texture2",
+						"name": "Texture2Rotation",
+						"display_name": "Rotation",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"min": "0",
+						"max": "360",
+						"step": "1"
+					},
+					{
+						"pin_category": "Texture3",
+						"name": "Texture3Resolution",
+						"display_name": "Resolution",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture3",
+						"name": "Texture3Pan",
+						"display_name": "Pan",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture3",
+						"name": "Texture3Rotation",
+						"display_name": "Rotation",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"min": "0",
+						"max": "360",
+						"step": "1"
+					},
+					{
+						"pin_category": "Texture4",
+						"name": "Texture4Resolution",
+						"display_name": "Resolution",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture4",
+						"name": "Texture4Pan",
+						"display_name": "Pan",
+						"type_name": "nos.fb.vec2i",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						}
+					},
+					{
+						"pin_category": "Texture4",
+						"name": "Texture4Rotation",
+						"display_name": "Rotation",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"min": "0",
+						"max": "360",
+						"step": "1"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

@@ -1,0 +1,25 @@
+{
+	"defaults": [
+		{
+			"type_name": "nos.Utilities2.CanvasLayer",
+			"def": {
+				"position": {
+					"x": 0,
+					"y": 0,
+					"z": 0
+				},
+				"rotation": 0.0,
+				"origin": {
+					"x": 0.5,
+					"y": 0.5
+				},
+				"size": {
+					"x": 960,
+					"y": 540
+				},
+				"blend_mode": 0,
+				"opacity": 1.0
+			}
+		}
+	]
+}

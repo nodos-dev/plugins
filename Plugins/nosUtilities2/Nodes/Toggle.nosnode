@@ -1,0 +1,32 @@
+{
+	"nodes": [
+		{
+			"class_name": "Toggle",
+			"menu_info": {
+				"category": "Experimental",
+				"display_name": "Toggle",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Value",
+						"type_name": "bool",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": true
+					}
+				],
+				"functions": [
+					{
+						"class_name": "Toggle",
+						"contents_type": "Job",
+						"pins": []
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

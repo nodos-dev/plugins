@@ -1,0 +1,40 @@
+{
+	"nodes": [
+		{
+			"class_name": "TemporalBlur",
+			"menu_info": {
+				"category": "Experimental",
+				"display_name": "Temporal Blur",
+				"name_aliases": []
+			},
+			"node": {
+				"description": "Blurs the image over time by averaging two or more source frames to produce each output frame.",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "FramesCount",
+						"type_name": "int",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 3,
+						"min": 1,
+						"max": 8
+					},
+					{
+						"name": "In",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}
