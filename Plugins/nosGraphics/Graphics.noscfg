@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.graphics",
-      "version": "0.1.0"
+      "version": "0.2.0"
     },
     "description": "Types & Nodes for graphics operations.",
     "display_name": "Graphics",
@@ -21,6 +21,7 @@
   "custom_types": [ "Config/Graphics.fbs" ],
   "node_definitions": [
     "Config/BillboardMask.nosdef",
+    "Config/BillboardPositions.nosdef",
     "Config/TrackToView.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",

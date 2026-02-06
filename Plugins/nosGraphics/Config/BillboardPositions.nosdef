@@ -1,0 +1,66 @@
+{
+	"nodes": [
+		{
+			"class_name": "BillboardPositions",
+			"menu_info": {
+				"category": "Rendering",
+				"display_name": "Billboard Positions"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Position",
+						"type_name": "nos.fb.vec3",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Width",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 100.0
+					},
+					{
+						"name": "Height",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 100.0
+					},
+					{
+						"name": "RenderView",
+						"type_name": "nos.graphics.RenderView",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "BottomLeft",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "BottomRight",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "TopLeft",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "TopRight",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
+}

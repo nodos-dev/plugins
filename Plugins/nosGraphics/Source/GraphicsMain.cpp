@@ -17,11 +17,13 @@ enum Nodes : int
 { // CPU nodes
 	TrackToView,
 	BillboardMask,
+	BillboardPositions,
 	Count
 };
 
 nosResult RegisterTrackToView(nosNodeFunctions*);
 nosResult RegisterBillboardMask(nosNodeFunctions*);
+nosResult RegisterBillboardPositions(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -44,6 +46,7 @@ struct PluginFunctions : nos::PluginFunctions
 			{
 				GEN_CASE_NODE(TrackToView)
 				GEN_CASE_NODE(BillboardMask)
+				GEN_CASE_NODE(BillboardPositions)
 			default: break;
 			}
 		}
