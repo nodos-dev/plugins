@@ -21,6 +21,9 @@ namespace nos
 			if (0 == inputs->size())
 				return NOS_RESULT_SUCCESS;
 
+			int size = inputs->size();
+
+
 			auto output = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Output));
 			auto outputSize = glm::vec2(output.Texture.Width, output.Texture.Height);
 			auto rgss = *params.GetPinData<bool>(NOS_NAME_STATIC("RGSS"));
@@ -42,7 +45,7 @@ namespace nos
 				if (!layer->texture())
 					continue;
 
-				auto texture = *arrayObj.GetElement<nos::CompositeObjectRef>(i)->GetField(NSN_Texture);
+				auto texture = *arrayObj.GetElement<nos::CompositeObjectRef>(i)->GetField(NOS_NAME("texture"));
 				textures.push_back(texture);
 				filters.push_back(NOS_TEXTURE_FILTER_LINEAR);
 				pos[last] = *layer->position();
