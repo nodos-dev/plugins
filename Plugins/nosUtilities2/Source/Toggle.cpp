@@ -41,7 +41,7 @@ namespace nos
 
     void RegisterToggleNode(nosNodeFunctions* nodeFunctions)
     {
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.Toggle"), ToggleContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Toggle"), ToggleContext, nodeFunctions);
     }
 
 } // namespace nos

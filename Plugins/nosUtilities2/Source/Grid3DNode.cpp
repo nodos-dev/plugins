@@ -119,7 +119,7 @@ public:
 
 void RegisterGrid3DNode(nosNodeFunctions* nodeFunctions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.Grid3D"), Grid3DNode, nodeFunctions);
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Grid3D"), Grid3DNode, nodeFunctions);
 }
 
 }

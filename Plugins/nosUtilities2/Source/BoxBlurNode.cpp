@@ -15,28 +15,8 @@ NOS_REGISTER_NAME(BOX_BLUR_PASS);
 
 struct BoxBlurContext : public NodeContext
 {
-    nos::ObjectRef IntermediateTexture;
-
-	void SetupIntermediateTexture(nosResourceInfo* outputTexture)
+	nos::ObjectRef SetupIntermediateTexture(nosResourceInfo* outputTexture)
 	{
-        if(IntermediateTexture.IsValid())
-        {
-            nosResourceInfo existingInfo = {};
-            nosVulkan->GetResourceInfo(IntermediateTexture, &existingInfo, nullptr);
-            if (existingInfo.Texture.Width == outputTexture->Texture.Width &&
-                existingInfo.Texture.Height == outputTexture->Texture.Height &&
-                existingInfo.Texture.Format == outputTexture->Texture.Format)
-            {
-                // Existing intermediate texture is valid
-                return;
-            }
-            else
-            {
-                // Release existing intermediate texture
-                IntermediateTexture = nos::ObjectRef();
-            }
-        }
-
 		nosResourceInfo info = {};
 		info.Type = NOS_RESOURCE_TYPE_TEXTURE;
 		info.Texture.Usage = nosImageUsage(NOS_IMAGE_USAGE_RENDER_TARGET | NOS_IMAGE_USAGE_SAMPLED);
@@ -44,7 +24,9 @@ struct BoxBlurContext : public NodeContext
 		info.Texture.Height = outputTexture->Texture.Height;
 		info.Texture.Format = outputTexture->Texture.Format;
 
-		nosVulkan->CreateResource(&info, 0, "BoxBlur_IntermediateTexture", &IntermediateTexture.GetStorage());
+        nos::ObjectRef texture = {};
+		nosVulkan->CreateResource(&info, 0, "BoxBlur_IntermediateTexture", &texture.GetStorage());
+        return texture;
 	}
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
@@ -53,8 +35,9 @@ struct BoxBlurContext : public NodeContext
 			return NOS_RESULT_INVALID_ARGUMENT;
 
 		auto outInfo = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Out));
-		SetupIntermediateTexture(&outInfo);
-
+        
+        nos::ObjectRef IntermediateTexture = SetupIntermediateTexture(&outInfo);
+        
 		float RedBlend   = *params.GetPinData<float>(NSN_RedBlend);
 		float GreenBlend = *params.GetPinData<float>(NSN_GreenBlend);
 		float BlueBlend  = *params.GetPinData<float>(NSN_BlueBlend);
@@ -103,21 +86,20 @@ struct BoxBlurContext : public NodeContext
 			nos::sys::vulkan::ShaderDataBinding(NSN_Direction, vertical),
 			nos::sys::vulkan::ShaderDataBinding(NSN_TexelSize, texelSize)
 		};
-
+        
 		boxBlurVertical.Bindings = verticalBindings.data();
 		boxBlurVertical.BindingCount = (u32)verticalBindings.size();
 		boxBlurVertical.Output = params.GetPinObject(NSN_Out);
 		nosVulkan->RunPass(cmd, &boxBlurVertical);
 		nosVulkan->End(cmd, 0);
-
+        
 		return NOS_RESULT_SUCCESS;
 	}
 };
 
 void RegisterBoxBlurNode(nosNodeFunctions* nodeFunctions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.BoxBlur"), BoxBlurContext, nodeFunctions);
-
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("BoxBlur"), BoxBlurContext, nodeFunctions);
 }
 
 } // namespace nos

@@ -93,7 +93,7 @@ public:
 
 void RegisterTemporalBlurNode(nosNodeFunctions* nodeFunctions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.TemporalBlur"), TemporalBlurContext, nodeFunctions);
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TemporalBlur"), TemporalBlurContext, nodeFunctions);
 }
 
 }

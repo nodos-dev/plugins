@@ -190,7 +190,7 @@ struct Cube3DLUTContext : NodeContext
 
 void RegisterCube3DLUTNode(nosNodeFunctions* nodeFunctions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.Cube3DLUT"), Cube3DLUTContext, nodeFunctions);
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Cube3DLUT"), Cube3DLUTContext, nodeFunctions);
 }
 
 }

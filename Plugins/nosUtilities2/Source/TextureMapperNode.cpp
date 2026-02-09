@@ -258,7 +258,7 @@ private:
 
 	void RegisterTextureMapperNode(nosNodeFunctions* nodeFunctions)
 	{
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.TextureMapper"), TextureMapperContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureMapper"), TextureMapperContext, nodeFunctions);
 	}
 
 } // namespace nos

@@ -94,7 +94,7 @@ namespace nos
 
     void RegisterCanvasMapperNode(nosNodeFunctions* nodeFunctions)
     {
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.CanvasMapper"), CanvasMapperContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("CanvasMapper"), CanvasMapperContext, nodeFunctions);
     }
 
 } // namespace nos

@@ -48,7 +48,7 @@ namespace nos
 
     void RegisterInterleaveNode(nosNodeFunctions* nodeFunctions)
     {
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.Interleave"), InterleaveContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Interleave"), InterleaveContext, nodeFunctions);
     }
 
 } // namespace nos

@@ -1037,7 +1037,7 @@ namespace nos
 
 	void RegisterMixerNode(nosNodeFunctions* nodeFunctions)
 	{
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.Mixer"), MixerContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Mixer"), MixerContext, nodeFunctions);
 	}
 
 } // namespace nos

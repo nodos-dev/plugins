@@ -83,7 +83,7 @@ namespace nos
 
     void RegisterDilateByAlphaNode(nosNodeFunctions* nodeFunctions)
     {
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.DilateByAlpha"), DilateByAlphaContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("DilateByAlpha"), DilateByAlphaContext, nodeFunctions);
     }
 
 } // namespace nos

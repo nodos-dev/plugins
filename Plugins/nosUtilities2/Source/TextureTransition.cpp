@@ -219,7 +219,7 @@ namespace nos
 
 	void RegisterTextureTransitionNode(nosNodeFunctions* nodeFunctions)
 	{
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.Utilities2.TextureTransition"), TextureTransitionContext, nodeFunctions);
+		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureTransition"), TextureTransitionContext, nodeFunctions);
 	}
 
 } // namespace nos

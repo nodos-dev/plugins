@@ -19,7 +19,6 @@ layout(location = 0) in vec2 uv;
 void main()
 {
 	vec4 Color = texture(In, uv);
-
 	float BlurSizeF = length(Params.BlurSize * Params.Direction);
 
 	int Radius = int(abs(BlurSizeF))+1;
