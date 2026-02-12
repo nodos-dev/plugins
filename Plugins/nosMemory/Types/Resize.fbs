@@ -1,4 +1,4 @@
-namespace nos.utilities;
+namespace nos.memory;
 
 enum ResizeMethod: uint
 {

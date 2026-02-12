@@ -1,7 +1,7 @@
 {
 	"nodes": [
 		{
-			"class_name": "nos.utilities.PSNR",
+			"class_name": "nos.imageprocessing.PSNR",
 			"menu_info": {
 				"category": "Measurement",
 				"display_name": "Peak Signal-to-Noise Ratio",
@@ -16,7 +16,7 @@
 			"node": {
 				"id": "b1352ee5-c13f-4c11-8ce0-e640db5a74e2",
 				"name": "PSNR",
-				"class_name": "nos.utilities.PSNR",
+				"class_name": "nos.imageprocessing.PSNR",
 				"pins": [
 					{
 						"id": "c3e1b1aa-ac9e-43b0-b549-611f569df6e9",
@@ -200,7 +200,7 @@
 						{
 							"id": "bc4828c0-e03b-494b-a1c2-e28327ca36ac",
 							"name": "MeanSquaredError",
-							"class_name": "nos.utilities.MeanSquaredError",
+							"class_name": "nos.imageprocessing.MeanSquaredError",
 							"pins": [
 								{
 									"id": "f4667213-c081-422b-a0af-1eecf75ea9d4",
@@ -640,12 +640,12 @@
 												{
 													"id": "66737aca-f95f-4368-a7e9-6553ed426640",
 													"name": "B",
-													"class_name": "nos.utilities.Swizzle",
+													"class_name": "nos.imageprocessing.Swizzle",
 													"pins": [
 														{
 															"id": "498c60db-cd76-498b-a1d0-a28fc5b973d0",
 															"name": "RedSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -662,7 +662,7 @@
 														{
 															"id": "4bc606dd-c896-4c18-9933-b6c2d6c9dab0",
 															"name": "RedChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Blue",
@@ -715,7 +715,7 @@
 														{
 															"id": "bafd5fee-0230-4de8-9820-76eb0fc747de",
 															"name": "GreenSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -732,7 +732,7 @@
 														{
 															"id": "40d093b4-1097-4a4b-8ac3-2b0cea05e109",
 															"name": "GreenChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Green",
@@ -785,7 +785,7 @@
 														{
 															"id": "01090ee2-33fa-4264-93c1-cd5f6c94f0c2",
 															"name": "BlueSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -802,7 +802,7 @@
 														{
 															"id": "c34ee81c-7ed6-48db-92b2-bb339a0d0807",
 															"name": "BlueChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Blue",
@@ -855,7 +855,7 @@
 														{
 															"id": "7be765db-5e2a-41b6-86c4-08943dd5ac0c",
 															"name": "AlphaSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input2",
@@ -872,7 +872,7 @@
 														{
 															"id": "4ff6d6e6-f218-4f5a-a282-a3493460a330",
 															"name": "AlphaChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Alpha",
@@ -1186,12 +1186,12 @@
 												{
 													"id": "6c2b3341-61ec-4d35-bf3e-517bdbb66ed0",
 													"name": "G",
-													"class_name": "nos.utilities.Swizzle",
+													"class_name": "nos.imageprocessing.Swizzle",
 													"pins": [
 														{
 															"id": "e5576f4c-eb92-425c-ae23-e04eb529aec6",
 															"name": "RedSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -1208,7 +1208,7 @@
 														{
 															"id": "7a1497e4-50fb-4ea1-8a74-261f67144706",
 															"name": "RedChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Green",
@@ -1261,7 +1261,7 @@
 														{
 															"id": "edea2a41-25e3-4b4f-9acb-1a9ad7d89976",
 															"name": "GreenSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -1278,7 +1278,7 @@
 														{
 															"id": "61fc9772-4f39-4709-809a-b94d63b8175f",
 															"name": "GreenChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Green",
@@ -1331,7 +1331,7 @@
 														{
 															"id": "5003c486-bb8b-4a5d-a41d-68616eba6e9e",
 															"name": "BlueSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -1348,7 +1348,7 @@
 														{
 															"id": "092c8057-2583-49cc-ba3f-3ab9f7e64375",
 															"name": "BlueChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Blue",
@@ -1401,7 +1401,7 @@
 														{
 															"id": "9a722563-1e05-4bfa-bfb0-758be75a9783",
 															"name": "AlphaSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input2",
@@ -1418,7 +1418,7 @@
 														{
 															"id": "ab3cb358-9a3b-4540-857d-ec311004036e",
 															"name": "AlphaChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Alpha",
@@ -1636,7 +1636,7 @@
 												{
 													"id": "41ec61c4-8676-491b-a362-a8dff3ec77b5",
 													"name": "Merge",
-													"class_name": "nos.utilities.Merge",
+													"class_name": "nos.memory.Merge",
 													"pins": [
 														{
 															"id": "94f470db-b382-4f42-801c-12a477dfa5cb",
@@ -1708,7 +1708,7 @@
 														{
 															"id": "71e6b284-26ff-4412-94bd-6530353f05b5",
 															"name": "Blend_Mode_0",
-															"type_name": "nos.utilities.BlendMode",
+															"type_name": "nos.memory.BlendMode",
 															"show_as": "PROPERTY",
 															"can_show_as": "INPUT_PIN_OR_PROPERTY",
 															"data": "Normal",
@@ -1726,7 +1726,7 @@
 														{
 															"id": "865f8928-f16a-40ce-9509-2b4dbc2b3cdc",
 															"name": "Blend_Mode_1",
-															"type_name": "nos.utilities.BlendMode",
+															"type_name": "nos.memory.BlendMode",
 															"show_as": "PROPERTY",
 															"can_show_as": "INPUT_PIN_OR_PROPERTY",
 															"data": "Add",
@@ -1889,7 +1889,7 @@
 														{
 															"id": "3e2e0b83-e012-4bde-aa18-f3f8705e9e36",
 															"name": "Blend_Mode_2",
-															"type_name": "nos.utilities.BlendMode",
+															"type_name": "nos.memory.BlendMode",
 															"show_as": "PROPERTY",
 															"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 															"data": "Add",
@@ -2019,12 +2019,12 @@
 												{
 													"id": "cff33462-1fb5-4c15-93bd-1660b9ddab2f",
 													"name": "R",
-													"class_name": "nos.utilities.Swizzle",
+													"class_name": "nos.imageprocessing.Swizzle",
 													"pins": [
 														{
 															"id": "7707468c-e7c7-4610-8d03-8616a04c14b2",
 															"name": "RedSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -2041,7 +2041,7 @@
 														{
 															"id": "5176fbe6-f9a8-44ca-86a9-929c1a9eecad",
 															"name": "RedChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Red",
@@ -2094,7 +2094,7 @@
 														{
 															"id": "0abce2c2-8418-411b-b2fb-3264eff9e8a3",
 															"name": "GreenSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -2111,7 +2111,7 @@
 														{
 															"id": "e003a374-26db-4071-920b-002abd628c4b",
 															"name": "GreenChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Green",
@@ -2164,7 +2164,7 @@
 														{
 															"id": "cf44ea9b-5855-4d92-a081-1994b2cd6ecc",
 															"name": "BlueSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input1",
@@ -2181,7 +2181,7 @@
 														{
 															"id": "d290fdde-da40-433e-91a3-769daa59678c",
 															"name": "BlueChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Blue",
@@ -2234,7 +2234,7 @@
 														{
 															"id": "7dd3a09d-1898-4224-8d4b-2cda5f74b42f",
 															"name": "AlphaSource",
-															"type_name": "nos.utilities.Source",
+															"type_name": "nos.imageprocessing.Source",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Input2",
@@ -2251,7 +2251,7 @@
 														{
 															"id": "a4fb01b1-c2cd-440c-9319-ad32695c00cd",
 															"name": "AlphaChannel",
-															"type_name": "nos.utilities.Channel",
+															"type_name": "nos.imageprocessing.Channel",
 															"show_as": "PROPERTY",
 															"can_show_as": "PROPERTY_ONLY",
 															"data": "Alpha",
@@ -2706,7 +2706,7 @@
 												{
 													"id": "af0dae2a-7c70-41fd-be0c-222ba1498436",
 													"name": "ReduceTexture",
-													"class_name": "nos.utilities.ReduceTexture",
+													"class_name": "nos.imageprocessing.ReduceTexture",
 													"pins": [
 														{
 															"id": "604ce520-e8c3-41f0-81cd-0afaaf15e877",

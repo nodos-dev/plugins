@@ -19,7 +19,7 @@
 				"pins": [
 					{
 						"name": "Output_Channel",
-						"type_name": "nos.utilities.TextureSwitcherChannel",
+						"type_name": "nos.imageprocessing.TextureSwitcherChannel",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"description": "Channel index to display on output",

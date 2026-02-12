@@ -21,7 +21,7 @@
 			"node": {
 				"id": "1a7149e2-a1c4-46ae-a4d8-97671e6917a8",
 				"name": "Timed Function Signaller",
-				"class_name": "nos.utilities.TimedFunctionSignaller",
+				"class_name": "nos.execution.TimedFunctionSignaller",
 				"pins": [
 					{
 						"id": "0179eb57-9b2d-47e9-9d90-40ed1e834cea",
@@ -70,7 +70,7 @@
 						{
 							"id": "e7ccc441-2757-4e1e-9c80-6becbded7c12",
 							"name": "PropagateExecution",
-							"class_name": "nos.utilities.PropagateExecution",
+							"class_name": "nos.execution.PropagateExecution",
 							"pins": [
 								{
 									"id": "5a63bf3c-4c4f-4664-8176-679fab1ad75f",
@@ -213,7 +213,7 @@
 						{
 							"id": "745a739d-c44d-4965-90ce-438546a0c52d",
 							"name": "CPUSleep",
-							"class_name": "nos.utilities.CPUSleep",
+							"class_name": "nos.execution.CPUSleep",
 							"pins": [
 								{
 									"id": "0564940c-4eb3-43c8-ad87-17adc163206f",

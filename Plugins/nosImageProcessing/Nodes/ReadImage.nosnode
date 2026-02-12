@@ -1,16 +1,16 @@
 {
 	"nodes": [
 		{
-			"class_name": "nos.utilities.ReadImage",
+			"class_name": "nos.imageprocessing.ReadImage",
 			"menu_info": {
 				"category": "Media",
-				"class_name": "nos.utilities.ReadImage",
+				"class_name": "nos.imageprocessing.ReadImage",
 				"display_name": "Read Image"
 			},
 			"node": {
 				"id": "e1e25a0d-0511-41ac-961f-4872f444af99",
 				"name": "Read Image",
-				"class_name": "nos.utilities.ReadImage",
+				"class_name": "nos.imageprocessing.ReadImage",
 				"pins": [
 					{
 						"id": "d7ebc9ed-520b-4149-a0b2-469a28b3df0c",
@@ -145,7 +145,7 @@
 						{
 							"id": "237e49b3-ff69-461e-94a0-89ae75905366",
 							"name": "STBI Load",
-							"class_name": "nos.utilities.StbiLoad",
+							"class_name": "nos.imageprocessing.StbiLoad",
 							"pins": [
 								{
 									"id": "668d45f9-f69d-4c12-bac1-663da3b5ee14",

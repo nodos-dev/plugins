@@ -25,7 +25,7 @@
 					},
 					{
 						"name": "Channel",
-						"type_name": "nos.utilities.ChannelViewerChannels",
+						"type_name": "nos.imageprocessing.ChannelViewerChannels",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"data": "A",
@@ -33,7 +33,7 @@
 					},
 					{
 						"name": "Format",
-						"type_name": "nos.utilities.ChannelViewerFormats",
+						"type_name": "nos.imageprocessing.ChannelViewerFormats",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"data": "Rec_709",

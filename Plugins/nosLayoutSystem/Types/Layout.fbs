@@ -1,6 +1,6 @@
 include "Builtins.fbs";
 
-namespace nos.utilities.layout;
+namespace nos.layout;
 
 enum LayoutType : uint
 {

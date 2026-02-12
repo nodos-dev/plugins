@@ -45,7 +45,7 @@
 					{
 						"name": "FitMode",
 						"display_name": "Fit Mode",
-						"type_name": "nos.utilities.BoxFitMode",
+						"type_name": "nos.imageprocessing.BoxFitMode",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "CONTAIN"

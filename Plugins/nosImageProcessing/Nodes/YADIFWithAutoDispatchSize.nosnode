@@ -442,7 +442,7 @@
 						{
 							"id": "bfd23637-c97c-4934-a29c-5cbfbf0b7d4c",
 							"name": "Calculate Dispatch Size",
-							"class_name": "nos.utilities.CalculateDispatchSize",
+							"class_name": "nos.imageprocessing.CalculateDispatchSize",
 							"pins": [
 								{
 									"id": "782dee85-a62c-47dd-aefb-bbd4acb10776",
@@ -1926,7 +1926,7 @@
 						{
 							"id": "6c8d6d4d-e2cb-4377-95b8-4ee87861c2ac",
 							"name": "YADIF",
-							"class_name": "nos.utilities.YADIF",
+							"class_name": "nos.imageprocessing.YADIF",
 							"pins": [
 								{
 									"id": "d7745518-7b55-457d-a15c-b82f33c27b70",

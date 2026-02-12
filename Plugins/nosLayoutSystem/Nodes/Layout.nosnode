@@ -1,7 +1,7 @@
 {
 	"nodes": [
 		{
-			"class_name": "nos.utilities.Layout",
+			"class_name": "nos.layout.Layout",
 			"menu_info": {
 				"category": "Layout",
 				"display_name": "Layout"
@@ -9,7 +9,7 @@
 			"node": {
 				"id": "991b228c-2f58-4acd-a79d-f5f92bca9e1e",
 				"name": "Layout",
-				"class_name": "nos.utilities.Layout",
+				"class_name": "nos.layout.Layout",
 				"pins": [
 					{
 						"id": "23396d01-4946-459b-b347-dea915060fb2",
@@ -472,7 +472,7 @@
 						{
 							"id": "7ac685eb-8681-4411-a87b-7b601d05a813",
 							"name": "LayoutDrawer (1)",
-							"class_name": "nos.utilities.LayoutDrawer",
+							"class_name": "nos.layout.LayoutDrawer",
 							"pins": [
 								{
 									"id": "f839cfbe-2452-4247-b467-a9ef0249d8c6",
@@ -758,7 +758,7 @@
 						{
 							"id": "f51ad438-36f9-43de-b242-b39c5c9e7d0b",
 							"name": "FreeOutputLayout",
-							"class_name": "nos.utilities.FreeOutputLayout",
+							"class_name": "nos.layout.FreeOutputLayout",
 							"pins": [
 								{
 									"id": "3b490af2-d8cb-4640-ab39-18dce4042a3b",
@@ -876,7 +876,7 @@
 						{
 							"id": "28f16744-cf54-4957-ae96-5d58a45f1a09",
 							"name": "FreeLayout (1)",
-							"class_name": "nos.utilities.FreeLayout",
+							"class_name": "nos.layout.FreeLayout",
 							"pins": [
 								{
 									"id": "34f4c576-6337-4f71-ab32-7967f752dccf",
@@ -956,7 +956,7 @@
 						{
 							"id": "b7d1620b-4e77-4ca5-aea6-265af867ba04",
 							"name": "GridLayout",
-							"class_name": "nos.utilities.GridLayout",
+							"class_name": "nos.layout.GridLayout",
 							"pins": [
 								{
 									"id": "a59b1b4b-e316-4c51-b046-9afdb948228b",

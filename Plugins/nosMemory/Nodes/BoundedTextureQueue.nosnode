@@ -10,11 +10,11 @@
           "buffer"
 				]
 			},
-      "class_name": "nos.utilities.BoundedTextureQueue",
+      "class_name": "nos.memory.BoundedTextureQueue",
       "node": {
         "id": "035f6ada-e05f-4122-b35f-4620ac084c77",
         "name": "Bounded Queue",
-        "class_name": "nos.utilities.BoundedTextureQueue",
+        "class_name": "nos.memory.BoundedTextureQueue",
         "description": "A bounded queue that cycles through a set of textures, providing them on request and ensuring proper synchronization between GPU and Host usage.",
         "pins": [
           {
@@ -232,7 +232,7 @@
                   {
                     "id": "b1cd4b40-7ac6-4b44-86f2-fbe033efa47a",
                     "name": "CopyTexture",
-                    "class_name": "nos.utilities.CopyResource",
+                    "class_name": "nos.memory.CopyResource",
                     "pins": [
                       {
                         "id": "a67ffb69-7062-4fda-a439-458028498c3b",
@@ -473,7 +473,7 @@
                   {
                     "id": "bc8e6d4e-deb6-4339-899c-fa70b5754633",
                     "name": "TextureProvider",
-                    "class_name": "nos.utilities.TextureProvider",
+                    "class_name": "nos.memory.TextureProvider",
                     "pins": [
                       {
                         "id": "8650f8ab-3779-426e-99a9-051612cfee59",
@@ -1502,7 +1502,7 @@
                   {
                     "id": "dd83785e-3f35-489a-a49a-fb9e42c13a23",
                     "name": "CopyResource",
-                    "class_name": "nos.utilities.CopyResource",
+                    "class_name": "nos.memory.CopyResource",
                     "pins": [
                       {
                         "id": "d6225260-12d7-4704-a470-e11b7764b85c",
@@ -1974,7 +1974,7 @@
                   {
                     "id": "5f6be73d-e9e4-4a84-be0e-66e062debd77",
                     "name": "TextureProvider (1)",
-                    "class_name": "nos.utilities.TextureProvider",
+                    "class_name": "nos.memory.TextureProvider",
                     "pins": [
                       {
                         "id": "1675c23a-05de-492d-ab1e-13ab2e2780a5",

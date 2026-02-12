@@ -424,7 +424,7 @@
 						{
 							"id": "d1ad566d-5cd3-4c82-b69f-5a97a20144f7",
 							"name": "LayoutDrawer",
-							"class_name": "nos.utilities.LayoutDrawer",
+							"class_name": "nos.layout.LayoutDrawer",
 							"pins": [
 								{
 									"id": "9fe817d9-41a0-4474-9d29-c38bec6402c4",
@@ -848,7 +848,7 @@
 						{
 							"id": "40ee4cec-c302-4651-b86d-a06f35908e08",
 							"name": "GridLayout",
-							"class_name": "nos.utilities.GridLayout",
+							"class_name": "nos.layout.GridLayout",
 							"pins": [
 								{
 									"id": "e506c895-2b61-4b76-9c6d-87621a4ceff6",

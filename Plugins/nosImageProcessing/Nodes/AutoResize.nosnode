@@ -219,7 +219,7 @@
 						{
 							"id": "1fbb3d3c-b1f1-4307-a654-974b5a700554",
 							"name": "Resize",
-							"class_name": "nos.utilities.Resize",
+							"class_name": "nos.memory.Resize",
 							"pins": [
 								{
 									"id": "259e2004-16f2-44f4-9627-ff6297e6954c",

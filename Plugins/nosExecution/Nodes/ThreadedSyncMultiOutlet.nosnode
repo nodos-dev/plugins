@@ -10,7 +10,7 @@
 				"id": "03dc39e3-2416-4238-901e-93dd953736f2",
 				"name": "ThreadedSyncMuiltiOutlet",
 				"display_name": "Threaded Sync Multi Outlet",
-				"class_name": "nos.utilities.ThreadedSyncMultiOutlet",
+				"class_name": "nos.execution.ThreadedSyncMultiOutlet",
 				"pins": [
 					{
 						"id": "7a203696-ee52-43af-b0aa-d6b1b93ebe26",
@@ -193,7 +193,7 @@
 						{
 							"id": "be194b01-6116-49b6-9c70-6aa2aa88f751",
 							"name": "SyncMultiOutlet",
-							"class_name": "nos.utilities.SyncMultiOutlet",
+							"class_name": "nos.execution.SyncMultiOutlet",
 							"pins": [
 								{
 									"id": "5123c077-6806-4359-a235-f6c0ca336713",
