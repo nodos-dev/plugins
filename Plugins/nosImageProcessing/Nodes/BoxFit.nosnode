@@ -1,0 +1,94 @@
+{
+	"nodes": [
+		{
+			"class_name": "BoxFit",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "BoxFit",
+				"name_aliases": [
+					"fit",
+					"texture"
+				]
+			},
+			"node": {
+				"class_name": "BoxFit",
+				"contents_type": "Job",
+				"description": "Fits input image to the output size, preserving the aspect ratio.",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "Shaders/BoxFit.frag"
+					}
+				},
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"extensions": [
+							{
+								"name": "texture_options",
+								"type_name": "nos.sys.vulkan.TexturePinOptions",
+								"data": {
+									"unscaled": true
+								}
+							}
+						]
+					},
+					{
+						"name": "FitMode",
+						"display_name": "Fit Mode",
+						"type_name": "nos.utilities.BoxFitMode",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "CONTAIN"
+					},
+					{
+						"name": "BackgroundColor",
+						"display_name": "Background Color",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 1.0
+						},
+						"description": "RGBA color for background",
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
+					},
+					{
+						"name": "Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						},
+						"description": "Output resolution which the input image will be fitted into",
+						"visualizers": [
+							{
+								"type": "NAMED_VALUE",
+								"name": "nos.mediaio.ResolutionVisualizer"
+							}
+						]
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

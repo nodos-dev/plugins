@@ -1,0 +1,33 @@
+{
+	"nodes": [
+		{
+			"class_name": "AlwaysDirty",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Always Dirty"
+			},
+			"node": {
+				"class_name": "AlwaysDirty",
+				"contents_type": "Job",
+				"always_execute": true,
+				"pins": [
+					{
+						"name": "LiveOutput",
+						"description": "If true, output pin will be live and consumer nodes will wait until this node has executed.",
+						"display_name": "Live Output",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

@@ -1,0 +1,88 @@
+{
+	"nodes": [
+		{
+			"class_name": "LayoutDrawer",
+			"menu_info": {
+				"category": "Layout",
+				"display_name": "Layout Drawer"
+			},
+			"node": {
+				"class_name": "LayoutDrawer",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "PreviewEnabled",
+						"display_name": "Preview Enabled",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "LayoutDrawItems",
+						"display_name": "Layout Draw Items",
+						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "LayoutOutputInfos",
+						"display_name": "Layout Output Infos",
+						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": [
+							{
+								"position": {
+									"x": 0.0,
+									"y": 0.0
+								},
+								"size": {
+									"x": 1.0,
+									"y": 1.0
+								},
+								"resolution": {
+									"x": 1920,
+									"y": 1080
+								}
+							}
+						]
+					},
+					{
+						"name": "InputTextures",
+						"display_name": "Input Textures",
+						"type_name": "[nos.sys.vulkan.Texture]",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
+					},
+					{
+						"name": "OutputTextures",
+						"type_name": "[nos.sys.vulkan.Texture]",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN",
+						"meta_data_map": [
+							{
+								"key": "AdvancedProperty",
+								"value": "true"
+							}
+						],
+						"readonly": true
+					},
+					{
+						"name": "Preview",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

@@ -1,0 +1,31 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.imageprocessing",
+			"version": "1.0.0"
+		},
+		"description": "GPU-accelerated image and texture processing nodes with shader-based effects.",
+		"display_name": "Image Processing",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "8.0"
+			},
+			{
+				"name": "nos.math",
+				"version": "2.0"
+			}
+		],
+		"category": "Image"
+	},
+	"binary_path": "Binaries/nosImageProcessing",
+	"plugin_options": [
+		{
+			"plugin": "nos.sys.vulkan",
+			"type": "nos.sys.vulkan.Resources",
+			"path": "Types/Resources.json"
+		}
+	],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
+}

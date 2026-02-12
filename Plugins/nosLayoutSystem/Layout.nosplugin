@@ -1,0 +1,31 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.layout",
+			"version": "1.0.0"
+		},
+		"description": "Canvas and layout system for arranging and compositing multiple textures.",
+		"display_name": "Layout System",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "8.0"
+			},
+			{
+				"name": "nos.math",
+				"version": "2.0"
+			}
+		],
+		"category": "Layout"
+	},
+	"binary_path": "Binaries/nosLayout",
+	"plugin_options": [
+		{
+			"plugin": "nos.sys.vulkan",
+			"type": "nos.sys.vulkan.Resources",
+			"path": "Types/Resources.json"
+		}
+	],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
+}

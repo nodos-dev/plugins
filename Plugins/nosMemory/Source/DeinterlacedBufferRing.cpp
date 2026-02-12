@@ -1,0 +1,125 @@
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
+#pragma once
+
+#include <Nodos/Plugin.hpp>
+
+// External
+#include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
+#include <nosSysVulkan/Helpers.hpp>
+
+#include "Ring.h"
+#include "Nodos/Utils/Stopwatch.hpp"
+
+namespace nos::utilities
+{
+
+struct DeinterlacedBufferRingNode : RingNodeBase
+{
+	DeinterlacedBufferRingNode() : RingNodeBase(RingNodeBase::OnRestartType::WAIT_UNTIL_FULL)
+	{
+	}
+	~DeinterlacedBufferRingNode()
+	{ 
+		NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
+	}
+
+	ResourceInterface::ResourceBase* LastPopped = nullptr;
+
+	std::string GetName() const override
+	{
+		return "DeinterlacedBufferRing";
+	}
+	
+	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
+	{
+		if (pinName == NOS_NAME("ShouldDeinterlace"))
+		{
+			auto& shouldDeinterlace = *InterpretObjectData<bool>(value);
+			if (ShouldDeinterlace != shouldDeinterlace)
+			{
+				ShouldDeinterlace = shouldDeinterlace;
+				nosEngine.RecompilePath(NodeId);
+			}
+		}
+	}
+
+	nosResult CopyFrom(nosCopyFromInfo* cpy) override {
+		NOS_SOFT_CHECK(LastPopped == nullptr, "LastPopped is not nullptr");
+		ResourceInterface::ResourceBase* slot = nullptr;
+		auto beginResult = CommonCopyFrom(cpy, &slot);
+		if (beginResult != NOS_RESULT_SUCCESS || !slot)
+			return beginResult;
+
+		Ring->ResInterface->WaitForDownloadToEnd(slot, "DeinterlacedBufferRing", NodeName.AsString(), cpy);
+
+		cpy->ShouldSetSourceFrameNumber = true;
+		cpy->FrameNumber = slot->FrameNumber;
+
+		LastPopped = slot;
+		SendScheduleRequest(1);
+		return NOS_RESULT_SUCCESS;
+	}
+
+	nosResult ExecuteNode(NodeExecuteParams const& params) override {
+		nosResult res = NOS_RESULT_SUCCESS;
+		auto pins = NodeExecuteParams(params);
+		auto fieldType = *pins.GetPinData<nosTextureFieldType>(NOS_NAME("FieldType"));
+		if (ShouldDeinterlace)
+		{
+			if (LastFieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
+				LastFieldType = fieldType;
+			else if (fieldType == LastFieldType)
+			{
+				nosEngine.LogW("Field mismatch. Waiting for a new frame.");
+				SendScheduleRequest(0);
+				return NOS_RESULT_FAILED;
+			}
+			LastFieldType = fieldType;
+		}
+		if (!ShouldDeinterlace || fieldType == NOS_TEXTURE_FIELD_TYPE_ODD)
+			res = ExecuteRingNode(params, true, NOS_NAME_STATIC("DeinterlacedBufferRing"), true);
+		else
+		{
+			res = SkipExecuteRingNode(params, NOS_NAME_STATIC("DeinterlacedBufferRing"));
+			SendScheduleRequest(1);
+		}
+		return res;
+	}
+
+	std::atomic_bool ShouldDeinterlace = false;
+	nosTextureFieldType LastFieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
+
+	void OnPathStart() override
+	{
+		RingNodeBase::OnPathStart();
+		LastFieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
+	}
+
+	void OnEndFrame(uuid const& pinId, nosEndFrameCause cause) override
+	{
+		RingNodeBase::OnEndFrame(pinId, cause);
+		if (pinId == PinName2Id[NOS_NAME_STATIC("Output")])
+		{
+			if (!LastPopped)
+				return;
+			Ring->EndPop(LastPopped);
+			LastPopped = nullptr;
+		}
+	}
+
+	void OverrideConsumerDeltaSeconds(nosVec2u& inoutDeltaSeconds) override
+	{
+		if (ShouldDeinterlace)
+			inoutDeltaSeconds.y *= 2;
+	}
+};
+
+nosResult RegisterDeinterlacedBufferRing(nosNodeFunctions* functions)
+{
+	NOS_BIND_NODE_CLASS(NOS_NAME("DeinterlacedBufferRing"), DeinterlacedBufferRingNode, functions)
+		return NOS_RESULT_SUCCESS;
+}
+
+
+}

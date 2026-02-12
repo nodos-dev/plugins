@@ -1,0 +1,31 @@
+{
+	"nodes": [
+		{
+			"class_name": "MultiLiveOut",
+			"menu_info": {
+				"category": "Scheduling",
+				"display_name": "Multi Live Out"
+			},
+			"node": {
+				"class_name": "MultiLiveOut",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input_0",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output_0",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"live": true
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

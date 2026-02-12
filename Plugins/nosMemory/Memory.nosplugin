@@ -1,0 +1,31 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.memory",
+			"version": "1.0.0"
+		},
+		"description": "Buffer and texture memory management, async transfers, and resource lifecycle nodes.",
+		"display_name": "Memory Management",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "8.0"
+			},
+			{
+				"name": "nos.sync",
+				"version": "11.1"
+			}
+		],
+		"category": "Memory"
+	},
+	"binary_path": "Binaries/nosMemory",
+	"plugin_options": [
+		{
+			"plugin": "nos.sys.vulkan",
+			"type": "nos.sys.vulkan.Resources",
+			"path": "Types/Resources.json"
+		}
+	],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
+}
