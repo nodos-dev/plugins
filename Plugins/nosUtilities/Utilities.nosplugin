@@ -4,8 +4,8 @@
 			"name": "nos.utilities",
 			"version": "4.0.0"
 		},
-		"description": "Various utility nodes.",
-		"display_name": "Utilities",
+		"description": "DEPRECATED: This plugin has been split into nosImageProcessing, nosMemory, nosExecution, and nosLayout. See DEPRECATED.md for migration guide.",
+		"display_name": "Utilities (DEPRECATED)",
 		"dependencies": [
 			{
 				"name": "nos.sys.vulkan",
