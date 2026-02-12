@@ -9,9 +9,10 @@ NOS_REGISTER_NAME(Channel);
 NOS_REGISTER_NAME(Format);
 NOS_REGISTER_NAME(Channel_Viewer_Pass);
 NOS_REGISTER_NAME(Channel_Viewer_Shader);
+// Keep old name for backward compatibility
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_ChannelViewer, "nos.utilities.ChannelViewer")
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 {

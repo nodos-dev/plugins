@@ -6,7 +6,7 @@
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::memory
 {
 struct WaitGPUEventNode : NodeContext
 {

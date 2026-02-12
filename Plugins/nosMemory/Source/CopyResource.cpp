@@ -4,7 +4,7 @@
 
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::memory
 {
 struct CopyResourceNode : NodeContext
 {
@@ -86,4 +86,4 @@ nosResult RegisterCopyResource(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::memory

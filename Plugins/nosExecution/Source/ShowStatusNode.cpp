@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::execution
 {
 	NOS_REGISTER_NAME_SPACED(Nos_Utilities_ShowStatus, "nos.utilities.ShowStatus")
 	struct ShowStatus : NodeContext

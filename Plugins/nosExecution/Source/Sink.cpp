@@ -9,7 +9,7 @@
 
 #include "nosUtilities/Sink_generated.h"
 
-namespace nos::utilities
+namespace nos::execution
 {
 using clock = std::chrono::high_resolution_clock;
 

@@ -17,7 +17,7 @@ NOS_REGISTER_NAME(Usage);
 NOS_REGISTER_NAME(Input);
 NOS_REGISTER_NAME(Format);
 
-namespace nos::utilities
+namespace nos::memory
 {
 struct TextureSlot
 {
@@ -207,4 +207,4 @@ nosResult RegisterTextureProvider(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME("TextureProvider"), TextureProviderNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
-} // namespace nos::utilities
+} // namespace nos::memory

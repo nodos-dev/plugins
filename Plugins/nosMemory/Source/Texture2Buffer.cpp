@@ -7,7 +7,7 @@
 
 #include "Names.h"
 
-namespace nos::utilities
+namespace nos::memory
 {
 NOS_REGISTER_NAME(Texture2Buffer)
 NOS_REGISTER_NAME(OutputBuffer)

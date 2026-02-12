@@ -1,7 +1,7 @@
 #include <Nodos/Plugin.hpp>
 
 
-namespace nos::utilities
+namespace nos::execution
 {
 struct ConditionalTrigger : NodeContext
 {

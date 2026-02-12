@@ -21,7 +21,7 @@
 
 #include <thread>
 
-namespace nos::utilities
+namespace nos::execution
 {
 std::string GetHostName()
 {
@@ -226,4 +226,4 @@ nosResult RegisterHost(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::execution

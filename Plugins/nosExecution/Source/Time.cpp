@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::execution
 {
 NOS_REGISTER_NAME(Seconds);
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_Time, "nos.utilities.Time")

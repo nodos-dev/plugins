@@ -4,7 +4,7 @@
 
 #include <nosSysVulkan/nosVulkanSubsystem.h>
 
-namespace nos::utilities
+namespace nos::execution
 {
 
 struct SyncMultiOutletNode : NodeContext
@@ -290,4 +290,4 @@ nosResult RegisterSyncMultiOutlet(nosNodeFunctions* functions)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::execution

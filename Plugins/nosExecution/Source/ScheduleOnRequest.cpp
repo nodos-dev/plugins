@@ -9,7 +9,7 @@
 
 #include "nosUtilities/Sink_generated.h"
 
-namespace nos::utilities
+namespace nos::execution
 {
 
 NOS_REGISTER_NAME(Request);

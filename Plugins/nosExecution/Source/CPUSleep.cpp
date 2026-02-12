@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::execution
 {
 NOS_REGISTER_NAME(BusyWait);
 NOS_REGISTER_NAME(WaitTimeMS);
@@ -35,4 +35,4 @@ nosResult RegisterCPUSleep(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::execution

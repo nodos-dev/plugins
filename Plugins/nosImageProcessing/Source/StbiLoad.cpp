@@ -23,8 +23,9 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
+// Keep old name for backward compatibility
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_StbiLoad, "nos.utilities.StbiLoad")
 
 enum State

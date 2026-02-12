@@ -2,7 +2,7 @@
 
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
 struct BoxFitNode : NodeContext
 {

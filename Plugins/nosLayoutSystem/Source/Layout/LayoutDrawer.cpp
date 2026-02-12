@@ -3,7 +3,7 @@
 #include <Nodos/Plugin.hpp>
 #include <nosSysVulkan/Helpers.hpp>
 #include <glm/glm.hpp>
-#include "nosUtilities/Layout_generated.h"
+#include "nosLayout/Layout_generated.h"
 
 NOS_REGISTER_NAME(LayoutDrawer)
 NOS_REGISTER_NAME(TexturedQuad_Pass)
@@ -14,7 +14,7 @@ NOS_REGISTER_NAME(QuadOutline_Frag)
 NOS_REGISTER_NAME(QuadOutline_Vert)
 NOS_REGISTER_NAME(OutputTextures)
 NOS_REGISTER_NAME(Preview)
-namespace nos::utilities
+namespace nos::layout
 {
 
 struct LayoutDrawerNode : NodeContext

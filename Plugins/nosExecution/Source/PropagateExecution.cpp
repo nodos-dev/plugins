@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::execution
 {
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_PropagateExecution, "nos.utilities.PropagateExecution")
 struct PropagateExecutionNode : NodeContext
@@ -36,4 +36,4 @@ nosResult RegisterPropagateExecution(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::execution

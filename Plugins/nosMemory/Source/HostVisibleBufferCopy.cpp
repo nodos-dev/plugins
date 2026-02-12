@@ -4,7 +4,7 @@
 
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::memory
 {
 struct HostVisibleBufferCopyNode : NodeContext
 {
@@ -61,4 +61,4 @@ nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::memory

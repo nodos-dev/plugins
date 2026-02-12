@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include "nosUtilities/Layout_generated.h"
+#include "nosLayout/Layout_generated.h"
 
 NOS_REGISTER_NAME(FreeLayout)
 NOS_REGISTER_NAME(QuadLayout)
@@ -10,7 +10,7 @@ NOS_REGISTER_NAME(GridLayout)
 NOS_REGISTER_NAME(FreeOutputLayout)
 NOS_REGISTER_NAME(GridOutputLayout)
 NOS_REGISTER_NAME(OutputInfos)
-namespace nos::utilities
+namespace nos::layout
 {
 	template<typename T>
 	nos::Buffer PackPinVectorOfStructs(const std::vector<T>& items)

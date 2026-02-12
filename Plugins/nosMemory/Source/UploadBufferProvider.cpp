@@ -14,7 +14,7 @@ NOS_REGISTER_NAME(Alignment);
 NOS_REGISTER_NAME(ForceHostMemory);
 NOS_REGISTER_NAME(UseHostCachedMemory);
 
-namespace nos::utilities
+namespace nos::memory
 {
 struct UploadBuffer
 {
@@ -179,4 +179,4 @@ nosResult RegisterUploadBufferProvider(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME("UploadBufferProvider"), UploadBufferProviderNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
-} // namespace nos::utilities
+} // namespace nos::memory

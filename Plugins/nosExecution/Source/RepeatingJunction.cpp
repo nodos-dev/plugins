@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 #include <nosSysVulkan/Helpers.hpp>
-namespace nos::utilities
+namespace nos::execution
 {
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_RepeatingJunction, "nos.utilities.RepeatingJunction")
 
@@ -71,4 +71,4 @@ nosResult RegisterRepeatingJunction(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::execution
