@@ -388,4 +388,4 @@ nosResult RegisterLayoutDrawer(nosNodeFunctions* fn)
 	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
 	return ret;
 }
-} // namespace nos::utilities
+} // namespace nos::imageprocessing

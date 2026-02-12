@@ -135,4 +135,4 @@ nosResult RegisterStbiLoad(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::imageprocessing

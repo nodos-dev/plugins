@@ -174,7 +174,7 @@ struct LoadCubeLUTContext : NodeContext
 		std::string pathAsString = nos::PathToUtf8(path);
 		try
 		{
-			auto cubeFile = utilities::LoadCubeFile<float>(path);
+			auto cubeFile = imageprocessing::LoadCubeFile<float>(path);
 			if (!cubeFile)
 			{
 				nosEngine.LogE("Couldn't load cube LUT from %s.", path.c_str());
@@ -245,4 +245,4 @@ nosResult RegisterLoadCubeLUT(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::imageprocessing
