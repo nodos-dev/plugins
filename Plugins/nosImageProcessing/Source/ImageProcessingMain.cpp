@@ -26,27 +26,11 @@ namespace nos::imageprocessing
 
 enum ImageProcessing : int
 {
-	AutoResize = 0,
-	BoxFit,
-	CalculateDispatchSize,
+	BoxFit = 0,
 	ChannelViewer,
-	Checkerboard,
-	Color,
-	Gradient,
-	StbiLoad,
 	LoadCubeLUT,
-	MeanSquaredError,
-	Offset,
-	PSNR,
-	QuadMerge,
-	ReadImage,
 	ReduceTexture,
-	SevenSegment,
-	SplitWipe,
-	Swizzle,
-	TextureSwitcher,
-	YADIF,
-	YADIFWithAutoDispatchSize,
+	StbiLoad,
 	WriteImage,
 	Count
 };

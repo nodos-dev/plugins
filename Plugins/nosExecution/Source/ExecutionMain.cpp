@@ -39,8 +39,8 @@ enum Execution : int
 	ScheduleRequest,
 	ShowStatusNode,
 	Sink,
-	SyncMultiOutlet,
 	SwitchTrigger,
+	SyncMultiOutlet,
 	Time,
 	TriggerOnAnyInput,
 	Count
