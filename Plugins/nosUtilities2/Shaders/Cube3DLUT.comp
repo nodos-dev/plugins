@@ -1,0 +1,84 @@
+#version 450
+
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(binding = 0) uniform sampler2D In;
+layout(binding = 1, rgba16f) uniform writeonly image2D Out;
+layout(binding = 2) buffer SSBO
+{
+    float LUT[];
+} LUT;
+
+layout(binding = 3) uniform UBO
+{
+    uint Size;
+    uint Dim;
+    float DomainGamma;
+    float RangeGamma;
+    float DomainScale;
+    float DomainOffset;
+    vec3 RangeScale;
+    vec3 RangeOffset;
+};
+
+vec3 IDX(ivec3 pos)
+{
+    const uint d3 = 3 * (pos.x + pos.y * Size + pos.z * Size * Size);
+    switch (Dim)
+    {
+    case 1:
+        return vec3(LUT.LUT[pos.x], LUT.LUT[pos.y], LUT.LUT[pos.z]);
+    case 3:
+        return vec3(LUT.LUT[d3], LUT.LUT[d3 + 1], LUT.LUT[d3 + 2]);
+    }
+    return vec3(0);
+}
+
+void SampleCube(ivec3 e, out vec3 C[2][2][2])
+{
+    for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+            for (int k = 0; k < 2; ++k)
+                C[i][j][k] = IDX(e + ivec3(i, j, k));
+}
+
+vec3 spow(vec3 v, vec3 p)
+{
+    return sign(v) * pow(abs(v), p);
+}
+
+
+vec3 SampleLUT(vec3 col)
+{
+    col = spow(col, vec3(1.0/DomainGamma));
+    
+    col *= Size - 1;
+    col = clamp(col, vec3(0), vec3(Size - 0.0001));
+    ivec3 pos = ivec3(floor(col));
+    vec3 w = fract(col);
+    vec3 Colors[2][2][2];
+    SampleCube(pos, Colors);
+    col = mix(mix(mix(Colors[0][0][0], Colors[1][0][0], w.x), mix(Colors[0][1][0], Colors[1][1][0], w.x), w.y), mix(mix(Colors[0][0][1], Colors[1][0][1], w.x), mix(Colors[0][1][1], Colors[1][1][1], w.x), w.y), w.z);
+    col = spow(col, vec3(RangeGamma));
+    return col;
+}
+
+void main()
+{
+    const ivec2 ImgSize     = ivec2(imageSize(Out));
+    const ivec2 ClusterSize = ivec2(gl_NumWorkGroups.xy * gl_WorkGroupSize.xy);
+    const int GlobalInvocationIndex = int(gl_GlobalInvocationID.y * ClusterSize.x + gl_GlobalInvocationID.x);
+    const int NumThreads     = ClusterSize.x * ClusterSize.y;
+    const int TotalWork      = ImgSize.x * ImgSize.y;
+    const int WorkPerThread  = (TotalWork + (NumThreads-1))/ NumThreads;
+    const int ResidueWork    = TotalWork % NumThreads;
+    const int WorkOffset     = GlobalInvocationIndex * WorkPerThread;
+    for(int idx = WorkOffset; idx < WorkOffset + WorkPerThread; ++idx)
+    {
+        if(idx >= TotalWork)
+            break;
+        ivec2 coord = ivec2(idx % ImgSize.x, idx / ImgSize.x);
+        vec4 col = texelFetch(In, coord, 0);
+        imageStore(Out, coord, vec4(SampleLUT(col.xyz), col.w));
+    }
+}
