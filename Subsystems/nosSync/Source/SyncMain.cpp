@@ -2,6 +2,7 @@
 #include <nosSync/nosSync.h>
 
 #include <Nodos/Plugin.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
 
 #include <shared_mutex>
 #include <format>
@@ -11,8 +12,10 @@
 #include "Promise.hpp"
 
 NOS_INIT();
+NOS_VULKAN_INIT();
 
 NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 namespace nos::sync
@@ -94,10 +97,12 @@ nosResult NOSAPI_CALL ExportObjectTypeInfos(size_t* outCount, nosObjectTypeInfo*
 enum class Nodes : size_t
 {
 	FulFillPromise,
+	WaitGPUEvent,
 	Count,
 };
 
 void RegisterFulFillPromiseNode(nosNodeFunctions* functions);
+nosResult RegisterWaitGPUEvent(nosNodeFunctions* functions);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
 {
@@ -105,9 +110,37 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		*outCount = static_cast<size_t>(Nodes::Count);
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
-	auto* functions = outList[static_cast<size_t>(Nodes::FulFillPromise)];
-	RegisterFulFillPromiseNode(functions);
+
+	RegisterFulFillPromiseNode(outList[static_cast<size_t>(Nodes::FulFillPromise)]);
+	NOS_SOFT_CHECK(RegisterWaitGPUEvent(outList[static_cast<size_t>(Nodes::WaitGPUEvent)]) == NOS_RESULT_SUCCESS);
 	return NOS_RESULT_SUCCESS;
+}
+
+void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
+{
+	(void)outTo;
+	if (!outFrom)
+		*outSize = 0;
+}
+
+void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
+{
+	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.utilities.WaitGPUEvent"), NOS_NAME("nos.sync.WaitGPUEvent")},
+		{NOS_NAME("zd.utilities.WaitGPUEvent"), NOS_NAME("nos.sync.WaitGPUEvent")},
+	};
+
+	if (!outFrom)
+	{
+		*outSize = renames.size();
+		return;
+	}
+
+	for (size_t i = 0; i < renames.size(); ++i)
+	{
+		outFrom[i] = renames[i].first;
+		outTo[i] = renames[i].second;
+	}
 }
 
 extern "C"
@@ -119,6 +152,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* funcs)
 	funcs->OnPreUnloadPlugin = UnloadSubsystem;
 	funcs->ExportObjectTypeInfos = ExportObjectTypeInfos;
 	funcs->ExportNodeFunctions = ExportNodeFunctions;
+	funcs->GetRenamedTypes = GetRenamedTypes;
+	funcs->GetRenamedNodeClasses = GetRenamedNodeClasses;
 	return NOS_RESULT_SUCCESS;
 }
 }

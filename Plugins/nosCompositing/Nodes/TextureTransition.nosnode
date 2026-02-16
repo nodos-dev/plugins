@@ -1,0 +1,114 @@
+{
+	"nodes": [
+		{
+			"class_name": "TextureTransition",
+			"menu_info": {
+				"category": "Switcher",
+				"display_name": "Texture Transition",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Input1",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Input2",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"pin_category": "State",
+						"name": "IsInTransition",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"readonly": true
+					},
+					{
+						"pin_category": "State",
+						"name": "TransitionTarget",
+						"type_name": "nos.compositing.TransitionTarget",
+						"show_as": "PROPERTY",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"readonly": true,
+						"data": "Input2"
+					},
+					{
+						"pin_category": "State",
+						"name": "Amount",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"readonly": true
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				],
+				"functions": [
+					{
+						"class_name": "DoTransition",
+						"contents_type": "Job",
+						"contents": {
+							"type": "CPU"
+						},
+						"pins": [
+							{
+								"name": "Duration",
+								"type_name": "float",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": 1.0
+							},
+							{
+								"name": "Type",
+								"type_name": "nos.compositing.TransitionType",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": "Dissolve"
+							},
+							{
+								"name": "WipeWidth",
+								"type_name": "float",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": 0.4
+							},
+							{
+								"name": "Interpolation",
+								"type_name": "nos.compositing.TransitionInterpolation",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": "EaseInOut"
+							},
+							{
+								"name": "EaseExponent",
+								"type_name": "float",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": 2.0
+							},
+							{
+								"name": "StepCount",
+								"type_name": "uint",
+								"show_as": "PROPERTY",
+								"can_show_as": "INPUT_PIN_OR_PROPERTY",
+								"data": 5
+							}
+						]
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

@@ -1,7 +1,0 @@
-namespace nos.utilities2;
-
-enum LUTType : uint {
-    NONE = 0,
-    LUT_1D = 1,
-    LUT_3D = 3,
-}

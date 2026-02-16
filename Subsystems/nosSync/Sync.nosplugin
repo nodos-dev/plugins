@@ -6,6 +6,12 @@
         },
         "display_name": "Synchronization",
         "description": "Nodos subsystem for synchronization utilities",
+        "dependencies": [
+            {
+                "name": "nos.sys.vulkan",
+                "version": "8.0"
+            }
+        ],
         "category": "Utilities"
     },
     "binary_path": "Binaries/nosSync",

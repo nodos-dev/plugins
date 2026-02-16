@@ -1,0 +1,36 @@
+{
+    "shaders": [
+        {
+            "key": "DEFAULT_FSHADER",
+            "path": "Shaders/Default.frag",
+            "stage": "FRAGMENT",
+            "lang": "GLSL"
+        },
+        {
+            "key": "RESIZE_FRAG",
+            "path": "Shaders/Resize.frag",
+            "stage": "FRAGMENT",
+            "lang": "GLSL"
+        },
+        {
+            "key": "REDUCE_TEXTURE",
+            "path": "Shaders/ReduceTexture.comp",
+            "stage": "COMPUTE",
+            "lang": "GLSL"
+        }
+    ],
+    "passes": [
+        {
+            "key": "RESIZE_PASS",
+            "shader": "RESIZE_FRAG"
+        },
+        {
+            "key": "TEXTURE_REDUCE_PASS",
+            "shader": "REDUCE_TEXTURE"
+        },
+        {
+            "key": "INTERLEAVE_PASS",
+            "shader": "DEFAULT_FSHADER"
+        }
+    ]
+}

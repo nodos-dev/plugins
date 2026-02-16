@@ -1,0 +1,56 @@
+{
+	"shaders": [
+		{
+			"key": "COLOR_MAPPER_COMP",
+			"path": "Shaders/Cube3DLUT.comp",
+			"stage": "COMPUTE",
+			"lang": "GLSL"
+		},
+		{
+			"key": "BOX_BLUR_FSHADER",
+			"path": "Shaders/BoxBlur.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "DILATE_ALPHA_FSHADER",
+			"path": "Shaders/DilateAlpha.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "DILATE_BY_ALPHA_FSHADER",
+			"path": "Shaders/DilateByAlpha.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "TEMPORAL_BLUR_FSHADER",
+			"path": "Shaders/TemporalBlur.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		}
+	],
+	"passes": [
+		{
+			"key": "COLOR_MAPPER_PASS",
+			"shader": "COLOR_MAPPER_COMP"
+		},
+		{
+			"key": "BOX_BLUR_PASS",
+			"shader": "BOX_BLUR_FSHADER"
+		},
+		{
+			"key": "DILATE_ALPHA_PASS",
+			"shader": "DILATE_ALPHA_FSHADER"
+		},
+		{
+			"key": "DILATE_BY_ALPHA_PASS",
+			"shader": "DILATE_BY_ALPHA_FSHADER"
+		},
+		{
+			"key": "TEMPORAL_BLUR_PASS",
+			"shader": "TEMPORAL_BLUR_FSHADER"
+		}
+	]
+}

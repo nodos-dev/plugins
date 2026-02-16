@@ -1,7 +1,0 @@
-namespace nos.utilities;
-
-enum BoxFitMode: uint
-{
-    Contain = 0,
-    Cover = 1,
-}
