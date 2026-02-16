@@ -23,6 +23,25 @@ enum Filters : int
 	Count
 };
 
+void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize)
+{
+    static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+        {NOS_NAME("zd.utilities.ColorspaceConversion"), NOS_NAME("nos.filters.ColorspaceConversion")},
+    };
+
+    if (!outRenamedFrom)
+    {
+        *outSize = renames.size();
+        return;
+    }
+
+    for (size_t i = 0; i < renames.size(); ++i)
+    {
+        outRenamedFrom[i] = renames[i].first;
+        outRenamedTo[i] = renames[i].second;
+    }
+}
+
 void GetRenamedNodeClasses(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize)
 {
     static std::vector<std::pair<nos::Name, nos::Name>> renames = {
@@ -58,6 +77,7 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+    outFunctions->GetRenamedTypes = GetRenamedTypes;
     outFunctions->GetRenamedNodeClasses = GetRenamedNodeClasses;
 	return NOS_RESULT_SUCCESS;
 }
