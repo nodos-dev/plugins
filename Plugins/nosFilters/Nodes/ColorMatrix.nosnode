@@ -3,7 +3,7 @@
 		{
 			"class_name": "ColorMatrix",
 			"menu_info": {
-				"category": "Process",
+				"category": "Filters",
 				"display_name": "Color Matrix",
 				"name_aliases": []
 			},
@@ -24,7 +24,7 @@
 					},
 					{
 						"name": "Conversion",
-						"type_name": "nos.Utilities2.ColorspaceConversion",
+						"type_name": "nos.filters.ColorspaceConversion",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},

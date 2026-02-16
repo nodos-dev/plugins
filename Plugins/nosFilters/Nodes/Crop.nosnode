@@ -3,7 +3,7 @@
 		{
 			"class_name": "Crop",
 			"menu_info": {
-				"category": "Process",
+				"category": "Filters",
 				"display_name": "Crop",
 				"name_aliases": []
 			},

@@ -3,7 +3,7 @@
 		{
 			"class_name": "3WayColorCorrect",
 			"menu_info": {
-				"category": "Process",
+				"category": "Filters",
 				"display_name": "3 Way Color Correct",
 				"name_aliases": []
 			},

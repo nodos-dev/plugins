@@ -1,4 +1,4 @@
-namespace nos.utilities2;
+namespace nos.filters;
 
 enum ColorspaceConversion : uint 
 {

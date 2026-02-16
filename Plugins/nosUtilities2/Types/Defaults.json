@@ -1,7 +1,7 @@
 {
 	"defaults": [
 		{
-			"type_name": "nos.Utilities2.CanvasLayer",
+			"type_name": "nos.utilities2.CanvasLayer",
 			"def": {
 				"position": {
 					"x": 0,

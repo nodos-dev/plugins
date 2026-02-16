@@ -3,7 +3,7 @@
 		{
 			"class_name": "Premultiply",
 			"menu_info": {
-				"category": "Process",
+				"category": "Filters",
 				"display_name": "Premultiply",
 				"name_aliases": []
 			},
