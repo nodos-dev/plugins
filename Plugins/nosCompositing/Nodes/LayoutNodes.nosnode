@@ -22,7 +22,7 @@
 					},
 					{
 						"name": "Items",
-						"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+						"type_name": "[nos.compositing.FreeLayoutItem]",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [
@@ -41,7 +41,7 @@
 					{
 						"name": "OutDrawItems",
 						"display_name": "Out Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+						"type_name": "[nos.compositing.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN",
 						"meta_data_map": [
@@ -83,7 +83,7 @@
 					},
 					{
 						"name": "Items",
-						"type_name": "[nos.utilities.layout.GridLayoutItem]",
+						"type_name": "[nos.compositing.GridLayoutItem]",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [
@@ -132,7 +132,7 @@
 					{
 						"name": "OutDrawItems",
 						"display_name": "Out Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+						"type_name": "[nos.compositing.LayoutDrawItem]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN",
 						"meta_data_map": [
@@ -168,7 +168,7 @@
 					},
 					{
 						"name": "Items",
-						"type_name": "[nos.utilities.layout.FreeOutputItem]",
+						"type_name": "[nos.compositing.FreeOutputItem]",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [
@@ -193,7 +193,7 @@
 					{
 						"name": "OutputInfos",
 						"display_name": "Output Infos",
-						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"type_name": "[nos.compositing.LayoutOutputInfo]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN",
 						"meta_data_map": [
@@ -235,7 +235,7 @@
 					},
 					{
 						"name": "Items",
-						"type_name": "[nos.utilities.layout.GridOutputItem]",
+						"type_name": "[nos.compositing.GridOutputItem]",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [
@@ -308,7 +308,7 @@
 					{
 						"name": "OutputInfos",
 						"display_name": "Output Infos",
-						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"type_name": "[nos.compositing.LayoutOutputInfo]",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN",
 						"meta_data_map": [
@@ -325,3 +325,4 @@
 	],
 	"schema_version": "1.4-v1"
 }
+

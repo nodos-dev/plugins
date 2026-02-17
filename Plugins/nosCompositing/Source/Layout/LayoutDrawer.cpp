@@ -14,7 +14,7 @@ NOS_REGISTER_NAME(QuadOutline_Frag)
 NOS_REGISTER_NAME(QuadOutline_Vert)
 NOS_REGISTER_NAME(OutputTextures)
 NOS_REGISTER_NAME(Preview)
-namespace nos::utilities
+namespace nos::compositing
 {
 
 struct LayoutDrawerNode : NodeContext
@@ -388,4 +388,4 @@ nosResult RegisterLayoutDrawer(nosNodeFunctions* fn)
 	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
 	return ret;
 }
-} // namespace nos::utilities
+} // namespace nos::compositing

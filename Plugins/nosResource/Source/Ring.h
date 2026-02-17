@@ -16,7 +16,7 @@ NOS_REGISTER_NAME(Size)
 NOS_REGISTER_NAME_SPACED(Generic, "nos.Generic")
 NOS_REGISTER_NAME(Alignment)
 
-namespace nos
+namespace nos::resource
 {
 struct ResourceInterface {
 	virtual ~ResourceInterface() = default;
@@ -1084,4 +1084,4 @@ struct RingNodeBase : NodeContext
 	}
 };
 
-} // namespace nos
+} // namespace nos::resource

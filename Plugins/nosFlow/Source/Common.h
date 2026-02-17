@@ -25,7 +25,7 @@
 #include <map>
 #include <memory>
 
-namespace nos
+namespace nos::flow
 {
 
 using nos::NodeContext;

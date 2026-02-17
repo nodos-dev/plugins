@@ -1,7 +1,7 @@
 // Copyright ZeroDensity AS. All Rights Reserved.
 #include "Common.h"
 
-namespace nos
+namespace nos::flow
 {
     NOS_REGISTER_NAME(Toggle);
 	NOS_REGISTER_NAME(Value);
@@ -44,4 +44,4 @@ namespace nos
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Toggle"), ToggleContext, nodeFunctions);
     }
 
-} // namespace nos
+} // namespace nos::flow

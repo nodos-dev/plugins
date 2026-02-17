@@ -3,6 +3,8 @@
 #include <Nodos/Plugin.hpp>
 
 NOS_INIT()
+NOS_BEGIN_IMPORT_DEPS()
+NOS_END_IMPORT_DEPS()
 
 namespace nos::utilities
 {
@@ -23,8 +25,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-	NOS_SOFT_CHECK(RegisterHost(outList[static_cast<size_t>(Utilities::Host)]) == NOS_RESULT_SUCCESS);
-	NOS_SOFT_CHECK(RegisterTime(outList[static_cast<size_t>(Utilities::Time)]) == NOS_RESULT_SUCCESS);
+	if (auto ret = RegisterHost(outList[static_cast<size_t>(Utilities::Host)]); ret != NOS_RESULT_SUCCESS)
+		return ret;
+	if (auto ret = RegisterTime(outList[static_cast<size_t>(Utilities::Time)]); ret != NOS_RESULT_SUCCESS)
+		return ret;
 	return NOS_RESULT_SUCCESS;
 }
 
@@ -34,14 +38,17 @@ void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* out
 		{NOS_NAME("nos.fb.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
 		{NOS_NAME("nos.fb.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
 		{NOS_NAME("nos.fb.GradientKind"), NOS_NAME("nos.utilities.GradientKind")},
-		{NOS_NAME("nos.fb.BlendMode"), NOS_NAME("nos.utilities.BlendMode")},
+		{NOS_NAME("nos.fb.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
 		{NOS_NAME("nos.fb.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
-		{NOS_NAME("nos.fb.Source"), NOS_NAME("nos.utilities.Source")},
-		{NOS_NAME("nos.fb.Channel"), NOS_NAME("nos.utilities.Channel")},
+		{NOS_NAME("nos.fb.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("nos.fb.Channel"), NOS_NAME("nos.compositing.Channel")},
 		{NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
 		{NOS_NAME("nos.utilities.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
 		{NOS_NAME("nos.utilities.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
 		{NOS_NAME("nos.utilities.BoxFitMode"), NOS_NAME("nos.compositing.BoxFitMode")},
+		{NOS_NAME("nos.utilities.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
+		{NOS_NAME("nos.utilities.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("nos.utilities.Channel"), NOS_NAME("nos.compositing.Channel")},
 		{NOS_NAME("nos.utilities.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
 		{NOS_NAME("nos.utilities.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
 		{NOS_NAME("nos.utilities.SinkMode"), NOS_NAME("nos.flow.SinkMode")},

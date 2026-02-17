@@ -2,7 +2,7 @@
 #include "TextureTransitionUtils.h"
 
 
-namespace nos
+namespace nos::compositing
 {
 	float InterpStep(float A, float B, float Alpha, u32 Steps)
 	{

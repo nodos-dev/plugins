@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
 
 struct ReduceTextureNode : NodeContext
@@ -138,4 +138,4 @@ nosResult RegisterReduceTexture(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::imageprocessing

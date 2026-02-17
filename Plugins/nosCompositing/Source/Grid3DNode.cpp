@@ -4,7 +4,7 @@
 #include "Common.h"
 #include <nosTrack/Track_generated.h>
 
-namespace nos
+namespace nos::compositing
 {
 NOS_REGISTER_NAME(Track);
 NOS_REGISTER_NAME(GridColor);
@@ -64,7 +64,7 @@ public:
 		indices.push_back(glm::uvec3(2, 1, 0));
 		indices.push_back(glm::uvec3(1, 2, 3));
 
-		nos::UpdateVertexBuffer(VertexData, BufferObject, vertices, 8 * sizeof(glm::vec3), indices.data(), (u32)indices.size() * (u32)sizeof(glm::uvec3), (u32)indices.size() * 3, "Grid3DNode_VertexData");
+		UpdateVertexBuffer(VertexData, BufferObject, vertices, 8 * sizeof(glm::vec3), indices.data(), (u32)indices.size() * (u32)sizeof(glm::uvec3), (u32)indices.size() * 3, "Grid3DNode_VertexData");
 		return NOS_RESULT_SUCCESS;
 	}
 

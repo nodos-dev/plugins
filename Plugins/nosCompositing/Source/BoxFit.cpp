@@ -2,7 +2,7 @@
 
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::compositing
 {
 struct BoxFitNode : NodeContext
 {

@@ -10,7 +10,7 @@ NOS_REGISTER_NAME(GridLayout)
 NOS_REGISTER_NAME(FreeOutputLayout)
 NOS_REGISTER_NAME(GridOutputLayout)
 NOS_REGISTER_NAME(OutputInfos)
-namespace nos::utilities
+namespace nos::compositing
 {
 	template<typename T>
 	nos::Buffer PackPinVectorOfStructs(const std::vector<T>& items)
@@ -26,15 +26,15 @@ namespace nos::utilities
 	{
 		nos::NodeExecuteParams args(params);
 		auto& outSize = *args.GetPinData<nos::fb::vec2u>(NOS_NAME("OutputSize"));
-		auto items = args.GetPinData<flatbuffers::Vector<const layout::FreeLayoutItem*>>(NOS_NAME("Items"));
+		auto items = args.GetPinData<flatbuffers::Vector<const FreeLayoutItem*>>(NOS_NAME("Items"));
 
 		int textureId = 0;
-		std::vector<layout::LayoutDrawItem> drawItems;
+		std::vector<LayoutDrawItem> drawItems;
 		drawItems.reserve(items->size());
 		for (auto itemPtr : *items)
 		{
 			auto& item = *itemPtr;
-			layout::LayoutDrawItem drawItem{};
+			LayoutDrawItem drawItem{};
 			drawItem.mutable_position() = nos::fb::vec2(item.position().x() / (float) outSize.x(), item.position().y() / (float) outSize.y());
 			drawItem.mutable_size() = nos::fb::vec2(item.size().x() / (float)outSize.x(), item.size().y() / (float)outSize.y());
 			drawItem.mutate_texture_id(textureId);
@@ -59,8 +59,8 @@ namespace nos::utilities
 		if (columns == 0 || rows == 0) return NOS_RESULT_SUCCESS;
 
 		// Get items array
-		auto items = args.GetPinData<flatbuffers::Vector<const layout::GridLayoutItem*>>(NOS_NAME("Items"));
-		std::vector<layout::LayoutDrawItem> drawItems;
+		auto items = args.GetPinData<flatbuffers::Vector<const GridLayoutItem*>>(NOS_NAME("Items"));
+		std::vector<LayoutDrawItem> drawItems;
 		drawItems.reserve(items->size());
 		int textureId = 0;
 		for (auto itemPtr : *items)
@@ -70,7 +70,7 @@ namespace nos::utilities
 			float y = (float)item.start().y() / rows;
 			float w = (float)item.span().x() / columns;
 			float h = (float)item.span().y() / rows;
-			layout::LayoutDrawItem drawItem{};
+			LayoutDrawItem drawItem{};
 			drawItem.mutable_position() = nos::fb::vec2(x, y);
 			drawItem.mutable_size() = nos::fb::vec2(w, h);
 			drawItem.mutate_texture_id(textureId);
@@ -89,10 +89,10 @@ namespace nos::utilities
 	nosResult NOSAPI_CALL ExecuteFreeOutputLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);
-		auto items = args.GetPinData<flatbuffers::Vector<const layout::FreeOutputItem*>>(NOS_NAME("Items"));
+		auto items = args.GetPinData<flatbuffers::Vector<const FreeOutputItem*>>(NOS_NAME("Items"));
 		auto totalResolution = args.GetPinData<nos::fb::vec2u>(NOS_NAME("Resolution"));
 
-		std::vector<layout::LayoutOutputInfo> outputs;
+		std::vector<LayoutOutputInfo> outputs;
 		outputs.reserve(items->size());
 		for (auto itemPtr : *items)
 		{
@@ -106,7 +106,7 @@ namespace nos::utilities
 			float u1 = (layoutItem.position().x() + layoutItem.size().x()) / (float)totalResolution->x();
 			float v1 = (layoutItem.position().y() + layoutItem.size().y()) / (float)totalResolution->y();
 
-			layout::LayoutOutputInfo output{};
+			LayoutOutputInfo output{};
 			output.mutable_resolution() = resolution;
 			output.mutable_pos() = nos::fb::vec2(u0, v0);
 			output.mutable_size() = nos::fb::vec2(u1 - u0, v1 - v0);
@@ -128,8 +128,8 @@ namespace nos::utilities
 		uint32_t rows = *args.GetPinData<uint32_t>(NOS_NAME("Rows"));
 		if (columns == 0 || rows == 0) return NOS_RESULT_SUCCESS;
 
-		auto items = args.GetPinData<flatbuffers::Vector<const layout::GridOutputItem*>>(NOS_NAME("Items"));
-		std::vector<layout::LayoutOutputInfo> outputs;
+		auto items = args.GetPinData<flatbuffers::Vector<const GridOutputItem*>>(NOS_NAME("Items"));
+		std::vector<LayoutOutputInfo> outputs;
 		outputs.reserve(items->size());
 		for (auto itemPtr : *items)
 		{
@@ -143,7 +143,7 @@ namespace nos::utilities
 			float u1 = (float)(layoutItem.start().x() + layoutItem.span().x()) / columns;
 			float v1 = (float)(layoutItem.start().y() + layoutItem.span().y()) / rows;
 
-			layout::LayoutOutputInfo output{};
+			LayoutOutputInfo output{};
 			output.mutable_resolution() = resolution;
 			output.mutable_pos() = nos::fb::vec2(u0, v0);
 			output.mutable_size() = nos::fb::vec2(u1 - u0, v1 - v0);
@@ -159,3 +159,4 @@ namespace nos::utilities
 		return NOS_RESULT_SUCCESS;
 	}
 }
+

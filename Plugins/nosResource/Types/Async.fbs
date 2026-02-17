@@ -2,7 +2,7 @@ include "Types/Types.fbs";
 include "Types/Sync.fbs";
 include "Types/Audio.fbs";
 
-namespace nos.utilities;
+namespace nos.resource;
 
 table BufferSyncTuple
 {

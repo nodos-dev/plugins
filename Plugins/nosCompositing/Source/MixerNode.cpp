@@ -160,7 +160,7 @@ static std::string NosFieldTypeStr(nosTextureFieldType fieldType) {
 	}
 }
 
-namespace nos
+namespace nos::compositing
 {
 
 
@@ -1040,4 +1040,4 @@ namespace nos
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Mixer"), MixerContext, nodeFunctions);
 	}
 
-} // namespace nos
+} // namespace nos::compositing

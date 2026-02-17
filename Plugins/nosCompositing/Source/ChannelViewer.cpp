@@ -11,7 +11,7 @@ NOS_REGISTER_NAME(Channel_Viewer_Pass);
 NOS_REGISTER_NAME(Channel_Viewer_Shader);
 NOS_REGISTER_NAME_SPACED(Nos_Utilities_ChannelViewer, "nos.compositing.ChannelViewer")
 
-namespace nos::utilities
+namespace nos::compositing
 {
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 {

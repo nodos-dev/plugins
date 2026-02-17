@@ -1,7 +1,7 @@
 // Copyright ZeroDensity AS. All Rights Reserved.
 #include "Common.h"
 
-namespace nos
+namespace nos::imageprocessing
 {
     NOS_REGISTER_NAME(Odd); // nos.fb.Texture node input pin
 	NOS_REGISTER_NAME(Even); // nos.fb.Texture node input pin
@@ -51,4 +51,4 @@ namespace nos
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Interleave"), InterleaveContext, nodeFunctions);
     }
 
-} // namespace nos
+} // namespace nos::imageprocessing

@@ -1,4 +1,4 @@
-namespace nos.utilities;
+namespace nos.compositing;
 
 enum BlendMode : uint {
   Normal = 0,

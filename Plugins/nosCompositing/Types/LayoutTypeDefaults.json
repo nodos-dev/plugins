@@ -1,7 +1,7 @@
 {
 	"defaults": [
 		{
-			"type_name": "nos.utilities.layout.FreeLayoutItem",
+			"type_name": "nos.compositing.FreeLayoutItem",
 			"def": {
 				"position": {
 					"x": 0,
@@ -14,7 +14,7 @@
 			}
 		},
 		{
-			"type_name": "nos.utilities.layout.GridLayoutItem",
+			"type_name": "nos.compositing.GridLayoutItem",
 			"def": {
 				"start": {
 					"x": 0,
@@ -27,7 +27,7 @@
 			}
 		},
 		{
-			"type_name": "nos.utilities.layout.FreeOutputItem",
+			"type_name": "nos.compositing.FreeOutputItem",
 			"def": {
 				"item": {
 					"position": {
@@ -46,7 +46,7 @@
 			}
 		},
 		{
-			"type_name": "nos.utilities.layout.GridOutputItem",
+			"type_name": "nos.compositing.GridOutputItem",
 			"def": {
 				"item": {
 					"start": {
@@ -65,7 +65,7 @@
 			}
 		},
 		{
-			"type_name": "nos.utilities.layout.LayoutDrawItem",
+			"type_name": "nos.compositing.LayoutDrawItem",
 			"def": {
 				"position": {
 					"x": 0.0,
@@ -78,7 +78,7 @@
 			}
 		},
 		{
-			"type_name": "nos.utilities.layout.LayoutOutputInfo",
+			"type_name": "nos.compositing.LayoutOutputInfo",
 			"def": {
 				"position": {
 					"x": 0.0,
@@ -96,3 +96,4 @@
 		}
 	]
 } 
+

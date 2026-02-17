@@ -11,7 +11,7 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-namespace nos::utilities
+namespace nos::flow
 {
 nosResult RegisterAlwaysDirty(nosNodeFunctions*);
 nosResult RegisterConditionalTrigger(nosNodeFunctions*);
@@ -27,15 +27,22 @@ nosResult RegisterSink(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterSyncMultiOutlet(nosNodeFunctions*);
 nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
-}
-
-namespace nos
-{
 void RegisterToggleNode(nosNodeFunctions*);
 }
 
 namespace nos::flow
 {
+static nosResult RegisterShowStatus(nosNodeFunctions* nodeFunctions)
+{
+	return RegisterShowStatusNode(nodeFunctions);
+}
+
+static nosResult RegisterToggle(nosNodeFunctions* nodeFunctions)
+{
+	RegisterToggleNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
 enum class Nodes : size_t
 {
 	AlwaysDirty,
@@ -63,60 +70,40 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
+#define GEN_CASE_NODE(name)            \
+	case Nodes::name: {                \
+		auto ret = Register##name(node); \
+		if (ret != NOS_RESULT_SUCCESS)  \
+			return ret;                 \
+		break;                          \
+	}
+
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)
 	{
 		auto* node = outList[i];
 		switch (static_cast<Nodes>(i))
 		{
-		case Nodes::AlwaysDirty:
-			NOS_SOFT_CHECK(nos::utilities::RegisterAlwaysDirty(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ConditionalTrigger:
-			NOS_SOFT_CHECK(nos::utilities::RegisterConditionalTrigger(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::CPUSleep:
-			NOS_SOFT_CHECK(nos::utilities::RegisterCPUSleep(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::MultiLiveOut:
-			NOS_SOFT_CHECK(nos::utilities::RegisterMultiLiveOut(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::PrintLog:
-			NOS_SOFT_CHECK(nos::utilities::RegisterPrintLog(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::PropagateExecution:
-			NOS_SOFT_CHECK(nos::utilities::RegisterPropagateExecution(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::RepeatingJunction:
-			NOS_SOFT_CHECK(nos::utilities::RegisterRepeatingJunction(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ScheduleOnRequest:
-			NOS_SOFT_CHECK(nos::utilities::RegisterScheduleOnRequest(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ScheduleRequest:
-			NOS_SOFT_CHECK(nos::utilities::RegisterScheduleRequest(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ShowStatus:
-			NOS_SOFT_CHECK(nos::utilities::RegisterShowStatusNode(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Sink:
-			NOS_SOFT_CHECK(nos::utilities::RegisterSink(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::SwitchTrigger:
-			NOS_SOFT_CHECK(nos::utilities::RegisterSwitchTrigger(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::SyncMultiOutlet:
-			NOS_SOFT_CHECK(nos::utilities::RegisterSyncMultiOutlet(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::TriggerOnAnyInput:
-			NOS_SOFT_CHECK(nos::utilities::RegisterTriggerOnAnyInput(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Toggle:
-			nos::RegisterToggleNode(node);
-			break;
 		default:
 			break;
+			GEN_CASE_NODE(AlwaysDirty)
+			GEN_CASE_NODE(ConditionalTrigger)
+			GEN_CASE_NODE(CPUSleep)
+			GEN_CASE_NODE(MultiLiveOut)
+			GEN_CASE_NODE(PrintLog)
+			GEN_CASE_NODE(PropagateExecution)
+			GEN_CASE_NODE(RepeatingJunction)
+			GEN_CASE_NODE(ScheduleOnRequest)
+			GEN_CASE_NODE(ScheduleRequest)
+			GEN_CASE_NODE(ShowStatus)
+			GEN_CASE_NODE(Sink)
+			GEN_CASE_NODE(SwitchTrigger)
+			GEN_CASE_NODE(SyncMultiOutlet)
+			GEN_CASE_NODE(TriggerOnAnyInput)
+			GEN_CASE_NODE(Toggle)
 		}
 	}
+
+#undef GEN_CASE_NODE
 
 	return NOS_RESULT_SUCCESS;
 }

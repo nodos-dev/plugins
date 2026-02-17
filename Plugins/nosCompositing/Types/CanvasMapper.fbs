@@ -1,12 +1,8 @@
 include "Builtins.fbs";
 include "Types/Types.fbs";
+include "Merge.fbs";
 
 namespace nos.compositing;
-
-enum BlendMode : uint {
-  Normal = 0,
-  Additive = 1
-}
 
 table CanvasLayer
 {

@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::flow
 {
 NOS_REGISTER_NAME_SPACED(ClassName_MultiLiveOut, "MultiLiveOut")
 
@@ -164,4 +164,4 @@ nosResult RegisterMultiLiveOut(nosNodeFunctions* nodeFunctions)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::flow

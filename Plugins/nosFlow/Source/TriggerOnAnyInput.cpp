@@ -1,7 +1,7 @@
 #include <Nodos/Plugin.hpp>
 
 
-namespace nos::utilities
+namespace nos::flow
 {
 struct TriggerOnAnyInput : NodeContext
 {

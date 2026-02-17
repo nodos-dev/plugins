@@ -1,4 +1,4 @@
-﻿// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
 
@@ -6,7 +6,7 @@
 #include <glm/glm.hpp> // TODO: Ring no longer needs glm::mat4 colormatrix. Remove this
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::resource
 {
 struct UploadBufferNode : NodeContext
 {

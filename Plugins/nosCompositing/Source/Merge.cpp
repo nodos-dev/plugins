@@ -9,7 +9,7 @@
 
 #include "Names.h"
 
-namespace nos::utilities
+namespace nos::compositing
 {
 
 NOS_REGISTER_NAME(Textures);
@@ -227,7 +227,7 @@ struct MergeContext : NodeContext
 				fb::CreatePinDirect(fbb,
 				                    &blendId,
 				                    blendPinName.c_str(),
-				                    "nos.utilities.BlendMode",
+				                    "nos.compositing.BlendMode",
 				                    fb::ShowAs::PROPERTY,
 				                    fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY,
 				                    0,
@@ -285,3 +285,4 @@ nosResult RegisterMerge(nosNodeFunctions* out)
 }
 
 }
+

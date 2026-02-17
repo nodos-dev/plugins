@@ -11,19 +11,21 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
 nosResult RegisterResize(nosNodeFunctions*);
 nosResult RegisterReduceTexture(nosNodeFunctions*);
-}
-
-namespace nos
-{
 void RegisterInterleaveNode(nosNodeFunctions*);
 }
 
 namespace nos::imageprocessing
 {
+static nosResult RegisterInterleave(nosNodeFunctions* nodeFunctions)
+{
+	RegisterInterleaveNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
 enum class Nodes : size_t
 {
 	Resize,
@@ -39,24 +41,28 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
+#define GEN_CASE_NODE(name)            \
+	case Nodes::name: {                \
+		auto ret = Register##name(node); \
+		if (ret != NOS_RESULT_SUCCESS)  \
+			return ret;                 \
+		break;                          \
+	}
+
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)
 	{
 		auto* node = outList[i];
 		switch (static_cast<Nodes>(i))
 		{
-		case Nodes::Resize:
-			NOS_SOFT_CHECK(nos::utilities::RegisterResize(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ReduceTexture:
-			NOS_SOFT_CHECK(nos::utilities::RegisterReduceTexture(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Interleave:
-			nos::RegisterInterleaveNode(node);
-			break;
 		default:
 			break;
+			GEN_CASE_NODE(Resize)
+			GEN_CASE_NODE(ReduceTexture)
+			GEN_CASE_NODE(Interleave)
 		}
 	}
+
+#undef GEN_CASE_NODE
 
 	return NOS_RESULT_SUCCESS;
 }

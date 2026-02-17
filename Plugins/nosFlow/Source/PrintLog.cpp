@@ -1,7 +1,7 @@
 #include <Nodos/Plugin.hpp>
 
 
-namespace nos::utilities
+namespace nos::flow
 {
 NOS_REGISTER_NAME(PrintLog)
 struct PrintLog : NodeContext

@@ -10,7 +10,7 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-namespace nos::utilities
+namespace nos::compositing
 {
 nosResult RegisterBoxFit(nosNodeFunctions*);
 nosResult RegisterChannelViewer(nosNodeFunctions*);
@@ -20,10 +20,6 @@ nosResult RegisterFreeLayout(nosNodeFunctions*);
 nosResult RegisterGridLayout(nosNodeFunctions*);
 nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
-}
-
-namespace nos
-{
 void RegisterTextureTransitionNode(nosNodeFunctions*);
 void RegisterTextureMapperNode(nosNodeFunctions*);
 void RegisterMixerNode(nosNodeFunctions*);
@@ -33,6 +29,36 @@ void RegisterCanvasMapperNode(nosNodeFunctions*);
 
 namespace nos::compositing
 {
+static nosResult RegisterTextureTransition(nosNodeFunctions* nodeFunctions)
+{
+	RegisterTextureTransitionNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
+static nosResult RegisterTextureMapper(nosNodeFunctions* nodeFunctions)
+{
+	RegisterTextureMapperNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
+static nosResult RegisterMixer(nosNodeFunctions* nodeFunctions)
+{
+	RegisterMixerNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
+static nosResult RegisterGrid3D(nosNodeFunctions* nodeFunctions)
+{
+	RegisterGrid3DNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
+static nosResult RegisterCanvasMapper(nosNodeFunctions* nodeFunctions)
+{
+	RegisterCanvasMapperNode(nodeFunctions);
+	return NOS_RESULT_SUCCESS;
+}
+
 enum class Nodes : size_t
 {
 	BoxFit,
@@ -58,54 +84,38 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
+#define GEN_CASE_NODE(name)            \
+	case Nodes::name: {                \
+		auto ret = Register##name(node); \
+		if (ret != NOS_RESULT_SUCCESS)  \
+			return ret;                 \
+		break;                          \
+	}
+
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)
 	{
 		auto* node = outList[i];
 		switch (static_cast<Nodes>(i))
 		{
-		case Nodes::BoxFit:
-			NOS_SOFT_CHECK(nos::utilities::RegisterBoxFit(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::ChannelViewer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterChannelViewer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Merge:
-			NOS_SOFT_CHECK(nos::utilities::RegisterMerge(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::LayoutDrawer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterLayoutDrawer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::FreeLayout:
-			NOS_SOFT_CHECK(nos::utilities::RegisterFreeLayout(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::GridLayout:
-			NOS_SOFT_CHECK(nos::utilities::RegisterGridLayout(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::FreeOutputLayout:
-			NOS_SOFT_CHECK(nos::utilities::RegisterFreeOutputLayout(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::GridOutputLayout:
-			NOS_SOFT_CHECK(nos::utilities::RegisterGridOutputLayout(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::TextureTransition:
-			nos::RegisterTextureTransitionNode(node);
-			break;
-		case Nodes::TextureMapper:
-			nos::RegisterTextureMapperNode(node);
-			break;
-		case Nodes::Mixer:
-			nos::RegisterMixerNode(node);
-			break;
-		case Nodes::Grid3D:
-			nos::RegisterGrid3DNode(node);
-			break;
-		case Nodes::CanvasMapper:
-			nos::RegisterCanvasMapperNode(node);
-			break;
 		default:
 			break;
+			GEN_CASE_NODE(BoxFit)
+			GEN_CASE_NODE(ChannelViewer)
+			GEN_CASE_NODE(Merge)
+			GEN_CASE_NODE(LayoutDrawer)
+			GEN_CASE_NODE(FreeLayout)
+			GEN_CASE_NODE(GridLayout)
+			GEN_CASE_NODE(FreeOutputLayout)
+			GEN_CASE_NODE(GridOutputLayout)
+			GEN_CASE_NODE(TextureTransition)
+			GEN_CASE_NODE(TextureMapper)
+			GEN_CASE_NODE(Mixer)
+			GEN_CASE_NODE(Grid3D)
+			GEN_CASE_NODE(CanvasMapper)
 		}
 	}
+
+#undef GEN_CASE_NODE
 
 	return NOS_RESULT_SUCCESS;
 }
@@ -121,9 +131,26 @@ void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.TransitionInterpolation"), NOS_NAME("nos.compositing.TransitionInterpolation")},
 		{NOS_NAME("nos.utilities.TransitionTarget"), NOS_NAME("nos.compositing.TransitionTarget")},
 		{NOS_NAME("nos.utilities.BoxFitMode"), NOS_NAME("nos.compositing.BoxFitMode")},
+		{NOS_NAME("nos.utilities.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
+		{NOS_NAME("nos.utilities.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("nos.utilities.Channel"), NOS_NAME("nos.compositing.Channel")},
 		{NOS_NAME("nos.utilities.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
 		{NOS_NAME("nos.utilities.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
 		{NOS_NAME("nos.utilities.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
+		{NOS_NAME("nos.utilities.layout.LayoutType"), NOS_NAME("nos.compositing.LayoutType")},
+		{NOS_NAME("nos.utilities.layout.FreeLayoutItem"), NOS_NAME("nos.compositing.FreeLayoutItem")},
+		{NOS_NAME("nos.utilities.layout.GridLayoutItem"), NOS_NAME("nos.compositing.GridLayoutItem")},
+		{NOS_NAME("nos.utilities.layout.FreeOutputItem"), NOS_NAME("nos.compositing.FreeOutputItem")},
+		{NOS_NAME("nos.utilities.layout.GridOutputItem"), NOS_NAME("nos.compositing.GridOutputItem")},
+		{NOS_NAME("nos.utilities.layout.LayoutDrawItem"), NOS_NAME("nos.compositing.LayoutDrawItem")},
+		{NOS_NAME("nos.utilities.layout.LayoutOutputInfo"), NOS_NAME("nos.compositing.LayoutOutputInfo")},
+		{NOS_NAME("nos.compositing.layout.LayoutType"), NOS_NAME("nos.compositing.LayoutType")},
+		{NOS_NAME("nos.compositing.layout.FreeLayoutItem"), NOS_NAME("nos.compositing.FreeLayoutItem")},
+		{NOS_NAME("nos.compositing.layout.GridLayoutItem"), NOS_NAME("nos.compositing.GridLayoutItem")},
+		{NOS_NAME("nos.compositing.layout.FreeOutputItem"), NOS_NAME("nos.compositing.FreeOutputItem")},
+		{NOS_NAME("nos.compositing.layout.GridOutputItem"), NOS_NAME("nos.compositing.GridOutputItem")},
+		{NOS_NAME("nos.compositing.layout.LayoutDrawItem"), NOS_NAME("nos.compositing.LayoutDrawItem")},
+		{NOS_NAME("nos.compositing.layout.LayoutOutputInfo"), NOS_NAME("nos.compositing.LayoutOutputInfo")},
 		{NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
 		{NOS_NAME("zd.utilities.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
 		{NOS_NAME("zd.utilities.CanvasLayer"), NOS_NAME("nos.compositing.CanvasLayer")},
@@ -134,9 +161,18 @@ void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("zd.utilities.TransitionInterpolation"), NOS_NAME("nos.compositing.TransitionInterpolation")},
 		{NOS_NAME("zd.utilities.TransitionTarget"), NOS_NAME("nos.compositing.TransitionTarget")},
 		{NOS_NAME("zd.utilities.BoxFitMode"), NOS_NAME("nos.compositing.BoxFitMode")},
+		{NOS_NAME("zd.utilities.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("zd.utilities.Channel"), NOS_NAME("nos.compositing.Channel")},
 		{NOS_NAME("zd.utilities.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
 		{NOS_NAME("zd.utilities.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
 		{NOS_NAME("zd.utilities.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
+		{NOS_NAME("zd.utilities.layout.LayoutType"), NOS_NAME("nos.compositing.LayoutType")},
+		{NOS_NAME("zd.utilities.layout.FreeLayoutItem"), NOS_NAME("nos.compositing.FreeLayoutItem")},
+		{NOS_NAME("zd.utilities.layout.GridLayoutItem"), NOS_NAME("nos.compositing.GridLayoutItem")},
+		{NOS_NAME("zd.utilities.layout.FreeOutputItem"), NOS_NAME("nos.compositing.FreeOutputItem")},
+		{NOS_NAME("zd.utilities.layout.GridOutputItem"), NOS_NAME("nos.compositing.GridOutputItem")},
+		{NOS_NAME("zd.utilities.layout.LayoutDrawItem"), NOS_NAME("nos.compositing.LayoutDrawItem")},
+		{NOS_NAME("zd.utilities.layout.LayoutOutputInfo"), NOS_NAME("nos.compositing.LayoutOutputInfo")},
 	};
 
 	if (!outFrom)

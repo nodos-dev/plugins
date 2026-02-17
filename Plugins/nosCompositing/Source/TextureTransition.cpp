@@ -4,7 +4,7 @@
 
 
 
-namespace nos
+namespace nos::compositing
 {
 	enum class EZDTransitionType
 	{
@@ -222,4 +222,4 @@ namespace nos
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureTransition"), TextureTransitionContext, nodeFunctions);
 	}
 
-} // namespace nos
+} // namespace nos::compositing

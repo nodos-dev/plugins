@@ -61,7 +61,7 @@
 					{
 						"id": "0fa42241-8ebe-4c31-883f-8eb5bbfd9789",
 						"name": "Value",
-						"type_name": "nos.utilities.layout.LayoutType",
+						"type_name": "nos.compositing.LayoutType",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "Quad",
@@ -105,7 +105,7 @@
 					{
 						"id": "86201eed-1c04-4d2f-b971-0273f6cf3952",
 						"name": "Items",
-						"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+						"type_name": "[nos.compositing.FreeLayoutItem]",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [],
@@ -279,7 +279,7 @@
 								{
 									"id": "1989d761-b8dd-4b05-bb9f-01757b6c7b11",
 									"name": "Output",
-									"type_name": "nos.utilities.layout.LayoutType",
+									"type_name": "nos.compositing.LayoutType",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"data": "Quad",
@@ -296,7 +296,7 @@
 								{
 									"id": "4b3731ff-68a2-4036-a1ab-98e130183ae4",
 									"name": "Input",
-									"type_name": "nos.utilities.layout.LayoutType",
+									"type_name": "nos.compositing.LayoutType",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": "Quad",
@@ -415,7 +415,7 @@
 								{
 									"id": "12c2ad7b-a99f-4c50-b518-a2cf271d3ad6",
 									"name": "Output",
-									"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+									"type_name": "[nos.compositing.FreeLayoutItem]",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"data": [],
@@ -432,7 +432,7 @@
 								{
 									"id": "69b2e816-a424-4850-9d2e-cd01e4c6a608",
 									"name": "Input",
-									"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+									"type_name": "[nos.compositing.FreeLayoutItem]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [],
@@ -489,7 +489,7 @@
 								{
 									"id": "15f40ed1-b284-4042-9127-58b3694d5a6d",
 									"name": "LayoutDrawItems",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [
@@ -546,7 +546,7 @@
 								{
 									"id": "b9a3d49a-af3d-48fa-8cd8-6723dea1367d",
 									"name": "LayoutOutputInfos",
-									"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+									"type_name": "[nos.compositing.LayoutOutputInfo]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [
@@ -780,7 +780,7 @@
 								{
 									"id": "2ea615bb-9d23-4f7e-99fc-3822d7c470a5",
 									"name": "Items",
-									"type_name": "[nos.utilities.layout.FreeOutputItem]",
+									"type_name": "[nos.compositing.FreeOutputItem]",
 									"show_as": "PROPERTY",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [
@@ -825,7 +825,7 @@
 								{
 									"id": "57c95ea1-72ed-4891-bb41-78b67aca0205",
 									"name": "OutputInfos",
-									"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+									"type_name": "[nos.compositing.LayoutOutputInfo]",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "INPUT_OUTPUT_PROPERTY",
 									"data": [
@@ -898,7 +898,7 @@
 								{
 									"id": "b80d1aea-88c9-4310-9e9f-ed948f2b418b",
 									"name": "Items",
-									"type_name": "[nos.utilities.layout.FreeLayoutItem]",
+									"type_name": "[nos.compositing.FreeLayoutItem]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [],
@@ -920,7 +920,7 @@
 								{
 									"id": "6e21ce14-493e-4850-a965-0cfdc3ff194d",
 									"name": "OutDrawItems",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "INPUT_OUTPUT_PROPERTY",
 									"data": [],
@@ -985,7 +985,7 @@
 								{
 									"id": "2883631f-2493-4f94-aab8-3b31fa63a259",
 									"name": "Items",
-									"type_name": "[nos.utilities.layout.GridLayoutItem]",
+									"type_name": "[nos.compositing.GridLayoutItem]",
 									"show_as": "PROPERTY",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": [
@@ -1078,7 +1078,7 @@
 								{
 									"id": "d2b802a0-0057-4f94-ad09-1dae4262fec8",
 									"name": "OutDrawItems",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "INPUT_OUTPUT_PROPERTY",
 									"data": [
@@ -1164,7 +1164,7 @@
 								{
 									"id": "40817385-38e7-471b-8642-c7a686edf7e1",
 									"name": "A",
-									"type_name": "nos.utilities.layout.LayoutType",
+									"type_name": "nos.compositing.LayoutType",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": "Quad",
@@ -1175,7 +1175,7 @@
 								{
 									"id": "199fc967-bf4e-48e1-8469-a2ea3f54712d",
 									"name": "B",
-									"type_name": "nos.utilities.layout.LayoutType",
+									"type_name": "nos.compositing.LayoutType",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"data": "Free",
@@ -1230,7 +1230,7 @@
 								{
 									"id": "1a05f41b-b8e7-4651-8a1d-eda68aaa22a3",
 									"name": "True",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"data": [],
@@ -1241,7 +1241,7 @@
 								{
 									"id": "321927d1-530f-43d7-9dc3-0a214623906a",
 									"name": "False",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"data": [],
@@ -1252,7 +1252,7 @@
 								{
 									"id": "bc751bde-fd00-48e2-9858-b619ed918db9",
 									"name": "Output",
-									"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+									"type_name": "[nos.compositing.LayoutDrawItem]",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"data": [],
@@ -1351,3 +1351,4 @@
 	],
 	"schema_version": "1.4-v1"
 }
+

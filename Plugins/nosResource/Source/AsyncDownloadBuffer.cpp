@@ -17,7 +17,7 @@ NOS_REGISTER_NAME(Alignment);
 NOS_REGISTER_NAME(ForceHostMemory);
 NOS_REGISTER_NAME(UseHostCachedMemory);
 
-namespace nos::utilities
+namespace nos::resource
 {
 struct AsyncDownloadBuffer
 {
@@ -208,4 +208,4 @@ nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME("AsyncDownloadBuffer"), AsyncDownloadBufferNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
-} // namespace nos::utilities
+} // namespace nos::resource

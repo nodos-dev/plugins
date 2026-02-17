@@ -112,7 +112,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		return NOS_RESULT_SUCCESS;
 
 	RegisterFulFillPromiseNode(outList[static_cast<size_t>(Nodes::FulFillPromise)]);
-	NOS_SOFT_CHECK(RegisterWaitGPUEvent(outList[static_cast<size_t>(Nodes::WaitGPUEvent)]) == NOS_RESULT_SUCCESS);
+	if (auto ret = RegisterWaitGPUEvent(outList[static_cast<size_t>(Nodes::WaitGPUEvent)]); ret != NOS_RESULT_SUCCESS)
+		return ret;
 	return NOS_RESULT_SUCCESS;
 }
 

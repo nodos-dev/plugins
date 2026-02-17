@@ -25,7 +25,7 @@
 #include <map>
 #include <memory>
 
-namespace nos
+namespace nos::compositing
 {
 
 using nos::NodeContext;

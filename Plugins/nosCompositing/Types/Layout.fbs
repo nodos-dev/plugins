@@ -1,6 +1,6 @@
 include "Builtins.fbs";
 
-namespace nos.utilities.layout;
+namespace nos.compositing;
 
 enum LayoutType : uint
 {
@@ -48,3 +48,4 @@ struct LayoutOutputInfo
 	size: nos.fb.vec2;
 	pos: nos.fb.vec2;
 }
+

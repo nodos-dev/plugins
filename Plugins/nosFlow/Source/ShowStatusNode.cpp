@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-namespace nos::utilities
+namespace nos::flow
 {
 	NOS_REGISTER_NAME_SPACED(Nos_Utilities_ShowStatus, "nos.flow.ShowStatus")
 	struct ShowStatus : NodeContext
@@ -38,4 +38,4 @@ namespace nos::utilities
 		return NOS_RESULT_SUCCESS;
 	}
 
-} // namespace nos
+} // namespace nos::flow

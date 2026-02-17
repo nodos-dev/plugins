@@ -20,14 +20,14 @@
 					{
 						"name": "LayoutDrawItems",
 						"display_name": "Layout Draw Items",
-						"type_name": "[nos.utilities.layout.LayoutDrawItem]",
+						"type_name": "[nos.compositing.LayoutDrawItem]",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
 						"name": "LayoutOutputInfos",
 						"display_name": "Layout Output Infos",
-						"type_name": "[nos.utilities.layout.LayoutOutputInfo]",
+						"type_name": "[nos.compositing.LayoutOutputInfo]",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": [
@@ -86,3 +86,4 @@
 	],
 	"schema_version": "1.4-v1"
 }
+

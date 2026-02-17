@@ -4,15 +4,8 @@
 #include <stb_image.h>
 #include <cuchar>
 
-NOS_INIT()
-NOS_VULKAN_INIT()
 
-NOS_BEGIN_IMPORT_DEPS()
-NOS_VULKAN_IMPORT()
-NOS_END_IMPORT_DEPS()
-
-
-namespace nos
+namespace nos::compositing
 {
 
 

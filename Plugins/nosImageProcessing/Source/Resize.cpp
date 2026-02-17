@@ -6,7 +6,7 @@
 
 #include "Names.h"
 
-namespace nos::utilities
+namespace nos::imageprocessing
 {
 
 NOS_REGISTER_NAME(RESIZE_PASS);
@@ -102,6 +102,6 @@ nosResult RegisterResize(nosNodeFunctions* out)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos::utilities
+} // namespace nos::imageprocessing
 
 

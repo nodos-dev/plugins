@@ -2,7 +2,7 @@
 #include "Common.h"
 #include "nosCompositing/CanvasMapper_generated.h"
 
-namespace nos
+namespace nos::compositing
 {
     struct CanvasMapperContext : public NodeContext
     {
@@ -100,4 +100,4 @@ namespace nos
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("CanvasMapper"), CanvasMapperContext, nodeFunctions);
     }
 
-} // namespace nos
+} // namespace nos::compositing

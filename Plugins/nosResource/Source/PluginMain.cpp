@@ -14,7 +14,7 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_SYNC_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-namespace nos::utilities
+namespace nos::resource
 {
 nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions*);
 nosResult RegisterBoundedQueue(nosNodeFunctions*);
@@ -58,62 +58,72 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
+#define GEN_CASE_NODE(name)            \
+	case Nodes::name: {                \
+		auto ret = Register##name(node); \
+		if (ret != NOS_RESULT_SUCCESS)  \
+			return ret;                 \
+		break;                          \
+	}
+
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)
 	{
 		auto* node = outList[i];
 		switch (static_cast<Nodes>(i))
 		{
-		case Nodes::AsyncDownloadBuffer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterAsyncDownloadBuffer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::BoundedQueue:
-			NOS_SOFT_CHECK(nos::utilities::RegisterBoundedQueue(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Buffer2Texture:
-			NOS_SOFT_CHECK(nos::utilities::RegisterBuffer2Texture(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::BufferProvider:
-			NOS_SOFT_CHECK(nos::utilities::RegisterBufferProvider(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::CopyResource:
-			NOS_SOFT_CHECK(nos::utilities::RegisterCopyResource(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::DeinterlacedBoundedTextureQueue:
-			NOS_SOFT_CHECK(nos::utilities::RegisterDeinterlacedBoundedTextureQueue(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::DeinterlacedBufferRing:
-			NOS_SOFT_CHECK(nos::utilities::RegisterDeinterlacedBufferRing(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::HostVisibleBufferCopy:
-			NOS_SOFT_CHECK(nos::utilities::RegisterHostVisibleBufferCopy(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::RingBuffer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterRingBuffer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::Texture2Buffer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterTexture2Buffer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::TextureProvider:
-			NOS_SOFT_CHECK(nos::utilities::RegisterTextureProvider(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::UploadBuffer:
-			NOS_SOFT_CHECK(nos::utilities::RegisterUploadBuffer(node) == NOS_RESULT_SUCCESS);
-			break;
-		case Nodes::UploadBufferProvider:
-			NOS_SOFT_CHECK(nos::utilities::RegisterUploadBufferProvider(node) == NOS_RESULT_SUCCESS);
-			break;
 		default:
 			break;
+			GEN_CASE_NODE(AsyncDownloadBuffer)
+			GEN_CASE_NODE(BoundedQueue)
+			GEN_CASE_NODE(Buffer2Texture)
+			GEN_CASE_NODE(BufferProvider)
+			GEN_CASE_NODE(CopyResource)
+			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
+			GEN_CASE_NODE(DeinterlacedBufferRing)
+			GEN_CASE_NODE(HostVisibleBufferCopy)
+			GEN_CASE_NODE(RingBuffer)
+			GEN_CASE_NODE(Texture2Buffer)
+			GEN_CASE_NODE(TextureProvider)
+			GEN_CASE_NODE(UploadBuffer)
+			GEN_CASE_NODE(UploadBufferProvider)
 		}
 	}
+
+#undef GEN_CASE_NODE
 
 	return NOS_RESULT_SUCCESS;
 }
 
 void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 {
+	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.utilities.BufferSyncTuple"), NOS_NAME("nos.resource.BufferSyncTuple")},
+		{NOS_NAME("nos.utilities.TextureSyncTuple"), NOS_NAME("nos.resource.TextureSyncTuple")},
+		{NOS_NAME("nos.utilities.AudioSyncTuple"), NOS_NAME("nos.resource.AudioSyncTuple")},
+		{NOS_NAME("nos.utilities.VideoFrame"), NOS_NAME("nos.resource.VideoFrame")},
+		{NOS_NAME("nos.utilities.AudioTexturePair"), NOS_NAME("nos.resource.AudioTexturePair")},
+		{NOS_NAME("nos.utilities.FrameBufferWithAudioSync"), NOS_NAME("nos.resource.FrameBufferWithAudioSync")},
+		{NOS_NAME("nos.utilities.VideoFrameWithAudioSync"), NOS_NAME("nos.resource.VideoFrameWithAudioSync")},
+		{NOS_NAME("zd.utilities.BufferSyncTuple"), NOS_NAME("nos.resource.BufferSyncTuple")},
+		{NOS_NAME("zd.utilities.TextureSyncTuple"), NOS_NAME("nos.resource.TextureSyncTuple")},
+		{NOS_NAME("zd.utilities.AudioSyncTuple"), NOS_NAME("nos.resource.AudioSyncTuple")},
+		{NOS_NAME("zd.utilities.VideoFrame"), NOS_NAME("nos.resource.VideoFrame")},
+		{NOS_NAME("zd.utilities.AudioTexturePair"), NOS_NAME("nos.resource.AudioTexturePair")},
+		{NOS_NAME("zd.utilities.FrameBufferWithAudioSync"), NOS_NAME("nos.resource.FrameBufferWithAudioSync")},
+		{NOS_NAME("zd.utilities.VideoFrameWithAudioSync"), NOS_NAME("nos.resource.VideoFrameWithAudioSync")},
+	};
+
 	if (!outFrom)
-		*outSize = 0;
+	{
+		*outSize = renames.size();
+		return;
+	}
+
+	for (size_t i = 0; i < renames.size(); ++i)
+	{
+		outFrom[i] = renames[i].first;
+		outTo[i] = renames[i].second;
+	}
 }
 
 void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)

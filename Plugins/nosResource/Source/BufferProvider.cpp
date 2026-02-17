@@ -18,7 +18,7 @@ NOS_REGISTER_NAME(MemoryFlags);
 NOS_REGISTER_NAME(Usage);
 NOS_REGISTER_NAME(Input);
 
-namespace nos::utilities
+namespace nos::resource
 {
 struct BufferSlot
 {
@@ -216,4 +216,4 @@ nosResult RegisterBufferProvider(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME("BufferProvider"), BufferProviderNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
-} // namespace nos::utilities
+} // namespace nos::resource

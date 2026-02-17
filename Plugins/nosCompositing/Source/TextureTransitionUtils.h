@@ -2,7 +2,7 @@
 
 #include "Common.h"
 
-namespace nos
+namespace nos::compositing
 {
 	enum class EZDTransitionInterpolation {
 		Jump,

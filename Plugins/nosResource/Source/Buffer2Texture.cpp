@@ -5,7 +5,7 @@
 // External
 #include <nosSysVulkan/Helpers.hpp>
 
-namespace nos::utilities
+namespace nos::resource
 {
 
 struct Buffer2TextureNodeContext : NodeContext

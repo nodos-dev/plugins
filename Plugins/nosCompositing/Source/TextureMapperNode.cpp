@@ -2,7 +2,7 @@
 
 #include "Common.h"
 
-namespace nos
+namespace nos::compositing
 {
 
 using glm::vec2;
@@ -261,5 +261,5 @@ private:
 		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureMapper"), TextureMapperContext, nodeFunctions);
 	}
 
-} // namespace nos
+} // namespace nos::compositing
 

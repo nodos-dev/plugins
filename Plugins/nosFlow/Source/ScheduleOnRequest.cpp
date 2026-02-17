@@ -9,7 +9,7 @@
 
 #include "nosFlow/Sink_generated.h"
 
-namespace nos::utilities
+namespace nos::flow
 {
 
 NOS_REGISTER_NAME(Request);

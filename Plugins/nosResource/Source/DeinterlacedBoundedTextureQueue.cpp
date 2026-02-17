@@ -11,7 +11,7 @@
 #include "Ring.h"
 #include <Nodos/Utils/Stopwatch.hpp>
 
-namespace nos::utilities
+namespace nos::resource
 {
 
 struct DeinterlacedBoundedTextureQueueNode : RingNodeBase
