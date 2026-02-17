@@ -96,33 +96,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 
 void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 {
-	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
-		{NOS_NAME("nos.utilities.BufferSyncTuple"), NOS_NAME("nos.resource.BufferSyncTuple")},
-		{NOS_NAME("nos.utilities.TextureSyncTuple"), NOS_NAME("nos.resource.TextureSyncTuple")},
-		{NOS_NAME("nos.utilities.AudioSyncTuple"), NOS_NAME("nos.resource.AudioSyncTuple")},
-		{NOS_NAME("nos.utilities.VideoFrame"), NOS_NAME("nos.resource.VideoFrame")},
-		{NOS_NAME("nos.utilities.AudioTexturePair"), NOS_NAME("nos.resource.AudioTexturePair")},
-		{NOS_NAME("nos.utilities.FrameBufferWithAudioSync"), NOS_NAME("nos.resource.FrameBufferWithAudioSync")},
-		{NOS_NAME("nos.utilities.VideoFrameWithAudioSync"), NOS_NAME("nos.resource.VideoFrameWithAudioSync")},
-		{NOS_NAME("zd.utilities.BufferSyncTuple"), NOS_NAME("nos.resource.BufferSyncTuple")},
-		{NOS_NAME("zd.utilities.TextureSyncTuple"), NOS_NAME("nos.resource.TextureSyncTuple")},
-		{NOS_NAME("zd.utilities.AudioSyncTuple"), NOS_NAME("nos.resource.AudioSyncTuple")},
-		{NOS_NAME("zd.utilities.VideoFrame"), NOS_NAME("nos.resource.VideoFrame")},
-		{NOS_NAME("zd.utilities.AudioTexturePair"), NOS_NAME("nos.resource.AudioTexturePair")},
-		{NOS_NAME("zd.utilities.FrameBufferWithAudioSync"), NOS_NAME("nos.resource.FrameBufferWithAudioSync")},
-		{NOS_NAME("zd.utilities.VideoFrameWithAudioSync"), NOS_NAME("nos.resource.VideoFrameWithAudioSync")},
-	};
-
 	if (!outFrom)
 	{
-		*outSize = renames.size();
+		*outSize = 0;
 		return;
-	}
-
-	for (size_t i = 0; i < renames.size(); ++i)
-	{
-		outFrom[i] = renames[i].first;
-		outTo[i] = renames[i].second;
 	}
 }
 
