@@ -95,7 +95,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ReduceTexture"), NOS_NAME("nos.imageprocessing.ReduceTexture")},
 		{NOS_NAME("nos.utilities.MeanSquaredError"), NOS_NAME("nos.imageprocessing.MeanSquaredError")},
 		{NOS_NAME("nos.utilities.PSNR"), NOS_NAME("nos.imageprocessing.PSNR")},
-		{NOS_NAME("nos.utilities.Interleave"), NOS_NAME("nos.imageprocessing.Interleave")},
 		{NOS_NAME("zd.utilities.Interleave"), NOS_NAME("nos.imageprocessing.Interleave")},
 	};
 

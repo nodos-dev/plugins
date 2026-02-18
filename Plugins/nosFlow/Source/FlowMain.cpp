@@ -149,7 +149,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ThreadedSyncMultiOutlet"), NOS_NAME("nos.flow.ThreadedSyncMultiOutlet")},
 		{NOS_NAME("nos.utilities.TimedFunctionSignaller"), NOS_NAME("nos.flow.TimedFunctionSignaller")},
 		{NOS_NAME("nos.utilities.TriggerOnAnyInput"), NOS_NAME("nos.flow.TriggerOnAnyInput")},
-		{NOS_NAME("nos.utilities.Toggle"), NOS_NAME("nos.flow.Toggle")},
 		{NOS_NAME("zd.utilities.Toggle"), NOS_NAME("nos.flow.Toggle")},
 	};
 
