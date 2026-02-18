@@ -30,10 +30,9 @@ struct PropagateExecutionNode : NodeContext
 	}
 };
 
-nosResult RegisterPropagateExecution(nosNodeFunctions* fn)
+void RegisterPropagateExecution(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_PropagateExecution, PropagateExecutionNode, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::flow

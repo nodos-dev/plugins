@@ -29,10 +29,9 @@ struct CPUSleepNode : NodeContext
 	}
 };
 
-nosResult RegisterCPUSleep(nosNodeFunctions* fn)
+void RegisterCPUSleep(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_CPUSleep, CPUSleepNode, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::flow

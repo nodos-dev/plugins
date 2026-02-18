@@ -65,10 +65,9 @@ struct RepeatingJunctionNode : NodeContext
 	}
 };
 
-nosResult RegisterRepeatingJunction(nosNodeFunctions* fn)
+void RegisterRepeatingJunction(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_RepeatingJunction, RepeatingJunctionNode, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::flow

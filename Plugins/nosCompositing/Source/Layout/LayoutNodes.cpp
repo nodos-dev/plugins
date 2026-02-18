@@ -44,11 +44,10 @@ namespace nos::compositing
 		nosEngine.SetPinValueByName(args.NodeId, NSN_OutDrawItems, PackPinVectorOfStructs(drawItems));
 		return NOS_RESULT_SUCCESS;
 	}
-	nosResult RegisterFreeLayout(nosNodeFunctions* fn)
+	void RegisterFreeLayout(nosNodeFunctions* fn)
 	{
 		fn->ClassName = NSN_FreeLayout;
 		fn->ExecuteNode = ExecuteFreeLayout;
-		return NOS_RESULT_SUCCESS;
 	}
 	nosResult NOSAPI_CALL ExecuteGridLayout(void* _, nosNodeExecuteParams* params)
 	{
@@ -80,11 +79,10 @@ namespace nos::compositing
 		nosEngine.SetPinValueByName(args.NodeId, NSN_OutDrawItems, PackPinVectorOfStructs(drawItems));
 		return NOS_RESULT_SUCCESS;
 	}
-	nosResult RegisterGridLayout(nosNodeFunctions* fn)
+	void RegisterGridLayout(nosNodeFunctions* fn)
 	{
 		fn->ClassName = NSN_GridLayout;
 		fn->ExecuteNode = ExecuteGridLayout;
-		return NOS_RESULT_SUCCESS;
 	}
 	nosResult NOSAPI_CALL ExecuteFreeOutputLayout(void* _, nosNodeExecuteParams* params)
 	{
@@ -115,11 +113,10 @@ namespace nos::compositing
 		nosEngine.SetPinValueByName(args.NodeId, NSN_OutputInfos, PackPinVectorOfStructs(outputs));
 		return NOS_RESULT_SUCCESS;
 	}
-	nosResult RegisterFreeOutputLayout(nosNodeFunctions* fn)
+	void RegisterFreeOutputLayout(nosNodeFunctions* fn)
 	{
 		fn->ClassName = NSN_FreeOutputLayout;
 		fn->ExecuteNode = ExecuteFreeOutputLayout;
-		return NOS_RESULT_SUCCESS;
 	}
 	nosResult NOSAPI_CALL ExecuteGridOutputLayout(void* _, nosNodeExecuteParams* params)
 	{
@@ -152,11 +149,10 @@ namespace nos::compositing
 		nosEngine.SetPinValueByName(args.NodeId, NSN_OutputInfos, PackPinVectorOfStructs(outputs));
 		return NOS_RESULT_SUCCESS;
 	}
-	nosResult RegisterGridOutputLayout(nosNodeFunctions* fn)
+	void RegisterGridOutputLayout(nosNodeFunctions* fn)
 	{
 		fn->ClassName = NSN_GridOutputLayout;
 		fn->ExecuteNode = ExecuteGridOutputLayout;
-		return NOS_RESULT_SUCCESS;
 	}
 }
 

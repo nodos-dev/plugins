@@ -72,9 +72,8 @@ struct ScheduleOnRequestNode : NodeContext
 		NOS_ADD_FUNCTION(NSN_Request, Request))
 };
 
-nosResult RegisterScheduleOnRequest(nosNodeFunctions* fn)
+void RegisterScheduleOnRequest(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("ScheduleOnRequest"), ScheduleOnRequestNode, fn)
-	return NOS_RESULT_SUCCESS;
 }
 }

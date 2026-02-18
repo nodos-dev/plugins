@@ -96,10 +96,9 @@ struct ResizeNode : nos::NodeContext
 	}
 };
 
-nosResult RegisterResize(nosNodeFunctions* out)
+void RegisterResize(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_Resize, ResizeNode, out);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::imageprocessing

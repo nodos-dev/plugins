@@ -32,10 +32,9 @@ namespace nos::flow
 	};
 
 
-	nosResult RegisterShowStatusNode(nosNodeFunctions* fn)
+	void RegisterShowStatusNode(nosNodeFunctions* fn)
 	{
 		NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_ShowStatus, ShowStatus, fn);
-		return NOS_RESULT_SUCCESS;
 	}
 
 } // namespace nos::flow

@@ -13,17 +13,16 @@ NOS_END_IMPORT_DEPS()
 
 namespace nos::imageprocessing
 {
-nosResult RegisterResize(nosNodeFunctions*);
-nosResult RegisterReduceTexture(nosNodeFunctions*);
+void RegisterResize(nosNodeFunctions*);
+void RegisterReduceTexture(nosNodeFunctions*);
 void RegisterInterleaveNode(nosNodeFunctions*);
 }
 
 namespace nos::imageprocessing
 {
-static nosResult RegisterInterleave(nosNodeFunctions* nodeFunctions)
+static void RegisterInterleave(nosNodeFunctions* nodeFunctions)
 {
 	RegisterInterleaveNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
 }
 
 enum class Nodes : size_t
@@ -41,12 +40,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-#define GEN_CASE_NODE(name)            \
-	case Nodes::name: {                \
-		auto ret = Register##name(node); \
-		if (ret != NOS_RESULT_SUCCESS)  \
-			return ret;                 \
-		break;                          \
+#define GEN_CASE_NODE(name)     \
+	case Nodes::name: {         \
+		Register##name(node);   \
+		break;                  \
 	}
 
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)

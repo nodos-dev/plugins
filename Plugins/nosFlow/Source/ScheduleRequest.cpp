@@ -75,9 +75,8 @@ struct ScheduleRequestNode : NodeContext
 	}
 };
 
-nosResult RegisterScheduleRequest(nosNodeFunctions* funcs)
+void RegisterScheduleRequest(nosNodeFunctions* funcs)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("ScheduleRequest"), ScheduleRequestNode, funcs);
-	return NOS_RESULT_SUCCESS;
 }
 }

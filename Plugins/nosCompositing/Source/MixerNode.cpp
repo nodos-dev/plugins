@@ -1,4 +1,4 @@
-// Copyright ZeroDensity AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "TextureTransitionUtils.h"
 #include "nosCompositing/Mixer_generated.h"
 
@@ -173,7 +173,7 @@ struct MixerContext : public NodeContext
 
 	// Transition state
 	nos::ObjectRef TransitionTexture = {};
-	EZDTransitionInterpolation TransitionInterp = EZDTransitionInterpolation::EaseInOut;
+	TransitionInterpolation TransitionInterp = TransitionInterpolation::EaseInOut;
 	float TransitionEaseExponent = 2.0f;
 	u32 TransitionStepCount = 5;
 	MixerTransitionType TransitionType = MixerTransitionType::Dissolve;
@@ -1065,7 +1065,7 @@ struct MixerContext : public NodeContext
 
 		context->TransitionDuration = *fnParams.GetPinData<float>(NSN_Duration);
 		context->WipeWidth = *fnParams.GetPinData<float>(NSN_WipeWidth);
-		context->TransitionInterp = (EZDTransitionInterpolation)*fnParams.GetPinData<u32>(NSN_Interpolation);
+		context->TransitionInterp = *fnParams.GetPinData<TransitionInterpolation>(NSN_Interpolation);
 		context->TransitionEaseExponent = *fnParams.GetPinData<float>(NSN_EaseExponent);
 		context->TransitionStepCount = *fnParams.GetPinData<u32>(NSN_StepCount);
 		context->TransitionType = transitionType;
@@ -1082,7 +1082,7 @@ struct MixerContext : public NodeContext
 };
 
 
-void RegisterMixerNode(nosNodeFunctions* nodeFunctions)
+void RegisterMixer(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("Mixer"), MixerContext, nodeFunctions);
 }

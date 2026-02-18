@@ -25,10 +25,9 @@ struct ConditionalTrigger : NodeContext
 };
 
 
-nosResult RegisterConditionalTrigger(nosNodeFunctions* out)
+void RegisterConditionalTrigger(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("ConditionalTrigger"), ConditionalTrigger, out);
-	return NOS_RESULT_SUCCESS;
 }
 
 }

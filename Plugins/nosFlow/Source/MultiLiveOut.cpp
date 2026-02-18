@@ -157,11 +157,9 @@ struct MultiLiveOutNode : NodeContext
 	std::unordered_map<int32_t, std::pair<nos::uuid, nos::uuid>> IndexToPairs;
 };
 
-nosResult RegisterMultiLiveOut(nosNodeFunctions* nodeFunctions)
+void RegisterMultiLiveOut(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NSN_ClassName_MultiLiveOut, MultiLiveOutNode, nodeFunctions)
-
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::flow

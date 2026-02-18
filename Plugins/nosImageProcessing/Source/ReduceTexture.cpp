@@ -132,10 +132,9 @@ struct ReduceTextureNode : NodeContext
 	TypedObjectRef<sys::vulkan::Buffer> ResultBuffer{};
 };
 
-nosResult RegisterReduceTexture(nosNodeFunctions* fn)
+void RegisterReduceTexture(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("ReduceTexture"), ReduceTextureNode, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::imageprocessing

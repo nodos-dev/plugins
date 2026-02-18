@@ -1,4 +1,4 @@
-// Copyright Zero Density AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "TextureTransitionUtils.h"
 #include "nosCompositing/Transition_generated.h"
@@ -226,7 +226,7 @@ struct TextureTransitionContext : public NodeContext
 };
 
 
-void RegisterTextureTransitionNode(nosNodeFunctions* nodeFunctions)
+void RegisterTextureTransition(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureTransition"), TextureTransitionContext, nodeFunctions);
 }

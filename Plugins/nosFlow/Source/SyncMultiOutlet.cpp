@@ -284,10 +284,9 @@ struct SyncMultiOutletNode : NodeContext
 };
 
 
-nosResult RegisterSyncMultiOutlet(nosNodeFunctions* functions)
+void RegisterSyncMultiOutlet(nosNodeFunctions* functions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("SyncMultiOutlet"), SyncMultiOutletNode, functions)
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::flow

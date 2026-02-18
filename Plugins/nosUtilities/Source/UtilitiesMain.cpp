@@ -20,9 +20,9 @@ enum class Utilities : size_t
 	Count,
 };
 
-nosResult RegisterHost(nosNodeFunctions*);
-nosResult RegisterSink(nosNodeFunctions*);
-nosResult RegisterTime(nosNodeFunctions*);
+void RegisterHost(nosNodeFunctions*);
+void RegisterSink(nosNodeFunctions*);
+void RegisterTime(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -31,12 +31,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-	if (auto ret = RegisterHost(outList[static_cast<size_t>(Utilities::Host)]); ret != NOS_RESULT_SUCCESS)
-		return ret;
-	if (auto ret = RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]); ret != NOS_RESULT_SUCCESS)
-		return ret;
-	if (auto ret = RegisterTime(outList[static_cast<size_t>(Utilities::Time)]); ret != NOS_RESULT_SUCCESS)
-		return ret;
+	RegisterHost(outList[static_cast<size_t>(Utilities::Host)]);
+	RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]);
+	RegisterTime(outList[static_cast<size_t>(Utilities::Time)]);
 	return NOS_RESULT_SUCCESS;
 }
 

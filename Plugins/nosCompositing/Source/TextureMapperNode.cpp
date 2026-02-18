@@ -1,4 +1,4 @@
-// Copyright Zero Density AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "Common.h"
 
@@ -255,7 +255,7 @@ private:
 	}
 };
 
-void RegisterTextureMapperNode(nosNodeFunctions* nodeFunctions)
+void RegisterTextureMapper(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureMapper"), TextureMapperContext, nodeFunctions);
 }

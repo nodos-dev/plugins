@@ -20,10 +20,9 @@ struct TimeNodeContext : NodeContext
 };
 
 
-nosResult RegisterTime(nosNodeFunctions* fn)
+void RegisterTime(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_Time, TimeNodeContext, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos

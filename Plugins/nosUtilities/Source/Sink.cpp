@@ -266,9 +266,8 @@ struct SinkNode : NodeContext
 
 };
 
-nosResult RegisterSink(nosNodeFunctions* fn)
+void RegisterSink(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("Sink"), SinkNode, fn)
-	return NOS_RESULT_SUCCESS;
 }
 }

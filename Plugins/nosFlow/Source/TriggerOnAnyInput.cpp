@@ -19,10 +19,9 @@ struct TriggerOnAnyInput : NodeContext
 };
 
 
-nosResult RegisterTriggerOnAnyInput(nosNodeFunctions* out)
+void RegisterTriggerOnAnyInput(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("TriggerOnAnyInput"), TriggerOnAnyInput, out);
-	return NOS_RESULT_SUCCESS;
 }
 
 }

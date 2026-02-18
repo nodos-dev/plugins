@@ -1,4 +1,4 @@
-// Copyright Zero Density AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "Common.h"
 #include "nosCompositing/CanvasMapper_generated.h"
 
@@ -99,10 +99,9 @@ struct CanvasMapperContext : public NodeContext
 };
 
 
-nosResult RegisterCanvasMapper(nosNodeFunctions* nodeFunctions)
+void RegisterCanvasMapper(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("CanvasMapper"), CanvasMapperContext, nodeFunctions);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::compositing

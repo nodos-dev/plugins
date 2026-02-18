@@ -12,19 +12,19 @@ NOS_END_IMPORT_DEPS()
 
 namespace nos::compositing
 {
-nosResult RegisterBoxFit(nosNodeFunctions*);
+void RegisterBoxFit(nosNodeFunctions*);
 nosResult RegisterChannelViewer(nosNodeFunctions*);
 nosResult RegisterMerge(nosNodeFunctions*);
 nosResult RegisterLayoutDrawer(nosNodeFunctions*);
-nosResult RegisterFreeLayout(nosNodeFunctions*);
-nosResult RegisterGridLayout(nosNodeFunctions*);
-nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
-nosResult RegisterGridOutputLayout(nosNodeFunctions*);
-nosResult RegisterTextureTransition(nosNodeFunctions*);
-nosResult RegisterTextureMapper(nosNodeFunctions*);
-nosResult RegisterMixer(nosNodeFunctions*);
-nosResult RegisterGrid3D(nosNodeFunctions*);
-nosResult RegisterCanvasMapper(nosNodeFunctions*);
+void RegisterFreeLayout(nosNodeFunctions*);
+void RegisterGridLayout(nosNodeFunctions*);
+void RegisterFreeOutputLayout(nosNodeFunctions*);
+void RegisterGridOutputLayout(nosNodeFunctions*);
+void RegisterTextureTransition(nosNodeFunctions*);
+void RegisterTextureMapper(nosNodeFunctions*);
+void RegisterMixer(nosNodeFunctions*);
+void RegisterGrid3D(nosNodeFunctions*);
+void RegisterCanvasMapper(nosNodeFunctions*);
 
 enum class Nodes : size_t
 {
@@ -51,7 +51,13 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-#define GEN_CASE_NODE(name)            \
+#define GEN_CASE_NODE(name)     \
+	case Nodes::name: {         \
+		Register##name(node);   \
+		break;                  \
+	}
+
+#define GEN_CASE_NODE_RESULT(name)     \
 	case Nodes::name: {                \
 		auto ret = Register##name(node); \
 		if (ret != NOS_RESULT_SUCCESS)  \
@@ -67,9 +73,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		default:
 			break;
 			GEN_CASE_NODE(BoxFit)
-			GEN_CASE_NODE(ChannelViewer)
-			GEN_CASE_NODE(Merge)
-			GEN_CASE_NODE(LayoutDrawer)
+			GEN_CASE_NODE_RESULT(ChannelViewer)
+			GEN_CASE_NODE_RESULT(Merge)
+			GEN_CASE_NODE_RESULT(LayoutDrawer)
 			GEN_CASE_NODE(FreeLayout)
 			GEN_CASE_NODE(GridLayout)
 			GEN_CASE_NODE(FreeOutputLayout)
@@ -83,6 +89,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	}
 
 #undef GEN_CASE_NODE
+#undef GEN_CASE_NODE_RESULT
 
 	return NOS_RESULT_SUCCESS;
 }

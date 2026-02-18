@@ -12,9 +12,8 @@ struct AlwaysDirtyNode : nos::NodeContext
 	}
 };
 
-nosResult RegisterAlwaysDirty(nosNodeFunctions* nodeFunctions)
+void RegisterAlwaysDirty(nosNodeFunctions* nodeFunctions)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.flow.AlwaysDirty"), AlwaysDirtyNode, nodeFunctions);
-	return NOS_RESULT_SUCCESS;
 }
 }

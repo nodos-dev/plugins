@@ -13,33 +13,32 @@ NOS_END_IMPORT_DEPS()
 
 namespace nos::flow
 {
-nosResult RegisterAlwaysDirty(nosNodeFunctions*);
-nosResult RegisterConditionalTrigger(nosNodeFunctions*);
-nosResult RegisterCPUSleep(nosNodeFunctions*);
-nosResult RegisterMultiLiveOut(nosNodeFunctions*);
-nosResult RegisterPrintLog(nosNodeFunctions*);
-nosResult RegisterPropagateExecution(nosNodeFunctions*);
-nosResult RegisterRepeatingJunction(nosNodeFunctions*);
-nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
-nosResult RegisterScheduleRequest(nosNodeFunctions*);
-nosResult RegisterShowStatusNode(nosNodeFunctions*);
-nosResult RegisterSwitchTrigger(nosNodeFunctions*);
-nosResult RegisterSyncMultiOutlet(nosNodeFunctions*);
-nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
+void RegisterAlwaysDirty(nosNodeFunctions*);
+void RegisterConditionalTrigger(nosNodeFunctions*);
+void RegisterCPUSleep(nosNodeFunctions*);
+void RegisterMultiLiveOut(nosNodeFunctions*);
+void RegisterPrintLog(nosNodeFunctions*);
+void RegisterPropagateExecution(nosNodeFunctions*);
+void RegisterRepeatingJunction(nosNodeFunctions*);
+void RegisterScheduleOnRequest(nosNodeFunctions*);
+void RegisterScheduleRequest(nosNodeFunctions*);
+void RegisterShowStatusNode(nosNodeFunctions*);
+void RegisterSwitchTrigger(nosNodeFunctions*);
+void RegisterSyncMultiOutlet(nosNodeFunctions*);
+void RegisterTriggerOnAnyInput(nosNodeFunctions*);
 void RegisterToggleNode(nosNodeFunctions*);
 }
 
 namespace nos::flow
 {
-static nosResult RegisterShowStatus(nosNodeFunctions* nodeFunctions)
+static void RegisterShowStatus(nosNodeFunctions* nodeFunctions)
 {
-	return RegisterShowStatusNode(nodeFunctions);
+	RegisterShowStatusNode(nodeFunctions);
 }
 
-static nosResult RegisterToggle(nosNodeFunctions* nodeFunctions)
+static void RegisterToggle(nosNodeFunctions* nodeFunctions)
 {
 	RegisterToggleNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
 }
 
 enum class Nodes : size_t
@@ -68,12 +67,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-#define GEN_CASE_NODE(name)            \
-	case Nodes::name: {                \
-		auto ret = Register##name(node); \
-		if (ret != NOS_RESULT_SUCCESS)  \
-			return ret;                 \
-		break;                          \
+#define GEN_CASE_NODE(name)     \
+	case Nodes::name: {         \
+		Register##name(node);   \
+		break;                  \
 	}
 
 	for (size_t i = 0; i < static_cast<size_t>(Nodes::Count); ++i)

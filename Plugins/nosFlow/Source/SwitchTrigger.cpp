@@ -223,10 +223,9 @@ struct SwitchTrigger : NodeContext
 };
 
 
-nosResult RegisterSwitchTrigger(nosNodeFunctions* out)
+void RegisterSwitchTrigger(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("SwitchTrigger"), SwitchTrigger, out);
-	return NOS_RESULT_SUCCESS;
 }
 
 }

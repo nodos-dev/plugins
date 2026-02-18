@@ -26,10 +26,9 @@ struct PrintLog : NodeContext
 };
 
 
-nosResult RegisterPrintLog(nosNodeFunctions* out)
+void RegisterPrintLog(nosNodeFunctions* out)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("PrintLog"), PrintLog, out);
-	return NOS_RESULT_SUCCESS;
 }
 
 }

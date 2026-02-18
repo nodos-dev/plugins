@@ -31,9 +31,8 @@ struct BoxFitNode : NodeContext
 	}
 };
 
-nosResult RegisterBoxFit(nosNodeFunctions* funcs)
+void RegisterBoxFit(nosNodeFunctions* funcs)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("BoxFit"), BoxFitNode, funcs);
-	return NOS_RESULT_SUCCESS;
 }
 }
