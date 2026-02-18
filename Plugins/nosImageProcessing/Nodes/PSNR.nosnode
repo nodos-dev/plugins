@@ -1090,7 +1090,7 @@
 												{
 													"id": "519ebe56-d743-485a-b5dc-caef3ed22dee",
 													"name": "TextureFormatConverter (3)",
-													"class_name": "nos.mediaio.TextureFormatConverter",
+													"class_name": "nos.resource.TextureFormatConverter",
 													"pins": [
 														{
 															"id": "dff2cdec-2382-41a6-b712-af209727757c",
@@ -1923,7 +1923,7 @@
 												{
 													"id": "8c8b03c6-dcb2-47a1-8398-33d30ae61c3a",
 													"name": "TextureFormatConverter (2)",
-													"class_name": "nos.mediaio.TextureFormatConverter",
+													"class_name": "nos.resource.TextureFormatConverter",
 													"pins": [
 														{
 															"id": "a9e63ac6-82eb-4109-b010-4c5dd00c3e9a",
@@ -2610,7 +2610,7 @@
 												{
 													"id": "fa04ca03-8bf2-4e24-9861-b525f0f3a2d6",
 													"name": "TextureFormatConverter (1)",
-													"class_name": "nos.mediaio.TextureFormatConverter",
+													"class_name": "nos.resource.TextureFormatConverter",
 													"pins": [
 														{
 															"id": "9c9db1a6-cc0b-4954-a312-6114d1ea67e7",
@@ -2802,7 +2802,7 @@
 												{
 													"id": "5d93ff77-bef1-4d87-9426-0cff9b7b8b8e",
 													"name": "TextureFormatConverter",
-													"class_name": "nos.mediaio.TextureFormatConverter",
+													"class_name": "nos.resource.TextureFormatConverter",
 													"pins": [
 														{
 															"id": "971d131f-24aa-44ff-b3f3-34a9d39e3388",

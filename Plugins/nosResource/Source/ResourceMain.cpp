@@ -24,7 +24,10 @@ nosResult RegisterCopyResource(nosNodeFunctions*);
 nosResult RegisterDeinterlacedBoundedTextureQueue(nosNodeFunctions*);
 nosResult RegisterDeinterlacedBufferRing(nosNodeFunctions*);
 nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
+nosResult RegisterRGBAToBGR24Buffer(nosNodeFunctions*);
 nosResult RegisterRingBuffer(nosNodeFunctions*);
+nosResult RegisterRGBAToBGRABuffer(nosNodeFunctions*);
+nosResult RegisterTextureFormatConverter(nosNodeFunctions*);
 nosResult RegisterTexture2Buffer(nosNodeFunctions*);
 nosResult RegisterTextureProvider(nosNodeFunctions*);
 nosResult RegisterUploadBuffer(nosNodeFunctions*);
@@ -43,7 +46,10 @@ enum class Nodes : size_t
 	DeinterlacedBoundedTextureQueue,
 	DeinterlacedBufferRing,
 	HostVisibleBufferCopy,
+	RGBAToBGR24Buffer,
 	RingBuffer,
+	RGBAToBGRABuffer,
+	TextureFormatConverter,
 	Texture2Buffer,
 	TextureProvider,
 	UploadBuffer,
@@ -81,7 +87,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
 			GEN_CASE_NODE(DeinterlacedBufferRing)
 			GEN_CASE_NODE(HostVisibleBufferCopy)
+			GEN_CASE_NODE(RGBAToBGR24Buffer)
 			GEN_CASE_NODE(RingBuffer)
+			GEN_CASE_NODE(RGBAToBGRABuffer)
+			GEN_CASE_NODE(TextureFormatConverter)
 			GEN_CASE_NODE(Texture2Buffer)
 			GEN_CASE_NODE(TextureProvider)
 			GEN_CASE_NODE(UploadBuffer)
@@ -117,10 +126,19 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.DeinterlacedBufferRing"), NOS_NAME("nos.resource.DeinterlacedBufferRing")},
 		{NOS_NAME("nos.utilities.HostVisibleBufferCopy"), NOS_NAME("nos.resource.HostVisibleBufferCopy")},
 		{NOS_NAME("nos.utilities.RingBuffer"), NOS_NAME("nos.resource.RingBuffer")},
+		{NOS_NAME("nos.utilities.RGBAToBGR24Buffer"), NOS_NAME("nos.resource.RGBAToBGR24Buffer")},
+		{NOS_NAME("nos.utilities.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
+		{NOS_NAME("nos.utilities.TextureFormatConverter"), NOS_NAME("nos.resource.TextureFormatConverter")},
 		{NOS_NAME("nos.utilities.Texture2Buffer"), NOS_NAME("nos.resource.Texture2Buffer")},
 		{NOS_NAME("nos.utilities.TextureProvider"), NOS_NAME("nos.resource.TextureProvider")},
 		{NOS_NAME("nos.utilities.UploadBuffer"), NOS_NAME("nos.resource.UploadBuffer")},
 		{NOS_NAME("nos.utilities.UploadBufferProvider"), NOS_NAME("nos.resource.UploadBufferProvider")},
+		{NOS_NAME("nos.interop.TextureFormatConverter"), NOS_NAME("nos.resource.TextureFormatConverter")},
+		{NOS_NAME("nos.mediaio.RGBAToBGR24Buffer"), NOS_NAME("nos.resource.RGBAToBGR24Buffer")},
+		{NOS_NAME("nos.mediaio.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
+		{NOS_NAME("nos.mediaio.TextureFormatConverter"), NOS_NAME("nos.resource.TextureFormatConverter")},
+		{NOS_NAME("zd.ndi.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
+		{NOS_NAME("nos.ndi.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
 	};
 
 	if (!outFrom)
