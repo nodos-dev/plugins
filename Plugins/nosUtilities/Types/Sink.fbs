@@ -1,4 +1,4 @@
-namespace nos.flow;
+namespace nos.utilities;
 
 enum SinkMode : uint {
   Periodic = 0,

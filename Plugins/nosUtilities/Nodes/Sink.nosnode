@@ -63,7 +63,7 @@
 					{
 						"name": "SinkMode",
 						"display_name": "Mode",
-						"type_name": "nos.flow.SinkMode",
+						"type_name": "nos.utilities.SinkMode",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"description": "Whether to schedule nodes at an unlimited or fixed rate",

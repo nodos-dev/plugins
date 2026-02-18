@@ -7,9 +7,9 @@
 #include <chrono>
 #include <Nodos/Utils/Stopwatch.hpp>
 
-#include "nosFlow/Sink_generated.h"
+#include "nosUtilities/Sink_generated.h"
 
-namespace nos::flow
+namespace nos::utilities
 {
 using clock = std::chrono::high_resolution_clock;
 
@@ -24,7 +24,7 @@ struct SinkNode : NodeContext
 	std::atomic<bool> Wait = true;
 	std::thread Thread;
 	bool AcceptRepeat = false;
-	flow::SinkMode Mode = flow::SinkMode::Periodic;
+	utilities::SinkMode Mode = utilities::SinkMode::Periodic;
 	std::atomic<int64_t> PendingRequests = 0;
 	std::atomic<float> LatencyBudget = 1.0f;
 	bool HasDroppingMessage = false;
@@ -130,7 +130,7 @@ struct SinkNode : NodeContext
 		}
 		if (NOS_NAME("SinkMode") == pinName)
 		{
-			SetMode(*static_cast<flow::SinkMode*>(value.Data));
+			SetMode(*static_cast<utilities::SinkMode*>(value.Data));
 		}
 		if (NOS_NAME("LatencyBudget") == pinName)
 		{
@@ -138,7 +138,7 @@ struct SinkNode : NodeContext
 		}
 	}
 
-	void SetMode(flow::SinkMode mode)
+	void SetMode(utilities::SinkMode mode)
 	{
 		Mode = mode;
 		nosEngine.RecompilePath(NodeId);
@@ -155,7 +155,7 @@ struct SinkNode : NodeContext
 
 	bool IsPeriodic()
 	{
-		return Mode == flow::SinkMode::Periodic;
+		return Mode == utilities::SinkMode::Periodic;
 	}
 
 	void StopThread() {

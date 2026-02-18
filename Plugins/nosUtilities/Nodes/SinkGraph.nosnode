@@ -9,7 +9,7 @@
 			"node": {
 				"id": "9c4000ea-8fc7-4683-b257-2e16cea01b1a",
 				"name": "Sink",
-				"class_name": "nos.flow.SinkGraph",
+				"class_name": "nos.utilities.SinkGraph",
 				"pins": [
 					{
 						"id": "aa8b2b61-086a-44f7-817f-90c75ef4da31",
@@ -81,7 +81,7 @@
 					{
 						"id": "52607932-ccf6-48fc-ac69-bb769a97efda",
 						"name": "SinkMode",
-						"type_name": "nos.flow.SinkMode",
+						"type_name": "nos.utilities.SinkMode",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"data": "Periodic",
@@ -245,7 +245,7 @@
 						{
 							"id": "860a78cc-4c8b-4a32-a4dc-d92dbc782413",
 							"name": "Sink",
-							"class_name": "nos.flow.Sink",
+							"class_name": "nos.utilities.Sink",
 							"pins": [
 								{
 									"id": "d6fc00c2-6adc-44ce-83cf-69f94125e335",
@@ -330,7 +330,7 @@
 								{
 									"id": "ecd236af-11e9-4c4b-a302-efc16d0eb2be",
 									"name": "SinkMode",
-									"type_name": "nos.flow.SinkMode",
+									"type_name": "nos.utilities.SinkMode",
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"data": "Periodic",

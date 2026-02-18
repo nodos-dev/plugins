@@ -7,7 +7,6 @@
 #include <chrono>
 #include <Nodos/Utils/Stopwatch.hpp>
 
-#include "nosFlow/Sink_generated.h"
 
 namespace nos::flow
 {

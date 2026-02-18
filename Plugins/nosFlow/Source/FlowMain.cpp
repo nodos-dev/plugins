@@ -23,7 +23,6 @@ nosResult RegisterRepeatingJunction(nosNodeFunctions*);
 nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
 nosResult RegisterShowStatusNode(nosNodeFunctions*);
-nosResult RegisterSink(nosNodeFunctions*);
 nosResult RegisterSwitchTrigger(nosNodeFunctions*);
 nosResult RegisterSyncMultiOutlet(nosNodeFunctions*);
 nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
@@ -55,7 +54,6 @@ enum class Nodes : size_t
 	ScheduleOnRequest,
 	ScheduleRequest,
 	ShowStatus,
-	Sink,
 	SwitchTrigger,
 	SyncMultiOutlet,
 	TriggerOnAnyInput,
@@ -95,7 +93,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(ScheduleOnRequest)
 			GEN_CASE_NODE(ScheduleRequest)
 			GEN_CASE_NODE(ShowStatus)
-			GEN_CASE_NODE(Sink)
 			GEN_CASE_NODE(SwitchTrigger)
 			GEN_CASE_NODE(SyncMultiOutlet)
 			GEN_CASE_NODE(TriggerOnAnyInput)
@@ -110,8 +107,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 
 void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 {
-	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
-		{NOS_NAME("nos.utilities.SinkMode"), NOS_NAME("nos.flow.SinkMode")},
+static std::vector<std::pair<nos::Name, nos::Name>> renames = {
 	};
 
 	if (!outFrom)
@@ -142,8 +138,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ScheduleRequest"), NOS_NAME("nos.flow.ScheduleRequest")},
 		{NOS_NAME("nos.utilities.ShowStatus"), NOS_NAME("nos.flow.ShowStatus")},
 		{NOS_NAME("nos.utilities.ShowStatusNode"), NOS_NAME("nos.flow.ShowStatus")},
-		{NOS_NAME("nos.utilities.Sink"), NOS_NAME("nos.flow.Sink")},
-		{NOS_NAME("nos.utilities.SinkGraph"), NOS_NAME("nos.flow.SinkGraph")},
 		{NOS_NAME("nos.utilities.SwitchTrigger"), NOS_NAME("nos.flow.SwitchTrigger")},
 		{NOS_NAME("nos.utilities.SyncMultiOutlet"), NOS_NAME("nos.flow.SyncMultiOutlet")},
 		{NOS_NAME("nos.utilities.ThreadedSyncMultiOutlet"), NOS_NAME("nos.flow.ThreadedSyncMultiOutlet")},

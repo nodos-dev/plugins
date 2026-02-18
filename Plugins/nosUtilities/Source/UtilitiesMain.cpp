@@ -1,9 +1,13 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
 
 NOS_INIT()
+NOS_VULKAN_INIT()
+
 NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 namespace nos::utilities
@@ -11,11 +15,13 @@ namespace nos::utilities
 enum class Utilities : size_t
 {
 	Host,
+	Sink,
 	Time,
 	Count,
 };
 
 nosResult RegisterHost(nosNodeFunctions*);
+nosResult RegisterSink(nosNodeFunctions*);
 nosResult RegisterTime(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
@@ -26,6 +32,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 		return NOS_RESULT_SUCCESS;
 
 	if (auto ret = RegisterHost(outList[static_cast<size_t>(Utilities::Host)]); ret != NOS_RESULT_SUCCESS)
+		return ret;
+	if (auto ret = RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]); ret != NOS_RESULT_SUCCESS)
 		return ret;
 	if (auto ret = RegisterTime(outList[static_cast<size_t>(Utilities::Time)]); ret != NOS_RESULT_SUCCESS)
 		return ret;
@@ -51,7 +59,6 @@ void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* out
 		{NOS_NAME("nos.utilities.Channel"), NOS_NAME("nos.compositing.Channel")},
 		{NOS_NAME("nos.utilities.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
 		{NOS_NAME("nos.utilities.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
-		{NOS_NAME("nos.utilities.SinkMode"), NOS_NAME("nos.flow.SinkMode")},
 	};
 
 	if (!outRenamedFrom)
@@ -108,8 +115,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ScheduleRequest"), NOS_NAME("nos.flow.ScheduleRequest")},
 		{NOS_NAME("nos.utilities.ShowStatus"), NOS_NAME("nos.flow.ShowStatus")},
 		{NOS_NAME("nos.utilities.ShowStatusNode"), NOS_NAME("nos.flow.ShowStatus")},
-		{NOS_NAME("nos.utilities.Sink"), NOS_NAME("nos.flow.Sink")},
-		{NOS_NAME("nos.utilities.SinkGraph"), NOS_NAME("nos.flow.SinkGraph")},
 		{NOS_NAME("nos.utilities.SwitchTrigger"), NOS_NAME("nos.flow.SwitchTrigger")},
 		{NOS_NAME("nos.utilities.SyncMultiOutlet"), NOS_NAME("nos.flow.SyncMultiOutlet")},
 		{NOS_NAME("nos.utilities.ThreadedSyncMultiOutlet"), NOS_NAME("nos.flow.ThreadedSyncMultiOutlet")},
