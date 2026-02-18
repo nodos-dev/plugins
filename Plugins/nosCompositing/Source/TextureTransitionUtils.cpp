@@ -37,27 +37,27 @@ namespace nos::compositing
 			InterpEaseOut(0.f, 1.f, Alpha * 2.f - 1.f, Exp) * 0.5f + 0.5f);
 	}
 
-	float GetInterpolation(EZDTransitionInterpolation interpType, float amount, u32 stepCount, float easeExponent)
+	float GetInterpolation(TransitionInterpolation interpType, float amount, u32 stepCount, float easeExponent)
 	{
 		auto Result = amount;
 		switch (interpType)
 		{
-		case EZDTransitionInterpolation::Jump:
+		case TransitionInterpolation::Jump:
 			Result = std::floorf(amount);
 			break;
-		case EZDTransitionInterpolation::Linear:
+		case TransitionInterpolation::Linear:
 			Result = amount;
 			break;
-		case EZDTransitionInterpolation::Step:
+		case TransitionInterpolation::Step:
 			Result = InterpStep(0.0f, 1.0f, amount, stepCount);
 			break;
-		case EZDTransitionInterpolation::EaseIn:
+		case TransitionInterpolation::EaseIn:
 			Result = InterpEaseIn(0.0f, 1.0f, amount, easeExponent);
 			break;
-		case EZDTransitionInterpolation::EaseOut:
+		case TransitionInterpolation::EaseOut:
 			Result = InterpEaseOut(0.0f, 1.0f, amount, easeExponent);
 			break;
-		case EZDTransitionInterpolation::EaseInOut:
+		case TransitionInterpolation::EaseInOut:
 			Result = InterpEaseInOut(0.0f, 1.0f, amount, easeExponent);
 			break;
 		}

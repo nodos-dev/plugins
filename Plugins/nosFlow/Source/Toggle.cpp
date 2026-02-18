@@ -10,16 +10,16 @@ namespace nos::flow
     {
 		static nosResult GetFunctions(size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* outFunction)
 		{
-			static std::pair<nos::Name, nosPfnNodeFunctionExecute> Functions[1] = {
+			static std::pair<nos::Name, nosPfnNodeFunctionExecute> functions[1] = {
 				{ NSN_Toggle, ToggleContext::Toggle},
 			};
 
-			*outCount = sizeof(Functions) / sizeof(Functions[0]);
+			*outCount = std::size(functions);
 
 			if (!pName || !outFunction)
 				return NOS_RESULT_SUCCESS;
 
-			for (auto& [name, fn] : Functions)
+			for (auto& [name, fn] : functions)
 			{
 				*pName++ = name;
 				*outFunction++ = fn;
@@ -34,7 +34,7 @@ namespace nos::flow
 			auto context = (ToggleContext*)ctx;
 			nos::NodeExecuteParams params = fnParams->ParentNodeExecuteParams;
 			bool newValue = !*params.GetPinData<bool>(NSN_Value);
-			nosEngine.SetPinValueByName(context->NodeId, NSN_Value, { &newValue, sizeof(newValue) });
+			context->SetPinValue<bool>(NSN_Value, newValue);
 			return NOS_RESULT_SUCCESS;
 		}
     };

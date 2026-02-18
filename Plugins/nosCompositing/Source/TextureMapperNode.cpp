@@ -75,32 +75,31 @@ private:
 
 	struct TextureParams
 	{
-		bool connected = false;
-		ivec2 resolution;
-		ivec2 pan;
-		float rotation;
+		bool Connected = false;
+		ivec2 Resolution;
+		ivec2 Pan;
+		float Rotation;
 	};
 
 	TextureParams Params[4];
 
 public:
-
 	virtual void OnPinConnected(nos::Name pinName, const nos::uuid& connectedPin) override
 	{
-		for(int i=0; i<4; ++i)
+		for (int i = 0; i < 4; ++i)
 			if (pinName == NSN_Inputs(i))
 			{
-				Params[i].connected = true;
+				Params[i].Connected = true;
 				break;
 			}
 	}
 
 	virtual void OnPinDisconnected(nos::Name pinName) override
 	{
-		for(int i=0; i<4; ++i)
+		for (int i = 0; i < 4; ++i)
 			if (pinName == NSN_Inputs(i))
 			{
-				Params[i].connected = false;
+				Params[i].Connected = false;
 				break;
 			}
 	}
@@ -111,9 +110,9 @@ public:
 
 		for (int i = 0; i < 4; ++i)
 		{
-			Params[i].resolution = *params.GetPinData<ivec2>(NSN_TextureResolutions(i));
-			Params[i].pan = *params.GetPinData<ivec2>(NSN_TexturePans(i));
-			Params[i].rotation = *params.GetPinData<float>(NSN_TextureRotations(i));
+			Params[i].Resolution = *params.GetPinData<ivec2>(NSN_TextureResolutions(i));
+			Params[i].Pan = *params.GetPinData<ivec2>(NSN_TexturePans(i));
+			Params[i].Rotation = *params.GetPinData<float>(NSN_TextureRotations(i));
 		}
 
 		uvec2 outResolution = *params.GetPinData<uvec2>(NSN_OutputResolution);
@@ -131,7 +130,9 @@ public:
 
 		nosRunPass2Params pass{};
 		pass.Wireframe = false;
-		pass.Key = alphaBlend ? NOS_NAME_STATIC("TEXTURE_MAPPER_ALPHA_BLEND_PASS") : NOS_NAME_STATIC("TEXTURE_MAPPER_PASS");
+		pass.Key = alphaBlend
+			           ? NOS_NAME_STATIC("TEXTURE_MAPPER_ALPHA_BLEND_PASS")
+			           : NOS_NAME_STATIC("TEXTURE_MAPPER_PASS");
 		pass.Output = outputTexture;
 		pass.DoNotClear = false;
 		pass.ClearCol = nosVec4(0, 0, 0, 0);
@@ -141,14 +142,15 @@ public:
 		mat4 MVPs[4];
 		std::vector<nosShaderBinding> bindings[4];
 
-
-		for(int i=0; i<4; ++i)
-			if (Params[i].connected)
+		for (int i = 0; i < 4; ++i)
+			if (Params[i].Connected)
 			{
 				MVPs[i] = GenMVP(outResolution, Params[i]);
 				bindings[i] = {
 					nos::sys::vulkan::ShaderDataBinding(NSN_MVP, MVPs[i]),
-					nos::sys::vulkan::ShaderTextureBinding(NSN_InputTexture, params.GetPinObject(NSN_Inputs(i)), NOS_TEXTURE_FILTER_LINEAR)
+					nos::sys::vulkan::ShaderTextureBinding(NSN_InputTexture,
+					                                       params.GetPinObject(NSN_Inputs(i)),
+					                                       NOS_TEXTURE_FILTER_LINEAR)
 				};
 
 				nosDrawCall drawCall;
@@ -167,20 +169,18 @@ public:
 	}
 
 private:
-
-
 	mat4 GenMVP(const uvec2& outputResolution,
-					 const TextureParams& params)
+	            const TextureParams& params)
 	{
 		mat4 mvp = glm::identity<mat4>();
 
 		mvp = glm::scale(mvp, 2.f / vec3(outputResolution, 1));
 
-		vec2 offset = -glm::min(vec2(0, 0), vec2(params.resolution));
-		mvp = glm::translate(mvp, vec3(vec2(params.pan) + offset - vec2 (outputResolution)/2.f, 0));
+		vec2 offset = -glm::min(vec2(0, 0), vec2(params.Resolution));
+		mvp = glm::translate(mvp, vec3(vec2(params.Pan) + offset - vec2(outputResolution) / 2.f, 0));
 
-		mvp = glm::rotate(mvp, glm::radians(params.rotation), vec3(0, 0, 1));
-		mvp = glm::scale(mvp, vec3(params.resolution, 1));
+		mvp = glm::rotate(mvp, glm::radians(params.Rotation), vec3(0, 0, 1));
+		mvp = glm::scale(mvp, vec3(params.Resolution, 1));
 
 		return mvp;
 	}
@@ -208,7 +208,6 @@ private:
 		const int vSize = sizeof(vertices);
 		const int iSize = sizeof(indices);
 
-
 		uint32_t bufferSize = vSize + iSize;
 
 		nosResourceInfo info = {};
@@ -235,31 +234,30 @@ private:
 
 
 	bool RequestNewTextureSize(nosName name,
-							   nosTextureObject& texture,
-							   uvec2 requiredResolution)
-		{
-			auto info = *nos::sys::vulkan::GetResourceInfo(texture);
-
-			if (info.Texture.Width == requiredResolution.x &&
-				info.Texture.Height == requiredResolution.y)
-				return false;
-
-			nosEngine.LogI("Requesting texture %dx%d", requiredResolution.x, requiredResolution.y);
-			info.Texture.Width = requiredResolution.x;
-			info.Texture.Height = requiredResolution.y;
-
-			nos::ObjectRef newTexture;
-			nosVulkan->CreateResource(&info, 0, 0, &newTexture.GetStorage());
-			nosEngine.SetPinObject(GetPinId(name).value(), newTexture);
-			texture = newTexture;
-			return true;
-		}
-	};
-
-	void RegisterTextureMapperNode(nosNodeFunctions* nodeFunctions)
+	                           nosTextureObject& texture,
+	                           uvec2 requiredResolution)
 	{
-		NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureMapper"), TextureMapperContext, nodeFunctions);
+		auto info = *nos::sys::vulkan::GetResourceInfo(texture);
+
+		if (info.Texture.Width == requiredResolution.x &&
+		    info.Texture.Height == requiredResolution.y)
+			return false;
+
+		nosEngine.LogI("Requesting texture %dx%d", requiredResolution.x, requiredResolution.y);
+		info.Texture.Width = requiredResolution.x;
+		info.Texture.Height = requiredResolution.y;
+
+		nos::ObjectRef newTexture;
+		nosVulkan->CreateResource(&info, 0, 0, &newTexture.GetStorage());
+		nosEngine.SetPinObject(GetPinId(name).value(), newTexture);
+		texture = newTexture;
+		return true;
 	}
+};
+
+void RegisterTextureMapperNode(nosNodeFunctions* nodeFunctions)
+{
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("TextureMapper"), TextureMapperContext, nodeFunctions);
+}
 
 } // namespace nos::compositing
-

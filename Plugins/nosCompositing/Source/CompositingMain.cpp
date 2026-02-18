@@ -20,44 +20,11 @@ nosResult RegisterFreeLayout(nosNodeFunctions*);
 nosResult RegisterGridLayout(nosNodeFunctions*);
 nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
-void RegisterTextureTransitionNode(nosNodeFunctions*);
-void RegisterTextureMapperNode(nosNodeFunctions*);
-void RegisterMixerNode(nosNodeFunctions*);
-void RegisterGrid3DNode(nosNodeFunctions*);
-void RegisterCanvasMapperNode(nosNodeFunctions*);
-}
-
-namespace nos::compositing
-{
-static nosResult RegisterTextureTransition(nosNodeFunctions* nodeFunctions)
-{
-	RegisterTextureTransitionNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
-}
-
-static nosResult RegisterTextureMapper(nosNodeFunctions* nodeFunctions)
-{
-	RegisterTextureMapperNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
-}
-
-static nosResult RegisterMixer(nosNodeFunctions* nodeFunctions)
-{
-	RegisterMixerNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
-}
-
-static nosResult RegisterGrid3D(nosNodeFunctions* nodeFunctions)
-{
-	RegisterGrid3DNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
-}
-
-static nosResult RegisterCanvasMapper(nosNodeFunctions* nodeFunctions)
-{
-	RegisterCanvasMapperNode(nodeFunctions);
-	return NOS_RESULT_SUCCESS;
-}
+nosResult RegisterTextureTransition(nosNodeFunctions*);
+nosResult RegisterTextureMapper(nosNodeFunctions*);
+nosResult RegisterMixer(nosNodeFunctions*);
+nosResult RegisterGrid3D(nosNodeFunctions*);
+nosResult RegisterCanvasMapper(nosNodeFunctions*);
 
 enum class Nodes : size_t
 {

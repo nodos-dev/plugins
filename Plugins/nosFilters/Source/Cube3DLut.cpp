@@ -16,18 +16,18 @@ struct Cube3DLUTContext : NodeContext
 		LUT_3D = 3,
 	} type;
 
-	f32 domainScale = 1.f;
-	f32 domainOffset = 0.f;
-	glm::vec3 rangeScale = glm::vec3(1.f);
-	glm::vec3 rangeOffset = glm::vec3(0.f);
+	f32 DomainScale = 1.f;
+	f32 DomainOffset = 0.f;
+	glm::vec3 RangeScale = glm::vec3(1.f);
+	glm::vec3 RangeOffset = glm::vec3(0.f);
 
-	uint32_t size = 0;
-	nos::ObjectRef ssbo = {};
-	std::string loadedLutName = "";
+	uint32_t Size = 0;
+	nos::ObjectRef SSBO = {};
+	std::string LoadedLutName = "";
 
 	std::vector<float> LUT;
 
-	std::unordered_map<std::string, std::string> properties;
+	std::unordered_map<std::string, std::string> Properties;
 
 	std::string NodeStatus;
 
@@ -48,7 +48,7 @@ struct Cube3DLUTContext : NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
 	{
-		if (!ssbo) {
+		if (!SSBO) {
 			auto cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("No Op"), NodeId);
 
 			nosVulkan->Copy(cmd, params.GetPinObject(NSN_In), params.GetPinObject(NSN_Out), nullptr);
@@ -58,7 +58,7 @@ struct Cube3DLUTContext : NodeContext
 			UpdateNodeStatus(status, fb::NodeStatusMessageType::WARNING);
 		}
 		else {
-			std::string status = loadedLutName;
+			std::string status = LoadedLutName;
 			UpdateNodeStatus(status, fb::NodeStatusMessageType::INFO);
 
 			f32 domainGamma = *params.GetPinData<f32>(nos::Name("InputGamma"));
@@ -67,15 +67,15 @@ struct Cube3DLUTContext : NodeContext
 			std::vector<nosShaderBinding> bindings = {
 				nos::sys::vulkan::ShaderTextureBinding(NSN_In, params.GetPinObject(NSN_In), NOS_TEXTURE_FILTER_LINEAR),
 				nos::sys::vulkan::ShaderTextureBinding(NSN_Out, params.GetPinObject(NSN_Out), NOS_TEXTURE_FILTER_LINEAR),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("Size"), size),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("Size"), Size),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("Dim"), type),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("LUT"), ssbo),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainScale"),  domainScale),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainOffset"), domainOffset),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("LUT"), SSBO),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainScale"),  DomainScale),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainOffset"), DomainOffset),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainGamma"),  domainGamma),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeGamma"), rangeGamma),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeScale"),  rangeScale),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeOffset"), rangeOffset),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeScale"),  RangeScale),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeOffset"), RangeOffset),
 			};
 
 			auto in = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_In));
@@ -98,7 +98,7 @@ struct Cube3DLUTContext : NodeContext
 
 	nosResult LoadLUTFile(const char* path)
 	{
-		properties = {};
+		Properties = {};
 
 		std::istringstream ss(ReadToString(path));
 
@@ -119,12 +119,12 @@ struct Cube3DLUTContext : NodeContext
 			if (line.starts_with("LUT_3D_SIZE"))
 			{
 				type = LUT_3D;
-				ls >> dump >> size;
+				ls >> dump >> Size;
 			}
 			if (line.starts_with("LUT_1D_SIZE"))
 			{
 				type = LUT_1D;
-				ls >> dump >> size;
+				ls >> dump >> Size;
 			}
 
 			if (line.starts_with("LUT_3D_INPUT_RANGE"))
@@ -148,15 +148,15 @@ struct Cube3DLUTContext : NodeContext
 			}
 		}
 
-		domainScale = domainMax - domainMin;
-		domainOffset = domainMin;
+		DomainScale = domainMax - domainMin;
+		DomainOffset = domainMin;
 
-		rangeScale = rangeMax - rangeMin;
-		rangeOffset = rangeMin;
+		RangeScale = rangeMax - rangeMin;
+		RangeOffset = rangeMin;
 
 		
 		{
-			ssbo = {};
+			SSBO = {};
 			nosResourceInfo info = {
 				.Type = NOS_RESOURCE_TYPE_BUFFER,
 				.Buffer = {
@@ -165,12 +165,12 @@ struct Cube3DLUTContext : NodeContext
 					.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE
 				}
 			};
-			nosVulkan->CreateResource(&info, 0, "Cube3DLut_ssbo", &ssbo.GetStorage());
+			nosVulkan->CreateResource(&info, 0, "Cube3DLut_ssbo", &SSBO.GetStorage());
 		}
 
-		auto mapping = nosVulkan->Map(ssbo);
+		auto mapping = nosVulkan->Map(SSBO);
 		memcpy(mapping, data.data(), data.size() * sizeof(data[0]));
-		loadedLutName = path;
+		LoadedLutName = path;
 		return NOS_RESULT_SUCCESS;
 	}
 

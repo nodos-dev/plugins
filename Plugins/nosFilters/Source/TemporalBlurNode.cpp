@@ -35,9 +35,9 @@ bool UpdateTextureFormat(nos::ObjectRef& texture, glm::uvec2 res, const char* ta
 struct TemporalBlurContext : public NodeContext
 {
 	static const int MAX_FRAMES = 8;
-	std::vector<nos::ObjectRef> history{MAX_FRAMES};
+	std::vector<nos::ObjectRef> History{MAX_FRAMES};
 
-	int writeId = 0;
+	int WriteId = 0;
 public:
 
 	virtual nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
@@ -50,7 +50,7 @@ public:
 		auto outputTextureInfo = *nos::sys::vulkan::GetResourceInfo(outputTexture);
 		for (int i = 0; i < MAX_FRAMES; ++i)
 		{
-			UpdateTextureFormat(history[i], { inputTextureInfo.Texture.Width, inputTextureInfo.Texture.Height }, "history texture", inputTextureInfo.Texture.Format);
+			UpdateTextureFormat(History[i], { inputTextureInfo.Texture.Width, inputTextureInfo.Texture.Height }, "History texture", inputTextureInfo.Texture.Format);
 		}
 
 		int framesCount = *params.GetPinData<int>(NSN_FramesCount);
@@ -59,7 +59,7 @@ public:
 		nosCmdBeginParams bp = {.Name = nos::Name("Copy History"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 
 		nosVulkan->Begin(&bp);
-		nosVulkan->Copy(cmd, inputTexture, history[writeId], nullptr);
+		nosVulkan->Copy(cmd, inputTexture, History[WriteId], nullptr);
 
 		nosRunPassParams pass = {};
 		pass.Key = NSN_TEMPORAL_BLUR_PASS;
@@ -69,7 +69,7 @@ public:
 		
 		for (int i = 0; i < MAX_FRAMES; ++i)
 		{
-			textures[i] = history[(MAX_FRAMES + writeId - i) % MAX_FRAMES];
+			textures[i] = History[(MAX_FRAMES + WriteId - i) % MAX_FRAMES];
 			filters[i] = NOS_TEXTURE_FILTER_LINEAR;
 		}
 
@@ -85,7 +85,7 @@ public:
 
 		nosVulkan->End(cmd, 0);
 
-		writeId = (writeId + 1) % MAX_FRAMES;
+		WriteId = (WriteId + 1) % MAX_FRAMES;
 		return NOS_RESULT_SUCCESS;
 	}
 

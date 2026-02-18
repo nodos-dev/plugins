@@ -1,17 +1,10 @@
 // Copyright Zero Density AS. All Rights Reserved.
 
 #include "Common.h"
+#include "nosCompositing/Transition_generated.h"
 
 namespace nos::compositing
 {
-	enum class EZDTransitionInterpolation {
-		Jump,
-		Linear,
-		Step,
-		EaseIn,
-		EaseOut,
-		EaseInOut
-	};
 
 	float InterpStep(float A, float B, float Alpha, u32 Steps);
 
@@ -21,5 +14,5 @@ namespace nos::compositing
 
 	float InterpEaseInOut(float A, float B, float Alpha, float Exp);
 
-	float GetInterpolation(EZDTransitionInterpolation interpType, float amount, u32 stepCount, float easeExponent);
+	float GetInterpolation(TransitionInterpolation interpType, float amount, u32 stepCount, float easeExponent);
 }
