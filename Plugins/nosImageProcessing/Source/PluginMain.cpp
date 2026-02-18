@@ -72,7 +72,6 @@ void GetRenamedTypes(nosName* outFrom, nosName* outTo, size_t* outSize)
 	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
 		{NOS_NAME("nos.utilities.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
 		{NOS_NAME("nos.fb.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
-		{NOS_NAME("zd.utilities.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
 	};
 
 	if (!outFrom)
@@ -93,19 +92,10 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
 		{NOS_NAME("nos.utilities.AutoResize"), NOS_NAME("nos.imageprocessing.AutoResize")},
 		{NOS_NAME("nos.utilities.Resize"), NOS_NAME("nos.imageprocessing.Resize")},
-		{NOS_NAME("nos.utilities.YADIF"), NOS_NAME("nos.imageprocessing.YADIF")},
-		{NOS_NAME("nos.utilities.YADIFWithAutoDispatchSize"), NOS_NAME("nos.imageprocessing.YADIFWithAutoDispatchSize")},
 		{NOS_NAME("nos.utilities.ReduceTexture"), NOS_NAME("nos.imageprocessing.ReduceTexture")},
 		{NOS_NAME("nos.utilities.MeanSquaredError"), NOS_NAME("nos.imageprocessing.MeanSquaredError")},
 		{NOS_NAME("nos.utilities.PSNR"), NOS_NAME("nos.imageprocessing.PSNR")},
 		{NOS_NAME("nos.utilities.Interleave"), NOS_NAME("nos.imageprocessing.Interleave")},
-		{NOS_NAME("zd.utilities.AutoResize"), NOS_NAME("nos.imageprocessing.AutoResize")},
-		{NOS_NAME("zd.utilities.Resize"), NOS_NAME("nos.imageprocessing.Resize")},
-		{NOS_NAME("zd.utilities.YADIF"), NOS_NAME("nos.imageprocessing.YADIF")},
-		{NOS_NAME("zd.utilities.YADIFWithAutoDispatchSize"), NOS_NAME("nos.imageprocessing.YADIFWithAutoDispatchSize")},
-		{NOS_NAME("zd.utilities.ReduceTexture"), NOS_NAME("nos.imageprocessing.ReduceTexture")},
-		{NOS_NAME("zd.utilities.MeanSquaredError"), NOS_NAME("nos.imageprocessing.MeanSquaredError")},
-		{NOS_NAME("zd.utilities.PSNR"), NOS_NAME("nos.imageprocessing.PSNR")},
 		{NOS_NAME("zd.utilities.Interleave"), NOS_NAME("nos.imageprocessing.Interleave")},
 	};
 

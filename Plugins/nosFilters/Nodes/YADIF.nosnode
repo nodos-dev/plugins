@@ -3,7 +3,7 @@
 		{
 			"class_name": "YADIF",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Filters",
 				"display_name": "YADIF (Raw)",
 				"name_aliases": [
 					"deinterlace",

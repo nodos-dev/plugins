@@ -92,11 +92,8 @@ void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* out
 void GetRenamedNodeClasses(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize)
 {
 	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
-		{NOS_NAME("nos.utilities.BoxBlur"), NOS_NAME("nos.filters.BoxBlur")},
-		{NOS_NAME("nos.utilities.Cube3DLUT"), NOS_NAME("nos.filters.Cube3DLUT")},
-		{NOS_NAME("nos.utilities.DilateAlpha"), NOS_NAME("nos.filters.DilateAlpha")},
-		{NOS_NAME("nos.utilities.DilateByAlpha"), NOS_NAME("nos.filters.DilateByAlpha")},
-		{NOS_NAME("nos.utilities.TemporalBlur"), NOS_NAME("nos.filters.TemporalBlur")},
+		{NOS_NAME("nos.utilities.YADIF"), NOS_NAME("nos.filters.YADIF")},
+		{NOS_NAME("nos.utilities.YADIFWithAutoDispatchSize"), NOS_NAME("nos.filters.YADIFWithAutoDispatchSize")},
 		{NOS_NAME("zd.utilities.3WayColorCorrect"), NOS_NAME("nos.filters.3WayColorCorrect")},
 		{NOS_NAME("zd.utilities.BoxBlur"), NOS_NAME("nos.filters.BoxBlur")},
 		{NOS_NAME("zd.utilities.ColorMatrix"), NOS_NAME("nos.filters.ColorMatrix")},

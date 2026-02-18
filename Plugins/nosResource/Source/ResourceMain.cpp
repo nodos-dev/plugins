@@ -121,21 +121,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.TextureProvider"), NOS_NAME("nos.resource.TextureProvider")},
 		{NOS_NAME("nos.utilities.UploadBuffer"), NOS_NAME("nos.resource.UploadBuffer")},
 		{NOS_NAME("nos.utilities.UploadBufferProvider"), NOS_NAME("nos.resource.UploadBufferProvider")},
-		{NOS_NAME("zd.utilities.AsyncDownloadBuffer"), NOS_NAME("nos.resource.AsyncDownloadBuffer")},
-		{NOS_NAME("zd.utilities.BoundedQueue"), NOS_NAME("nos.resource.BoundedQueue")},
-		{NOS_NAME("zd.utilities.BoundedTextureQueue"), NOS_NAME("nos.resource.BoundedTextureQueue")},
-		{NOS_NAME("zd.utilities.Buffer2Texture"), NOS_NAME("nos.resource.Buffer2Texture")},
-		{NOS_NAME("zd.utilities.BufferProvider"), NOS_NAME("nos.resource.BufferProvider")},
-		{NOS_NAME("zd.utilities.CalculateDispatchSize"), NOS_NAME("nos.resource.CalculateDispatchSize")},
-		{NOS_NAME("zd.utilities.CopyResource"), NOS_NAME("nos.resource.CopyResource")},
-		{NOS_NAME("zd.utilities.DeinterlacedBoundedTextureQueue"), NOS_NAME("nos.resource.DeinterlacedBoundedTextureQueue")},
-		{NOS_NAME("zd.utilities.DeinterlacedBufferRing"), NOS_NAME("nos.resource.DeinterlacedBufferRing")},
-		{NOS_NAME("zd.utilities.HostVisibleBufferCopy"), NOS_NAME("nos.resource.HostVisibleBufferCopy")},
-		{NOS_NAME("zd.utilities.RingBuffer"), NOS_NAME("nos.resource.RingBuffer")},
-		{NOS_NAME("zd.utilities.Texture2Buffer"), NOS_NAME("nos.resource.Texture2Buffer")},
-		{NOS_NAME("zd.utilities.TextureProvider"), NOS_NAME("nos.resource.TextureProvider")},
-		{NOS_NAME("zd.utilities.UploadBuffer"), NOS_NAME("nos.resource.UploadBuffer")},
-		{NOS_NAME("zd.utilities.UploadBufferProvider"), NOS_NAME("nos.resource.UploadBufferProvider")}
 	};
 
 	if (!outFrom)

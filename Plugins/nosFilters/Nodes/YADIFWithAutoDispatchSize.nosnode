@@ -3,7 +3,7 @@
 		{
 			"class_name": "YADIFWithAutoDispatchSize",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Filters",
 				"display_name": "YADIF",
 				"name_aliases": [
 					"deinterlace",
@@ -1926,7 +1926,7 @@
 						{
 							"id": "6c8d6d4d-e2cb-4377-95b8-4ee87861c2ac",
 							"name": "YADIF",
-							"class_name": "nos.imageprocessing.YADIF",
+							"class_name": "nos.filters.YADIF",
 							"pins": [
 								{
 									"id": "d7745518-7b55-457d-a15c-b82f33c27b70",
