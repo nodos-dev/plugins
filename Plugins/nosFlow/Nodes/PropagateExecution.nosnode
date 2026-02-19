@@ -3,7 +3,7 @@
 		{
 			"class_name": "PropagateExecution",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Flow",
 				"display_name": "Propagate Execution"
 			},
 			"node": {

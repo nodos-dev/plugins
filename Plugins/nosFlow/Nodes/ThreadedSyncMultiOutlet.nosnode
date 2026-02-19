@@ -3,7 +3,7 @@
 		{
 			"class_name": "ThreadedSyncMultiOutlet",
 			"menu_info": {
-				"category": "Execution",
+				"category": "Flow",
 				"display_name": "Threaded Sync Multi Outlet"
 			},
 			"node": {

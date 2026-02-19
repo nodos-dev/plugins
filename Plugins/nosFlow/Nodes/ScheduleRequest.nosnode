@@ -3,7 +3,7 @@
 		{
 			"class_name": "ScheduleRequest",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Scheduling",
 				"display_name": "Schedule Request",
 				"name_aliases": []
 			},

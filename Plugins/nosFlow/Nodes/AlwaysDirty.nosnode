@@ -3,7 +3,7 @@
 		{
 			"class_name": "AlwaysDirty",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Flow",
 				"display_name": "Always Dirty"
 			},
 			"node": {

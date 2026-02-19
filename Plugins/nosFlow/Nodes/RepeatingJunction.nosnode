@@ -3,7 +3,7 @@
 		{
 			"class_name": "RepeatingJunction",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Flow",
 				"display_name": "Repeating Junction"
 			},
 			"node": {

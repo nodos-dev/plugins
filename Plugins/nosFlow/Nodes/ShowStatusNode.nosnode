@@ -3,7 +3,7 @@
 		{
 			"class_name": "ShowStatus",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Flow",
 				"display_name": "Show Status",
 				"name_aliases": [
 					"print"

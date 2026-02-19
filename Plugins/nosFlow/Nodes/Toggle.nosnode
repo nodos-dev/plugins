@@ -3,7 +3,7 @@
 		{
 			"class_name": "Toggle",
 			"menu_info": {
-				"category": "Experimental",
+				"category": "Flow",
 				"display_name": "Toggle",
 				"name_aliases": []
 			},

@@ -3,7 +3,7 @@
 		{
 			"class_name": "CPUSleep",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Flow",
 				"display_name": "CPU Sleep",
 				"name_aliases": [
 					"Wait",

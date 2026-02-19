@@ -3,7 +3,7 @@
 		{
 			"class_name": "ConditionalTrigger",
 			"menu_info": {
-				"category": "Execution",
+				"category": "Flow",
 				"display_name": "Conditional Trigger",
 				"aliases": [
 					"if",

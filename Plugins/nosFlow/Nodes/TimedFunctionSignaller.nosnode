@@ -3,7 +3,7 @@
 		{
 			"class_name": "TimedFunctionSignaller",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Scheduling",
 				"display_name": "Timed Function Signaller",
 				"name_aliases": [
 					"timer",

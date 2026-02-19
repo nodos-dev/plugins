@@ -3,7 +3,7 @@
 		{
 			"class_name": "SwitchTrigger",
 			"menu_info": {
-				"category": "Execution",
+				"category": "Flow",
 				"display_name": "Switch Trigger",
 				"name_aliases": [
 					"branch",
