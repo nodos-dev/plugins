@@ -28,7 +28,7 @@
 namespace nos::compositing
 {
 
-using nos::NodeContext;
+
 using nos::Name;
 // using nos::PinMapping;
 // using nos::InterpretPinValue;

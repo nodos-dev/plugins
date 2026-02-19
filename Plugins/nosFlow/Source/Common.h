@@ -28,7 +28,7 @@
 namespace nos::flow
 {
 
-using nos::NodeContext;
+
 using nos::Name;
 // using nos::PinMapping;
 // using nos::InterpretPinValue;

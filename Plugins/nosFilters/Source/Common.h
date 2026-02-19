@@ -28,7 +28,7 @@
 namespace nos
 {
 
-using nos::NodeContext;
+
 using nos::Name;
 // using nos::PinMapping;
 // using nos::InterpretPinValue;

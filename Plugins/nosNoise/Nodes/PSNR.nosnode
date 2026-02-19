@@ -1,9 +1,9 @@
 {
 	"nodes": [
 		{
-			"class_name": "nos.imageprocessing.PSNR",
+			"class_name": "nos.noise.PSNR",
 			"menu_info": {
-				"category": "Image Processing",
+				"category": "Noise",
 				"display_name": "Peak Signal-to-Noise Ratio",
 				"name_aliases": [
 					"psnr",
@@ -16,7 +16,7 @@
 			"node": {
 				"id": "b1352ee5-c13f-4c11-8ce0-e640db5a74e2",
 				"name": "PSNR",
-				"class_name": "nos.imageprocessing.PSNR",
+				"class_name": "nos.noise.PSNR",
 				"pins": [
 					{
 						"id": "c3e1b1aa-ac9e-43b0-b549-611f569df6e9",
@@ -200,7 +200,7 @@
 						{
 							"id": "bc4828c0-e03b-494b-a1c2-e28327ca36ac",
 							"name": "MeanSquaredError",
-							"class_name": "nos.imageprocessing.MeanSquaredError",
+							"class_name": "nos.noise.MeanSquaredError",
 							"pins": [
 								{
 									"id": "f4667213-c081-422b-a0af-1eecf75ea9d4",
@@ -3558,4 +3558,5 @@
 	],
 	"schema_version": "1.4-v1"
 }
+
 

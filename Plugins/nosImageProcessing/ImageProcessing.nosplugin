@@ -24,20 +24,8 @@
 				"version": "1.0"
 			},
 			{
-				"name": "nos.resource",
-				"version": "1.0"
-			},
-			{
 				"name": "nos.mediaio",
 				"version": "4.0"
-			},
-			{
-				"name": "nos.compositing",
-				"version": "1.0"
-			},
-			{
-				"name": "nos.filters",
-				"version": "3.0"
 			}
 		],
 		"category": "Image Processing"

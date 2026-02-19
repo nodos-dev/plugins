@@ -1,9 +1,9 @@
 {
 	"nodes": [
 		{
-			"class_name": "nos.imageprocessing.MeanSquaredError",
+			"class_name": "nos.noise.MeanSquaredError",
 			"menu_info": {
-				"category": "Image Processing",
+				"category": "Noise",
 				"display_name": "Mean Squared Error",
 				"name_aliases": [
 					"mse",
@@ -15,7 +15,7 @@
 			"node": {
 				"id": "f2317fd3-bbcb-4d0c-b7e0-05a4c4c70862",
 				"name": "MeanSquaredError",
-				"class_name": "nos.imageprocessing.MeanSquaredError",
+				"class_name": "nos.noise.MeanSquaredError",
 				"pins": [
 					{
 						"id": "5dd72186-c6d8-4f9a-a59d-bc4e41e88782",
@@ -3130,4 +3130,5 @@
 	],
 	"schema_version": "1.4-v1"
 }
+
 
