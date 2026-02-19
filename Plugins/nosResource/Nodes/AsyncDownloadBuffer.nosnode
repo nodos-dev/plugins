@@ -3,7 +3,7 @@
 		{
 			"class_name": "AsyncDownloadBuffer",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Async Download Buffer",
 				"name_aliases": [
 					"staging",

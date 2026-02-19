@@ -3,7 +3,7 @@
 		{
 			"class_name": "nos.imageprocessing.PSNR",
 			"menu_info": {
-				"category": "Measurement",
+				"category": "Image Processing",
 				"display_name": "Peak Signal-to-Noise Ratio",
 				"name_aliases": [
 					"psnr",

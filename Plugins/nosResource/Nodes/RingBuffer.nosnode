@@ -3,7 +3,7 @@
 		{
 			"class_name": "RingBuffer",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Ring Buffer",
 				"name_aliases": [
 					"data structure",

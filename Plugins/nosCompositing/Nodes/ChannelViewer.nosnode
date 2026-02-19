@@ -3,7 +3,7 @@
 		{
 			"class_name": "ChannelViewer",
 			"menu_info": {
-				"category": "Channels",
+				"category": "Compositing|Channels",
 				"display_name": "Channel Viewer",
 				"name_aliases": [
 					"display"

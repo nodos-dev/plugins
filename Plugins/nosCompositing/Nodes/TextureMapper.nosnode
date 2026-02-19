@@ -3,7 +3,7 @@
 		{
 			"class_name": "TextureMapper",
 			"menu_info": {
-				"category": "Mapping",
+				"category": "Compositing|Mapping",
 				"display_name": "Texture Mapper",
 				"name_aliases": []
 			},

@@ -3,7 +3,7 @@
 		{
 			"class_name": "Grid3D",
 			"menu_info": {
-				"category": "Experimental",
+				"category": "Compositing|Experimental",
 				"display_name": "Grid 3D",
 				"name_aliases": []
 			},

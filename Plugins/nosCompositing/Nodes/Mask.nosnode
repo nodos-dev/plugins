@@ -3,7 +3,7 @@
 		{
 			"class_name": "Mask",
 			"menu_info": {
-				"category": "Generator",
+				"category": "Compositing|Generator",
 				"display_name": "Mask",
 				"name_aliases": []
 			},

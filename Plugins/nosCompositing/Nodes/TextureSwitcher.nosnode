@@ -3,7 +3,7 @@
 		{
 			"class_name": "TextureSwitcher",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Compositing",
 				"display_name": "Texture Switcher"
 			},
 			"node": {

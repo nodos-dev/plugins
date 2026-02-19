@@ -3,7 +3,7 @@
 		{
 			"class_name": "AutoResize",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Image Processing",
 				"display_name": "Auto Resize",
 				"name_aliases": [
 					"scale",

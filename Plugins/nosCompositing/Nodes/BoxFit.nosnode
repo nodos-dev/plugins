@@ -3,7 +3,7 @@
 		{
 			"class_name": "BoxFit",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Compositing",
 				"display_name": "BoxFit",
 				"name_aliases": [
 					"fit",

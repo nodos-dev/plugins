@@ -3,7 +3,7 @@
 		{
 			"class_name": "QuadMerge",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Compositing",
 				"display_name": "Quad Merge",
 				"name_aliases": [
 					"combine",

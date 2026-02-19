@@ -1,7 +1,7 @@
 { "schema_version": "1.4-v1", "nodes": [
     {
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Bounded Queue (Texture)",
 				"name_aliases": [
 					"data structure",

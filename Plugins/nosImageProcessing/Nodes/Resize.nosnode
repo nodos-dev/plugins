@@ -3,7 +3,7 @@
 		{
 			"class_name": "Resize",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Image Processing",
 				"display_name": "Resize",
 				"name_aliases": [
 					"scale",

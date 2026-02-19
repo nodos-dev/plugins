@@ -3,7 +3,7 @@
 		{
 			"class_name": "nos.imageprocessing.MeanSquaredError",
 			"menu_info": {
-				"category": "Measurement",
+				"category": "Image Processing",
 				"display_name": "Mean Squared Error",
 				"name_aliases": [
 					"mse",

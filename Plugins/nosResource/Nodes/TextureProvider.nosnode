@@ -3,7 +3,7 @@
 		{
 			"class_name": "TextureProvider",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Texture Provider",
 				"name_aliases": [
 					"staging",

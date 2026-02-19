@@ -3,7 +3,7 @@
 		{
 			"class_name": "HostVisibleBufferCopy",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Copy Buffer (Host Visible Buffers)",
 				"name_aliases": [
 					"copy"

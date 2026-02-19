@@ -3,7 +3,7 @@
 		{
 			"class_name": "nos.compositing.Layout",
 			"menu_info": {
-				"category": "Layout",
+				"category": "Compositing|Layout",
 				"display_name": "Layout"
 			},
 			"node": {

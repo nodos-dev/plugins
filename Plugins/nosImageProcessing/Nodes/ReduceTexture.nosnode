@@ -3,7 +3,7 @@
 		{
 			"class_name": "ReduceTexture",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Image Processing",
 				"display_name": "Reduce Texture",
 				"name_aliases": [
 					"reduce",

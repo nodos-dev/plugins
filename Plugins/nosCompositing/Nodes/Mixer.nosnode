@@ -3,7 +3,7 @@
 		{
 			"class_name": "Mixer",
 			"menu_info": {
-				"category": "Switcher",
+				"category": "Compositing|Switcher",
 				"display_name": "Mixer",
 				"name_aliases": []
 			},

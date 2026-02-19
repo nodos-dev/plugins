@@ -3,7 +3,7 @@
 		{
 			"class_name": "Interleave",
 			"menu_info": {
-				"category": "Process",
+				"category": "Image Processing",
 				"display_name": "Interleave",
 				"name_aliases": []
 			},

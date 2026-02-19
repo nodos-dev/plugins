@@ -3,7 +3,7 @@
 		{
 			"class_name": "Swizzle",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Compositing",
 				"display_name": "Swizzle",
 				"name_aliases": [
 					"reorder",

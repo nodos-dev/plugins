@@ -3,7 +3,7 @@
 		{
 			"class_name": "DeinterlacedBufferRing",
 			"menu_info": {
-				"category": "Utilities",
+				"category": "Resource",
 				"display_name": "Deinterlaced Buffer Ring"
 			},
 			"node": {
