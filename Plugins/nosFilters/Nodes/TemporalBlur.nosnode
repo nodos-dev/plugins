@@ -3,7 +3,7 @@
 		{
 			"class_name": "TemporalBlur",
 			"menu_info": {
-				"category": "Experimental",
+				"category": "Filters",
 				"display_name": "Temporal Blur",
 				"name_aliases": []
 			},

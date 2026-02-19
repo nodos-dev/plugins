@@ -3,7 +3,7 @@
 		{
 			"class_name": "Cube3DLUT",
 			"menu_info": {
-				"category": "Experimental",
+				"category": "Filters",
 				"display_name": "Cube 3D LUT",
 				"name_aliases": []
 			},

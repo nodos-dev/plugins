@@ -3,7 +3,7 @@
 		{
 			"class_name": "BoxBlur",
 			"menu_info": {
-				"category": "Process",
+				"category": "Filters",
 				"display_name": "Box Blur",
 				"name_aliases": []
 			},
