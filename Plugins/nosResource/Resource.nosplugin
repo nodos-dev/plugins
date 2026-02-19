@@ -16,16 +16,16 @@
 				"version": "11.1"
 			},
 			{
-				"name": "nos.audio",
-				"version": "1.0"
-			},
-			{
 				"name": "nos.math",
 				"version": "2.0"
 			},
 			{
 				"name": "nos.reflect",
 				"version": "3.0"
+			},
+			{
+				"name": "nos.mediaio",
+				"version": "4.0"
 			}
 		],
 		"category": "Resource"
