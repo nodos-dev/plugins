@@ -26,10 +26,6 @@
 			{
 				"name": "nos.reflect",
 				"version": "3.0"
-			},
-			{
-				"name": "nos.mediaio",
-				"version": "4.0"
 			}
 		],
 		"category": "Resource"

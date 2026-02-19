@@ -811,7 +811,7 @@
                   {
                     "id": "4bdcc1f5-dc0f-43b1-aa01-b0708b64644c",
                     "name": "SetFieldType",
-                    "class_name": "nos.mediaio.SetFieldType",
+                    "class_name": "nos.resource.SetFieldType",
                     "pins": [
                       {
                         "id": "46e997a2-34ec-4dfb-ad14-27a5715aa963",
@@ -952,7 +952,7 @@
                   {
                     "id": "99f49d19-3ae2-4634-8e3d-df23865e943d",
                     "name": "GetFieldType (1)",
-                    "class_name": "nos.mediaio.GetFieldType",
+                    "class_name": "nos.resource.GetFieldType",
                     "pins": [
                       {
                         "id": "14c8e374-0c0f-4735-83cf-4b6e82e0020b",
@@ -1678,7 +1678,7 @@
                   {
                     "id": "d64aa0d9-205b-4c0a-866c-42eef6057caf",
                     "name": "GetFieldType",
-                    "class_name": "nos.mediaio.GetFieldType",
+                    "class_name": "nos.resource.GetFieldType",
                     "pins": [
                       {
                         "id": "e760ca86-85d1-4478-a2fc-23f9562f80c3",
@@ -1738,7 +1738,7 @@
                   {
                     "id": "3095c966-5544-4d7b-a375-37a18ec6b487",
                     "name": "SetFieldType (1)",
-                    "class_name": "nos.mediaio.SetFieldType",
+                    "class_name": "nos.resource.SetFieldType",
                     "pins": [
                       {
                         "id": "5b85e26b-fffb-438f-afc6-94ed64c5a703",

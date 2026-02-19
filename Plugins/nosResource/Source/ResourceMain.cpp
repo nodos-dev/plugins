@@ -23,10 +23,12 @@ nosResult RegisterBufferProvider(nosNodeFunctions*);
 nosResult RegisterCopyResource(nosNodeFunctions*);
 nosResult RegisterDeinterlacedBoundedTextureQueue(nosNodeFunctions*);
 nosResult RegisterDeinterlacedBufferRing(nosNodeFunctions*);
+nosResult RegisterGetFieldType(nosNodeFunctions*);
 nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
 nosResult RegisterRGBAToBGR24Buffer(nosNodeFunctions*);
 nosResult RegisterRingBuffer(nosNodeFunctions*);
 nosResult RegisterRGBAToBGRABuffer(nosNodeFunctions*);
+nosResult RegisterSetFieldType(nosNodeFunctions*);
 nosResult RegisterTextureFormatConverter(nosNodeFunctions*);
 nosResult RegisterTexture2Buffer(nosNodeFunctions*);
 nosResult RegisterTextureProvider(nosNodeFunctions*);
@@ -45,10 +47,12 @@ enum class Nodes : size_t
 	CopyResource,
 	DeinterlacedBoundedTextureQueue,
 	DeinterlacedBufferRing,
+	GetFieldType,
 	HostVisibleBufferCopy,
 	RGBAToBGR24Buffer,
 	RingBuffer,
 	RGBAToBGRABuffer,
+	SetFieldType,
 	TextureFormatConverter,
 	Texture2Buffer,
 	TextureProvider,
@@ -86,10 +90,12 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(CopyResource)
 			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
 			GEN_CASE_NODE(DeinterlacedBufferRing)
+			GEN_CASE_NODE(GetFieldType)
 			GEN_CASE_NODE(HostVisibleBufferCopy)
 			GEN_CASE_NODE(RGBAToBGR24Buffer)
 			GEN_CASE_NODE(RingBuffer)
 			GEN_CASE_NODE(RGBAToBGRABuffer)
+			GEN_CASE_NODE(SetFieldType)
 			GEN_CASE_NODE(TextureFormatConverter)
 			GEN_CASE_NODE(Texture2Buffer)
 			GEN_CASE_NODE(TextureProvider)
@@ -137,6 +143,8 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.mediaio.RGBAToBGR24Buffer"), NOS_NAME("nos.resource.RGBAToBGR24Buffer")},
 		{NOS_NAME("nos.mediaio.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
 		{NOS_NAME("nos.mediaio.TextureFormatConverter"), NOS_NAME("nos.resource.TextureFormatConverter")},
+		{NOS_NAME("nos.mediaio.GetFieldType"), NOS_NAME("nos.resource.GetFieldType")},
+		{NOS_NAME("nos.mediaio.SetFieldType"), NOS_NAME("nos.resource.SetFieldType")},
 		{NOS_NAME("zd.ndi.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
 		{NOS_NAME("nos.ndi.RGBAToBGRABuffer"), NOS_NAME("nos.resource.RGBAToBGRABuffer")},
 	};

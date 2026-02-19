@@ -1733,7 +1733,7 @@
             {
               "id": "4c4c8b2b-f2ab-4996-b7c6-9a091fc9a667",
               "name": "GetFieldType",
-              "class_name": "nos.mediaio.GetFieldType",
+              "class_name": "nos.resource.GetFieldType",
               "pins": [
                 {
                   "id": "9c902c5d-eacf-4151-972c-b04b12731436",
