@@ -17,7 +17,6 @@ void RegisterAlwaysDirty(nosNodeFunctions*);
 void RegisterConditionalTrigger(nosNodeFunctions*);
 void RegisterCPUSleep(nosNodeFunctions*);
 void RegisterMultiLiveOut(nosNodeFunctions*);
-void RegisterPrintLog(nosNodeFunctions*);
 void RegisterPropagateExecution(nosNodeFunctions*);
 void RegisterRepeatingJunction(nosNodeFunctions*);
 void RegisterScheduleOnRequest(nosNodeFunctions*);
@@ -47,7 +46,6 @@ enum class Nodes : size_t
 	ConditionalTrigger,
 	CPUSleep,
 	MultiLiveOut,
-	PrintLog,
 	PropagateExecution,
 	RepeatingJunction,
 	ScheduleOnRequest,
@@ -84,7 +82,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(ConditionalTrigger)
 			GEN_CASE_NODE(CPUSleep)
 			GEN_CASE_NODE(MultiLiveOut)
-			GEN_CASE_NODE(PrintLog)
 			GEN_CASE_NODE(PropagateExecution)
 			GEN_CASE_NODE(RepeatingJunction)
 			GEN_CASE_NODE(ScheduleOnRequest)
@@ -128,7 +125,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ExecDepend"), NOS_NAME("nos.flow.ExecDepend")},
 		{NOS_NAME("nos.utilities.CPUSleep"), NOS_NAME("nos.flow.CPUSleep")},
 		{NOS_NAME("nos.utilities.MultiLiveOut"), NOS_NAME("nos.flow.MultiLiveOut")},
-		{NOS_NAME("nos.utilities.PrintLog"), NOS_NAME("nos.flow.PrintLog")},
 		{NOS_NAME("nos.utilities.PropagateExecution"), NOS_NAME("nos.flow.PropagateExecution")},
 		{NOS_NAME("nos.utilities.RepeatingJunction"), NOS_NAME("nos.flow.RepeatingJunction")},
 		{NOS_NAME("nos.utilities.ScheduleOnRequest"), NOS_NAME("nos.flow.ScheduleOnRequest")},

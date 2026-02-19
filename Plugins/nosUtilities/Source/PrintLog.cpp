@@ -1,7 +1,9 @@
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
 #include <Nodos/Plugin.hpp>
 
 
-namespace nos::flow
+namespace nos::utilities
 {
 NOS_REGISTER_NAME(PrintLog)
 struct PrintLog : NodeContext

@@ -15,12 +15,14 @@ namespace nos::utilities
 enum class Utilities : size_t
 {
 	Host,
+	PrintLog,
 	Sink,
 	Time,
 	Count,
 };
 
 void RegisterHost(nosNodeFunctions*);
+void RegisterPrintLog(nosNodeFunctions*);
 void RegisterSink(nosNodeFunctions*);
 void RegisterTime(nosNodeFunctions*);
 
@@ -32,6 +34,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 		return NOS_RESULT_SUCCESS;
 
 	RegisterHost(outList[static_cast<size_t>(Utilities::Host)]);
+	RegisterPrintLog(outList[static_cast<size_t>(Utilities::PrintLog)]);
 	RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]);
 	RegisterTime(outList[static_cast<size_t>(Utilities::Time)]);
 	return NOS_RESULT_SUCCESS;
@@ -105,7 +108,6 @@ void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
 		{NOS_NAME("nos.utilities.ExecDepend"), NOS_NAME("nos.flow.ExecDepend")},
 		{NOS_NAME("nos.utilities.CPUSleep"), NOS_NAME("nos.flow.CPUSleep")},
 		{NOS_NAME("nos.utilities.MultiLiveOut"), NOS_NAME("nos.flow.MultiLiveOut")},
-		{NOS_NAME("nos.utilities.PrintLog"), NOS_NAME("nos.flow.PrintLog")},
 		{NOS_NAME("nos.utilities.PropagateExecution"), NOS_NAME("nos.flow.PropagateExecution")},
 		{NOS_NAME("nos.utilities.RepeatingJunction"), NOS_NAME("nos.flow.RepeatingJunction")},
 		{NOS_NAME("nos.utilities.ScheduleOnRequest"), NOS_NAME("nos.flow.ScheduleOnRequest")},
