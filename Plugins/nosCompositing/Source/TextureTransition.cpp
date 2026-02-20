@@ -110,10 +110,6 @@ struct TextureTransitionContext : public NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
 	{
-		//if (!HasPinValues(params, NSN_TransitionTarget, NSN_Input1, NSN_Input2, NSN_Output)) {
-		//	return NOS_RESULT_INVALID_ARGUMENT;
-		//}
-
 		nosCmd cmd;
 		nosCmdBeginParams bp = {.Name = nos::Name("Transition"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 		nosVulkan->Begin(&bp);
@@ -196,14 +192,6 @@ struct TextureTransitionContext : public NodeContext
 
 	static nosResult DoTransition(void* ctx, nosFunctionExecuteParams* fnParams)
 	{
-		//auto nodeExecParams = params->ParentNodeExecuteParams;
-		//auto functionExecParams = params->FunctionNodeExecuteParams;
-		//if (!HasPinValues(nodeExecParams, NSN_TransitionTarget) ||
-		//	!HasPinValues(functionExecParams, NSN_Duration, NSN_Type, NSN_WipeWidth, NSN_Interpolation, NSN_EaseExponent, NSN_StepCount)) {
-		//	// TODO - it should return error instead of failing silently
-		//	return NOS_RESULT_FAILED;
-		//}
-
 		auto context = (TextureTransitionContext*)ctx;
 
 		nos::NodeExecuteParams params = fnParams->FunctionNodeExecuteParams;

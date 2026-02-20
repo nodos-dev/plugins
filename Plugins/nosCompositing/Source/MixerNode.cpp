@@ -964,31 +964,6 @@ struct MixerContext : public NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
 	{
-		//if (!HasPinValues(
-		//	params,
-		//	NSN_Channel1,
-		//	NSN_Channel2,
-		//	NSN_Channel3,
-		//	NSN_Channel4,
-		//	NSN_Channel5,
-		//	NSN_Channel6,
-		//	NSN_Channel7,
-		//	NSN_Channel8,
-		//	NSN_Channel9,
-		//	NSN_Channel10,
-		//	NSN_Overlay,
-		//	NSN_ProgramChannel,
-		//	NSN_PreviewChannel,
-		//	NSN_OverlayPreview,
-		//	NSN_Opacity,
-		//	NSN_Premultiply,
-		//	NSN_Program,
-		//	NSN_Preview,
-		//	NSN_Multiviewer
-		//)) {
-		//	return NOS_RESULT_INVALID_ARGUMENT;
-		//}
-
 		if (bIsInTransition)
 		{
 			auto now = std::chrono::high_resolution_clock::now();

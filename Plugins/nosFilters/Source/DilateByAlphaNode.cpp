@@ -28,10 +28,6 @@ struct DilateByAlphaContext : public NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
 	{
-		//if (!HasPinValues(params, NSN_Out, NSN_In, NSN_Radius)) {
-		//	return NOS_RESULT_INVALID_ARGUMENT;
-		//}
-
 		auto outInfo = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Out));
 		auto intermediateTexture = SetupIntermediateTexture(&outInfo);
 

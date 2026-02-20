@@ -13,11 +13,6 @@ struct CanvasMapperContext : public NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
 	{
-		//if (!HasPinValues(params, NOS_NAME_STATIC("Input"), NOS_NAME_STATIC("BackgroundColor"), NOS_NAME_STATIC("RGSS")))
-		//	return NOS_RESULT_INVALID_ARGUMENT;
-
-		// auto values = GetPinValues(params);
-
 		auto arrayObj = nos::ArrayObjectRef(params.GetPinObject(NSN_Input));
 
 		auto inputs = (flatbuffers::Vector<flatbuffers::Offset<nos::compositing::CanvasLayer>>*)arrayObj.
