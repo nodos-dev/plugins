@@ -66,8 +66,6 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize)
 {
 	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
-		{NOS_NAME("nos.utilities.LUTType"), NOS_NAME("nos.filters.LUTType")},
-		{NOS_NAME("nos.utilities.ColorspaceConversion"), NOS_NAME("nos.filters.ColorspaceConversion")},
 		{NOS_NAME("zd.utilities.ColorspaceConversion"), NOS_NAME("nos.filters.ColorspaceConversion")},
 		{NOS_NAME("zd.utilities.LUTType"), NOS_NAME("nos.filters.LUTType")},
 	};
