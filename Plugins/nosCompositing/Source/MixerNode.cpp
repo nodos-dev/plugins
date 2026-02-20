@@ -1,6 +1,10 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "TextureTransitionUtils.h"
 #include "nosCompositing/Mixer_generated.h"
+#include "nosSysVulkan/nosVulkanSubsystem.h"
+#include "FontRendering.h"
+
+#include <glm/ext/scalar_common.hpp>
 
 static std::string NosFormatStr(nosFormat format)
 {
@@ -219,11 +223,11 @@ struct MixerContext : public NodeContext
 	{
 		if (!fontAtlas14pt)
 		{
-			fontAtlas14pt = MakeFontAtlas(EFontAtlas::DejaVuSansMono14pt, NodeId, "Mixer_fontAtlas14pt");
+			fontAtlas14pt = MakeFontAtlas(FontType::DejaVuSansMono14pt, NodeId, "Mixer_fontAtlas14pt");
 		}
 		if (!fontAtlas28pt)
 		{
-			fontAtlas28pt = MakeFontAtlas(EFontAtlas::DejaVuSansMono28pt, NodeId, "Mixer_fontAtlas28pt");
+			fontAtlas28pt = MakeFontAtlas(FontType::DejaVuSansMono28pt, NodeId, "Mixer_fontAtlas28pt");
 		}
 		return NOS_RESULT_SUCCESS;
 	}
@@ -370,85 +374,85 @@ struct MixerContext : public NodeContext
 		             .Add("Program",
 		                  0.033333f,
 		                  glm::vec2(0.25f, 0.516666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add("Preview",
 		                  0.033333f,
 		                  glm::vec2(0.75f, 0.516666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel1]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.1f, 0.749666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel2]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.3f, 0.749666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel3]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.5f, 0.749666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel4]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.7f, 0.749666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel5]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.9f, 0.749666f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel6]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.1f, 0.983333f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel7]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.3f, 0.983333f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel8]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.5f, 0.983333f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel9]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.7f, 0.983333f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Add(Pins[PinName2Id[NSN_Channel10]].DisplayName.AsCStr(),
 		                  0.033333f,
 		                  glm::vec2(0.9f, 0.983333f),
-		                  ETextHorizontalAlignment::Middle,
-		                  ETextVerticalAlignment::Middle,
+		                  TextHorizontalAlignment::Middle,
+		                  TextVerticalAlignment::Middle,
 		                  white,
 		                  true)
 		             .Build("MixerNode_Calculate_ChannelLabels");
@@ -487,8 +491,8 @@ struct MixerContext : public NodeContext
 				debugText[lineI].c_str(),
 				fontSize,
 				pos + glm::vec2(0.0f, (lineI - lineCount) * fontSize),
-				ETextHorizontalAlignment::Left,
-				ETextVerticalAlignment::Top,
+				TextHorizontalAlignment::Left,
+				TextVerticalAlignment::Top,
 				yellow,
 				false
 				);
@@ -1023,19 +1027,6 @@ struct MixerContext : public NodeContext
 	{
 		auto nodeExecParams = params->ParentNodeExecuteParams;
 		auto functionExecParams = params->FunctionNodeExecuteParams;
-		if (!HasPinValues(nodeExecParams, NSN_ProgramChannel, NSN_PreviewChannel) ||
-		    !HasPinValues(functionExecParams,
-		                  NSN_Duration,
-		                  NSN_Type,
-		                  NSN_WipeWidth,
-		                  NSN_Target,
-		                  NSN_Interpolation,
-		                  NSN_EaseExponent,
-		                  NSN_StepCount))
-		{
-			// TODO - it should return error instead of failing silently
-			return NOS_RESULT_FAILED;
-		}
 
 		auto context = (MixerContext*)ctx;
 

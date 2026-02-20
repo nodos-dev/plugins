@@ -1,10 +1,13 @@
 
 #include "TextureTransitionUtils.h"
 
+#include <glm/exponential.hpp>
+#include <glm/common.hpp>
+
 
 namespace nos::compositing
 {
-	float InterpStep(float A, float B, float Alpha, u32 Steps)
+	float InterpStep(float A, float B, float Alpha, uint32_t Steps)
 	{
 		if (Steps <= 1 || Alpha <= 0) {
 			return A;
@@ -37,7 +40,7 @@ namespace nos::compositing
 			InterpEaseOut(0.f, 1.f, Alpha * 2.f - 1.f, Exp) * 0.5f + 0.5f);
 	}
 
-	float GetInterpolation(TransitionInterpolation interpType, float amount, u32 stepCount, float easeExponent)
+	float GetInterpolation(TransitionInterpolation interpType, float amount, uint32_t stepCount, float easeExponent)
 	{
 		auto Result = amount;
 		switch (interpType)

@@ -1,4 +1,4 @@
-// Copyright Zero Density AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "Common.h"
 
 namespace nos
@@ -31,9 +31,6 @@ struct BoxBlurContext : public NodeContext
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params)
 	{
-		if (!HasPinValues(params, NSN_Out, NSN_In, NSN_RedBlend, NSN_GreenBlend, NSN_BlueBlend, NSN_AlphaBlend))
-			return NOS_RESULT_INVALID_ARGUMENT;
-
 		auto outInfo = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Out));
         
         nos::ObjectRef IntermediateTexture = SetupIntermediateTexture(&outInfo);

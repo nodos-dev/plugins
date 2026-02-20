@@ -113,12 +113,6 @@ void UpdateVertexBuffer(
 	const char* tag);
 
 
-template<typename... Names>
-bool HasPinValues(nos::NodeExecuteParams const& params, const Names... paramNames)
-{
-	return (params.contains(paramNames) && ...);
-}
-
 struct FontDescription {
 	const unsigned char* Image;
 	size_t ImageSize;

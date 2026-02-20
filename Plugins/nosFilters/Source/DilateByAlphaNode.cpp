@@ -1,4 +1,4 @@
-// Copyright Zero Density AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 #include "Common.h"
 
 namespace nos

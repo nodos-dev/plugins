@@ -1,8 +1,12 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
+#include <Nodos/Plugin.hpp>
+#include <nosSysVulkan/Helpers.hpp>
+#include <glm/ext/scalar_common.hpp>
+
 #include "TextureTransitionUtils.h"
 #include "nosCompositing/Transition_generated.h"
-
+#include "Names.h"
 
 namespace nos::compositing
 {

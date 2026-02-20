@@ -1,6 +1,10 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include "Common.h"
+#include <Nodos/Plugin.hpp>
+#include <nosSysVulkan/Helpers.hpp>
+#include <glm/vec2.hpp>
+
 #include "nosCompositing/CanvasMapper_generated.h"
+#include "Names.h"
 
 namespace nos::compositing
 {

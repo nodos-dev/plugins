@@ -1,13 +1,14 @@
-#include "Common.h"
-#include "DejaVuSansMono.hpp"
+#include "FontRendering.h"
+#include "DejaVuSansMono.hpp.dat"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <cuchar>
-
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 namespace nos::compositing
 {
-
 
 static FontDescription DejaVuSansMono14pt = {
 	DejaVuSansMono14pt_Image,
@@ -32,62 +33,22 @@ static FontDescription DejaVuSansMono28pt = {
 	10
 };
 
-
-void UpdateVertexBuffer(
-	nosVertexData& data, 
-	nos::ObjectRef& bufferObject,
-	const void* verticesData,
-	size_t verticesSize,
-	const void* indicesData,
-	size_t indicesSize,
-	size_t indicesCount,
-	const char* tag)
-{
-	uint32_t bufferSize = (uint32_t)(verticesSize + indicesSize);
-
-	auto info = nos::sys::vulkan::GetResourceInfo(bufferObject).value_or({});
-	if (info.Buffer.Size < bufferSize)
-	{
-		bufferObject = {};
-		info = {};
-		info.Type = NOS_RESOURCE_TYPE_BUFFER;
-		info.Buffer.Size = bufferSize;
-		info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_VERTEX_BUFFER | NOS_BUFFER_USAGE_INDEX_BUFFER);
-		info.Buffer.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
-		nosVulkan->CreateResource(&info, 0, tag, &bufferObject.GetStorage());
-		data.Buffer = bufferObject;
-	}
-
-	data.VertexOffset = 0;
-	data.IndexOffset = (uint32_t)verticesSize;
-	data.IndexCount = (uint32_t)indicesCount;
-	
-	u8* mapping = nosVulkan->Map(bufferObject);
-	if (mapping)
-	{
-		memcpy(mapping, verticesData, verticesSize);
-		memcpy(mapping + verticesSize, indicesData, indicesSize);
-	}
-}
-
-
-
 FontAtlas::FontAtlas(FontDescription& description)
 	: Description(description)
 	, Texture()
 {}
 
-std::shared_ptr<FontAtlas> MakeFontAtlas(EFontAtlas font, const nos::uuid& nodeId, const char* tag)
+std::shared_ptr<FontAtlas> MakeFontAtlas(FontType font, const nos::uuid& nodeId, const char* tag)
 {
 	if (!nosVulkan)
 		return nullptr;
 
 	FontDescription *fontDescription = nullptr;
 	switch (font) {
-	case EFontAtlas::DejaVuSansMono14pt:
+	case FontType::DejaVuSansMono14pt:
 		fontDescription = &DejaVuSansMono14pt;
 		break;
-	case EFontAtlas::DejaVuSansMono28pt:
+	case FontType::DejaVuSansMono28pt:
 		fontDescription = &DejaVuSansMono28pt;
 		break;
 	}
@@ -126,7 +87,7 @@ TextBuilder TextBuilder::Create(glm::vec2 outputSize, FontAtlas& font) {
 	return std::move(TextBuilder(outputSize, font));
 }
 
-TextBuilder& TextBuilder::Add(std::string text, float cHeight, glm::vec2 position, ETextHorizontalAlignment halign, ETextVerticalAlignment valign, glm::vec4 color, bool uppercase) {
+TextBuilder& TextBuilder::Add(std::string text, float cHeight, glm::vec2 position, TextHorizontalAlignment halign, TextVerticalAlignment valign, glm::vec4 color, bool uppercase) {
 	float letterHeightPx = float(Font.Description.CellHeightPx - 2 * Font.Description.yCellPaddingPx);
 	float fontScale = cHeight / letterHeightPx;
 	float outputAspect = OutputSize.x / OutputSize.y;

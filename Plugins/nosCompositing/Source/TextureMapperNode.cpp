@@ -1,6 +1,11 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include "Common.h"
+#include <Nodos/Plugin.hpp>
+#include <nosSysVulkan/Helpers.hpp>
+
+#include <glm/ext/matrix_transform.hpp>
+
+#include "Names.h"
 
 namespace nos::compositing
 {

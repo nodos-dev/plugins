@@ -1,8 +1,12 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 
-#include "Common.h"
+#include <Nodos/Plugin.hpp>
 #include <nosTrack/Track_generated.h>
+#include <nosSysVulkan/Helpers.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
+#include "Names.h"
 
 namespace nos::compositing
 {
@@ -40,7 +44,42 @@ glm::mat4 Perspective(f32 fovx, f32 pixelAspectRatio, glm::vec2 sensorSize, glm:
 		glm::vec4(0, 0, -near * Z, 0));
 }
 
+void UpdateVertexBuffer(
+	nosVertexData& data, 
+	nos::ObjectRef& bufferObject,
+	const void* verticesData,
+	size_t verticesSize,
+	const void* indicesData,
+	size_t indicesSize,
+	size_t indicesCount,
+	const char* tag)
+{
+	uint32_t bufferSize = (uint32_t)(verticesSize + indicesSize);
 
+	auto info = nos::sys::vulkan::GetResourceInfo(bufferObject).value_or({});
+	if (info.Buffer.Size < bufferSize)
+	{
+		bufferObject = {};
+		info = {};
+		info.Type = NOS_RESOURCE_TYPE_BUFFER;
+		info.Buffer.Size = bufferSize;
+		info.Buffer.Usage = nosBufferUsage(NOS_BUFFER_USAGE_VERTEX_BUFFER | NOS_BUFFER_USAGE_INDEX_BUFFER);
+		info.Buffer.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
+		nosVulkan->CreateResource(&info, 0, tag, &bufferObject.GetStorage());
+		data.Buffer = bufferObject;
+	}
+
+	data.VertexOffset = 0;
+	data.IndexOffset = (uint32_t)verticesSize;
+	data.IndexCount = (uint32_t)indicesCount;
+	
+	u8* mapping = nosVulkan->Map(bufferObject);
+	if (mapping)
+	{
+		memcpy(mapping, verticesData, verticesSize);
+		memcpy(mapping + verticesSize, indicesData, indicesSize);
+	}
+}
 struct Grid3DNode : public NodeContext
 {
 public:
