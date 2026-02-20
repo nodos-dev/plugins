@@ -12,7 +12,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "./Shaders/Crop.frag.spv"
+						"shader": "./Shaders/Crop.frag"
 					}
 				},
 				"pins": [

@@ -12,7 +12,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "./Shaders/Unpremultiply.frag.spv"
+						"shader": "./Shaders/Unpremultiply.frag"
 					}
 				},
 				"pins": [

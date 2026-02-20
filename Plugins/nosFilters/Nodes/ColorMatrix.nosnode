@@ -12,7 +12,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "./Shaders/ColorMatrix.frag.spv"
+						"shader": "./Shaders/ColorMatrix.frag"
 					}
 				},
 				"pins": [

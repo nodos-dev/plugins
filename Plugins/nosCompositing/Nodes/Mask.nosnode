@@ -12,7 +12,7 @@
 				"contents": {
 					"type": "nos.sys.vulkan.GPUNode",
 					"options": {
-						"shader": "./Shaders/Mask.frag.spv"
+						"shader": "./Shaders/Mask.frag"
 					}
 				},
 				"pins": [
