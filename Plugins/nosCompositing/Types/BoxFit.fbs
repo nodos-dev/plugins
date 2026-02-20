@@ -1,0 +1,7 @@
+namespace nos.compositing;
+
+enum BoxFitMode: uint
+{
+    Contain = 0,
+    Cover = 1,
+}

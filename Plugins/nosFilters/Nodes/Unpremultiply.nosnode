@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{
+			"class_name": "Unpremultiply",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "Unpremultiply",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "./Shaders/Unpremultiply.frag"
+					}
+				},
+				"pins": [
+					{
+						"name": "In",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

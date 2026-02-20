@@ -1,0 +1,8 @@
+namespace nos.filters;
+
+enum ColorspaceConversion : uint 
+{
+    CUSTOM = 0,
+	BT2020_TO_REC709 = 1,
+    REC709_TO_BT2020 = 2,
+}

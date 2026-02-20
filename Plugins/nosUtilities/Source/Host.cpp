@@ -220,10 +220,9 @@ struct HostNode : NodeContext
 	}
 };
 
-nosResult RegisterHost(nosNodeFunctions* fn)
+void RegisterHost(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NOS_NAME("Host"), HostNode, fn);
-	return NOS_RESULT_SUCCESS;
 }
 
 } // namespace nos::utilities

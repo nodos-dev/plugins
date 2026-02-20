@@ -59,11 +59,32 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	return NOS_RESULT_SUCCESS;
 }
 
+void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
+{
+	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.utilities.MeanSquaredError"), NOS_NAME("nos.noise.MeanSquaredError")},
+		{NOS_NAME("nos.utilities.PSNR"), NOS_NAME("nos.noise.PSNR")},
+	};
+
+	if (!outFrom)
+	{
+		*outSize = renames.size();
+		return;
+	}
+
+	for (size_t i = 0; i < renames.size(); ++i)
+	{
+		outFrom[i] = renames[i].first;
+		outTo[i] = renames[i].second;
+	}
+}
+
 extern "C"
 {
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	outFunctions->GetRenamedNodeClasses = GetRenamedNodeClasses;
 	return NOS_RESULT_SUCCESS;
 }
 }

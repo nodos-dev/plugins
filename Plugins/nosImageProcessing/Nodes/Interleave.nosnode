@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{
+			"class_name": "Interleave",
+			"menu_info": {
+				"category": "Image Processing",
+				"display_name": "Interleave",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Odd",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Even",
+						"type_name": "nos.fb.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.fb.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

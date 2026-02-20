@@ -1,0 +1,147 @@
+{
+	"shaders": [
+		{
+			"key": "MIXER_OVERLAY_FSHADER",
+			"path": "Shaders/Overlay.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "MIXER_MULTIVIEWER_FSHADER",
+			"path": "Shaders/Multiviewer.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "MIXER_TEXT_VSHADER",
+			"path": "Shaders/Label.vert",
+			"stage": "VERTEX",
+			"lang": "GLSL"
+		},
+		{
+			"key": "MIXER_TEXT_FSHADER",
+			"path": "Shaders/Label.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "TRANSITION_DISSOLVE_FSHADER",
+			"path": "Shaders/TransitionDissolve.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "TRANSITION_WIPE_FSHADER",
+			"path": "Shaders/TransitionWipe.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "GRID_3D_VSHADER",
+			"path": "Shaders/Grid3D.vert",
+			"stage": "VERTEX",
+			"lang": "GLSL"
+		},
+		{
+			"key": "GRID_3D_FSHADER",
+			"path": "Shaders/Grid3D.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "TEXTURE_MAPPER_VSHADER",
+			"path": "Shaders/TextureMapper.vert",
+			"stage": "VERTEX",
+			"lang": "GLSL"
+		},
+		{
+			"key": "TEXTURE_MAPPER_FSHADER",
+			"path": "Shaders/TextureMapper.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		},
+		{
+			"key": "CANVAS_MAPPER_FSHADER",
+			"path": "Shaders/CanvasMapper.frag",
+			"stage": "FRAGMENT",
+			"lang": "GLSL"
+		}
+	],
+	"passes": [
+		{
+			"key": "MIXER_OVERLAY_PASS",
+			"shader": "MIXER_OVERLAY_FSHADER"
+		},
+		{
+			"key": "MIXER_MULTIVIEWER_PASS",
+			"shader": "MIXER_MULTIVIEWER_FSHADER"
+		},
+		{
+			"key": "MIXER_LABEL_PASS",
+			"vertex_shader": "MIXER_TEXT_VSHADER",
+			"shader": "MIXER_TEXT_FSHADER"
+		},
+		{
+			"key": "MIXER_DEBUG_TEXT_PASS",
+			"vertex_shader": "MIXER_TEXT_VSHADER",
+			"shader": "MIXER_TEXT_FSHADER",
+			"blend_mode": {
+				"enabled": true,
+				"color_op": "ADD",
+				"src_color_factor": "SRC_ALPHA",
+				"dst_color_factor": "ONE_MINUS_SRC_ALPHA",
+				"alpha_op": "MAXIMUM",
+				"src_alpha_factor": "ONE",
+				"dst_alpha_factor": "ONE",
+				"color_write_mask": "ALL"
+			}
+		},
+		{
+			"key": "TRANSITION_DISSOLVE_PASS",
+			"shader": "TRANSITION_DISSOLVE_FSHADER"
+		},
+		{
+			"key": "TRANSITION_WIPE_PASS",
+			"shader": "TRANSITION_WIPE_FSHADER"
+		},
+		{
+			"key": "CANVAS_MAPPER_PASS",
+			"shader": "CANVAS_MAPPER_FSHADER"
+		},
+		{
+			"key": "GRID_3D_PASS",
+			"vertex_shader": "GRID_3D_VSHADER",
+			"shader": "GRID_3D_FSHADER"
+		},
+		{
+			"key": "TEXTURE_MAPPER_PASS",
+			"vertex_shader": "TEXTURE_MAPPER_VSHADER",
+			"shader": "TEXTURE_MAPPER_FSHADER",
+			"blend_mode": {
+				"enabled": true,
+				"color_op": "ADD",
+				"src_color_factor": "ONE",
+				"dst_color_factor": "ONE",
+				"alpha_op": "MAXIMUM",
+				"src_alpha_factor": "ONE",
+				"dst_alpha_factor": "ONE",
+				"color_write_mask": "ALL"
+			}
+		},
+		{
+			"key": "TEXTURE_MAPPER_ALPHA_BLEND_PASS",
+			"vertex_shader": "TEXTURE_MAPPER_VSHADER",
+			"shader": "TEXTURE_MAPPER_FSHADER",
+			"blend_mode": {
+				"enabled": true,
+				"color_op": "ADD",
+				"src_color_factor": "SRC_ALPHA",
+				"dst_color_factor": "ONE_MINUS_SRC_ALPHA",
+				"alpha_op": "MAXIMUM",
+				"src_alpha_factor": "ONE",
+				"dst_alpha_factor": "ONE",
+				"color_write_mask": "ALL"
+			}
+		}
+	]
+}

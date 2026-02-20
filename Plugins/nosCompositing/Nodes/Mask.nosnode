@@ -1,0 +1,132 @@
+{
+	"nodes": [
+		{
+			"class_name": "Mask",
+			"menu_info": {
+				"category": "Compositing|Generator",
+				"display_name": "Mask",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "./Shaders/Mask.frag"
+					}
+				},
+				"pins": [
+					{
+						"pin_category": "Color",
+						"name": "BackgroundColor",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 1.0
+						},
+						"step": 0.01,
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
+					},
+					{
+						"pin_category": "Color",
+						"name": "ForegroundColor",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 1.0
+						},
+						"step": 0.01,
+						"visualizers": [
+							{
+								"type": "COLOR_PICKER"
+							}
+						]
+					},
+					{
+						"pin_category": "Mask",
+						"name": "Left",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Mask",
+						"name": "Top",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Mask",
+						"name": "Right",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Mask",
+						"name": "Bottom",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Smooth",
+						"name": "LeftSmooth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Smooth",
+						"name": "TopSmooth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Smooth",
+						"name": "RightSmooth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"pin_category": "Smooth",
+						"name": "BottomSmooth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

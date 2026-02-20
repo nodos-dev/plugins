@@ -1,0 +1,52 @@
+{
+	"nodes": [
+		{
+			"class_name": "ScheduleRequest",
+			"menu_info": {
+				"category": "Scheduling",
+				"display_name": "Schedule Request",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Trigger",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Sink",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "DeltaSeconds",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Importance",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1
+					},
+					{
+						"name": "TryAgainOnFailure",
+						"display_name": "Try Again On Failure",
+						"description": "If enabled, the request will be retried if any of the nodes return an error on execute.",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": true
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

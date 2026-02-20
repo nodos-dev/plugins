@@ -1,0 +1,43 @@
+{
+	"info": {
+		"id": {
+			"name": "nos.imageprocessing",
+			"version": "1.0.0"
+		},
+		"display_name": "Image Processing",
+		"description": "Image processing nodes.",
+		"dependencies": [
+			{
+				"name": "nos.sys.vulkan",
+				"version": "8.0"
+			},
+			{
+				"name": "nos.math",
+				"version": "2.0"
+			},
+			{
+				"name": "nos.reflect",
+				"version": "3.0"
+			},
+			{
+				"name": "nos.flow",
+				"version": "1.0"
+			},
+			{
+				"name": "nos.mediaio",
+				"version": "4.0"
+			}
+		],
+		"category": "Image Processing"
+	},
+	"binary_path": "Binaries/nosImageProcessing",
+	"plugin_options": [
+		{
+			"plugin": "nos.sys.vulkan",
+			"type": "nos.sys.vulkan.Resources",
+			"path": "Types/Resources.json"
+		}
+	],
+	"sdk_version": "41.0",
+	"schema_version": "1.4-v1"
+}

@@ -1,0 +1,557 @@
+{
+	"nodes": [
+		{
+			"class_name": "3WayColorCorrect",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "3 Way Color Correct",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "Shaders/3WayColorCorrect.frag",
+						"stage": "FRAGMENT"
+					}
+				},
+				"pins": [
+					{
+						"name": "Source",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Saturation",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Global"
+					},
+					{
+						"name": "Contrast",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Global"
+					},
+					{
+						"name": "Gamma",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Global"
+					},
+					{
+						"name": "Gain",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Global"
+					},
+					{
+						"name": "Offset",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"min": {
+							"x": -1.0,
+							"y": -1.0,
+							"z": -1.0,
+							"w": -1.0
+						},
+						"max": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"pin_category": "Global"
+					},
+					{
+						"name": "SaturationShadows",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "ContrastShadows",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "GammaShadows",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "GainShadows",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "OffsetShadows",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"min": {
+							"x": -1.0,
+							"y": -1.0,
+							"z": -1.0,
+							"w": -1.0
+						},
+						"max": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "SaturationMidtones",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Midtones"
+					},
+					{
+						"name": "ContrastMidtones",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Midtones"
+					},
+					{
+						"name": "GammaMidtones",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Midtones"
+					},
+					{
+						"name": "GainMidtones",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Midtones"
+					},
+					{
+						"name": "OffsetMidtones",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"min": {
+							"x": -1.0,
+							"y": -1.0,
+							"z": -1.0,
+							"w": -1.0
+						},
+						"max": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"pin_category": "Midtones"
+					},
+					{
+						"name": "SaturationHighlights",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Highlights"
+					},
+					{
+						"name": "ContrastHighlights",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Highlights"
+					},
+					{
+						"name": "GammaHighlights",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Highlights"
+					},
+					{
+						"name": "GainHighlights",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"min": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"max": {
+							"x": 2.0,
+							"y": 2.0,
+							"z": 2.0,
+							"w": 2.0
+						},
+						"pin_category": "Highlights"
+					},
+					{
+						"name": "OffsetHighlights",
+						"type_name": "nos.fb.vec4",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0,
+							"w": 0.0
+						},
+						"min": {
+							"x": -1.0,
+							"y": -1.0,
+							"z": -1.0,
+							"w": -1.0
+						},
+						"max": {
+							"x": 1.0,
+							"y": 1.0,
+							"z": 1.0,
+							"w": 1.0
+						},
+						"pin_category": "Highlights"
+					},
+					{
+						"name": "ShadowsMax",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.09,
+						"min": -1.0,
+						"max": 1.0,
+						"pin_category": "Shadows"
+					},
+					{
+						"name": "HighlightsMin",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.5,
+						"min": -1.0,
+						"max": 1.0,
+						"pin_category": "Highlights"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

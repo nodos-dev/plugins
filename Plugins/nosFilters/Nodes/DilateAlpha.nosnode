@@ -1,0 +1,37 @@
+{
+	"nodes": [
+		{
+			"class_name": "DilateAlpha",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "Dilate Alpha",
+				"name_aliases": []
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Out",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "In",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Radius",
+						"type_name": "nos.fb.vec2",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"pin_category": "Default"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

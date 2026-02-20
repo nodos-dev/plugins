@@ -1,0 +1,16 @@
+include "Builtins.fbs";
+include "Types/Types.fbs";
+include "Merge.fbs";
+
+namespace nos.compositing;
+
+table CanvasLayer
+{
+    texture: nos.sys.vulkan.Texture;
+    position: nos.fb.vec2;
+    rotation: float;
+	origin: nos.fb.vec2;
+    size: nos.fb.vec2u;
+	blend_mode: BlendMode;
+	opacity: float;
+}

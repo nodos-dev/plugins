@@ -1,0 +1,38 @@
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
+#include <Nodos/Plugin.hpp>
+
+namespace nos::flow
+{
+NOS_REGISTER_NAME_SPACED(Nos_Utilities_PropagateExecution, "nos.flow.PropagateExecution")
+struct PropagateExecutionNode : NodeContext
+{
+	using NodeContext::NodeContext;
+
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
+	{
+		nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Propagate"));
+		nosScheduleNodeParams schedule{
+			.NodeId = NodeId,
+			.AddScheduleCount = 1
+		};
+		nosEngine.ScheduleNode(&schedule);
+		return NOS_RESULT_SUCCESS;
+	}
+
+	void OnPathStart() override
+	{
+		nosScheduleNodeParams schedule{
+			.NodeId = NodeId,
+			.AddScheduleCount = 1
+		};
+		nosEngine.ScheduleNode(&schedule);
+	}
+};
+
+void RegisterPropagateExecution(nosNodeFunctions* fn)
+{
+	NOS_BIND_NODE_CLASS(NSN_Nos_Utilities_PropagateExecution, PropagateExecutionNode, fn);
+}
+
+} // namespace nos::flow

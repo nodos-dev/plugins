@@ -1,197 +1,153 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-// Includes
 #include <Nodos/Plugin.hpp>
-#include <glm/glm.hpp>
-#include <Builtins_generated.h>
-#include <Module_generated.h>
-
 #include <nosSysVulkan/nosVulkanSubsystem.h>
-#include <nosSync/nosSync.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
-NOS_SYNC_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
-	NOS_SYNC_IMPORT()
 NOS_END_IMPORT_DEPS()
-
-NOS_REGISTER_NAME(Input);
-NOS_REGISTER_NAME(Output);
-NOS_REGISTER_NAME(In);
-NOS_REGISTER_NAME(Out);
-NOS_REGISTER_NAME(Path);
-NOS_REGISTER_NAME(sRGB);
 
 namespace nos::utilities
 {
-
-enum Utilities : int
-{	// CPU nodes
-	Resize = 0,
-	ChannelViewer,
-	Merge,
-	Time,
-	StbiLoad,
-	WriteImage,
-	CPUSleep,
-	UploadBuffer,
-	Buffer2Texture,
-	Texture2Buffer,
-	ShowStatusNode,
-	Sink,
-	PropagateExecution,
-	UploadBufferProvider,
-	BoundedQueue,
-	RingBuffer,
+enum class Utilities : size_t
+{
 	Host,
-	DeinterlacedBoundedTextureQueue,
-	DeinterlacedBufferRing,
-	SyncMultiOutlet,
-	ConditionalTrigger,
-	TriggerOnAnyInput,
-	SwitchTrigger,
 	PrintLog,
-	LayoutDrawer,
-	FreeLayout,
-	GridLayout,
-	FreeOutputLayout,
-	GridOutputLayout,
-	ScheduleOnRequest,
-	ReadImage,
-	BoxFit,
-	ReduceTexture,
-	MultiLiveOut,
-	AsyncDownloadBuffer,
-	WaitGPUEvent,
-	ScheduleRequest,
-	BufferProvider,
-	TextureProvider,
-	CopyResource,
-	HostVisibleBufferCopy,
-	LoadCubeLUT,
-	RepeatingJunction,
-	AlwaysDirty,
-	Count
+	Sink,
+	Time,
+	Count,
 };
 
-nosResult RegisterMerge(nosNodeFunctions*);
-nosResult RegisterTime(nosNodeFunctions*);
-nosResult RegisterStbiLoad(nosNodeFunctions*);
-nosResult RegisterWriteImage(nosNodeFunctions*);
-nosResult RegisterChannelViewer(nosNodeFunctions*);
-nosResult RegisterResize(nosNodeFunctions*);
-nosResult RegisterCPUSleep(nosNodeFunctions*);
-nosResult RegisterUploadBuffer(nosNodeFunctions*);
-nosResult RegisterBuffer2Texture(nosNodeFunctions*);
-nosResult RegisterTexture2Buffer(nosNodeFunctions*);
-nosResult RegisterShowStatusNode(nosNodeFunctions*);
-nosResult RegisterSink(nosNodeFunctions*);
-nosResult RegisterPropagateExecution(nosNodeFunctions*);
-nosResult RegisterUploadBufferProvider(nosNodeFunctions*);
-nosResult RegisterBoundedQueue(nosNodeFunctions*);
-nosResult RegisterRingBuffer(nosNodeFunctions*);
-nosResult RegisterHost(nosNodeFunctions*);
-nosResult RegisterPin2Json(nosNodeFunctions*);
-nosResult RegisterJson2Pin(nosNodeFunctions*);
-nosResult RegisterDeinterlacedBoundedTextureQueue(nosNodeFunctions*);
-nosResult RegisterDeinterlacedBufferRing(nosNodeFunctions*);
-nosResult RegisterSyncMultiOutlet(nosNodeFunctions*);
-nosResult RegisterConditionalTrigger(nosNodeFunctions*);
-nosResult RegisterTriggerOnAnyInput(nosNodeFunctions*);
-nosResult RegisterSwitchTrigger(nosNodeFunctions*);
-nosResult RegisterPrintLog(nosNodeFunctions*);
-nosResult RegisterScheduleOnRequest(nosNodeFunctions*);
-nosResult RegisterReadImage(nosNodeFunctions*);
-nosResult RegisterBoxFit(nosNodeFunctions*);
-nosResult RegisterLayoutDrawer(nosNodeFunctions*);
-nosResult RegisterFreeLayout(nosNodeFunctions*);
-nosResult RegisterGridLayout(nosNodeFunctions*);
-nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
-nosResult RegisterGridOutputLayout(nosNodeFunctions*);
-nosResult RegisterReduceTexture(nosNodeFunctions*);
-nosResult RegisterMultiLiveOut(nosNodeFunctions*);
-nosResult RegisterAsyncDownloadBuffer(nosNodeFunctions*);
-nosResult RegisterWaitGPUEvent(nosNodeFunctions*);
-nosResult RegisterScheduleRequest(nosNodeFunctions*);
-nosResult RegisterBufferProvider(nosNodeFunctions*);
-nosResult RegisterTextureProvider(nosNodeFunctions*);
-nosResult RegisterCopyResource(nosNodeFunctions*);
-nosResult RegisterHostVisibleBufferCopy(nosNodeFunctions*);
-nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
-nosResult RegisterRepeatingJunction(nosNodeFunctions*);
-nosResult RegisterAlwaysDirty(nosNodeFunctions*);
+void RegisterHost(nosNodeFunctions*);
+void RegisterPrintLog(nosNodeFunctions*);
+void RegisterSink(nosNodeFunctions*);
+void RegisterTime(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
-	*outSize = Utilities::Count;
+	if (outSize)
+		*outSize = static_cast<size_t>(Utilities::Count);
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
-#define GEN_CASE_NODE(name)					\
-	case Utilities::name: {					\
-		auto ret = Register##name(node);	\
-		if (NOS_RESULT_SUCCESS != ret)		\
-			return ret;						\
-		break;								\
+	RegisterHost(outList[static_cast<size_t>(Utilities::Host)]);
+	RegisterPrintLog(outList[static_cast<size_t>(Utilities::PrintLog)]);
+	RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]);
+	RegisterTime(outList[static_cast<size_t>(Utilities::Time)]);
+	return NOS_RESULT_SUCCESS;
+}
+
+void GetRenamedTypes(nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize)
+{
+	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.fb.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
+		{NOS_NAME("nos.fb.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
+		{NOS_NAME("nos.fb.GradientKind"), NOS_NAME("nos.utilities.GradientKind")},
+		{NOS_NAME("nos.fb.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
+		{NOS_NAME("nos.fb.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
+		{NOS_NAME("nos.fb.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("nos.fb.Channel"), NOS_NAME("nos.compositing.Channel")},
+		{NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
+		{NOS_NAME("nos.utilities.ChannelViewerChannels"), NOS_NAME("nos.compositing.ChannelViewerChannels")},
+		{NOS_NAME("nos.utilities.ChannelViewerFormats"), NOS_NAME("nos.compositing.ChannelViewerFormats")},
+		{NOS_NAME("nos.utilities.BoxFitMode"), NOS_NAME("nos.compositing.BoxFitMode")},
+		{NOS_NAME("nos.utilities.BlendMode"), NOS_NAME("nos.compositing.BlendMode")},
+		{NOS_NAME("nos.utilities.Source"), NOS_NAME("nos.compositing.Source")},
+		{NOS_NAME("nos.utilities.Channel"), NOS_NAME("nos.compositing.Channel")},
+		{NOS_NAME("nos.utilities.TextureSwitcherChannel"), NOS_NAME("nos.compositing.TextureSwitcherChannel")},
+		{NOS_NAME("nos.utilities.ResizeMethod"), NOS_NAME("nos.imageprocessing.ResizeMethod")},
+	};
+
+	if (!outRenamedFrom)
+	{
+		*outSize = renames.size();
+		return;
 	}
 
-	for (int i = 0; i < Utilities::Count; ++i)
+	for (size_t i = 0; i < renames.size(); ++i)
 	{
-		auto node = outList[i];
-		switch ((Utilities)i) {
-		default:
-			break;
-			GEN_CASE_NODE(Merge)
-			GEN_CASE_NODE(Time)
-			GEN_CASE_NODE(StbiLoad)
-			GEN_CASE_NODE(WriteImage)
-			GEN_CASE_NODE(ChannelViewer)
-			GEN_CASE_NODE(Resize)
-			GEN_CASE_NODE(CPUSleep)
-			GEN_CASE_NODE(UploadBuffer)
-			GEN_CASE_NODE(Buffer2Texture)
-			GEN_CASE_NODE(Texture2Buffer)
-			GEN_CASE_NODE(ShowStatusNode)
-			GEN_CASE_NODE(Sink)
-			GEN_CASE_NODE(PropagateExecution)
-			GEN_CASE_NODE(UploadBufferProvider)
-			GEN_CASE_NODE(BoundedQueue)
-			GEN_CASE_NODE(RingBuffer)
-			GEN_CASE_NODE(Host)
-			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
-			GEN_CASE_NODE(DeinterlacedBufferRing)
-			GEN_CASE_NODE(SyncMultiOutlet)
-			GEN_CASE_NODE(ConditionalTrigger)
-			GEN_CASE_NODE(TriggerOnAnyInput)
-			GEN_CASE_NODE(SwitchTrigger)
-			GEN_CASE_NODE(PrintLog)
-			GEN_CASE_NODE(ScheduleOnRequest)
-			GEN_CASE_NODE(ReadImage)
-			GEN_CASE_NODE(BoxFit)
-			GEN_CASE_NODE(LayoutDrawer)
-			GEN_CASE_NODE(FreeLayout)
-			GEN_CASE_NODE(GridLayout)
-			GEN_CASE_NODE(FreeOutputLayout)
-			GEN_CASE_NODE(GridOutputLayout)
-			GEN_CASE_NODE(ReduceTexture)
-			GEN_CASE_NODE(MultiLiveOut)
-			GEN_CASE_NODE(AsyncDownloadBuffer)
-			GEN_CASE_NODE(WaitGPUEvent)
-			GEN_CASE_NODE(ScheduleRequest)
-			GEN_CASE_NODE(BufferProvider)
-			GEN_CASE_NODE(TextureProvider)
-			GEN_CASE_NODE(CopyResource)
-			GEN_CASE_NODE(HostVisibleBufferCopy)
-			GEN_CASE_NODE(LoadCubeLUT)
-			GEN_CASE_NODE(RepeatingJunction)
-			GEN_CASE_NODE(AlwaysDirty)
-		}
+		outRenamedFrom[i] = renames[i].first;
+		outRenamedTo[i] = renames[i].second;
 	}
-	
-	return NOS_RESULT_SUCCESS;
+}
+
+void GetRenamedNodeClasses(nosName* outFrom, nosName* outTo, size_t* outSize)
+{
+	static std::vector<std::pair<nos::Name, nos::Name>> renames = {
+		{NOS_NAME("nos.utilities.BoxFit"), NOS_NAME("nos.compositing.BoxFit")},
+		{NOS_NAME("nos.utilities.ChannelViewer"), NOS_NAME("nos.compositing.ChannelViewer")},
+		{NOS_NAME("nos.utilities.Merge"), NOS_NAME("nos.compositing.Merge")},
+		{NOS_NAME("nos.utilities.QuadMerge"), NOS_NAME("nos.compositing.QuadMerge")},
+		{NOS_NAME("nos.utilities.Swizzle"), NOS_NAME("nos.compositing.Swizzle")},
+		{NOS_NAME("nos.utilities.Layout"), NOS_NAME("nos.compositing.Layout")},
+		{NOS_NAME("nos.utilities.LayoutDrawer"), NOS_NAME("nos.compositing.LayoutDrawer")},
+		{NOS_NAME("nos.utilities.FreeLayout"), NOS_NAME("nos.compositing.FreeLayout")},
+		{NOS_NAME("nos.utilities.GridLayout"), NOS_NAME("nos.compositing.GridLayout")},
+		{NOS_NAME("nos.utilities.FreeOutputLayout"), NOS_NAME("nos.compositing.FreeOutputLayout")},
+		{NOS_NAME("nos.utilities.GridOutputLayout"), NOS_NAME("nos.compositing.GridOutputLayout")},
+		{NOS_NAME("nos.utilities.LayoutQuadCanvas"), NOS_NAME("nos.compositing.LayoutQuadCanvas")},
+		{NOS_NAME("nos.utilities.TextureSwitcher"), NOS_NAME("nos.compositing.TextureSwitcher")},
+		{NOS_NAME("nos.utilities.Offset"), NOS_NAME("nos.compositing.Offset")},
+		{NOS_NAME("nos.utilities.SplitWipe"), NOS_NAME("nos.compositing.SplitWipe")},
+		{NOS_NAME("nos.utilities.AutoResize"), NOS_NAME("nos.imageprocessing.AutoResize")},
+		{NOS_NAME("nos.utilities.Resize"), NOS_NAME("nos.imageprocessing.Resize")},
+		{NOS_NAME("nos.utilities.YADIF"), NOS_NAME("nos.filters.YADIF")},
+		{NOS_NAME("nos.utilities.YADIFWithAutoDispatchSize"), NOS_NAME("nos.filters.YADIFWithAutoDispatchSize")},
+		{NOS_NAME("nos.utilities.ReduceTexture"), NOS_NAME("nos.imageprocessing.ReduceTexture")},
+		{NOS_NAME("nos.utilities.MeanSquaredError"), NOS_NAME("nos.noise.MeanSquaredError")},
+		{NOS_NAME("nos.utilities.PSNR"), NOS_NAME("nos.noise.PSNR")},
+		{NOS_NAME("nos.utilities.StbiLoad"), NOS_NAME("nos.mediaio.StbiLoad")},
+		{NOS_NAME("nos.utilities.WriteImage"), NOS_NAME("nos.mediaio.WriteImage")},
+		{NOS_NAME("nos.utilities.LoadCubeLUT"), NOS_NAME("nos.mediaio.LoadCubeLUT")},
+		{NOS_NAME("nos.utilities.ReadImage"), NOS_NAME("nos.mediaio.ReadImage")},
+		{NOS_NAME("nos.utilities.AlwaysDirty"), NOS_NAME("nos.flow.AlwaysDirty")},
+		{NOS_NAME("nos.utilities.ConditionalTrigger"), NOS_NAME("nos.flow.ConditionalTrigger")},
+		{NOS_NAME("nos.utilities.ExecDepend"), NOS_NAME("nos.flow.ExecDepend")},
+		{NOS_NAME("nos.utilities.CPUSleep"), NOS_NAME("nos.flow.CPUSleep")},
+		{NOS_NAME("nos.utilities.MultiLiveOut"), NOS_NAME("nos.flow.MultiLiveOut")},
+		{NOS_NAME("nos.utilities.PropagateExecution"), NOS_NAME("nos.flow.PropagateExecution")},
+		{NOS_NAME("nos.utilities.RepeatingJunction"), NOS_NAME("nos.flow.RepeatingJunction")},
+		{NOS_NAME("nos.utilities.ScheduleOnRequest"), NOS_NAME("nos.flow.ScheduleOnRequest")},
+		{NOS_NAME("nos.utilities.ScheduleRequest"), NOS_NAME("nos.flow.ScheduleRequest")},
+		{NOS_NAME("nos.utilities.ShowStatus"), NOS_NAME("nos.flow.ShowStatus")},
+		{NOS_NAME("nos.utilities.ShowStatusNode"), NOS_NAME("nos.flow.ShowStatus")},
+		{NOS_NAME("nos.utilities.SwitchTrigger"), NOS_NAME("nos.flow.SwitchTrigger")},
+		{NOS_NAME("nos.utilities.SyncMultiOutlet"), NOS_NAME("nos.flow.SyncMultiOutlet")},
+		{NOS_NAME("nos.utilities.ThreadedSyncMultiOutlet"), NOS_NAME("nos.flow.ThreadedSyncMultiOutlet")},
+		{NOS_NAME("nos.utilities.TimedFunctionSignaller"), NOS_NAME("nos.flow.TimedFunctionSignaller")},
+		{NOS_NAME("nos.utilities.TriggerOnAnyInput"), NOS_NAME("nos.flow.TriggerOnAnyInput")},
+		{NOS_NAME("nos.utilities.AsyncDownloadBuffer"), NOS_NAME("nos.resource.AsyncDownloadBuffer")},
+		{NOS_NAME("nos.utilities.BoundedQueue"), NOS_NAME("nos.resource.BoundedQueue")},
+		{NOS_NAME("nos.utilities.BoundedTextureQueue"), NOS_NAME("nos.resource.BoundedTextureQueue")},
+		{NOS_NAME("nos.utilities.Buffer2Texture"), NOS_NAME("nos.resource.Buffer2Texture")},
+		{NOS_NAME("nos.utilities.BufferProvider"), NOS_NAME("nos.resource.BufferProvider")},
+		{NOS_NAME("nos.utilities.CalculateDispatchSize"), NOS_NAME("nos.resource.CalculateDispatchSize")},
+		{NOS_NAME("nos.utilities.CopyResource"), NOS_NAME("nos.resource.CopyResource")},
+		{NOS_NAME("nos.utilities.DeinterlacedBoundedTextureQueue"), NOS_NAME("nos.resource.DeinterlacedBoundedTextureQueue")},
+		{NOS_NAME("nos.utilities.DeinterlacedBufferRing"), NOS_NAME("nos.resource.DeinterlacedBufferRing")},
+		{NOS_NAME("nos.utilities.HostVisibleBufferCopy"), NOS_NAME("nos.resource.HostVisibleBufferCopy")},
+		{NOS_NAME("nos.utilities.RingBuffer"), NOS_NAME("nos.resource.RingBuffer")},
+		{NOS_NAME("nos.utilities.Texture2Buffer"), NOS_NAME("nos.resource.Texture2Buffer")},
+		{NOS_NAME("nos.utilities.TextureProvider"), NOS_NAME("nos.resource.TextureProvider")},
+		{NOS_NAME("nos.utilities.UploadBuffer"), NOS_NAME("nos.resource.UploadBuffer")},
+		{NOS_NAME("nos.utilities.UploadBufferProvider"), NOS_NAME("nos.resource.UploadBufferProvider")},
+		{NOS_NAME("nos.utilities.WaitGPUEvent"), NOS_NAME("nos.sync.WaitGPUEvent")},
+	};
+
+	if (!outFrom)
+	{
+		*outSize = renames.size();
+		return;
+	}
+
+	for (size_t i = 0; i < renames.size(); ++i)
+	{
+		outFrom[i] = renames[i].first;
+		outTo[i] = renames[i].second;
+	}
 }
 
 extern "C"
@@ -199,24 +155,10 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* out)
 {
 	out->ExportNodeFunctions = ExportNodeFunctions;
-	out->GetRenamedTypes = [](nosName* outRenamedFrom, nosName* outRenamedTo, size_t* outSize) {
-		if (!outRenamedFrom)
-		{
-			*outSize = 8;
-			return;
-		}
-		// clang-format off
-		outRenamedFrom[0] = NOS_NAME("nos.fb.ChannelViewerChannels"); outRenamedTo[0] = NOS_NAME("nos.utilities.ChannelViewerChannels");
-		outRenamedFrom[1] = NOS_NAME("nos.fb.ChannelViewerFormats"); outRenamedTo[1] = NOS_NAME("nos.utilities.ChannelViewerFormats");
-		outRenamedFrom[2] = NOS_NAME("nos.fb.GradientKind"); outRenamedTo[2] = NOS_NAME("nos.utilities.GradientKind");
-		outRenamedFrom[3] = NOS_NAME("nos.fb.BlendMode"); outRenamedTo[3] = NOS_NAME("nos.utilities.BlendMode");
-		outRenamedFrom[4] = NOS_NAME("nos.fb.ResizeMethod"); outRenamedTo[4] = NOS_NAME("nos.utilities.ResizeMethod");
-		outRenamedFrom[5] = NOS_NAME("nos.fb.Source"); outRenamedTo[5] = NOS_NAME("nos.utilities.Source");
-		outRenamedFrom[6] = NOS_NAME("nos.fb.Channel"); outRenamedTo[6] = NOS_NAME("nos.utilities.Channel");
-		outRenamedFrom[7] = NOS_NAME("nos.plugin.switcher.TextureSwitcherChannel"); outRenamedTo[7] = NOS_NAME("nos.utilities.TextureSwitcherChannel");
-		// clang-format on
-	};
+	out->GetRenamedTypes = GetRenamedTypes;
+	out->GetRenamedNodeClasses = GetRenamedNodeClasses;
 	return NOS_RESULT_SUCCESS;
 }
 }
-}	
+
+} // namespace nos::utilities

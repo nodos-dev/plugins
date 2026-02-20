@@ -1,0 +1,8 @@
+namespace nos.imageprocessing;
+
+enum ResizeMethod: uint
+{
+    NEAREST = 0,
+    BILINEAR = 1,
+    GAUSSIAN_UNSHARP_MASK = 4,
+}

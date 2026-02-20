@@ -1,0 +1,58 @@
+{
+	"nodes": [
+		{
+			"class_name": "ReduceTexture",
+			"menu_info": {
+				"category": "Image Processing",
+				"display_name": "Reduce Texture",
+				"name_aliases": [
+					"reduce",
+					"sum",
+					"mean",
+					"mse",
+					"statistics"
+				]
+			},
+			"node": {
+				"class_name": "ReduceTexture",
+				"contents_type": "Job",
+				"description": "Computes the sum, mean, and squares of the elements input texture.",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Sum",
+						"type_name": "float",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Mean",
+						"type_name": "float",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "SumOfSquares",
+						"display_name": "Sum of the Squares",
+						"type_name": "float",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "MeanOfSquares",
+						"display_name": "Mean of the Squares",
+						"type_name": "float",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}
