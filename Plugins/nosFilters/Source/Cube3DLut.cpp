@@ -1,7 +1,13 @@
-#include "Common.h"
+#include <Nodos/Plugin.hpp>
 #include <fstream>
 
-namespace nos
+#include <nosSysVulkan/Helpers.hpp>
+
+#include <glm/vec3.hpp>
+
+#include "Names.h"
+
+namespace nos::filters
 {
 
 
@@ -31,7 +37,8 @@ struct Cube3DLUTContext : NodeContext
 
 	std::string NodeStatus;
 
-	void UpdateNodeStatus(const std::string& status, fb::NodeStatusMessageType type) {
+	void UpdateNodeStatus(const std::string& status, fb::NodeStatusMessageType type)
+	{
 
 		if (NodeStatus == status)
 			return;
@@ -42,13 +49,24 @@ struct Cube3DLUTContext : NodeContext
 		flatbuffers::FlatBufferBuilder fbb;
 		msg.push_back(fb::CreateNodeStatusMessageDirect(fbb, NodeStatus.c_str(), type));
 
-		HandleEvent(CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &NodeId, nos::ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
+		HandleEvent(CreateAppEvent(fbb,
+		                           nos::CreatePartialNodeUpdateDirect(fbb,
+		                                                              &NodeId,
+		                                                              nos::ClearFlags::NONE,
+		                                                              0,
+		                                                              0,
+		                                                              0,
+		                                                              0,
+		                                                              0,
+		                                                              0,
+		                                                              &msg)));
 	}
 
 
 	nosResult ExecuteNode(nos::NodeExecuteParams const& params) override
 	{
-		if (!SSBO) {
+		if (!SSBO)
+		{
 			auto cmd = nos::sys::vulkan::BeginCmd(NOS_NAME("No Op"), NodeId);
 
 			nosVulkan->Copy(cmd, params.GetPinObject(NSN_In), params.GetPinObject(NSN_Out), nullptr);
@@ -57,24 +75,27 @@ struct Cube3DLUTContext : NodeContext
 			std::string status = "No LUT Loaded";
 			UpdateNodeStatus(status, fb::NodeStatusMessageType::WARNING);
 		}
-		else {
+		else
+		{
 			std::string status = LoadedLutName;
 			UpdateNodeStatus(status, fb::NodeStatusMessageType::INFO);
 
 			f32 domainGamma = *params.GetPinData<f32>(nos::Name("InputGamma"));
-			f32 rangeGamma  = *params.GetPinData<f32>(nos::Name("OutputGamma"));
+			f32 rangeGamma = *params.GetPinData<f32>(nos::Name("OutputGamma"));
 
 			std::vector<nosShaderBinding> bindings = {
 				nos::sys::vulkan::ShaderTextureBinding(NSN_In, params.GetPinObject(NSN_In), NOS_TEXTURE_FILTER_LINEAR),
-				nos::sys::vulkan::ShaderTextureBinding(NSN_Out, params.GetPinObject(NSN_Out), NOS_TEXTURE_FILTER_LINEAR),
+				nos::sys::vulkan::ShaderTextureBinding(NSN_Out,
+				                                       params.GetPinObject(NSN_Out),
+				                                       NOS_TEXTURE_FILTER_LINEAR),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("Size"), Size),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("Dim"), type),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("LUT"), SSBO),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainScale"),  DomainScale),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainScale"), DomainScale),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainOffset"), DomainOffset),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainGamma"),  domainGamma),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("DomainGamma"), domainGamma),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeGamma"), rangeGamma),
-				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeScale"),  RangeScale),
+				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeScale"), RangeScale),
 				nos::sys::vulkan::ShaderDataBinding(nos::Name("RangeOffset"), RangeOffset),
 			};
 
@@ -113,7 +134,8 @@ struct Cube3DLUTContext : NodeContext
 
 		while (std::getline(ss, line))
 		{
-			if (line.empty() || line.starts_with("#")) continue;
+			if (line.empty() || line.starts_with("#"))
+				continue;
 			std::istringstream ls(line);
 			std::string dump;
 			if (line.starts_with("LUT_3D_SIZE"))
@@ -154,7 +176,6 @@ struct Cube3DLUTContext : NodeContext
 		RangeScale = rangeMax - rangeMin;
 		RangeOffset = rangeMin;
 
-		
 		{
 			SSBO = {};
 			nosResourceInfo info = {
@@ -181,7 +202,8 @@ struct Cube3DLUTContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 		*outFunctionNames = NOS_NAME_STATIC("Load LUT File");
 		*outFunction = [](void* ctx, nosFunctionExecuteParams* params) {
-			const char* path = nos::NodeExecuteParams(params->FunctionNodeExecuteParams).GetPinData<const char*>(nos::Name("LUT File"));
+			const char* path = nos::NodeExecuteParams(params->FunctionNodeExecuteParams).GetPinData<const char*>(
+				nos::Name("LUT File"));
 			return ((Cube3DLUTContext*)ctx)->LoadLUTFile(path);
 		};
 		return NOS_RESULT_SUCCESS;

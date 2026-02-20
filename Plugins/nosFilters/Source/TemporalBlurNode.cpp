@@ -1,8 +1,10 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-#include "Common.h"
+#include "Names.h"
+#include <nosSysVulkan/Helpers.hpp>
+#include <glm/vec2.hpp>
 
-namespace nos
+namespace nos::filters
 {
 
 NOS_REGISTER_NAME(FramesCount);

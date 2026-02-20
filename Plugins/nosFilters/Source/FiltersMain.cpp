@@ -10,15 +10,6 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-namespace nos
-{
-void RegisterBoxBlurNode(nosNodeFunctions* nodeFunctions);
-void RegisterDilateAlphaNode(nosNodeFunctions* nodeFunctions);
-void RegisterDilateByAlphaNode(nosNodeFunctions* nodeFunctions);
-void RegisterCube3DLUTNode(nosNodeFunctions* nodeFunctions);
-void RegisterTemporalBlurNode(nosNodeFunctions* nodeFunctions);
-}
-
 namespace nos::filters
 {
 
@@ -31,6 +22,11 @@ enum class Nodes : size_t
 	TemporalBlur,
 	Count,
 };
+void RegisterBoxBlurNode(nosNodeFunctions* nodeFunctions);
+void RegisterDilateAlphaNode(nosNodeFunctions* nodeFunctions);
+void RegisterDilateByAlphaNode(nosNodeFunctions* nodeFunctions);
+void RegisterCube3DLUTNode(nosNodeFunctions* nodeFunctions);
+void RegisterTemporalBlurNode(nosNodeFunctions* nodeFunctions);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -45,19 +41,19 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 		switch (static_cast<Nodes>(i))
 		{
 		case Nodes::BoxBlur:
-			nos::RegisterBoxBlurNode(node);
+			RegisterBoxBlurNode(node);
 			break;
 		case Nodes::DilateAlpha:
-			nos::RegisterDilateAlphaNode(node);
+			RegisterDilateAlphaNode(node);
 			break;
 		case Nodes::DilateByAlpha:
-			nos::RegisterDilateByAlphaNode(node);
+			RegisterDilateByAlphaNode(node);
 			break;
 		case Nodes::Cube3DLUT:
-			nos::RegisterCube3DLUTNode(node);
+			RegisterCube3DLUTNode(node);
 			break;
 		case Nodes::TemporalBlur:
-			nos::RegisterTemporalBlurNode(node);
+			RegisterTemporalBlurNode(node);
 			break;
 		default:
 			break;

@@ -1,7 +1,8 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-#include "Common.h"
+#include "Names.h"
+#include <nosSysVulkan/Helpers.hpp>
 
-namespace nos
+namespace nos::filters
 {
 
 NOS_REGISTER_NAME(BlurSize);	  // vec2 shader parameter
