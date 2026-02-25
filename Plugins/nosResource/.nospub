@@ -4,6 +4,7 @@
         "*.nosplugin",
         "Include/**",
         "Assets/**",
+        "Shaders/**",
         "Binaries/*.{dll,dylib,so}",
         "Types/**",
         "Nodes/*.nosnode"
