@@ -28,6 +28,3 @@
 [submodule "Plugins/nosWebRTC/Source/ssl-cert"]
 	path = Plugins/nosWebRTC/Source/ssl-cert
 	url = https://github.com/mediaz/ssl-cert.git
-[submodule "Plugins/nosUtilities/External/stb"]
-	path = Plugins/nosUtilities/External/stb
-	url = https://github.com/nothings/stb.git
