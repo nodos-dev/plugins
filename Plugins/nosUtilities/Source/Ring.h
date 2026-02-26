@@ -61,23 +61,9 @@ struct ResourceInterface {
 	virtual bool CheckNewResource(nosName updateName, nosBuffer newVal, std::optional<nos::Buffer> oldVal) = 0;
 	virtual bool BeginCopyFrom(ResourceBase* r, const nosBuffer& pinData, nos::Buffer& outPinVal) = 0;
 	virtual void OnRepeatPinValue(nosCopyInfo* cpy) {}
-	virtual std::pair<uint32_t, std::string> GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const { return {ringSize, ""}; }
+	virtual uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const { return ringSize; }
 	virtual void OnPathStart() {}
 };
-
-inline std::pair<uint32_t, std::string> GetRequiredRingSizeForFieldType(nosTextureFieldType fieldType, uint32_t ringSize)
-{
-	std::stringstream message;
-	if (vkss::IsTextureFieldTypeInterlaced(fieldType))
-	{
-		// Because ring delays by "size - 1" and what comes in should come out from the ring
-		auto preAdjustedSize = ringSize;
-		ringSize = ringSize | 0b1;
-		if (preAdjustedSize != ringSize)
-			message << "Effective ring size was adjusted from " << preAdjustedSize << " to " << ringSize << "\nto maintain full-frame interlaced output delays"; 
-	}
-	return {ringSize, message.str()};
-}
 
 struct GPUTextureResource : ResourceInterface
 {
@@ -275,13 +261,15 @@ struct GPUTextureResource : ResourceInterface
 		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(textureInfo));
 	}
 
-	std::pair<uint32_t, std::string> GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
 	{
-		std::stringstream message;
 		if (!inputPinData)
-			return {ringSize, message.str()};
+			return ringSize;
 		auto input = vkss::DeserializeTextureInfo(inputPinData);
-		return GetRequiredRingSizeForFieldType(input.Info.Texture.FieldType, ringSize);
+		if (vkss::IsTextureFieldTypeInterlaced(input.Info.Texture.FieldType))
+			ringSize =
+				ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
+		return ringSize;
 	}
 
 	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
@@ -491,13 +479,14 @@ struct GPUBufferResource : ResourceInterface {
 		nosEngine.SetPinValue(cpy->ID, nos::Buffer::From(*outputBuffer));
 	}
 
-	std::pair<uint32_t, std::string> GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
+	uint32_t GetRequiredRingSize(void* inputPinData, uint32_t ringSize) const override
 	{
-		std::stringstream message;
 		if (!inputPinData)
-			return {ringSize, message.str()};
+			return ringSize;
 		auto input = static_cast<sys::vulkan::Buffer*>(inputPinData);
-		return GetRequiredRingSizeForFieldType((nosTextureFieldType)input->field_type(), ringSize);
+		if (vkss::IsTextureFieldTypeInterlaced((nosTextureFieldType)input->field_type()))
+			ringSize = ringSize | 0b1; // Because ring delays by "size - 1" and what comes in should come out from the ring
+		return ringSize;
 	}
 	nosResult SkipExecute(nosNodeExecuteParams* executeParams) override
 	{
@@ -780,45 +769,6 @@ struct RingNodeBase : NodeContext
 	std::atomic_bool RepeatWhenFilling = false;
 	TypeInfo TypeInfo;
 
-	enum class Status
-	{
-		Ok,
-		EffectiveRingSizeAdjusted,
-	} CurrentStatus = Status::Ok;
-	std::string CurrentStatusMessage;
-
-	void SetStatus(Status newStatus, std::string message = "")
-	{
-		if (CurrentStatus == newStatus)
-		{
-			if (newStatus == Status::EffectiveRingSizeAdjusted && CurrentStatusMessage != message)
-			{
-				CurrentStatusMessage = std::move(message);
-				ClearNodeStatusMessages();
-				SetNodeStatusMessage(CurrentStatusMessage, fb::NodeStatusMessageType::WARNING);
-			}
-			return;
-		}
-
-		CurrentStatus = newStatus;
-		CurrentStatusMessage = std::move(message);
-		switch (CurrentStatus)
-		{
-		case Status::Ok: {
-			CurrentStatusMessage.clear();
-			ClearNodeStatusMessages();
-			return;
-		}
-		case Status::EffectiveRingSizeAdjusted: {
-			ClearNodeStatusMessages();
-			SetNodeStatusMessage(CurrentStatusMessage,
-				fb::NodeStatusMessageType::WARNING);
-			return;
-		}
-		default: return;
-		}
-	}
-
 	void RequestRingResize(uint32_t size)
 	{
 		if (size == 0)
@@ -953,20 +903,11 @@ struct RingNodeBase : NodeContext
 			return NOS_RESULT_FAILED;
 		}
 		
-		uint32_t requestedSize = *pins.GetPinData<uint32_t>(NSN_Size);
-
-		auto [requiredSize, message] = Ring->ResInterface->GetRequiredRingSize(input, requestedSize);
-		bool effectiveSizeAdjusted = requiredSize != requestedSize;
-		if (effectiveSizeAdjusted)
-			SetStatus(Status::EffectiveRingSizeAdjusted, message);
-		else
-			SetStatus(Status::Ok);
-
+		auto requiredSize = Ring->ResInterface->GetRequiredRingSize(input, Ring->Size);
 		if (Ring->Size != requiredSize)
 		{
+			nosEngine.LogW("Required ring size for this data type is %lu, will resize it", requiredSize);
 			RequestRingResize(requiredSize);
-			if (effectiveSizeAdjusted)
-				nosEngine.LogW("%s", message.c_str());
 			return NOS_RESULT_FAILED;
 		}
 
