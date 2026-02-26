@@ -20,8 +20,17 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
+typedef struct nosEventGroupHealth
+{
+	/// Indicates that the events in this group are consistently drifting apart from each other.
+	nosBool DriftDetected;
+	/// Indicates the maximum time difference between event firings in this group.
+	uint64_t MaxEventTimeDifferenceNs;
+} nosEventGroupHealth;
+
 typedef nosResult (*nosResetEventPfn)(void* userData);
 typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
+typedef void (*nosNotifyEventGroupHealthPfn)(void* userData, const nosEventGroupHealth* status);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
@@ -35,6 +44,7 @@ typedef struct nosRegisterEventParams {
 	void* UserData; /// User data to pass to the wait function.
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
+	nosNotifyEventGroupHealthPfn NotifyHealthFn; /// Optional callback to subscribe to the health status of event group.
 	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
 } nosRegisterEventParams;
 
@@ -56,6 +66,9 @@ typedef struct nosSyncSubsystem
 	/// Waits until all registered waiters agree on the same event timestamp,
 	/// indicating they're all synchronized on the same event occurrence.
 	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount);
+	
+	/// Notifies the subsystem that an event has occurred, allowing it check event group health.
+	nosResult (NOSAPI_CALL* NotifyEventOccured)(uint64_t eventId);
 
 	nosResult (NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
 	/// 
@@ -66,8 +79,8 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 3
-#define NOS_SYNC_VERSION_MINOR 1
+#define NOS_SYNC_VERSION_MAJOR 4
+#define NOS_SYNC_VERSION_MINOR 0
 
 extern struct nosModuleInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;
