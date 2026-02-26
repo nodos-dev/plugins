@@ -17,6 +17,8 @@ struct SlotBase
 	SlotBase(nosBuffer const& buf) : Buffer(buf) {}
 	virtual void CopyFrom(nosBuffer const& buf, uuid const& nodeId) = 0;
 	virtual bool IsSlotCompatible(nosBuffer const& buf) const = 0;
+	virtual uint64_t GetPhaseCount() const { return 1; }
+	virtual std::optional<std::string> HasPhaseCountDelayMismatchWarning(uint64_t delay) const { return std::nullopt; }
 };
 
 struct DelayQueue {
@@ -147,6 +149,7 @@ requires std::is_same_v<T, nosTextureInfo> || std::is_same_v<T, nosBufferInfo>
 struct ResourceSlot : SlotBase
 {
 	vkss::Resource Res;
+	nosTextureFieldType FieldType{};
 	ResourceSlot(nosBuffer const& buf)
 		: SlotBase(buf),
 		  Res(*vkss::Resource::Create(
@@ -169,7 +172,6 @@ struct ResourceSlot : SlotBase
 
 	void CopyFrom(nosBuffer const& other, uuid const& nodeId) override
 	{
-		// TODO: Interlaced.
 		nosCmd cmd{};
 		nosCmdBeginParams beginParams{
 			.Name = NOS_NAME_STATIC("Delay Copy"),
@@ -178,9 +180,15 @@ struct ResourceSlot : SlotBase
 		};
 		nosResourceShareInfo src{};
 		if constexpr (std::is_same_v<T, nosBufferInfo>)
+		{
 			src = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(other.Data));
+			FieldType = src.Info.Buffer.FieldType;
+		}
 		if constexpr (std::is_same_v<T, nosTextureInfo>)
+		{
 			src = vkss::DeserializeTextureInfo(other.Data);
+			FieldType = src.Info.Texture.FieldType;
+		}
 		nosVulkan->Begin(&beginParams);
 		nosVulkan->Copy(cmd, &src, &Res, nullptr);
 		nosVulkan->End(cmd, nullptr);
@@ -209,12 +217,32 @@ struct ResourceSlot : SlotBase
 		}
 		return true;
 	}
+
+	uint64_t GetPhaseCount() const override
+	{
+		// For 1.3: An auxiliary field type used to avoid continuous path restarts caused by field type mismatches in RingBuffer.
+		//          The delay node will report a warning but won't set correct output field type because of this.
+		return vkss::IsTextureFieldTypeInterlaced(FieldType) ? 2 : 1;
+	}
+
+	std::optional<std::string> HasPhaseCountDelayMismatchWarning(uint64_t delay) const override
+	{
+		if (GetPhaseCount() <= 1 || (delay % GetPhaseCount() == 0))
+			return std::nullopt;
+		return "WARNING:\n\tOdd delay values cause field mismatch\n\ton interlaced signals. Use even numbers only.";
+	}
 };
 
 struct DelayNode : NodeContext
 {
     nosName TypeName = NSN_TypeNameGeneric;
 	DelayQueue Queue;
+
+	enum class Status
+	{
+		Ok,
+		WarnDelayIsNotMultipleOfPhaseCount
+	} CurrentStatus = Status::Ok;
 
 	DelayNode(nosFbNodePtr node) : NodeContext(node), Queue(0)
 	{
@@ -253,6 +281,27 @@ struct DelayNode : NodeContext
 		}
 	}
 
+	void SetStatus(Status newStatus, std::optional<std::string> warningMsg = std::nullopt)
+	{
+		if (CurrentStatus == newStatus)
+			return;
+		CurrentStatus = newStatus;
+		switch (CurrentStatus)
+		{
+		case Status::Ok: {
+			ClearNodeStatusMessages();
+			return;
+		}
+		case Status::WarnDelayIsNotMultipleOfPhaseCount: {
+			SetNodeStatusMessage(warningMsg.value_or("WARNING:\n\tDelay value is not\n\ta multiple of input signal phase "
+													 "count.\n\tThis may cause phase mismatch problems downstream."),
+								 fb::NodeStatusMessageType::WARNING);
+			return;
+		}
+		default: return;
+		}
+	}
+
 	void SetType(nos::Name typeName)
 	{
 		TypeName = typeName;
@@ -271,6 +320,7 @@ struct DelayNode : NodeContext
 		if (0 == delay)
 		{
 			Queue.Clear();
+			SetStatus(Status::Ok);
 			SetPinValue(NSN_Output, inputBuffer);
 			return NOS_RESULT_SUCCESS;
 		}
@@ -295,6 +345,10 @@ struct DelayNode : NodeContext
 		if (auto pushSlot = Queue.BeginPush())
 		{
 			pushSlot->CopyFrom(inputBuffer, NodeId);
+			if (auto warningMsg = pushSlot->HasPhaseCountDelayMismatchWarning(delay))
+				SetStatus(Status::WarnDelayIsNotMultipleOfPhaseCount, warningMsg);
+			else
+				SetStatus(Status::Ok);
 			Queue.EndPush(*pushSlot);
 		}
 		return NOS_RESULT_SUCCESS;
