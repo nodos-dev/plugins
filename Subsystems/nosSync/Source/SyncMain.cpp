@@ -58,6 +58,13 @@ nosVec2u GetSmallerDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
 	return (frac1 < frac2) ? deltaSec1 : deltaSec2; // Return the smaller delta-seconds based on the fraction
 }
 
+nosVec2u GetLargerDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
+{
+	double frac1 = static_cast<double>(deltaSec1.x) / deltaSec1.y;
+	double frac2 = static_cast<double>(deltaSec2.x) / deltaSec2.y;
+	return (frac1 > frac2) ? deltaSec1 : deltaSec2; // Return the larger delta-seconds based on the fraction
+}
+
 double GetIntervalFromDeltaSecs(nosVec2u deltaSecs)
 {
 	if (deltaSecs.y == 0)
@@ -156,11 +163,20 @@ struct EventGroup
 	nosVec2u GcdDeltaSeconds = { 0, 0 }; // Greatest common divisor of delta-seconds of all events in this group, used for health checking
 };
 
+std::string GetEventGroupString(Ref<Event> event, Ref<EventGroup> eventGroup, nosVec2u smallestDeltaSecs)
+{
+	char eventGroupStr[256];
+	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu:%lu:(%lu/%lu)]", event->PathGroupId, eventGroup->Id, smallestDeltaSecs.x, smallestDeltaSecs.y);
+	return std::string(eventGroupStr);
+}
+
 struct EventSync
 {
 	std::shared_mutex Mutex;
 	uint64_t NextEventId = 1;
 	std::unordered_map<uint32_t, EventGroup> Groups;
+	
+	std::unordered_map<uint64_t, std::vector<uint64_t>> AlignedTimestamps; // Event Id x List of timestamps when events occurred (aligned)
 
 	std::variant<std::pair<Ref<Event>, Ref<EventGroup>>, nosResult> GetEvent(uint64_t eventId)
 	{
@@ -344,8 +360,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		return NOS_RESULT_SUCCESS; // Already waited for consensus
 	}
 
-	char eventGroupStr[256];
-	std::snprintf(eventGroupStr, sizeof(eventGroupStr), "[%llu:%lu:(%lu/%lu)]", event->PathGroupId, eventGroup->Id, smallestDeltaSecs.x, smallestDeltaSecs.y);
+	auto eventGroupStr = GetEventGroupString(event, eventGroup, smallestDeltaSecs);
 
 	// Diagnosis code, randomize the order of events to treat everyone equally
 #if RANDOMIZE_EVENT_ORDER
@@ -385,7 +400,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	if (NOS_SYNC_NO_SYNC_EVENT_GROUP_ID != eventGroup->Id)
 	{
-		nosEngine.LogD("Resetting events of group %s", eventGroupStr);
+		nosEngine.LogD("Resetting events of group %s", eventGroupStr.c_str());
 
 		for (const auto& [eventId, event] : events)
 		{
@@ -393,20 +408,20 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			if (res == NOS_RESULT_FAILED)
 			{
 				// Error when resetting, consensus cannot be achieved
-				nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr);
+				nosEngine.LogE("Failed to reset event %llu in group %s", eventId, eventGroupStr.c_str());
 				return res;
 			}
 		}
 	}
 
-	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr);
+	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr.c_str());
 	
 	uint64_t lastConsensusTimestamp = 0;
 	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
 	if (events.empty())
 	{
-		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
+		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr.c_str());
 		return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
 	}
 
@@ -419,7 +434,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		if (waitRes.Result == NOS_RESULT_FAILED)
 		{
 			// Error when waiting for an event, consensus cannot be achieved
-			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr);
+			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr.c_str());
 			return waitRes.Result;
 		}
 		eventTimestamps[event] = waitRes.Timestamp;
@@ -434,7 +449,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		auto frac = currDiffFromStartNs / eventIntervalNs;
 		if (frac >= (1.0 + eventGroup->Timeout))
 		{
-			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr);
+			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr.c_str());
 			return NOS_RESULT_TIMEOUT; // Timeout reached
 		}
 		
@@ -455,7 +470,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
-			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr, formatted.c_str(), (diffNs / eventIntervalNs));
+			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr.c_str(), formatted.c_str(), (diffNs / eventIntervalNs));
 			*outTimestamp = event->LastWaitedTimestamp;
 			*outCount = event->OccurenceCountAtSync;
 			return NOS_RESULT_SUCCESS;
@@ -478,7 +493,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 				auto maxTime =
 					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(maxTs));
 				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
-							   eventGroupStr,
+							   eventGroupStr.c_str(),
 							   event->Id,
 							   std::format("{:%H:%M:%S}", curTime).c_str(),
 							   std::format("{:%H:%M:%S}", maxTime).c_str());
@@ -505,39 +520,67 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 	auto& [event, eventGroup] = std::get<std::pair<Ref<Event>, Ref<EventGroup>>>(eventRes);
 	event->LastOccurrences.push_back(now);
 	auto syncedEvents = GEventSync.GetSyncedEvents(event);
-	uint64_t maxEventTimeDifferenceNs = 0;
-	std::deque<uint64_t> thisFrame;
-	uint32_t remainingEventsForThisCycle = 0;
-	std::vector<Event*> eventsInPathGroup;
-	for (auto& [eid, e] : eventGroup->Events)
-		if (e.PathGroupId == event->PathGroupId)
-		{
-			eventsInPathGroup.push_back(&e);
-			if (e.LastOccurrences.empty())
-				++remainingEventsForThisCycle;
-		}
-	if (remainingEventsForThisCycle == 0)
+	// For synced events, how many we need to wait for that specific event to consider the cycle complete.
+	std::unordered_map<uint64_t, uint32_t> multipliers;
+	nosVec2u smallestDeltaSecs {UINT32_MAX, 1};
+	for (const auto& [eid, ev] : syncedEvents)
+		smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, ev->DeltaSeconds);
+	for (const auto& [eid, ev] : syncedEvents)
 	{
-		for (auto& e : eventsInPathGroup)
+		// How many times this event should occur within the time window defined by the smallest delta-seconds to be considered in consensus for this cycle.
+		multipliers[eid] = (ev->DeltaSeconds.y == 0 || smallestDeltaSecs.y == 0)
+			? 1 
+			: (smallestDeltaSecs.x * ev->DeltaSeconds.y) / (smallestDeltaSecs.y * ev->DeltaSeconds.x);
+	}
+	uint32_t fulfilledCount = 0;
+	for (const auto& [eid, ev] : syncedEvents)
+	{
+		if (ev->LastOccurrences.size() >= multipliers[eid])
+			fulfilledCount++;
+	}
+	if (fulfilledCount == syncedEvents.size()) // Everyone is ready.
+	{
+		uint64_t maxEventTimeDifferenceNs = 0;
+		std::unordered_map<uint64_t, uint64_t> timestamps;
+		for (const auto& [eid, ev] : syncedEvents)
 		{
-			if (!e->LastOccurrences.empty())
+			uint32_t rem = multipliers[eid];
+			while (rem > 0 && !ev->LastOccurrences.empty())
 			{
-				thisFrame.push_back(e->LastOccurrences.front());
-				e->LastOccurrences.pop_front();
+				auto ts = ev->LastOccurrences.front();
+				ev->LastOccurrences.pop_front();
+				if (rem == 1)
+					timestamps[eid] = ts;
+				rem--;
 			}
 		}
-		for (auto& t : thisFrame)
-			for (auto& ot : thisFrame)
-				maxEventTimeDifferenceNs = std::max(maxEventTimeDifferenceNs, (t > ot) ? (t - ot) : (ot - t));
-		for (auto& e : eventsInPathGroup)
+		// Check the maximum time difference between the events that are considered in consensus for this cycle, and notify the health status if supported.
+		for (const auto& [eid, ts] : timestamps)
 		{
-			if (e->PfnNotifyEventGroupHealth)
+			auto diff = (ts > event->LastWaitedTimestamp) ? (ts - event->LastWaitedTimestamp) : (event->LastWaitedTimestamp - ts);
+			maxEventTimeDifferenceNs = std::max(maxEventTimeDifferenceNs, diff);
+			// Moving average of timestamps
+			GEventSync.AlignedTimestamps[eid].push_back(ts);
+			if (GEventSync.AlignedTimestamps[eid].size() > 10)
+				GEventSync.AlignedTimestamps[eid].erase(GEventSync.AlignedTimestamps[eid].begin());
+		}
+		nosBool driftDetected = NOS_FALSE;
+		for (const auto& [eid, alignedTimestamps] : GEventSync.AlignedTimestamps)
+		{
+			if (alignedTimestamps.size() < 2)
+				continue;
+			// To check drift, calculate whether any of the alignedTimestamps are consistently moving apart from other events' alignedTimestamps over time.
+			
+		}
+		for (const auto& [eid, ev] : syncedEvents)
+		{
+			if (ev->PfnNotifyEventGroupHealth)
 			{
 				nosEventGroupHealth healthInfo{
 					.DriftDetected = NOS_FALSE, // TODO.
 					.MaxEventTimeDifferenceNs = maxEventTimeDifferenceNs
 				};
-				e->PfnNotifyEventGroupHealth(e->UserData, &healthInfo);
+				ev->PfnNotifyEventGroupHealth(ev->UserData, &healthInfo);
 			}
 		}
 	}
