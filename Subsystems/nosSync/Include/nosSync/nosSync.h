@@ -27,6 +27,8 @@ typedef struct nosEventGroupHealth
 	/// If drift is detected, indicates how many events will be lost per hour at the current
 	/// drift rate.
 	double DriftsPerHour;
+	/// Path-group contains events with mixed sources.
+	nosBool AreSyncSourcesMixed;
 	/// Indicates the maximum time difference between event firings in this group.
 	uint64_t MaxEventTimeDifferenceNs;
 } nosEventGroupHealth;
@@ -39,9 +41,6 @@ typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
 	double Timeout; /// Number of frames to wait before timing out.
 	double ConsensusTolerance; /// Fraction of an event time to allow during consensus.
-	/// Events per hour to allow for drift before marking the group as unhealthy. This is calculted
-	/// from the smallest delta-seconds of the events in the group (which are aligned).
-	double DriftTolerance; 
 } nosRegisterEventGroupParams;
 
 typedef struct nosRegisterEventParams {
@@ -51,6 +50,11 @@ typedef struct nosRegisterEventParams {
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
 	nosNotifyEventGroupHealthPfn NotifyHealthFn; /// Optional callback to subscribe to the health status of event group.
+	/// Events per hour to allow for drift before marking the group as unhealthy. This is calculted
+	/// from the smallest delta-seconds of the events in the group (which are aligned).
+	double DriftTolerance;
+	/// Whether the event is synchronized by an external source.
+	nosBool IsExternallySynchronized;
 	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
 } nosRegisterEventParams;
 
