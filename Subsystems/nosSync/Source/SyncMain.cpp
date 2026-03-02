@@ -108,11 +108,13 @@ struct Event
 	nosNotifyEventGroupHealthPfn PfnNotifyEventGroupHealth = nullptr; // Optional callback for notifying about event group health
 	void* UserData;
 	nosVec2u DeltaSeconds = { 0, 0 }; // Time units in delta-seconds (x, y) for this event
-	uint64_t LastWaitedTimestamp = 0; // Last timestamp when this event was waited on
+	uint64_t LastAlignedWaitedTimestamp = 0; // Last timestamp when this event was waited on
 	uint64_t OccurenceCountAtSync = 0; // Number of times this event was fired when consensus achieved
 	bool HasRequestedConsensus = false; // Whether the caller has requested consensus
 
 	std::deque<uint64_t> LastOccurrences; // Timestamps of recent waits for this event, used for health checking
+	// List of timestamps when events occurred (aligned, meaning deltas only when all events in this group happen to fire)
+	std::deque<uint64_t> AlignedDeltas;
 	
 	WaitResult Wait(void* userData)
 	{
@@ -125,7 +127,7 @@ struct Event
 			if (res.Result == NOS_RESULT_SUCCESS)
 			{
 				auto ts = nowNs - outRes.TimeSinceLastEventNs; // Timestamp when the event was last waited on
-				LastWaitedTimestamp = ts;
+				LastAlignedWaitedTimestamp = ts;
 				OccurenceCountAtSync = outRes.EventCount;
 				res.Timestamp = ts;
 			}
@@ -145,7 +147,9 @@ struct EventGroup
 {
 	uint32_t Id;
 	double Timeout; // Maximum time to wait for consensus in number of time units (delta-seconds)
-	double Tolerance; // Fraction of the event time to allow for consensus
+	double ConsensusTolerance; // Fraction of the event time to allow for consensus
+	double DriftTolerance;	   // Events per hour to allow for drift before marking the group as unhealthy
+
 	std::unordered_map<uint64_t, Event> Events;
 	void AddEvent(Event&& event)
 	{
@@ -195,8 +199,6 @@ struct EventSync
 	std::shared_mutex Mutex;
 	uint64_t NextEventId = 1;
 	std::unordered_map<uint32_t, EventGroup> Groups;
-	
-	std::unordered_map<uint64_t, std::vector<uint64_t>> AlignedTimestamps; // Event Id x List of timestamps when events occurred (aligned)
 
 	std::variant<std::pair<Ref<Event>, Ref<EventGroup>>, nosResult> GetEvent(uint64_t eventId)
 	{
@@ -270,7 +272,8 @@ nosResult NOSAPI_CALL RegisterEventGroup(const nosRegisterEventGroupParams* para
 	GEventSync.Groups[params->Id] = {
 		.Id = params->Id,
 		.Timeout = params->Timeout,
-		.Tolerance = params->Tolerance
+		.ConsensusTolerance = params->ConsensusTolerance,
+		.DriftTolerance = params->DriftTolerance
 	};
 	return NOS_RESULT_SUCCESS;
 }
@@ -323,7 +326,9 @@ nosResult NOSAPI_CALL UnregisterEvent(uint64_t eventId)
 		for (auto eit = group.Events.begin(); eit != group.Events.end(); )
 		{
 			if (eit->first == eventId)
+			{
 				eit = group.Events.erase(eit);
+			}
 			else
 				++eit;
 		}
@@ -374,7 +379,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	if (!shouldWait)
 	{
 		if (outTimestamp)
-			*outTimestamp = event->LastWaitedTimestamp;
+			*outTimestamp = event->LastAlignedWaitedTimestamp;
 		if (outCount)
 			*outCount = event->OccurenceCountAtSync;
 		return NOS_RESULT_SUCCESS; // Already waited for consensus
@@ -484,14 +489,14 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 		// Check if consensus is achieved
 		auto diffNs = (maxTs - minTs);
-		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
+		if ((diffNs / eventIntervalNs <= eventGroup->ConsensusTolerance))
 		{
 			lastConsensusTimestamp = maxTs;
 			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 				std::chrono::nanoseconds(lastConsensusTimestamp));
 			std::string formatted = std::format("{:%H:%M:%S}", time);
 			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr.c_str(), formatted.c_str(), (diffNs / eventIntervalNs));
-			*outTimestamp = event->LastWaitedTimestamp;
+			*outTimestamp = event->LastAlignedWaitedTimestamp;
 			*outCount = event->OccurenceCountAtSync;
 			return NOS_RESULT_SUCCESS;
 		}
@@ -503,7 +508,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			// If the the event's timestamp is already within the tolarence compared to the maximum timestamp, skip it
 			auto ts = eventTimestamps[event];
 			auto difFrac = (maxTs - ts) / eventIntervalNs;
-			if (difFrac <= eventGroup->Tolerance)
+			if (difFrac <= eventGroup->ConsensusTolerance)
 				continue;
 
 			// Log the event that is behind
@@ -538,6 +543,8 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 	if (std::holds_alternative<nosResult>(eventRes))
 		return std::get<nosResult>(eventRes); // Event not found
 	auto& [event, eventGroup] = std::get<std::pair<Ref<Event>, Ref<EventGroup>>>(eventRes);
+	if (eventGroup->Id == NOS_SYNC_NO_SYNC_EVENT_GROUP_ID)
+		return NOS_RESULT_SUCCESS;
 	event->LastOccurrences.push_back(now);
 	auto syncedEvents = GEventSync.GetSyncedEvents(event);
 	// For synced events, how many we need to wait for that specific event to consider the cycle complete.
@@ -560,6 +567,7 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 	}
 	if (fulfilledCount == syncedEvents.size()) // Everyone is ready.
 	{
+		const size_t DRIFT_DETECTION_MOVING_AVERAGE_WINDOW = std::max(10 * uint64_t(1.0f / GetIntervalFromDeltaSecs(smallestDeltaSecs)), 10ull);
 		uint64_t maxEventTimeDifferenceNs = 0;
 		std::unordered_map<uint64_t, uint64_t> timestamps;
 		for (const auto& [eid, ev] : syncedEvents)
@@ -575,29 +583,73 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 			}
 		}
 		// Check the maximum time difference between the events that are considered in consensus for this cycle, and notify the health status if supported.
+		std::unordered_map<uint64_t, double> movingAverages;
 		for (const auto& [eid, ts] : timestamps)
 		{
-			auto diff = (ts > event->LastWaitedTimestamp) ? (ts - event->LastWaitedTimestamp) : (event->LastWaitedTimestamp - ts);
+			auto& e = eventGroup->Events[eid];
+			auto diff = ts - e.LastAlignedWaitedTimestamp;
+			e.LastAlignedWaitedTimestamp = ts;
 			maxEventTimeDifferenceNs = std::max(maxEventTimeDifferenceNs, diff);
 			// Moving average of timestamps
-			GEventSync.AlignedTimestamps[eid].push_back(ts);
-			if (GEventSync.AlignedTimestamps[eid].size() > 10)
-				GEventSync.AlignedTimestamps[eid].erase(GEventSync.AlignedTimestamps[eid].begin());
-		}
-		nosBool driftDetected = NOS_FALSE;
-		for (const auto& [eid, alignedTimestamps] : GEventSync.AlignedTimestamps)
-		{
-			if (alignedTimestamps.size() < 2)
+			auto& alignedDeltas = e.AlignedDeltas;
+			alignedDeltas.push_back(diff);
+			if (alignedDeltas.size() > DRIFT_DETECTION_MOVING_AVERAGE_WINDOW)
+				alignedDeltas.pop_front();
+			if (alignedDeltas.size() < DRIFT_DETECTION_MOVING_AVERAGE_WINDOW)
 				continue;
-			// To check drift, calculate whether any of the alignedTimestamps are consistently moving apart from other events' alignedTimestamps over time.
+			// To check drift, calculate whether any of the alignedDeltas are consistently moving apart from other events' alignedDeltas over time.
+			uint64_t sum = std::accumulate(alignedDeltas.begin(), alignedDeltas.end(), uint64_t(0));
+			double movingAverage = static_cast<double>(sum) / alignedDeltas.size();
+			movingAverages[eid] = movingAverage;
+		}
+		// Detect drift based on the variance/spread of the moving averages
+		nosBool driftDetected = NOS_FALSE;
+		double driftsPerHour = 0;
+		if (movingAverages.size() > 1)
+		{
+			double minAvg = std::numeric_limits<double>::max();
+			double maxAvg = std::numeric_limits<double>::lowest();
+
+			for (const auto& [eid, avg] : movingAverages)
+			{
+				minAvg = std::min(minAvg, avg);
+				maxAvg = std::max(maxAvg, avg);
+			}
+
+			// Calculate the physical threshold for drift based on the smallest delta seconds
+			// Converting to nanoseconds to match the timestamp scale
+			double smallestPeriodNs = (static_cast<double>(smallestDeltaSecs.x) / smallestDeltaSecs.y) * 1e9;
+          
+			// Drift tolerance: e.g., 0.01% of the smallest tick period. 
+			// You can expose this as a configurable parameter if needed.
+			auto intervalSecs = GetIntervalFromDeltaSecs(smallestDeltaSecs);
+			auto eventsPerSec = 1.0 / intervalSecs;
+			auto eventsPerHour = eventsPerSec * 3600.0;
+			// Allow at most 1 frame time of drift per hour, for example.
+			double driftToleranceNs = (1.0 / ((1.0 / eventGroup->DriftTolerance) * eventsPerHour)) * 1e9;
+
+			double spreadPerEvent = maxAvg - minAvg;
+			driftsPerHour = (spreadPerEvent / 1e9) * eventsPerHour;
+
+			char watchKey[256];
+			std::snprintf(watchKey, sizeof(watchKey), "%s: Event Drift Per Hour", GetEventGroupString(event, eventGroup, smallestDeltaSecs).c_str());
+
+			char driftStr[256];
+			std::snprintf(driftStr, sizeof(driftStr), "%f", driftsPerHour);
 			
+			nosEngine.WatchLog(watchKey, driftStr);
+			if (spreadPerEvent > driftToleranceNs)
+			{
+				driftDetected = NOS_TRUE;
+			}
 		}
 		for (const auto& [eid, ev] : syncedEvents)
 		{
 			if (ev->PfnNotifyEventGroupHealth)
 			{
 				nosEventGroupHealth healthInfo{
-					.DriftDetected = NOS_FALSE, // TODO.
+					.DriftDetected = driftDetected,
+					.DriftsPerHour = driftsPerHour,
 					.MaxEventTimeDifferenceNs = maxEventTimeDifferenceNs
 				};
 				ev->PfnNotifyEventGroupHealth(ev->UserData, &healthInfo);
@@ -632,13 +684,16 @@ nosResult NOSAPI_CALL Initialize()
 	nosRegisterEventGroupParams defaultGroup{
 		.Id = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
 		.Timeout = 10.0,	// Allow 10 frames for sync
-		.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
+		.ConsensusTolerance = 0.49f, // Allow a fraction frame time for tolerance
+		.DriftTolerance =
+			1.0 / 24.0, // Allow at most 1 frame time of drift per day by default, can be configured per group
 	};
 	RegisterEventGroup(&defaultGroup);
 	nosRegisterEventGroupParams noSyncGroup{
 		.Id = NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
 		.Timeout = 0.0,	// Don't care
-		.Tolerance = 0.0f, // Don't care
+		.ConsensusTolerance = 0.0, // Don't care
+		.DriftTolerance = 0.0 // Don't care
 	};
 	RegisterEventGroup(&noSyncGroup);
 	return NOS_RESULT_SUCCESS;

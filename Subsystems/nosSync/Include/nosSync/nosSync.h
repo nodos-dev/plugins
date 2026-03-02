@@ -24,6 +24,9 @@ typedef struct nosEventGroupHealth
 {
 	/// Indicates that the events in this group are consistently drifting apart from each other.
 	nosBool DriftDetected;
+	/// If drift is detected, indicates how many events will be lost per hour at the current
+	/// drift rate.
+	double DriftsPerHour;
 	/// Indicates the maximum time difference between event firings in this group.
 	uint64_t MaxEventTimeDifferenceNs;
 } nosEventGroupHealth;
@@ -35,7 +38,10 @@ typedef void (*nosNotifyEventGroupHealthPfn)(void* userData, const nosEventGroup
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
 	double Timeout; /// Number of frames to wait before timing out.
-	double Tolerance; /// Fraction of an event time to allow during consensus.
+	double ConsensusTolerance; /// Fraction of an event time to allow during consensus.
+	/// Events per hour to allow for drift before marking the group as unhealthy. This is calculted
+	/// from the smallest delta-seconds of the events in the group (which are aligned).
+	double DriftTolerance; 
 } nosRegisterEventGroupParams;
 
 typedef struct nosRegisterEventParams {
