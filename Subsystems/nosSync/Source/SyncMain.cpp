@@ -24,46 +24,51 @@ uint64_t NowNs()
 	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
-nosVec2u GetLcmDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
+// Helper to compare two rational time steps (a/b < c/d) using cross-multiplication
+static int CompareDeltaSeconds(nosVec2u d1, nosVec2u d2)
 {
-	if (deltaSec1.y == 0 || deltaSec2.y == 0)
-		return { 0, 0 }; // Cannot compute LCM if any of the delta-seconds is zero
-	auto lcmx = std::lcm(deltaSec1.x, deltaSec2.x);
-	auto lcmy = std::lcm(deltaSec1.y, deltaSec2.y);
-	return { lcmx, lcmy };
+	if (d1.y == 0 || d2.y == 0)
+		return 0;
+	uint64_t left = static_cast<uint64_t>(d1.x) * d2.y;
+	uint64_t right = static_cast<uint64_t>(d2.x) * d1.y;
+	return (left < right) ? -1 : (left > right ? 1 : 0);
 }
 
-nosVec2u GetGcdDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
+nosVec2u GetLcmDeltaSeconds(nosVec2u d1, nosVec2u d2)
 {
-	if (deltaSec1.y == 0 || deltaSec2.y == 0)
-		return { 0, 0 }; // Cannot compute GCD if any of the delta-seconds is zero
-	auto gcdx = std::gcd(deltaSec1.x, deltaSec2.x);
-	auto gcdy = std::gcd(deltaSec1.y, deltaSec2.y);
-	return { gcdx, gcdy };
+	if (d1.y == 0 || d2.y == 0)
+		return {0, 0};
+	// Cast to uint64_t to prevent overflow during LCM calculation
+	uint32_t lcmx = static_cast<uint32_t>(std::lcm<uint64_t>(d1.x, d2.x));
+	uint32_t gcdy = std::gcd(d1.y, d2.y);
+	return {lcmx, gcdy};
 }
 
-bool CanTimeStepsAlign(nosVec2u deltaSec1, nosVec2u deltaSec2)
+nosVec2u GetGcdDeltaSeconds(nosVec2u d1, nosVec2u d2)
 {
-	if (deltaSec1.y == 0 || deltaSec2.y == 0)
-		return false; // Cannot sync if any of the delta-seconds is zero
-	auto gcdx = std::gcd(deltaSec1.x, deltaSec2.x);
-	auto gcdy = std::gcd(deltaSec1.y, deltaSec2.y);
-	return (gcdx == deltaSec1.x || gcdx == deltaSec2.x) && (gcdy == deltaSec1.y || gcdy == deltaSec2.y);
+	if (d1.y == 0 || d2.y == 0)
+		return {0, 0};
+	uint32_t gcdx = std::gcd(d1.x, d2.x);
+	// Cast to uint64_t to prevent overflow during LCM calculation
+	uint32_t lcmy = static_cast<uint32_t>(std::lcm<uint64_t>(d1.y, d2.y));
+	return {gcdx, lcmy};
 }
 
-nosVec2u GetSmallerDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
+// Determines if two time steps can align, meaning one is an integer multiple of the other
+bool CanTimeStepsAlign(nosVec2u d1, nosVec2u d2)
 {
-	double frac1 = static_cast<double>(deltaSec1.x) / deltaSec1.y;
-	double frac2 = static_cast<double>(deltaSec2.x) / deltaSec2.y;
-	return (frac1 < frac2) ? deltaSec1 : deltaSec2; // Return the smaller delta-seconds based on the fraction
+	if (d1.y == 0 || d2.y == 0 || d1.x == 0 || d2.x == 0)
+		return false;
+
+	uint64_t ad = static_cast<uint64_t>(d1.x) * d2.y;
+	uint64_t bc = static_cast<uint64_t>(d1.y) * d2.x;
+
+	return (ad % bc == 0) || (bc % ad == 0);
 }
 
-nosVec2u GetLargerDeltaSeconds(nosVec2u deltaSec1, nosVec2u deltaSec2)
-{
-	double frac1 = static_cast<double>(deltaSec1.x) / deltaSec1.y;
-	double frac2 = static_cast<double>(deltaSec2.x) / deltaSec2.y;
-	return (frac1 > frac2) ? deltaSec1 : deltaSec2; // Return the larger delta-seconds based on the fraction
-}
+nosVec2u GetSmallerDeltaSeconds(nosVec2u d1, nosVec2u d2) { return (CompareDeltaSeconds(d1, d2) <= 0) ? d1 : d2; }
+
+nosVec2u GetLargerDeltaSeconds(nosVec2u d1, nosVec2u d2) { return (CompareDeltaSeconds(d1, d2) >= 0) ? d1 : d2; }
 
 double GetIntervalFromDeltaSecs(nosVec2u deltaSecs)
 {
