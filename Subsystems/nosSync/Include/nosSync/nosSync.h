@@ -20,10 +20,22 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
+typedef enum nosDriftDetectionStatus
+{
+	// Drift detection is in progress and not enough data is collected to determine the health status of events in this
+	// group.
+	NOS_DRIFT_DETECTION_STATUS_COLLECTING_DATA,
+	// No drift is detected and events in this group are healthy.
+	NOS_DRIFT_DETECTION_STATUS_HEALTHY,
+	// Drift is detected and events in this group are drifting apart. This can lead to loss of synchronization and
+	// dropped frames.
+	NOS_DRIFT_DETECTION_STATUS_UNHEALTHY,
+};
+
 typedef struct nosEventGroupHealth
 {
-	/// Indicates that the events in this group are consistently drifting apart from each other.
-	nosBool DriftDetected;
+	/// Status of drift detection for events in this group.
+	nosDriftDetectionStatus DriftDetectionStatus;
 	/// If drift is detected, indicates how many events will be lost per hour at the current
 	/// drift rate.
 	double DriftsPerHour;

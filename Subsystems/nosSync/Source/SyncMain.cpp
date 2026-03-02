@@ -115,9 +115,9 @@ struct Event
 	bool IsExternallySynchronized; // Whether the event is synchronized by an external source.
 
 	std::deque<uint64_t> LastOccurrences; // Timestamps of recent waits for this event, used for health checking
-	// List of timestamps when events occurred (aligned, meaning deltas only when all events in this group happen to fire)
-	std::deque<uint64_t> AlignedDeltas;
-	
+
+	uint64_t UninterruptedDriftCount = 0;
+
 	WaitResult Wait(void* userData)
 	{
 		WaitResult res{};
@@ -150,6 +150,8 @@ struct EventGroup
 	uint32_t Id;
 	double Timeout; // Maximum time to wait for consensus in number of time units (delta-seconds)
 	double ConsensusTolerance; // Fraction of the event time to allow for consensus
+	uint64_t MaxTimeDiffAtConsensusNs = 0; // Maximum time difference between events when consensus is achieved, used for health checking
+	uint64_t AlignedFrameCountSinceConsensus = 0;
 
 	std::unordered_map<uint64_t, Event> Events;
 	void AddEvent(Event&& event)
@@ -375,7 +377,11 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 	if (shouldReset)
 	{
 		for (auto& [eid, ev] : events)
+		{
 			ev->HasRequestedConsensus = false; // Reset the consensus request flag for all events
+			ev->UninterruptedDriftCount = 0;
+		}
+		eventGroup->AlignedFrameCountSinceConsensus = 0;
 	}
 
 	if (!shouldWait)
@@ -500,6 +506,7 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr.c_str(), formatted.c_str(), (diffNs / eventIntervalNs));
 			*outTimestamp = event->LastAlignedWaitedTimestamp;
 			*outCount = event->OccurenceCountAtSync;
+			eventGroup->MaxTimeDiffAtConsensusNs = diffNs;
 			return NOS_RESULT_SUCCESS;
 		}
 		// Consensus is not achieved
@@ -552,8 +559,12 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 	// For synced events, how many we need to wait for that specific event to consider the cycle complete.
 	std::unordered_map<uint64_t, uint32_t> multipliers;
 	nosVec2u smallestDeltaSecs {UINT32_MAX, 1};
+	nosVec2u largestDeltaSecs{0, 1};
 	for (const auto& [eid, ev] : syncedEvents)
+	{
 		smallestDeltaSecs = GetSmallerDeltaSeconds(smallestDeltaSecs, ev->DeltaSeconds);
+		largestDeltaSecs = GetLargerDeltaSeconds(largestDeltaSecs, ev->DeltaSeconds);
+	}
 	for (const auto& [eid, ev] : syncedEvents)
 	{
 		// How many times this event should occur within the time window defined by the smallest delta-seconds to be considered in consensus for this cycle.
@@ -567,48 +578,19 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 		if (ev->LastOccurrences.size() >= multipliers[eid])
 			fulfilledCount++;
 	}
-	if (fulfilledCount < syncedEvents.size())
-		return NOS_RESULT_SUCCESS; // Not everyone is ready, but that's fine, we will check again when the next event
-								   // occurs.
-	const size_t DRIFT_DETECTION_MOVING_AVERAGE_WINDOW = std::max(10 * uint64_t(1.0f / GetIntervalFromDeltaSecs(smallestDeltaSecs)), 10ull);
-	uint64_t maxEventTimeDifferenceNs = 0;
-	std::unordered_map<uint64_t, uint64_t> timestamps;
-	for (const auto& [eid, ev] : syncedEvents)
-	{
-		uint32_t rem = multipliers[eid];
-		while (rem > 0 && !ev->LastOccurrences.empty())
-		{
-			auto ts = ev->LastOccurrences.front();
-			ev->LastOccurrences.pop_front();
-			if (rem == 1)
-				timestamps[eid] = ts;
-			rem--;
-		}
-	}
-	// Check the maximum time difference between the events that are considered in consensus for this cycle, and notify the health status if supported.
-	std::unordered_map<uint64_t, double> movingAverages;
-	for (const auto& [eid, ts] : timestamps)
-	{
-		auto& e = eventGroup->Events[eid];
-		auto diff = ts - e.LastAlignedWaitedTimestamp;
-		e.LastAlignedWaitedTimestamp = ts;
-		maxEventTimeDifferenceNs = std::max(maxEventTimeDifferenceNs, diff);
-		// Moving average of timestamps
-		auto& alignedDeltas = e.AlignedDeltas;
-		alignedDeltas.push_back(diff);
-		if (alignedDeltas.size() > DRIFT_DETECTION_MOVING_AVERAGE_WINDOW)
-			alignedDeltas.pop_front();
-		if (alignedDeltas.size() < DRIFT_DETECTION_MOVING_AVERAGE_WINDOW)
-			continue;
-		// To check drift, calculate whether any of the alignedDeltas are consistently moving apart from other events' alignedDeltas over time.
-		uint64_t sum = std::accumulate(alignedDeltas.begin(), alignedDeltas.end(), uint64_t(0));
-		double movingAverage = static_cast<double>(sum) / alignedDeltas.size();
-		movingAverages[eid] = movingAverage;
-	}
+
+	if (fulfilledCount < syncedEvents.size()) // Everyone is ready.
+		return NOS_RESULT_SUCCESS;
+	nosEventGroupHealth healthStatus{};
+
 	nosBool syncSourcesAreMixed = NOS_FALSE;
 	std::optional<bool> isAllExternallySynced = std::nullopt;
+
 	for (const auto& [eid, ev] : syncedEvents)
 	{
+		if (ev->LastOccurrences.size() >= multipliers[eid])
+			fulfilledCount++;
+
 		if (!isAllExternallySynced.has_value())
 			isAllExternallySynced = ev->IsExternallySynchronized;
 		else if (*isAllExternallySynced != ev->IsExternallySynchronized)
@@ -617,66 +599,89 @@ nosResult NOSAPI_CALL NotifyEventOccured(uint64_t eventId)
 			break;
 		}
 	}
-	if (movingAverages.empty())
+	healthStatus.AreSyncSourcesMixed = syncSourcesAreMixed;
 	{
+		// Calculate the relative time span of the occurrences to determine, if it is different than the consensus
+		// difference, then the events are drifting and we should notify the health status to the clients.
+		uint64_t minTs = UINT64_MAX, maxTs = 0;
 		for (const auto& [eid, ev] : syncedEvents)
 		{
-			if (ev->PfnNotifyEventGroupHealth)
+			auto multiplier = multipliers[eid];
+			uint64_t ts{};
+			for (size_t i = 0; i < multiplier; i++)
 			{
-				nosEventGroupHealth healthInfo{.DriftDetected = NOS_FALSE,
-											   .DriftsPerHour = 0.0,
-											   .AreSyncSourcesMixed = syncSourcesAreMixed,
-											   .MaxEventTimeDifferenceNs = maxEventTimeDifferenceNs};
-				ev->PfnNotifyEventGroupHealth(ev->UserData, &healthInfo);
+				ts = ev->LastOccurrences.front();
+				ev->LastOccurrences.pop_front();
 			}
+
+			minTs = std::min(minTs, ts);
+			maxTs = std::max(maxTs, ts);
 		}
-		return NOS_RESULT_SUCCESS;
+
+		auto diffNs = (maxTs - minTs);
+		auto diffOfEventTimeDiffsNs = std::max(diffNs, eventGroup->MaxTimeDiffAtConsensusNs) -
+									  std::min(diffNs, eventGroup->MaxTimeDiffAtConsensusNs);
+
+		auto eventGroupStr = GetEventGroupString(event, eventGroup, smallestDeltaSecs);
+		auto eventIntervalNs = GetIntervalFromDeltaSecs(largestDeltaSecs) * 1e9;
+
+		double diffOfRelativeTimeSpans = double(diffOfEventTimeDiffsNs) / eventIntervalNs;
+
+		eventGroup->AlignedFrameCountSinceConsensus++;
+
+		double timeSinceConsensus =
+			GetIntervalFromDeltaSecs(largestDeltaSecs) * eventGroup->AlignedFrameCountSinceConsensus;
+
+		double driftsPerHour = (double(diffOfEventTimeDiffsNs) / eventIntervalNs) * (3600.0 / timeSinceConsensus);
+
+		double maxAllowedRelativeTimeSpanDiff = 0.1 / sqrt(timeSinceConsensus / 10.0f);
+		if (diffOfRelativeTimeSpans > maxAllowedRelativeTimeSpanDiff)
+		{
+			nosEngine.LogW("Event group %s drifting %.2f drifts per hour, maximum allowed drift of %.2f per hour.",
+						   eventGroupStr.c_str(),
+						   diffOfRelativeTimeSpans,
+						   maxAllowedRelativeTimeSpanDiff);
+		}
+
+		healthStatus.DriftsPerHour = driftsPerHour;
+		healthStatus.MaxEventTimeDifferenceNs = diffNs;
+
+		char watchKey[256];
+		std::snprintf(watchKey,
+					  sizeof(watchKey),
+					  "%s: Event Drift Per Hour",
+					  GetEventGroupString(event, eventGroup, smallestDeltaSecs).c_str());
+
+		char driftStr[256];
+		std::snprintf(driftStr, sizeof(driftStr), "%f", driftsPerHour);
+
+		nosEngine.WatchLog(watchKey, driftStr);
 	}
-	// Detect drift based on the variance/spread of the moving averages
-	double minAvg = std::numeric_limits<double>::max();
-	double maxAvg = std::numeric_limits<double>::lowest();
-
-	double driftsPerHour = 0;
-	for (const auto& [eid, avg] : movingAverages)
-	{
-		minAvg = std::min(minAvg, avg);
-		maxAvg = std::max(maxAvg, avg);
-	}
-
-	// Calculate the physical threshold for drift based on the smallest delta seconds
-	// Converting to nanoseconds to match the timestamp scale
-	double smallestPeriodNs = (static_cast<double>(smallestDeltaSecs.x) / smallestDeltaSecs.y) * 1e9;
-
-	auto intervalSecs = GetIntervalFromDeltaSecs(smallestDeltaSecs);
-	auto eventsPerSec = 1.0 / intervalSecs;
-	auto eventsPerHour = eventsPerSec * 3600.0;
-
-	double spreadPerEvent = maxAvg - minAvg;
-	driftsPerHour = (spreadPerEvent / 1e9) * eventsPerHour;
-
-	char watchKey[256];
-	std::snprintf(watchKey, sizeof(watchKey), "%s: Event Drift Per Hour", GetEventGroupString(event, eventGroup, smallestDeltaSecs).c_str());
-
-	char driftStr[256];
-	std::snprintf(driftStr, sizeof(driftStr), "%f", driftsPerHour);
-			
-	nosEngine.WatchLog(watchKey, driftStr);
+	uint64_t minAlignedCountBeforeDrift = 120.0 / GetIntervalFromDeltaSecs(largestDeltaSecs);
+	uint64_t uninterruptedDriftThreshold = 1.0 / GetIntervalFromDeltaSecs(largestDeltaSecs) * 10.0;
 	for (const auto& [eid, ev] : syncedEvents)
 	{
-		double driftToleranceNs = (1.0 / ((1.0 / ev->DriftTolerance) * eventsPerHour)) * 1e9;
-		nosBool driftDetected = NOS_FALSE;
-		if (spreadPerEvent > driftToleranceNs)
+		if (!ev->PfnNotifyEventGroupHealth)
+			continue;
+		
+		healthStatus.DriftDetectionStatus = NOS_DRIFT_DETECTION_STATUS_COLLECTING_DATA;
+		if (eventGroup->AlignedFrameCountSinceConsensus > minAlignedCountBeforeDrift)
 		{
-			driftDetected = NOS_TRUE;
+			if (healthStatus.DriftsPerHour > ev->DriftTolerance)
+				ev->UninterruptedDriftCount++;
+			else
+				ev->UninterruptedDriftCount = 0;
+			if (ev->UninterruptedDriftCount > uninterruptedDriftThreshold)
+			{
+				healthStatus.DriftDetectionStatus = NOS_DRIFT_DETECTION_STATUS_UNHEALTHY;
+			}
+			else
+			{
+				healthStatus.DriftDetectionStatus = NOS_DRIFT_DETECTION_STATUS_HEALTHY;
+			}
 		}
-		if (ev->PfnNotifyEventGroupHealth)
-		{
-			nosEventGroupHealth healthInfo{.DriftDetected = driftDetected,
-											.DriftsPerHour = driftsPerHour,
-											.AreSyncSourcesMixed = syncSourcesAreMixed,
-											.MaxEventTimeDifferenceNs = maxEventTimeDifferenceNs};
-			ev->PfnNotifyEventGroupHealth(ev->UserData, &healthInfo);
-		}
+		
+		ev->PfnNotifyEventGroupHealth(ev->UserData, &healthStatus);
 	}
 	return NOS_RESULT_SUCCESS;
 }
