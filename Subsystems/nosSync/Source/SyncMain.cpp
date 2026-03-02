@@ -34,13 +34,23 @@ static int CompareDeltaSeconds(nosVec2u d1, nosVec2u d2)
 	return (left < right) ? -1 : (left > right ? 1 : 0);
 }
 
+static nosVec2u ReduceDeltaSeconds(nosVec2u deltaSecs)
+{
+	if (deltaSecs.y == 0)
+		return deltaSecs;
+	auto gcd = std::gcd(deltaSecs.x, deltaSecs.y);
+	return { deltaSecs.x / gcd, deltaSecs.y / gcd };
+}
+
 nosVec2u GetLcmDeltaSeconds(nosVec2u d1, nosVec2u d2)
 {
 	if (d1.y == 0 || d2.y == 0)
 		return {0, 0};
+	auto d1Reduced = ReduceDeltaSeconds(d1);
+	auto d2Reduced = ReduceDeltaSeconds(d2);
 	// Cast to uint64_t to prevent overflow during LCM calculation
-	uint32_t lcmx = static_cast<uint32_t>(std::lcm<uint64_t>(d1.x, d2.x));
-	uint32_t gcdy = std::gcd(d1.y, d2.y);
+	uint32_t lcmx = static_cast<uint32_t>(std::lcm<uint64_t>(d1Reduced.x, d2Reduced.x));
+	uint32_t gcdy = std::gcd(d1Reduced.y, d2Reduced.y);
 	return {lcmx, gcdy};
 }
 
@@ -48,9 +58,11 @@ nosVec2u GetGcdDeltaSeconds(nosVec2u d1, nosVec2u d2)
 {
 	if (d1.y == 0 || d2.y == 0)
 		return {0, 0};
-	uint32_t gcdx = std::gcd(d1.x, d2.x);
+	auto d1Reduced = ReduceDeltaSeconds(d1);
+	auto d2Reduced = ReduceDeltaSeconds(d2);
+	uint32_t gcdx = std::gcd(d1Reduced.x, d2Reduced.x);
 	// Cast to uint64_t to prevent overflow during LCM calculation
-	uint32_t lcmy = static_cast<uint32_t>(std::lcm<uint64_t>(d1.y, d2.y));
+	uint32_t lcmy = static_cast<uint32_t>(std::lcm<uint64_t>(d1Reduced.y, d2Reduced.y));
 	return {gcdx, lcmy};
 }
 
@@ -60,8 +72,11 @@ bool CanTimeStepsAlign(nosVec2u d1, nosVec2u d2)
 	if (d1.y == 0 || d2.y == 0 || d1.x == 0 || d2.x == 0)
 		return false;
 
-	uint64_t ad = static_cast<uint64_t>(d1.x) * d2.y;
-	uint64_t bc = static_cast<uint64_t>(d1.y) * d2.x;
+	auto d1Reduced = ReduceDeltaSeconds(d1);
+	auto d2Reduced = ReduceDeltaSeconds(d2);
+
+	uint64_t ad = static_cast<uint64_t>(d1Reduced.x) * d2Reduced.y;
+	uint64_t bc = static_cast<uint64_t>(d1Reduced.y) * d2Reduced.x;
 
 	return (ad % bc == 0) || (bc % ad == 0);
 }
