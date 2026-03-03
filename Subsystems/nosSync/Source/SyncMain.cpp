@@ -37,12 +37,15 @@ struct Event
 	uint64_t PathGroupId = 0;
 	nosResetEventPfn PfnReset = nullptr; // Optional callback for resetting the event
 	nosEventWaitPfn PfnWait;
+	nosNotifyEventGroupHealthPfn NotifyHealthFn =
+		nullptr; // Optional callback to receive health updates of the event group
 	void* UserData;
 	nosVec2u DeltaSeconds = { 0, 0 }; // Time units in delta-seconds (x, y) for this event
 	uint64_t LastWaitedTimestamp = 0; // Last timestamp when this event was waited on
 	uint64_t NumOccurrences = 0; // Number of times this event was fired
 	bool HasRequestedConsensus = false; // Whether the caller has requested consensus
-
+	bool IsExternallySynchronized{};	// Whether this event is synchronized by an external source, used for health
+										// monitoring and diagnostics
 	WaitResult Wait(void* userData)
 	{
 		WaitResult res{};
@@ -68,6 +71,12 @@ struct Event
 		if (PfnReset)
 			return PfnReset(userData);
 		return NOS_RESULT_SUCCESS;
+	}
+
+	void NotifyHealth(const nosEventGroupHealth* health)
+	{
+		if (NotifyHealthFn)
+			NotifyHealthFn(UserData, health);
 	}
 };
 
@@ -121,6 +130,8 @@ std::optional<uint64_t> GetCurrentPathGroupId()
 	return pathGroupId;
 }
 
+static_assert(NOS_SYNC_VERSION_MAJOR == 3, "Remove the template parameter");
+template<bool HasEventHealthNotificationSupport, bool HasExternallySynchronizedParam>
 nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 {
 	if (!params->WaitFn || !params->OutEventId)
@@ -134,11 +145,26 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 		return NOS_RESULT_FAILED; // Failed to get current path group ID
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
-	eventGroup.Events[nextId] = {.Id = nextId, .PathGroupId = *pathGroupId, .PfnReset = params->ResetFn,
-		.PfnWait = params->WaitFn,
-		.UserData = params->UserData,
-		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds)
-	};
+
+	nosNotifyEventGroupHealthPfn notifyHealthFn{};
+	if constexpr (HasEventHealthNotificationSupport)
+	{
+		notifyHealthFn = params->NotifyHealthFn;
+	}
+	bool isExternallySynchronized = false;
+	if constexpr (HasExternallySynchronizedParam)
+	{
+		isExternallySynchronized = params->IsExternallySynchronized;
+	}
+
+	eventGroup.Events[nextId] = {.Id = nextId,
+								 .PathGroupId = *pathGroupId,
+								 .PfnReset = params->ResetFn,
+								 .PfnWait = params->WaitFn,
+								 .NotifyHealthFn = notifyHealthFn,
+								 .UserData = params->UserData,
+								 .DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds),
+								 .IsExternallySynchronized = isExternallySynchronized};
 	*params->OutEventId = nextId;
 	return NOS_RESULT_SUCCESS;
 }
@@ -191,6 +217,104 @@ double GetIntervalFromDeltaSecs(nosVec2u deltaSecs)
 	if (deltaSecs.y == 0)
 		return 0.0;										   // Avoid division by zero
 	return static_cast<double>(deltaSecs.x) / deltaSecs.y; // Convert delta-seconds to seconds
+}
+
+nosResult HandleConsensusProcess(char eventGroupStr[256], const std::unordered_map<uint64_t, Ref<Event>>& events,
+														  const EventGroup& eventGroup,
+														  nosVec2u smallestDeltaSecs)
+{
+	uint32_t syncedEventOccurrences = 0;
+	uint64_t lastConsensusTimestamp = 0;
+	uint64_t startTimeNs =
+		std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch())
+			.count();
+
+	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
+	eventTimestamps.reserve(events.size()); // Reserve space for all events
+	// Collect initial timestamps for all events
+	for (const auto& [eventId, event] : events)
+	{
+		auto waitRes = event->Wait(event->UserData);
+		if (waitRes.Result == NOS_RESULT_FAILED)
+		{
+			// Error when waiting for an event, consensus cannot be achieved
+			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr);
+			return waitRes.Result;
+		}
+		eventTimestamps[event] = waitRes.Timestamp;
+	}
+	uint64_t minTs = UINT64_MAX, maxTs = 0;
+	while (true)
+	{
+		uint64_t currentTimeNs =
+			std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch())
+				.count();
+		auto currDiffFromStartNs = currentTimeNs - startTimeNs;
+		auto eventIntervalNs = GetIntervalFromDeltaSecs(smallestDeltaSecs) * 1e9;
+		auto frac = currDiffFromStartNs / eventIntervalNs;
+		if (frac >= (1.0 + eventGroup.Timeout))
+		{
+			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr);
+			return NOS_RESULT_TIMEOUT; // Timeout reached
+		}
+
+		// Find min and max timestamps
+		minTs = UINT64_MAX;
+		maxTs = 0;
+		for (const auto& [event, ts] : eventTimestamps)
+		{
+			minTs = std::min(minTs, ts);
+			maxTs = std::max(maxTs, ts);
+		}
+
+		// Check if consensus is achieved
+		auto diffNs = (maxTs - minTs);
+		if ((diffNs / eventIntervalNs <= eventGroup.Tolerance))
+		{
+			lastConsensusTimestamp = maxTs;
+			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+				std::chrono::nanoseconds(lastConsensusTimestamp));
+			std::string formatted = std::format("{:%H:%M:%S}", time);
+			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f",
+						   eventGroupStr,
+						   formatted.c_str(),
+						   (diffNs / eventIntervalNs));
+			return NOS_RESULT_SUCCESS;
+		}
+		// Consensus is not achieved
+
+		// Wait for the non-synchronized events again
+		for (const auto& [eventId, event] : events)
+		{
+			// If the the event's timestamp is already within the tolarence compared to the maximum timestamp, skip it
+			auto ts = eventTimestamps[event];
+			auto difFrac = (maxTs - ts) / eventIntervalNs;
+			if (difFrac <= eventGroup.Tolerance)
+				continue;
+
+			// Log the event that is behind
+			{
+				auto curTime =
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(ts));
+				auto maxTime =
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(maxTs));
+				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
+							   eventGroupStr,
+							   event->Id,
+							   std::format("{:%H:%M:%S}", curTime).c_str(),
+							   std::format("{:%H:%M:%S}", maxTime).c_str());
+			}
+
+			auto waitRes = event->Wait(event->UserData);
+			if (waitRes.Result == NOS_RESULT_FAILED)
+			{
+				// Error when waiting for an event, consensus cannot be achieved
+				return waitRes.Result;
+			}
+			eventTimestamps[event] = waitRes.Timestamp;
+		}
+	}
+	return NOS_RESULT_FAILED;
 }
 
 nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount)
@@ -248,6 +372,8 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 			rcvd++;
 	}
 	auto numWaiting = events.size();
+	// The first one requesting consensus will handle the consensus process, others will wait in the mutex until the
+	// consensus process ends(success or failure) and then return the result without doing the consensus process again.
 	bool shouldWait = (rcvd == 1);
 	bool shouldReset = (rcvd == numWaiting);
 	if (shouldReset)
@@ -322,101 +448,53 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 
 	nosEngine.LogD("Attempting to achieve consensus on event group %s", eventGroupStr);
 	
-	uint32_t syncedEventOccurrences = 0;
-	uint64_t lastConsensusTimestamp = 0;
-	uint64_t startTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-
 	if (events.empty())
 	{
 		nosEngine.LogE("No one is waiting on event group %s", eventGroupStr);
 		return NOS_RESULT_NOT_FOUND; // No waiters to synchronize
 	}
 
-	std::unordered_map<Ref<Event>, uint64_t> eventTimestamps;
-	eventTimestamps.reserve(events.size()); // Reserve space for all events
-	// Collect initial timestamps for all events
-	for (const auto& [eventId, event] : events)
-	{
-		auto waitRes = event->Wait(event->UserData);
-		if (waitRes.Result == NOS_RESULT_FAILED)
-		{
-			// Error when waiting for an event, consensus cannot be achieved
-			nosEngine.LogE("Failed to wait for event %llu in group %s", eventId, eventGroupStr);
-			return waitRes.Result;
-		}
-		eventTimestamps[event] = waitRes.Timestamp;
-	}
-
-	uint64_t minTs = UINT64_MAX, maxTs = 0;
-	while (true)
-	{
-		uint64_t currentTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-		auto currDiffFromStartNs = currentTimeNs - startTimeNs;
-		auto eventIntervalNs = GetIntervalFromDeltaSecs(smallestDeltaSecs) * 1e9;
-		auto frac = currDiffFromStartNs / eventIntervalNs;
-		if (frac >= (1.0 + eventGroup->Timeout))
-		{
-			nosEngine.LogE("Timeout waiting for consensus on event group %s", eventGroupStr);
-			return NOS_RESULT_TIMEOUT; // Timeout reached
-		}
-		
-		// Find min and max timestamps
-		minTs = UINT64_MAX;
-		maxTs = 0;
-		for (const auto& [event, ts] : eventTimestamps)
-		{
-			minTs = std::min(minTs, ts);
-			maxTs = std::max(maxTs, ts);
-		}
-
-		// Check if consensus is achieved
-		auto diffNs = (maxTs - minTs);
-		if ((diffNs / eventIntervalNs <= eventGroup->Tolerance))
-		{
-			lastConsensusTimestamp = maxTs;
-			auto time = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-				std::chrono::nanoseconds(lastConsensusTimestamp));
-			std::string formatted = std::format("{:%H:%M:%S}", time);
-			nosEngine.LogD("Consensus achieved on event group %s with timestamp %s with relative time span %.3f", eventGroupStr, formatted.c_str(), (diffNs / eventIntervalNs));
-			*outTimestamp = event->LastWaitedTimestamp;
-			*outCount = event->NumOccurrences;
-			return NOS_RESULT_SUCCESS;
-		}
-		// Consensus is not achieved
-		
-		// Wait for the non-synchronized events again
+	nosEventGroupHealth groupHealth{};
+	
+	groupHealth.HasMixedReferenceTypes = [&]() -> bool {
+		std::optional<bool> lastIsExternallySynchronized = std::nullopt;
 		for (const auto& [eventId, event] : events)
 		{
-			// If the the event's timestamp is already within the tolarence compared to the maximum timestamp, skip it
-			auto ts = eventTimestamps[event];
-			auto difFrac = (maxTs - ts) / eventIntervalNs;
-			if (difFrac <= eventGroup->Tolerance)
+			if (!lastIsExternallySynchronized.has_value())
+			{
+				lastIsExternallySynchronized = event->IsExternallySynchronized;
 				continue;
-
-			// Log the event that is behind
-			{
-				auto curTime =
-					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(ts));
-				auto maxTime =
-					std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(maxTs));
-				nosEngine.LogD("Event group %s entry %llu is behind: Current %s, waiting for %s",
-							   eventGroupStr,
-							   event->Id,
-							   std::format("{:%H:%M:%S}", curTime).c_str(),
-							   std::format("{:%H:%M:%S}", maxTime).c_str());
 			}
-
-			auto waitRes = event->Wait(event->UserData);
-			if (waitRes.Result == NOS_RESULT_FAILED)
-			{
-				// Error when waiting for an event, consensus cannot be achieved
-				return waitRes.Result;
-			}
-			eventTimestamps[event] = waitRes.Timestamp;
+			if (event->IsExternallySynchronized != lastIsExternallySynchronized.value())
+				return true;
 		}
+		return false;
+	}();
+	
+	auto consensusResult = HandleConsensusProcess(eventGroupStr, events, *eventGroup, smallestDeltaSecs);
+
+	if (consensusResult == NOS_RESULT_SUCCESS)
+	{
+		*outTimestamp = event->LastWaitedTimestamp;
+		*outCount = event->NumOccurrences;
+		groupHealth.UnableToReachConsensus = false;
 	}
-	nosEngine.LogE("Unable to establish consensus on event group %s", eventGroupStr);
-	return NOS_RESULT_FAILED;
+	else
+	{
+		nosEngine.LogE("Unable to establish consensus on event group %s", eventGroupStr);
+		groupHealth.UnableToReachConsensus = true;
+	}
+
+	// Notify health status to all events in the group
+	for (const auto& [eventId, event] : events)
+	{
+		event->NotifyHealth(&groupHealth);
+	}
+
+	// This is to match the behavior of non-waiting events, which return success even if they are not in sync with
+	// anyone, so that the caller can still use the timestamp and occurrence count for their logic without caring about
+	// the consensus result.
+	return NOS_RESULT_SUCCESS;
 }
 
 nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
@@ -429,7 +507,15 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	}
 	auto* subsystem = new nosSyncSubsystem();
 	subsystem->RegisterEventGroup = RegisterEventGroup;
-	subsystem->RegisterEvent = RegisterEvent;
+	static_assert(NOS_SYNC_VERSION_MAJOR == 3, "Update the exported subsystem versions if the major version changes");
+	if (minorVersion >= 2)
+	{
+		subsystem->RegisterEvent = RegisterEvent<true, true>;
+	}
+	else
+	{
+		subsystem->RegisterEvent = RegisterEvent<false, false>;
+	}
 	subsystem->UnregisterEvent = UnregisterEvent;
 	subsystem->WaitForConsensus = WaitForConsensus;
 	subsystem->UnregisterEventGroup = UnregisterEventGroup;

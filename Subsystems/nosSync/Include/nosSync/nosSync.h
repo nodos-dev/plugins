@@ -20,8 +20,19 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
+typedef struct nosEventGroupHealth
+{
+	/// Whether the event group has a mix of different synchronization reference types,
+	/// which can lead to synchronization issues.
+	nosBool HasMixedReferenceTypes;
+	/// Whether the event group is currently unable to reach consensus among its registered
+	/// events, which can indicate synchronization problems or misconfigurations.
+	nosBool UnableToReachConsensus;
+} nosEventGroupHealth;
+
 typedef nosResult (*nosResetEventPfn)(void* userData);
 typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
+typedef void (*nosNotifyEventGroupHealthPfn)(void* userData, const nosEventGroupHealth* health);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
@@ -36,7 +47,11 @@ typedef struct nosRegisterEventParams {
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
 	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
+	nosNotifyEventGroupHealthPfn NotifyHealthFn; /// Optional callback to receive health updates of the event group.
+	nosBool IsExternallySynchronized; /// Whether this event is synchronized by an external source, used for health
+									  /// monitoring and diagnostics.
 } nosRegisterEventParams;
+
 
 typedef struct nosSyncSubsystem
 {
@@ -67,7 +82,7 @@ typedef struct nosSyncSubsystem
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
 #define NOS_SYNC_VERSION_MAJOR 3
-#define NOS_SYNC_VERSION_MINOR 1
+#define NOS_SYNC_VERSION_MINOR 2
 
 extern struct nosModuleInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;
