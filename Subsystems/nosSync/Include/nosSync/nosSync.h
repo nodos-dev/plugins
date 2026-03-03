@@ -19,13 +19,31 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
-typedef nosResult (NOSAPI_CALL *nosResetEventPfn)(void* userData);
-typedef nosResult(NOSAPI_CALL * nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
+typedef enum nosConsensusStatus
+{
+	NOS_CONSENSUS_IN_PROGRESS = 0,
+	NOS_CONSENSUS_ACHIEVED,
+	NOS_CONSENSUS_TIMEOUT,
+	NOS_CONSENSUS_ATTEMPT_FAILED,
+} nosConsensusStatus;
+
+typedef struct nosSyncGroupHealth
+{
+	/// Path-group contains events with mixed sources (external and internal).
+	nosBool AreSyncSourcesMixed;
+	/// Reports the consensus status of the event group. If consensus cannot be achieved, it may indicate that the
+	/// events in the group are not properly aligned in time.
+	nosConsensusStatus ConsensusStatus;
+} nosSyncGroupHealth;
+
+typedef nosResult (*nosResetEventPfn)(void* userData);
+typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
+typedef void (*nosNotifySyncGroupHealthPfn)(void* userData, const nosSyncGroupHealth* status);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
 	double Timeout; /// Number of frames to wait before timing out.
-	double Tolerance; /// Fraction of an event time to allow during consensus.
+	double ConsensusTolerance; /// Fraction of an event time to allow during consensus.
 } nosRegisterEventGroupParams;
 
 typedef struct nosRegisterEventParams {
@@ -35,6 +53,9 @@ typedef struct nosRegisterEventParams {
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
 	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
+	nosNotifySyncGroupHealthPfn NotifyHealthFn; /// Optional callback to subscribe to the health status of sync group (events in this event group that falls into same path group).
+	/// Whether the event is synchronized by an external source.
+	nosBool IsExternallySynchronized;
 } nosRegisterEventParams;
 
 typedef struct nosSyncSubsystem
