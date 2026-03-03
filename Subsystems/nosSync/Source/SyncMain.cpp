@@ -154,7 +154,7 @@ struct EventSync
 	uint64_t NextEventId = 1;
 	std::unordered_map<uint32_t, EventGroup> Groups;
 
-	std::variant<std::pair<Ref<Event>, Ref<EventGroup>>, nosResult> GetEvent(uint64_t eventId)
+	std::optional<std::pair<Ref<Event>, Ref<EventGroup>>> GetEvent(uint64_t eventId)
 	{
 		Event* event = nullptr;
 		EventGroup* eventGroup = nullptr;
@@ -170,7 +170,7 @@ struct EventSync
 			}
 		}
 		if (!event || !eventGroup)
-			return NOS_RESULT_NOT_FOUND;
+			return std::nullopt;
 		return std::make_pair(Ref(*event), Ref(*eventGroup));
 	}
 
@@ -243,6 +243,8 @@ std::optional<uint64_t> GetCurrentPathGroupId()
 	return pathGroupId;
 }
 
+static_assert(NOS_SYNC_VERSION_MAJOR == 3, "Remove the template parameter");
+template<bool HasHealthNotificationSupport, bool HasExternallySynchronizedParam>
 nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 {
 	if (!params->WaitFn || !params->OutEventId)
@@ -256,16 +258,27 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 		return NOS_RESULT_FAILED; // Failed to get current path group ID
 	auto& eventGroup = it->second;
 	auto nextId = GEventSync.NextEventId++;
+	
+	nosNotifySyncGroupHealthPfn notifyHealthFn{};
+	if constexpr (HasHealthNotificationSupport)
+	{
+		notifyHealthFn = params->NotifyHealthFn;
+	}
+	bool isExternallySynchronized = false;
+	if constexpr (HasExternallySynchronizedParam)
+	{
+		isExternallySynchronized = params->IsExternallySynchronized;
+	}
+
 	eventGroup.Events[nextId] = {
 		.Id = nextId,
 		.PathGroupId = *pathGroupId,
-		.EventGroupId = eventGroup.Id,
 		.PfnReset = params->ResetFn,
 		.PfnWait = params->WaitFn,
-		.PfnNotifySyncGroupHealth = params->NotifyHealthFn,
+		.PfnNotifySyncGroupHealth = notifyHealthFn,
 		.UserData = params->UserData,
 		.DeltaSeconds = GetReducedDeltaSeconds(params->DeltaSeconds),
-		.IsExternallySynchronized = params->IsExternallySynchronized
+		.IsExternallySynchronized = isExternallySynchronized
 	};
 	*params->OutEventId = nextId;
 	return NOS_RESULT_SUCCESS;
@@ -313,10 +326,10 @@ void NotifySyncGroupHealth(std::unordered_map<uint64_t, Ref<Event>> const& synce
 nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount)
 {
 	std::unique_lock lock(GEventSync.Mutex);
-	auto eventRes = GEventSync.GetEvent(eventId);
-	if (std::holds_alternative<nosResult>(eventRes))
-		return std::get<nosResult>(eventRes); // Event not found
-	auto& [event, eventGroup] = std::get<std::pair<Ref<Event>, Ref<EventGroup>>>(eventRes);
+	auto maybeEvent = GEventSync.GetEvent(eventId);
+	if (!maybeEvent)
+		return NOS_RESULT_NOT_FOUND;
+	auto& [event, eventGroup] = *maybeEvent;
 
 	// Gather the events that should be considered for consensus.
 	// They should be in the same group and have the same delta-seconds.
@@ -528,7 +541,11 @@ nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
 	}
 	auto* subsystem = new nosSyncSubsystem();
 	subsystem->RegisterEventGroup = RegisterEventGroup;
-	subsystem->RegisterEvent = RegisterEvent;
+	static_assert(NOS_SYNC_VERSION_MAJOR == 3, "Update the exported subsystem versions if the major version changes");
+	if (minorVersion >= 2)
+		subsystem->RegisterEvent = RegisterEvent<true, true>;
+	else
+		subsystem->RegisterEvent = RegisterEvent<false, false>;
 	subsystem->UnregisterEvent = UnregisterEvent;
 	subsystem->WaitForConsensus = WaitForConsensus;
 	subsystem->UnregisterEventGroup = UnregisterEventGroup;
