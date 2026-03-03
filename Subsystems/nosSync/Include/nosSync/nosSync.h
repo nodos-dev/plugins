@@ -20,22 +20,26 @@ typedef struct nosWaitResult {
 	uint64_t EventCount;
 } nosWaitResult;
 
-typedef struct nosEventGroupHealth
+typedef enum nosConsensusStatus
 {
-	/// Indicates that the events in this group are consistently drifting apart from each other.
-	nosBool DriftDetected;
-	/// If drift is detected, indicates how many events will be lost per hour at the current
-	/// drift rate.
-	double DriftsPerHour;
-	/// Path-group contains events with mixed sources.
+	NOS_CONSENSUS_IN_PROGRESS = 0,
+	NOS_CONSENSUS_ACHIEVED,
+	NOS_CONSENSUS_TIMEOUT,
+	NOS_CONSENSUS_ATTEMPT_FAILED,
+} nosConsensusStatus;
+
+typedef struct nosSyncGroupHealth
+{
+	/// Path-group contains events with mixed sources (external and internal).
 	nosBool AreSyncSourcesMixed;
-	/// Indicates the maximum time difference between event firings in this group.
-	uint64_t MaxEventTimeDifferenceNs;
-} nosEventGroupHealth;
+	/// Reports the consensus status of the event group. If consensus cannot be achieved, it may indicate that the
+	/// events in the group are not properly aligned in time.
+	nosConsensusStatus ConsensusStatus;
+} nosSyncGroupHealth;
 
 typedef nosResult (*nosResetEventPfn)(void* userData);
 typedef nosResult (*nosEventWaitPfn)(void* userData, nosWaitResult* outResult);
-typedef void (*nosNotifyEventGroupHealthPfn)(void* userData, const nosEventGroupHealth* status);
+typedef void (*nosNotifySyncGroupHealthPfn)(void* userData, const nosSyncGroupHealth* status);
 
 typedef struct nosRegisterEventGroupParams {
 	uint32_t Id; /// Unique identifier for the event group.
@@ -49,13 +53,10 @@ typedef struct nosRegisterEventParams {
 	void* UserData; /// User data to pass to the wait function.
 	nosResetEventPfn ResetFn; /// To initialize clocks that will be used in the wait function, and reset event states.
 	nosEventWaitPfn WaitFn; /// The wait function to call when waiting for consensus.
-	nosNotifyEventGroupHealthPfn NotifyHealthFn; /// Optional callback to subscribe to the health status of event group.
-	/// Events per hour to allow for drift before marking the group as unhealthy. This is calculted
-	/// from the smallest delta-seconds of the events in the group (which are aligned).
-	double DriftTolerance;
+	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
+	nosNotifySyncGroupHealthPfn NotifyHealthFn; /// Optional callback to subscribe to the health status of sync group (events in this event group that falls into same path group).
 	/// Whether the event is synchronized by an external source.
 	nosBool IsExternallySynchronized;
-	uint64_t* OutEventId; /// Output parameter for the unique event identifier.
 } nosRegisterEventParams;
 
 typedef struct nosSyncSubsystem
@@ -76,9 +77,6 @@ typedef struct nosSyncSubsystem
 	/// Waits until all registered waiters agree on the same event timestamp,
 	/// indicating they're all synchronized on the same event occurrence.
 	nosResult (NOSAPI_CALL* WaitForConsensus)(uint32_t eventId, uint64_t* outTimestamp, uint64_t* outCount);
-	
-	/// Notifies the subsystem that an event has occurred, allowing it check event group health.
-	nosResult (NOSAPI_CALL* NotifyEventOccured)(uint64_t eventId);
 
 	nosResult (NOSAPI_CALL* UnregisterEventGroup)(uint32_t eventGroupId);
 	/// 
@@ -89,8 +87,8 @@ typedef struct nosSyncSubsystem
 
 // Make sure these are same with nossys file.
 #define NOS_SYNC_NAME "nos.sync"
-#define NOS_SYNC_VERSION_MAJOR 4
-#define NOS_SYNC_VERSION_MINOR 0
+#define NOS_SYNC_VERSION_MAJOR 3
+#define NOS_SYNC_VERSION_MINOR 2
 
 extern struct nosModuleInfo nosSyncPluginInfo;
 extern nosSyncSubsystem* nosSync;
