@@ -30,7 +30,7 @@ struct DynamicSizedNoiseNode : public NodeContext
     {
 		NodeExecuteParams execParams(params);
         auto outTex = execParams.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
-        auto& res = *execParams.GetPinData<const fb::vec2u>(NOS_NAME("Resolution"));
+        auto& res = *execParams.GetPinValue<const fb::vec2u>(NOS_NAME("Resolution"));
 		auto outTexInfo = *sys::vulkan::GetResourceInfo(outTex);
 
         if (res.x() != outTexInfo.Width || res.y() != outTexInfo.Height)

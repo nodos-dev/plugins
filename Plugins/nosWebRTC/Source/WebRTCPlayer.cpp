@@ -435,8 +435,8 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 				nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
 
 				playerNode->InitializeNodeInternals();
-				playerNode->server = nodeParams.GetPinData<const char>(NSN_ServerIP);
-				playerNode->UseHttps = *nodeParams.GetPinData<bool>(NSN_UseHttps);
+				playerNode->server = nodeParams.GetPinValue<const char>(NSN_ServerIP);
+				playerNode->UseHttps = *nodeParams.GetPinValue<bool>(NSN_UseHttps);
 				bool shouldUseHttps = playerNode->p_nosWebRTC->StartConnection(playerNode->server, playerNode->UseHttps);
 				if (shouldUseHttps != playerNode->UseHttps) {
 					nosEngine.LogW("WebRTC Player: Server connection protocol mismatch! Server is using %s, but player's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", playerNode->UseHttps ? "HTTPS" : "HTTP");
@@ -459,7 +459,7 @@ struct WebRTCPlayerNodeContext : nos::NodeContext {
 		fns[2] = [](void* ctx, nosFunctionExecuteParams* params) {
 			if (WebRTCPlayerNodeContext* playerNode = static_cast<WebRTCPlayerNodeContext*>(ctx)) {
 				nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-				playerNode->p_nosWebRTC->SendOffer(*nodeParams.GetPinData<int>(NSN_StreamerID));
+				playerNode->p_nosWebRTC->SendOffer(*nodeParams.GetPinValue<int>(NSN_StreamerID));
 			}
 			return NOS_RESULT_SUCCESS;
 		};

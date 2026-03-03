@@ -121,9 +121,9 @@ struct TextureTransitionContext : public NodeContext
 			UpdateTransition(elapsed.count() / 1000000.0f);
 		}
 
-		auto transitionTarget = *params.GetPinData<compositing::TransitionTarget>(NSN_TransitionTarget);
+		auto transitionTarget = *params.GetPinValue<compositing::TransitionTarget>(NSN_TransitionTarget);
 
-		float amount = *params.GetPinData<float>(NSN_Amount);;
+		float amount = *params.GetPinValue<float>(NSN_Amount);;
 		auto source1Texture = params.GetPinObject(transitionTarget == TransitionTarget::Input2
 			                                          ? NSN_Input1.GetName()
 			                                          : NSN_Input2.GetName());
@@ -200,13 +200,13 @@ struct TextureTransitionContext : public NodeContext
 		if (context->bIsInTransition)
 			return NOS_RESULT_SUCCESS;
 
-		context->TransitionDuration = *params.GetPinData<float>(NSN_Duration);
-		context->TransitionType = *params.GetPinData<compositing::TransitionType>(NSN_Type);
-		context->WipeWidth = *params.GetPinData<float>(NSN_WipeWidth);
-		context->TransitionInterp = *params.GetPinData<TransitionInterpolation>(NSN_Interpolation);
-		context->TransitionEaseExponent = *params.GetPinData<float>(NSN_EaseExponent);
-		context->TransitionStepCount = *params.GetPinData<u32>(NSN_StepCount);
-		context->TransitionTarget = *nodeParams.GetPinData<compositing::TransitionTarget>(NSN_TransitionTarget);
+		context->TransitionDuration = *params.GetPinValue<float>(NSN_Duration);
+		context->TransitionType = *params.GetPinValue<compositing::TransitionType>(NSN_Type);
+		context->WipeWidth = *params.GetPinValue<float>(NSN_WipeWidth);
+		context->TransitionInterp = *params.GetPinValue<TransitionInterpolation>(NSN_Interpolation);
+		context->TransitionEaseExponent = *params.GetPinValue<float>(NSN_EaseExponent);
+		context->TransitionStepCount = *params.GetPinValue<u32>(NSN_StepCount);
+		context->TransitionTarget = *nodeParams.GetPinValue<compositing::TransitionTarget>(NSN_TransitionTarget);
 		context->TransitionStart = std::chrono::high_resolution_clock::now();
 		context->bIsInTransition = true;
 		nosEngine.SetPinValueByName(context->NodeId,

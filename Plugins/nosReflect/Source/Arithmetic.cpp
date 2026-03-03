@@ -360,7 +360,7 @@ struct ArithmeticNodeContext : NodeContext
 			if ((*Type)->BaseType == NOS_BASE_TYPE_STRING)
 			{
 				std::stringstream ss;
-				ss << params.GetPinData<const char*>(NSN_A) << params.GetPinData<const char*>(NSN_B);
+				ss << params.GetPinValue<const char*>(NSN_A) << params.GetPinValue<const char*>(NSN_B);
 				auto str = ss.str();
 				SetPinValue(NSN_Output, str.c_str());
 			}
@@ -369,8 +369,8 @@ struct ArithmeticNodeContext : NodeContext
 				nos::Buffer outputBuf = params.GetPinBuffer(NSN_Output);
 				DoOp<void>(*Operator,
 						   *Type,
-						   params.GetPinData<uint8_t>(NSN_A),
-						   params.GetPinData<uint8_t>(NSN_B),
+						   params.GetPinValue<uint8_t>(NSN_A),
+						   params.GetPinValue<uint8_t>(NSN_B),
 						   outputBuf.As<uint8_t>());
 				SetPinValue(NSN_Output, outputBuf);
 			}
@@ -380,9 +380,9 @@ struct ArithmeticNodeContext : NodeContext
 			nos::Buffer outputBuf = params.GetPinBuffer(NSN_Output);
 			DoScalarOp(*Operator,
 					   *Type,
-					   params.GetPinData<uint8_t>(NSN_A),
+					   params.GetPinValue<uint8_t>(NSN_A),
 					   *ScalarType,
-					   params.GetPinData<void>(NSN_Scalar),
+					   params.GetPinValue<void>(NSN_Scalar),
 					   outputBuf.As<uint8_t>());
 			SetPinValue(NSN_Output, outputBuf);
 		}

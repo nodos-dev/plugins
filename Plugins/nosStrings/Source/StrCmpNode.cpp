@@ -10,8 +10,8 @@ struct IsSameStringNode : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto firstStr = params.GetPinData<const char>(NOS_NAME("First"));
-		auto secondStr = params.GetPinData<const char>(NOS_NAME("Second"));
+		auto firstStr = params.GetPinValue<const char>(NOS_NAME("First"));
+		auto secondStr = params.GetPinValue<const char>(NOS_NAME("Second"));
 		SetPinValue(NOS_NAME("IsSame"), strcmp(firstStr, secondStr) == 0);
 		return NOS_RESULT_SUCCESS;
 	}

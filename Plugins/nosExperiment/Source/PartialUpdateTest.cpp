@@ -112,10 +112,10 @@ struct PartialUpdateTestNode : NodeContext
 		fb::TVisualizer viz{};
 
 		NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
-		auto vizType = execParams.GetPinData<fb::VisualizerType>(NOS_NAME_STATIC("Type"));
+		auto vizType = execParams.GetPinValue<fb::VisualizerType>(NOS_NAME_STATIC("Type"));
 		if (!vizType)
 			nosEngine.LogE("Visualizer Type pin is empty!");
-		auto subfieldPath = execParams.GetPinData<const char>(NOS_NAME_STATIC("SubfieldPath"));
+		auto subfieldPath = execParams.GetPinValue<const char>(NOS_NAME_STATIC("SubfieldPath"));
 		if (!subfieldPath)
 			nosEngine.LogE("SubfieldPath pin is empty!");
 		if (!vizType || !subfieldPath)
@@ -123,19 +123,19 @@ struct PartialUpdateTestNode : NodeContext
 		viz.visualizer_subfield_path = subfieldPath;
 		viz.type = *vizType;
 
-		if (auto vizName = execParams.GetPinData<const char>(NOS_NAME_STATIC("Name")))
+		if (auto vizName = execParams.GetPinValue<const char>(NOS_NAME_STATIC("Name")))
 			viz.name = vizName;
 
-		if (auto vizFileExts = execParams.GetPinData<const char>(NOS_NAME_STATIC("FileExtensions")))
+		if (auto vizFileExts = execParams.GetPinValue<const char>(NOS_NAME_STATIC("FileExtensions")))
 			viz.file_extensions = { std::string(vizFileExts) };
 
-		if (auto vizDiscardedNames = execParams.GetPinData<const char>(NOS_NAME_STATIC("DiscardedNames")))
+		if (auto vizDiscardedNames = execParams.GetPinValue<const char>(NOS_NAME_STATIC("DiscardedNames")))
 			viz.discarded_names = { std::string(vizDiscardedNames) };
 
-		if (auto vizHideVal = execParams.GetPinData<const char>(NOS_NAME_STATIC("HideValue")))
+		if (auto vizHideVal = execParams.GetPinValue<const char>(NOS_NAME_STATIC("HideValue")))
 			viz.hide_value = *vizHideVal;
 
-		if (auto filePickerType = execParams.GetPinData<fb::FilePickerType>(NOS_NAME_STATIC("FilePickerType")))
+		if (auto filePickerType = execParams.GetPinValue<fb::FilePickerType>(NOS_NAME_STATIC("FilePickerType")))
 			viz.file_picker_type = *filePickerType;
 
 		SetPinVisualizer(NSN_Table, viz);

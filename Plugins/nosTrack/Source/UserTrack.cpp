@@ -30,11 +30,11 @@ struct UserTrack : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		Impulse = glm::max(*params.GetPinData<float>(NSN_Impulse), 1.f);
-		Decay = glm::max(*params.GetPinData<float>(NSN_Decay), 0.f);
+		Impulse = glm::max(*params.GetPinValue<float>(NSN_Impulse), 1.f);
+		Decay = glm::max(*params.GetPinValue<float>(NSN_Decay), 0.f);
 		(glm::vec3&)State.location += V;
 		V *= exp(-Decay);
-		ReadAndUpdate(params.GetPinData<track::TTrack>(NSN_Input));
+		ReadAndUpdate(params.GetPinValue<track::TTrack>(NSN_Input));
 		return NOS_RESULT_SUCCESS;
 	}
 

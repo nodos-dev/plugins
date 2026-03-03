@@ -112,9 +112,9 @@ public:
 		// std::unordered_map<Name, void*> values = GetPinValues(params);
 	
 		
-		auto track = params.GetPinData<nos::track::TTrack>(NSN_Track);
-		auto gridColor = params.GetPinData<fb::vec4>(NSN_GridColor);
-		auto step = params.GetPinData<float>(NSN_Step);
+		auto track = params.GetPinValue<nos::track::TTrack>(NSN_Track);
+		auto gridColor = params.GetPinValue<fb::vec4>(NSN_GridColor);
+		auto step = params.GetPinValue<float>(NSN_Step);
 
 		glm::vec3 pos = reinterpret_cast<const glm::vec3&>(track.location);
 		glm::vec3 rot = reinterpret_cast<const glm::vec3&>(track.rotation);

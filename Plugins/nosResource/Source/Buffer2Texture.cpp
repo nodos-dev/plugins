@@ -19,8 +19,8 @@ struct Buffer2TextureNodeContext : NodeContext
 			return NOS_RESULT_FAILED;
 		}
 		auto outTex = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
-		const auto& size = *params.GetPinData<fb::vec2u>(NOS_NAME("Size"));
-		const auto& format = *params.GetPinData<sys::vulkan::Format>(NOS_NAME("Format"));
+		const auto& size = *params.GetPinValue<fb::vec2u>(NOS_NAME("Size"));
+		const auto& format = *params.GetPinValue<sys::vulkan::Format>(NOS_NAME("Format"));
 		auto inBufInfo = *sys::vulkan::GetResourceInfo(inBuf);
 		auto inputFieldType = sys::vulkan::GetResourceFieldType(inBuf);
 		auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);

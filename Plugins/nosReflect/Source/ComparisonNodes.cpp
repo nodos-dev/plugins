@@ -38,13 +38,13 @@ struct ComparisonNode : NodeContext
 		const void* aPtr, *bPtr;
 		if (!type->ByteSize && type->BaseType == NOS_BASE_TYPE_STRUCT)
 		{
-			aPtr = params.GetPinData<flatbuffers::Table>(NSN_A);
-			bPtr = params.GetPinData<flatbuffers::Table>(NSN_B);
+			aPtr = params.GetPinValue<flatbuffers::Table>(NSN_A);
+			bPtr = params.GetPinValue<flatbuffers::Table>(NSN_B);
 		}
 		else
 		{
-			aPtr = params.GetPinData<void>(NSN_A);
-			bPtr = params.GetPinData<void>(NSN_B);
+			aPtr = params.GetPinValue<void>(NSN_A);
+			bPtr = params.GetPinValue<void>(NSN_B);
 		}
 		bool yes = CompareFlatBuffers<TCompareResult>(type, aPtr, bPtr);
 		nos::Name pinName;

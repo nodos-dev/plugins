@@ -16,7 +16,7 @@ nosResult RegisterInterpolateWithCustomInterpolator(nosNodeFunctions* out)
 		}
 		nosImmutableBuffer a = args.GetPinBuffer(NOS_NAME("A"));
 		nosImmutableBuffer b = args.GetPinBuffer(NOS_NAME("B"));
-		double t = *args.GetPinData<double>(NOS_NAME("t"));
+		double t = *args.GetPinValue<double>(NOS_NAME("t"));
 		EngineBuffer outBuf{};
 		nosResult res = nosAnimation->Interpolate(typeName, a, b, t, outBuf.GetBufferPtr());
 		if (res != NOS_RESULT_SUCCESS)

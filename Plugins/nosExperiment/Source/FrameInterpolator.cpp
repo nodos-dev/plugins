@@ -39,7 +39,7 @@ struct FrameInterpolatorNode : NodeContext
 		}
 		auto inputTexture = *execParams[NSN_Input].Object;
 		auto outputTexture = *execParams[NSN_Output].Object;
-		auto method = *execParams.GetPinData<nos::experiment::FrameInterpolationMethod>(NSN_Method);
+		auto method = *execParams.GetPinValue<nos::experiment::FrameInterpolationMethod>(NSN_Method);
 		switch (method)
 		{
 		case FrameInterpolationMethod::REPEAT: {

@@ -15,7 +15,7 @@ struct RepeatingJunctionNode : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		ObjectRef inputObject = params.GetPinObject(NOS_NAME("Input"));
-		bool waitGpu = *params.GetPinData<bool>(NOS_NAME("WaitGPU"));
+		bool waitGpu = *params.GetPinValue<bool>(NOS_NAME("WaitGPU"));
 		SubmitAndWaitIfWanted(waitGpu);
 		{
 			std::unique_lock lock(NewFrameMutex);

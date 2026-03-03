@@ -17,9 +17,9 @@ struct PartialBufferCopy : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto input = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
-		auto srcOffset = params.GetPinData<uint32_t>(NOS_NAME("SrcOffset"));
-		auto dstOffset = params.GetPinData<uint32_t>(NOS_NAME("DstOffset"));
-		auto size = params.GetPinData<uint32_t>(NOS_NAME("Size"));
+		auto srcOffset = params.GetPinValue<uint32_t>(NOS_NAME("SrcOffset"));
+		auto dstOffset = params.GetPinValue<uint32_t>(NOS_NAME("DstOffset"));
+		auto size = params.GetPinValue<uint32_t>(NOS_NAME("Size"));
 
 		if (!input)
 			return NOS_RESULT_INVALID_ARGUMENT;

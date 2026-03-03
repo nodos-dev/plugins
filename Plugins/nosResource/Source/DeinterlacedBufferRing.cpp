@@ -64,7 +64,7 @@ struct DeinterlacedBufferRingNode : RingNodeBase
 	nosResult ExecuteNode(NodeExecuteParams const& params) override {
 		nosResult res = NOS_RESULT_SUCCESS;
 		auto pins = NodeExecuteParams(params);
-		auto fieldType = *pins.GetPinData<nosTextureFieldType>(NOS_NAME("FieldType"));
+		auto fieldType = *pins.GetPinValue<nosTextureFieldType>(NOS_NAME("FieldType"));
 		if (ShouldDeinterlace)
 		{
 			if (LastFieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)

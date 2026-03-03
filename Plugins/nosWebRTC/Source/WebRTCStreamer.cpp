@@ -452,8 +452,8 @@ struct WebRTCNodeContext : nos::NodeContext {
 				nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
 
 				streamerNode->InitializeNodeInternals();
-				streamerNode->server = nodeParams.GetPinData<const char>(NSN_ServerIP);
-				streamerNode->UseHttps = *nodeParams.GetPinData<bool>(NSN_UseHttps);
+				streamerNode->server = nodeParams.GetPinValue<const char>(NSN_ServerIP);
+				streamerNode->UseHttps = *nodeParams.GetPinValue<bool>(NSN_UseHttps);
 				bool shouldUseHttps = streamerNode->p_nosWebRTC->StartConnection(streamerNode->server, streamerNode->UseHttps);
 				if (shouldUseHttps != streamerNode->UseHttps) {
 					nosEngine.LogW("WebRTC Streamer: Server connection protocol mismatch! Server is using %s, but streamer's pin set to %s", shouldUseHttps ? "HTTPS" : "HTTP", streamerNode->UseHttps ? "HTTPS" : "HTTP");

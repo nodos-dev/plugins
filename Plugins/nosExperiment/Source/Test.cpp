@@ -107,8 +107,8 @@ public:
 	{
 		NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
 
-		auto a = *execParams.GetPinData<double>(NSN_in1);
-		auto b = *execParams.GetPinData<double>(NSN_in2);
+		auto a = *execParams.GetPinValue<double>(NSN_in1);
+		auto b = *execParams.GetPinValue<double>(NSN_in2);
 		auto c = a + b;
 		nosEngine.SetPinValue(params->FunctionNodeExecuteParams->Pins[2]->Id, { .Data = &c, .Size = sizeof(c) });
 		
@@ -178,7 +178,7 @@ struct PrintNode : nos::NodeContext
 	using NodeContext::NodeContext;
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		const char* log = params.GetPinData<const char*>(NOS_NAME("Log"));
+		const char* log = params.GetPinValue<const char*>(NOS_NAME("Log"));
 		nosEngine.LogI("Print: %s", log);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -220,7 +220,7 @@ struct TestPluginFunctions : PluginFunctions
 				NodeExecuteParams execParams(params->FunctionNodeExecuteParams);
 				nosEngine.LogI("NodeWithFunctions: TestFunction executed");
 				double res =
-					*execParams.GetPinData<double>(NOS_NAME("in1")) + *execParams.GetPinData<double>(NOS_NAME("in2"));
+					*execParams.GetPinValue<double>(NOS_NAME("in1")) + *execParams.GetPinValue<double>(NOS_NAME("in2"));
 				
 				nosEngine.SetPinValue(execParams[NOS_NAME("out")].Id, nos::Buffer::From(res));
 				nosEngine.SetPinDirty(execParams[NOS_NAME("OutTrigger")].Id);

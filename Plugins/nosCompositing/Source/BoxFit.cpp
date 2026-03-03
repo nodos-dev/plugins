@@ -12,7 +12,7 @@ struct BoxFitNode : NodeContext
 		auto outputTex = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
 		auto inputTexInfo = *sys::vulkan::GetResourceInfo(inputTex);
 		auto outputTexInfo = sys::vulkan::GetResourceInfo(outputTex);
-		const nos::fb::vec2u& resolution = *params.GetPinData<fb::vec2u>(NOS_NAME("Resolution"));
+		const nos::fb::vec2u& resolution = *params.GetPinValue<fb::vec2u>(NOS_NAME("Resolution"));
 
 		if (!outputTexInfo || resolution.x() != outputTexInfo->Width || resolution.y() != outputTexInfo->Height)
 		{

@@ -121,8 +121,8 @@ struct WebRTCSignalingServerNodeContext : nos::NodeContext {
 				
 				std::unique_lock<std::mutex> serverLock(serverNode->UpdateMutex);
 				nos::NodeExecuteParams nodeParams(params->ParentNodeExecuteParams);
-				int streamerPort = *nodeParams.GetPinData<int>(NSN_StreamerPort);
-				int playerPort = *nodeParams.GetPinData<int>(NSN_PlayerPort);
+				int streamerPort = *nodeParams.GetPinValue<int>(NSN_StreamerPort);
+				int playerPort = *nodeParams.GetPinValue<int>(NSN_PlayerPort);
 				if (!serverNode->p_server) {
 					serverNode->p_server.reset(new nosSignalingServer());
 					serverNode->RegisterCallbacks();

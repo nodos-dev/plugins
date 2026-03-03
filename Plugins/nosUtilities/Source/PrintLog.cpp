@@ -12,8 +12,8 @@ struct PrintLog : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		const char* log = params.GetPinData<const char>(NOS_NAME("Log"));
-		nos::log::LogLevel level = *params.GetPinData<nos::log::LogLevel>(NOS_NAME("LogLevel"));
+		const char* log = params.GetPinValue<const char>(NOS_NAME("Log"));
+		nos::log::LogLevel level = *params.GetPinValue<nos::log::LogLevel>(NOS_NAME("LogLevel"));
 		switch (level)
 		{
 		case nos::log::LogLevel::TRACE:

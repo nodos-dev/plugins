@@ -123,12 +123,12 @@ struct IndexOfNode : NodeContext
 
 		auto indexPinId = *GetPinId(NSN_Index);
 
-		auto* vec = params.GetPinData<VectorObjectData<uint8_t>>(NSN_InputArray);
+		auto* vec = params.GetPinValue<VectorObjectData<uint8_t>>(NSN_InputArray);
 		const void* value{};
 		if (!type->ByteSize && type->BaseType != NOS_BASE_TYPE_STRING)
-			value = (void*)params.GetPinData<flatbuffers::Table>(NSN_Value);
+			value = (void*)params.GetPinValue<flatbuffers::Table>(NSN_Value);
 		else
-			value = params.GetPinData<void>(NSN_Value);
+			value = params.GetPinValue<void>(NSN_Value);
 		int index =	-1;
 		if (type->ByteSize)
 		{

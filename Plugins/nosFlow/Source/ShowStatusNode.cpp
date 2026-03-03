@@ -10,10 +10,10 @@ namespace nos::flow
 		nosResult ExecuteNode(NodeExecuteParams const& params) override
 		{
 			std::string statusMessage = "";
-			const char* statusMsg = params.GetPinData<const char*>(NOS_NAME("Status"));
+			const char* statusMsg = params.GetPinValue<const char*>(NOS_NAME("Status"));
 			if(strlen(statusMsg) > 0)
 				statusMessage = std::string(statusMsg);
-			fb::NodeStatusMessageType statusType = *params.GetPinData<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
+			fb::NodeStatusMessageType statusType = *params.GetPinValue<fb::NodeStatusMessageType>(NOS_NAME("StatusType"));
 			if (StatusMessage == statusMessage && StatusType == statusType)
 			{
 				return NOS_RESULT_SUCCESS;

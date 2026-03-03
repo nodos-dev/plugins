@@ -19,8 +19,8 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* execParams)
 	auto inTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Input);
 	auto outTex = params.GetPinObject<sys::vulkan::Texture>(NSN_Output);
 
-	auto channel = *params.GetPinData<uint32_t>(NSN_Channel);
-	auto format = *params.GetPinData<uint32_t>(NSN_Format);
+	auto channel = *params.GetPinValue<uint32_t>(NSN_Channel);
+	auto format = *params.GetPinValue<uint32_t>(NSN_Format);
 
 	glm::vec4 val{};
 	val[channel & 3] = 1;

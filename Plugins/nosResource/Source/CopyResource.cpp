@@ -52,7 +52,7 @@ struct CopyResourceNode : NodeContext
 		auto source = params.GetPinObject(NOS_NAME("Source"));
 		auto destination = params.GetPinObject(NOS_NAME("Destination"));
 		auto inEventHolder = params.GetPinObject<sys::vulkan::GPUEventHolder>(NOS_NAME("InGPUEventHolder"));
-		bool preferTransferQueue = *params.GetPinData<bool>(NOS_NAME("PreferTransferQueue"));
+		bool preferTransferQueue = *params.GetPinValue<bool>(NOS_NAME("PreferTransferQueue"));
 		nosCmd cmd{};
 		nosCmdBeginParams beginParams{
 			.Name = NOS_NAME("Resource Copy"),

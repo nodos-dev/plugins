@@ -10,8 +10,8 @@ struct AndNode : NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto& A = *params.GetPinData<bool>(NOS_NAME("A"));
-		auto& B = *params.GetPinData<bool>(NOS_NAME("B"));
+		auto& A = *params.GetPinValue<bool>(NOS_NAME("A"));
+		auto& B = *params.GetPinValue<bool>(NOS_NAME("B"));
 		SetPinValue(NOS_NAME("AndResult"), A && B);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -21,8 +21,8 @@ struct OrNode : NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto& A = *params.GetPinData<bool>(NOS_NAME("A"));
-		auto& B = *params.GetPinData<bool>(NOS_NAME("B"));
+		auto& A = *params.GetPinValue<bool>(NOS_NAME("A"));
+		auto& B = *params.GetPinValue<bool>(NOS_NAME("B"));
 		SetPinValue(NOS_NAME("OrResult"), A || B);
 		return NOS_RESULT_SUCCESS;
 	}
@@ -32,7 +32,7 @@ struct NotNode : NodeContext
 {
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto& X = *params.GetPinData<bool>(NOS_NAME("X"));
+		auto& X = *params.GetPinValue<bool>(NOS_NAME("X"));
 		SetPinValue(NOS_NAME("NotX"), !X);
 		return NOS_RESULT_SUCCESS;
 	}

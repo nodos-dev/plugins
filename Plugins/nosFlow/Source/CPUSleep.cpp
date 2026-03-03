@@ -13,8 +13,8 @@ struct CPUSleepNode : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		bool busyWait = *params.GetPinData<bool>(NSN_BusyWait);
-		auto milliseconds = *params.GetPinData<double>(NSN_WaitTimeMS);
+		bool busyWait = *params.GetPinValue<bool>(NSN_BusyWait);
+		auto milliseconds = *params.GetPinValue<double>(NSN_WaitTimeMS);
 		if (busyWait)
 		{
 			auto end = std::chrono::high_resolution_clock::now() + std::chrono::nanoseconds(uint64_t(milliseconds * 1.0e6));

@@ -115,12 +115,12 @@ public:
 
 		for (int i = 0; i < 4; ++i)
 		{
-			Params[i].Resolution = *params.GetPinData<ivec2>(NSN_TextureResolutions(i));
-			Params[i].Pan = *params.GetPinData<ivec2>(NSN_TexturePans(i));
-			Params[i].Rotation = *params.GetPinData<float>(NSN_TextureRotations(i));
+			Params[i].Resolution = *params.GetPinValue<ivec2>(NSN_TextureResolutions(i));
+			Params[i].Pan = *params.GetPinValue<ivec2>(NSN_TexturePans(i));
+			Params[i].Rotation = *params.GetPinValue<float>(NSN_TextureRotations(i));
 		}
 
-		uvec2 outResolution = *params.GetPinData<uvec2>(NSN_OutputResolution);
+		uvec2 outResolution = *params.GetPinValue<uvec2>(NSN_OutputResolution);
 
 		auto outputTexture = params.GetPinObject(NSN_Output);
 
@@ -131,7 +131,7 @@ public:
 		nosCmdBeginParams bp = {.Name = nos::Name("ExecuteNode"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};
 		nosVulkan->Begin(&bp);
 
-		bool alphaBlend = *params.GetPinData<bool>(NOS_NAME_STATIC("AlphaBlend"));
+		bool alphaBlend = *params.GetPinValue<bool>(NOS_NAME_STATIC("AlphaBlend"));
 
 		nosRunPass2Params pass{};
 		pass.Wireframe = false;
@@ -239,7 +239,7 @@ private:
 
 
 	bool RequestNewTextureSize(nosName name,
-	                           nosTextureObject& texture,
+	                           nos::ObjectRef& texture,
 	                           uvec2 requiredResolution)
 	{
 		auto info = *nos::sys::vulkan::GetResourceInfo(texture);

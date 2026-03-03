@@ -33,7 +33,7 @@ struct ToggleContext : public NodeContext
 	{
 		auto context = (ToggleContext*)ctx;
 		nos::NodeExecuteParams params = fnParams->ParentNodeExecuteParams;
-		bool newValue = !*params.GetPinData<bool>(NSN_Value);
+		bool newValue = !*params.GetPinValue<bool>(NSN_Value);
 		context->SetPinValue<bool>(NSN_Value, newValue);
 		return NOS_RESULT_SUCCESS;
 	}

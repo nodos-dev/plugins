@@ -11,8 +11,8 @@ void RegisterAddTrack(nosNodeFunctions* funcs) {
 	funcs->ExecuteNode = [](void*, nosNodeExecuteParams* execParams) {
 		NodeExecuteParams params(execParams);
 		// TODO: Remove these once generic table aritmetic ops are supported
-		auto* xTrack = params.GetPinData<track::Track>(NOS_NAME("X"));
-		auto* yTrack = params.GetPinData<track::Track>(NOS_NAME("Y"));
+		auto* xTrack = params.GetPinValue<track::Track>(NOS_NAME("X"));
+		auto* yTrack = params.GetPinValue<track::Track>(NOS_NAME("Y"));
 		track::TTrack sumTrack;
 		xTrack->UnPackTo(&sumTrack);
 		reinterpret_cast<glm::vec3&>(sumTrack.location) += reinterpret_cast<const glm::vec3&>(*yTrack->location());

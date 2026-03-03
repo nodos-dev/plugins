@@ -15,9 +15,9 @@ struct PartialTextureCopy : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		auto input = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Input"));
-		auto srcOffset = params.GetPinData<nos::fb::vec2i>(NOS_NAME("SrcOffset"));
-		auto dstOffset = params.GetPinData<nos::fb::vec2i>(NOS_NAME("DstOffset"));
-		auto size = params.GetPinData<nos::fb::vec2u>(NOS_NAME("Size"));
+		auto srcOffset = params.GetPinValue<nos::fb::vec2i>(NOS_NAME("SrcOffset"));
+		auto dstOffset = params.GetPinValue<nos::fb::vec2i>(NOS_NAME("DstOffset"));
+		auto size = params.GetPinValue<nos::fb::vec2u>(NOS_NAME("Size"));
 		auto output = params.GetPinObject<sys::vulkan::Texture>(NOS_NAME("Output"));
 
 		if (!input || !output)

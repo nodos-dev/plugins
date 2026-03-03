@@ -25,7 +25,7 @@ struct CanvasMapperContext : public NodeContext
 
 		auto output = *nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Output));
 		auto outputSize = glm::vec2(output.Texture.Width, output.Texture.Height);
-		auto rgss = *params.GetPinData<bool>(NOS_NAME_STATIC("RGSS"));
+		auto rgss = *params.GetPinValue<bool>(NOS_NAME_STATIC("RGSS"));
 
 		std::array<nos::fb::vec2, 16> pos = {};
 		std::array<nos::fb::vec2, 16> sca = {};
@@ -63,7 +63,7 @@ struct CanvasMapperContext : public NodeContext
 		if (0 == count)
 			return NOS_RESULT_SUCCESS;
 
-		auto backgroundColor = *params.GetPinData<nosVec4>(NOS_NAME_STATIC("BackgroundColor"));
+		auto backgroundColor = *params.GetPinValue<nosVec4>(NOS_NAME_STATIC("BackgroundColor"));
 		std::vector bindings = {
 			nos::sys::vulkan::ShaderTextureArrayBinding(
 				NOS_NAME_STATIC("Textures"),

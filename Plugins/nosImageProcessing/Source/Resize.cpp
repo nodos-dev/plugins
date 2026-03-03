@@ -55,10 +55,10 @@ struct ResizeNode : nos::NodeContext
 	nosResult ExecuteNode(nos::NodeExecuteParams const& nodeParams) override
 	{
 		auto inTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Input);
-		auto method = *nodeParams.GetPinData<uint32_t>(NSN_Method);
+		auto method = *nodeParams.GetPinValue<uint32_t>(NSN_Method);
 
 		auto outTex = nodeParams.GetPinObject<sys::vulkan::Texture>(NSN_Output);
-		auto& size = *nodeParams.GetPinData<nosVec2u>(NSN_Size);
+		auto& size = *nodeParams.GetPinValue<nosVec2u>(NSN_Size);
 
 		auto outTexInfo = sys::vulkan::GetResourceInfo(outTex);
 

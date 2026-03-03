@@ -35,7 +35,7 @@ struct DilateAlphaContext : public NodeContext
 		nos::fb::vec2 texelSize(1.f / outInfo.Texture.Width, 1.f / outInfo.Texture.Height);
 		nos::fb::vec2 horizontal(1.0, 0.0);
 		nos::fb::vec2 vertical(0.0, 1.0);
-		fb::vec2 radius = *params.GetPinData<fb::vec2>(NSN_Radius);
+		fb::vec2 radius = *params.GetPinValue<fb::vec2>(NSN_Radius);
 
 		nosCmd cmd;
 		nosCmdBeginParams bp = {.Name = nos::Name("DilateAlpha"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};

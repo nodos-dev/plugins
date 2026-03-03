@@ -80,8 +80,8 @@ struct Cube3DLUTContext : NodeContext
 			std::string status = LoadedLutName;
 			UpdateNodeStatus(status, fb::NodeStatusMessageType::INFO);
 
-			f32 domainGamma = *params.GetPinData<f32>(nos::Name("InputGamma"));
-			f32 rangeGamma = *params.GetPinData<f32>(nos::Name("OutputGamma"));
+			f32 domainGamma = *params.GetPinValue<f32>(nos::Name("InputGamma"));
+			f32 rangeGamma = *params.GetPinValue<f32>(nos::Name("OutputGamma"));
 
 			std::vector<nosShaderBinding> bindings = {
 				nos::sys::vulkan::ShaderTextureBinding(NSN_In, params.GetPinObject(NSN_In), NOS_TEXTURE_FILTER_LINEAR),
@@ -202,7 +202,7 @@ struct Cube3DLUTContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 		*outFunctionNames = NOS_NAME_STATIC("Load LUT File");
 		*outFunction = [](void* ctx, nosFunctionExecuteParams* params) {
-			const char* path = nos::NodeExecuteParams(params->FunctionNodeExecuteParams).GetPinData<const char*>(
+			const char* path = nos::NodeExecuteParams(params->FunctionNodeExecuteParams).GetPinValue<const char*>(
 				nos::Name("LUT File"));
 			return ((Cube3DLUTContext*)ctx)->LoadLUTFile(path);
 		};

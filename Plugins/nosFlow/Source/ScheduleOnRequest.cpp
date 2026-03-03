@@ -62,7 +62,7 @@ struct ScheduleOnRequestNode : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		SetPinValue(NSN_Output, params.GetPinObject(NSN_Input));
+		SetPinObject(NSN_Output, params.GetPinObject(NSN_Input));
 		nosEngine.TriggerNodeEvent(NodeId, NSN_OnResponse);
 		ExecuteForOnceAtCreation = false;
 		return NOS_RESULT_SUCCESS;

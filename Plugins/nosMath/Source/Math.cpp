@@ -114,8 +114,8 @@ nosResult AddTransform(void* ctx, nosNodeExecuteParams* params)
 {
 	NodeExecuteParams execParams(params);
 	nos::Buffer outBuf = execParams.GetPinBuffer(NSN_Z);
-	FieldIterator<fb::Transform>([X = execParams.GetPinData<uint8_t>(NSN_X),
-								  Y = execParams.GetPinData<uint8_t>(NSN_Y),
+	FieldIterator<fb::Transform>([X = execParams.GetPinValue<uint8_t>(NSN_X),
+								  Y = execParams.GetPinValue<uint8_t>(NSN_Y),
 								  Z = outBuf.As<uint8_t>()]<u32 i, class T>(auto O) {
 		if constexpr (i == 2) (T&)O[Z] = (T&)O[X] * (T&)O[Y];
 		else (T&)O[Z] = (T&)O[X] + (T&)O[Y];
@@ -185,7 +185,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			node->ExecuteNode = [](void* ctx, nosNodeExecuteParams* params)
 				{
 				NodeExecuteParams execParams(params);
-					auto fov = *execParams.GetPinData<float>(NSN_FOV);
+					auto fov = *execParams.GetPinValue<float>(NSN_FOV);
 
 					// Sanity checks
 					static_assert(alignof(glm::vec3) == alignof(nos::fb::vec3));
@@ -194,8 +194,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 					static_assert(sizeof(glm::mat4) == sizeof(nos::fb::mat4));
 
 					// glm::dvec3 is compatible with nos::fb::vec3d so it's safe to cast
-					auto const& rot = *execParams.GetPinData<glm::vec3>(NSN_Rotation);
-					auto const& pos = *execParams.GetPinData<glm::vec3>(NSN_Position);
+					auto const& rot = *execParams.GetPinValue<glm::vec3>(NSN_Rotation);
+					auto const& pos = *execParams.GetPinValue<glm::vec3>(NSN_Position);
 					auto perspective = glm::perspective(fov, 16.f / 9.f, 10.f, 10000.f);
 					auto view = glm::eulerAngleXYZ(rot.x, rot.y, rot.z);
 					SetPinValue(execParams[NSN_Transformation].Id, perspective * view);

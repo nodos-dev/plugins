@@ -25,8 +25,8 @@ namespace nos::compositing
 	nosResult NOSAPI_CALL ExecuteFreeLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);
-		auto& outSize = *args.GetPinData<nos::fb::vec2u>(NOS_NAME("OutputSize"));
-		auto items = args.GetPinData<flatbuffers::Vector<const FreeLayoutItem*>>(NOS_NAME("Items"));
+		auto& outSize = *args.GetPinValue<nos::fb::vec2u>(NOS_NAME("OutputSize"));
+		auto items = args.GetPinValue<flatbuffers::Vector<const FreeLayoutItem*>>(NOS_NAME("Items"));
 
 		int textureId = 0;
 		std::vector<LayoutDrawItem> drawItems;
@@ -53,12 +53,12 @@ namespace nos::compositing
 	{
 		nos::NodeExecuteParams args(params);
 		// Get grid size from input pins
-		uint32_t columns = *args.GetPinData<uint32_t>(NOS_NAME("Columns"));
-		uint32_t rows = *args.GetPinData<uint32_t>(NOS_NAME("Rows"));
+		uint32_t columns = *args.GetPinValue<uint32_t>(NOS_NAME("Columns"));
+		uint32_t rows = *args.GetPinValue<uint32_t>(NOS_NAME("Rows"));
 		if (columns == 0 || rows == 0) return NOS_RESULT_SUCCESS;
 
 		// Get items array
-		auto items = args.GetPinData<flatbuffers::Vector<const GridLayoutItem*>>(NOS_NAME("Items"));
+		auto items = args.GetPinValue<flatbuffers::Vector<const GridLayoutItem*>>(NOS_NAME("Items"));
 		std::vector<LayoutDrawItem> drawItems;
 		drawItems.reserve(items->size());
 		int textureId = 0;
@@ -87,8 +87,8 @@ namespace nos::compositing
 	nosResult NOSAPI_CALL ExecuteFreeOutputLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);
-		auto items = args.GetPinData<flatbuffers::Vector<const FreeOutputItem*>>(NOS_NAME("Items"));
-		auto totalResolution = args.GetPinData<nos::fb::vec2u>(NOS_NAME("Resolution"));
+		auto items = args.GetPinValue<flatbuffers::Vector<const FreeOutputItem*>>(NOS_NAME("Items"));
+		auto totalResolution = args.GetPinValue<nos::fb::vec2u>(NOS_NAME("Resolution"));
 
 		std::vector<LayoutOutputInfo> outputs;
 		outputs.reserve(items->size());
@@ -121,11 +121,11 @@ namespace nos::compositing
 	nosResult NOSAPI_CALL ExecuteGridOutputLayout(void* _, nosNodeExecuteParams* params)
 	{
 		nos::NodeExecuteParams args(params);
-		uint32_t columns = *args.GetPinData<uint32_t>(NOS_NAME("Columns"));
-		uint32_t rows = *args.GetPinData<uint32_t>(NOS_NAME("Rows"));
+		uint32_t columns = *args.GetPinValue<uint32_t>(NOS_NAME("Columns"));
+		uint32_t rows = *args.GetPinValue<uint32_t>(NOS_NAME("Rows"));
 		if (columns == 0 || rows == 0) return NOS_RESULT_SUCCESS;
 
-		auto items = args.GetPinData<flatbuffers::Vector<const GridOutputItem*>>(NOS_NAME("Items"));
+		auto items = args.GetPinValue<flatbuffers::Vector<const GridOutputItem*>>(NOS_NAME("Items"));
 		std::vector<LayoutOutputInfo> outputs;
 		outputs.reserve(items->size());
 		for (auto itemPtr : *items)

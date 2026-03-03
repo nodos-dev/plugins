@@ -113,11 +113,11 @@ struct LayoutDrawerNode : NodeContext
 //	{
 //		nos::NodeExecuteParams args(params);
 //		auto const& drawItems =
-//			*args.GetPinData<flatbuffers::Vector<layout::LayoutDrawItem const*>>(NOS_NAME("LayoutDrawItems"));
+//			*args.GetPinValue<flatbuffers::Vector<layout::LayoutDrawItem const*>>(NOS_NAME("LayoutDrawItems"));
 //		auto const& outputInfos =
-//			*args.GetPinData<flatbuffers::Vector<layout::LayoutOutputInfo const*>>(NOS_NAME("LayoutOutputInfos"));
+//			*args.GetPinValue<flatbuffers::Vector<layout::LayoutOutputInfo const*>>(NOS_NAME("LayoutOutputInfos"));
 //		auto* outputs =
-//			args.GetPinData<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(NSN_OutputTextures);
+//			args.GetPinValue<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(NSN_OutputTextures);
 //
 //		OutTextures.clear();
 //		bool outsChanged = false;
@@ -172,11 +172,11 @@ struct LayoutDrawerNode : NodeContext
 //		if (outsChanged)
 //		{
 //			UpdateOutputTexturesPin();
-//			outputs = args.GetPinData<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(
+//			outputs = args.GetPinValue<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(
 //				NSN_OutputTextures);
 //		}
 //
-//		auto& inTexturesFb = *args.GetPinData<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(
+//		auto& inTexturesFb = *args.GetPinValue<flatbuffers::Vector<flatbuffers::Offset<nos::sys::vulkan::Texture>>>(
 //			NOS_NAME("InputTextures"));
 //		std::vector<nosResourceShareInfo> inTextures;
 //		inTextures.reserve(inTexturesFb.size());
@@ -237,7 +237,7 @@ struct LayoutDrawerNode : NodeContext
 //			DrawOut(cmd, inTextures, drawItemsForOut, outTex);
 //		}
 //
-//		if (*args.GetPinData<bool>(NOS_NAME("PreviewEnabled")))
+//		if (*args.GetPinValue<bool>(NOS_NAME("PreviewEnabled")))
 //		{
 //			auto preview = vkss::DeserializeTextureInfo(args[NSN_Preview].Data->Data);
 //			if (preview.Memory.Handle != 0)

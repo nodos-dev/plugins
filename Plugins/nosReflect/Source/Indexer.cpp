@@ -148,7 +148,7 @@ struct Indexer : NodeContext
 		
 		ArraySize = vecObj.GetSize();
 
-		if (!SetIndex(*params.GetPinData<uint32_t>(NSN_Index)))
+		if (!SetIndex(*params.GetPinValue<uint32_t>(NSN_Index)))
 			return NOS_RESULT_SUCCESS;
 
 		auto elem = vecObj.GetElement(Index);

@@ -10,8 +10,8 @@ struct TokenizerNode : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto text = params.GetPinData<const char>(NOS_NAME("Text"));
-		auto delimiter = params.GetPinData<const char>(NOS_NAME("Delimiter"));
+		auto text = params.GetPinValue<const char>(NOS_NAME("Text"));
+		auto delimiter = params.GetPinValue<const char>(NOS_NAME("Delimiter"));
 		auto tokensPinId = *GetPinId(NOS_NAME("Tokens"));
 		
 		std::vector<std::string> tokens;

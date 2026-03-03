@@ -36,16 +36,16 @@ struct BoxBlurContext : public NodeContext
         
         nos::ObjectRef IntermediateTexture = SetupIntermediateTexture(&outInfo);
         
-		float RedBlend   = *params.GetPinData<float>(NSN_RedBlend);
-		float GreenBlend = *params.GetPinData<float>(NSN_GreenBlend);
-		float BlueBlend  = *params.GetPinData<float>(NSN_BlueBlend);
-		float AlphaBlend = *params.GetPinData<float>(NSN_AlphaBlend);
+		float RedBlend   = *params.GetPinValue<float>(NSN_RedBlend);
+		float GreenBlend = *params.GetPinValue<float>(NSN_GreenBlend);
+		float BlueBlend  = *params.GetPinValue<float>(NSN_BlueBlend);
+		float AlphaBlend = *params.GetPinValue<float>(NSN_AlphaBlend);
 
 		nos::fb::vec2 texelSize(1.f / outInfo.Texture.Width,
 								1.f / outInfo.Texture.Height);
 		nos::fb::vec2 horizontal(1.0, 0.0);
 		nos::fb::vec2 vertical(0.0, 1.0);
-		fb::vec2 blurSize = *params.GetPinData<fb::vec2>(NSN_BlurSize);
+		fb::vec2 blurSize = *params.GetPinValue<fb::vec2>(NSN_BlurSize);
 
 		nosCmd cmd;
 		nosCmdBeginParams bp = {.Name = nos::Name("Blur"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};

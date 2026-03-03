@@ -204,7 +204,7 @@ struct SwitchTrigger : NodeContext
 	nosResult Switch(nosFunctionExecuteParams* functionExecParams)
 	{
 		NodeExecuteParams params(functionExecParams->FunctionNodeExecuteParams);
-		int caseNum = *params.GetPinData<int>(NOS_NAME("Case"));
+		int caseNum = *params.GetPinValue<int>(NOS_NAME("Case"));
 		functionExecParams->MarkOutExeDirty = false;
 		for (auto& [pinId, pinCaseInfo] : FuncPinIdToCaseMap)
 		{

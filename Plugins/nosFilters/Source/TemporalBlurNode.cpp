@@ -56,7 +56,7 @@ public:
 			UpdateTextureFormat(History[i], { inputTextureInfo.Texture.Width, inputTextureInfo.Texture.Height }, "History texture", inputTextureInfo.Texture.Format);
 		}
 
-		int framesCount = *params.GetPinData<int>(NSN_FramesCount);
+		int framesCount = *params.GetPinValue<int>(NSN_FramesCount);
 
 		nosCmd cmd;
 		nosCmdBeginParams bp = {.Name = nos::Name("Copy History"), .AssociatedNodeId = NodeId, .OutCmdHandle = &cmd};

@@ -254,7 +254,7 @@ struct EvalNodeContext : NodeContext
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		for (auto const& [pinId, value] : Variables)
-			Variables[pinId] = *params.GetPinData<double>(*GetPinName(pinId));
+			Variables[pinId] = *params.GetPinValue<double>(*GetPinName(pinId));
 
 		try
 		{

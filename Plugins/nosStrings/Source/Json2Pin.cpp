@@ -16,7 +16,7 @@ struct Json2PinNode : NodeContext
 			SetNodeStatusMessages({{{}, "Out pin is not connected to typed pin", fb::NodeStatusMessageType::FAILURE, "", 5, true, true}});
 			return NOS_RESULT_FAILED;
 		}
-		if (auto buf = GenerateBufferFromJson(outPin.TypeName, params.GetPinData<const char*>(NOS_NAME("Json"))))
+		if (auto buf = GenerateBufferFromJson(outPin.TypeName, params.GetPinValue<const char*>(NOS_NAME("Json"))))
 		{
 			SetPinValue(outPin.Id, *buf);
 			ClearNodeStatusMessages();

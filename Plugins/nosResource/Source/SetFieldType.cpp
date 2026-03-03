@@ -57,7 +57,7 @@ struct SetFieldType : NodeContext
 		if (!TypeInfo || TypeInfo->TypeName == NSN_Generic)
 			return NOS_RESULT_FAILED;
 		auto inputObj = params.GetPinObject(NOS_NAME("Input"));
-		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
+		auto fieldType = *params.GetPinValue<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		if (!inputObj)
 			return NOS_RESULT_FAILED;
 		nosVulkan->SetResourceFieldType(inputObj, nosTextureFieldType(fieldType));

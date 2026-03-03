@@ -13,8 +13,8 @@ struct RegexNode : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		const char* expression = params.GetPinData<const char>(NOS_NAME("RegularExpression"));
-		const char* text = params.GetPinData<const char>(NOS_NAME("Input"));
+		const char* expression = params.GetPinValue<const char>(NOS_NAME("RegularExpression"));
+		const char* text = params.GetPinValue<const char>(NOS_NAME("Input"));
 		std::string inputCopy = text;
 
 		auto& outMatchPin = params[NOS_NAME("Match")].Id;

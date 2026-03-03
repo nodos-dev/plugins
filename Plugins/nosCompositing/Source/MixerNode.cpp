@@ -527,10 +527,10 @@ struct MixerContext : public NodeContext
 
 	void UpdateDebugTextsIfNeeded(nos::NodeExecuteParams const& params)
 	{
-		u32 programChannelIndex = *params.GetPinData<u32>(NSN_ProgramChannel);
+		u32 programChannelIndex = *params.GetPinValue<u32>(NSN_ProgramChannel);
 		bool programChannelIndexChanged = programChannelIndex != LastProgramDebugChannelIndex;
 		LastProgramDebugChannelIndex = programChannelIndex;
-		u32 previewChannelIndex = *params.GetPinData<u32>(NSN_PreviewChannel);
+		u32 previewChannelIndex = *params.GetPinValue<u32>(NSN_PreviewChannel);
 		bool previewChannelIndexChanged = previewChannelIndex != LastPreviewDebugChannelIndex;
 		LastPreviewDebugChannelIndex = previewChannelIndex;
 
@@ -729,24 +729,24 @@ struct MixerContext : public NodeContext
 
 	void Calculate_Program(nos::NodeExecuteParams const& params, nosCmd& cmd)
 	{
-		bool isInTransition = *params.GetPinData<bool>(NSN_IsInTransition);
+		bool isInTransition = *params.GetPinValue<bool>(NSN_IsInTransition);
 		bool NeedsTransition = isInTransition && TransitionTarget == MixerTransitionTarget::Program;
 		if (NeedsTransition)
 		{
 			Calculate_Transition(params, cmd);
 		}
 
-		u32 programChannelIndex = *params.GetPinData<u32>(NSN_ProgramChannel);
+		u32 programChannelIndex = *params.GetPinValue<u32>(NSN_ProgramChannel);
 		auto baseTexture = NeedsTransition
 			                   ? getTransitionTextureInfo(params)
 			                   : GetChannelTexture(params, programChannelIndex);
 		auto overlayTexture = params.GetPinObject(NSN_Overlay);
 		auto outputTexture = params.GetPinObject(NSN_Program);
 		auto OverlayOpacity = bIsOverlayConnected
-			                      ? *params.GetPinData<float>(NSN_Opacity)
+			                      ? *params.GetPinValue<float>(NSN_Opacity)
 			                      : 0.0f;
 		auto overlayUV = glm::vec4(0.0, 0.0, 1.0, 1.0);
-		auto blendingMode = *params.GetPinData<bool>(NSN_Premultiply) ? 1 : 0;
+		auto blendingMode = *params.GetPinValue<bool>(NSN_Premultiply) ? 1 : 0;
 
 		nosRunPassParams programPassParams = {};
 		programPassParams.Key = NSN_MIXER_OVERLAY_PASS;
@@ -781,24 +781,24 @@ struct MixerContext : public NodeContext
 
 	void Calculate_Preview(nos::NodeExecuteParams const& params, nosCmd& cmd)
 	{
-		bool isInTransition = *params.GetPinData<bool>(NSN_IsInTransition);
+		bool isInTransition = *params.GetPinValue<bool>(NSN_IsInTransition);
 		bool NeedsTransition = isInTransition && TransitionTarget == MixerTransitionTarget::Preview;
 		if (NeedsTransition)
 		{
 			Calculate_Transition(params, cmd);
 		}
 
-		u32 previewChannelIndex = *params.GetPinData<u32>(NSN_PreviewChannel);
+		u32 previewChannelIndex = *params.GetPinValue<u32>(NSN_PreviewChannel);
 		auto baseTexture = NeedsTransition
 			                   ? getTransitionTextureInfo(params)
 			                   : GetChannelTexture(params, previewChannelIndex);
 		auto overlayTexture = params.GetPinObject(NSN_Overlay);
 		auto outputTexture = params.GetPinObject(NSN_Preview);
-		auto OverlayOpacity = (bIsOverlayConnected && *params.GetPinData<bool>(NSN_OverlayPreview))
-			                      ? *params.GetPinData<float>(NSN_Opacity)
+		auto OverlayOpacity = (bIsOverlayConnected && *params.GetPinValue<bool>(NSN_OverlayPreview))
+			                      ? *params.GetPinValue<float>(NSN_Opacity)
 			                      : 0.0f;
 		auto overlayUV = glm::vec4(0.0, 0.0, 1.0, 1.0);
-		auto blendingMode = *params.GetPinData<bool>(NSN_Premultiply) ? 1 : 0;
+		auto blendingMode = *params.GetPinValue<bool>(NSN_Premultiply) ? 1 : 0;
 
 		nosRunPassParams previewPassParams = {};
 		previewPassParams.Key = NSN_MIXER_OVERLAY_PASS;
@@ -848,8 +848,8 @@ struct MixerContext : public NodeContext
 			1.0f / outputTextureInfo.Texture.Width,
 			1.0f / outputTextureInfo.Texture.Height
 			);
-		u32 programChannelIndex = *params.GetPinData<u32>(NSN_ProgramChannel);
-		u32 previewChannelIndex = *params.GetPinData<u32>(NSN_PreviewChannel);
+		u32 programChannelIndex = *params.GetPinValue<u32>(NSN_ProgramChannel);
+		u32 previewChannelIndex = *params.GetPinValue<u32>(NSN_PreviewChannel);
 		auto programTexture = params.GetPinObject(NSN_Program);
 		auto previewTexture = params.GetPinObject(NSN_Preview);
 
@@ -907,7 +907,7 @@ struct MixerContext : public NodeContext
 
 	void Calculate_Transition(nos::NodeExecuteParams const& params, nosCmd& cmd)
 	{
-		float amount = *params.GetPinData<float>(NSN_Amount);;
+		float amount = *params.GetPinValue<float>(NSN_Amount);;
 		auto programTexture = GetChannelTexture(params, TransitionProgramChannel);
 		auto previewTexture = GetChannelTexture(params, TransitionPreviewChannel);
 
@@ -1009,15 +1009,15 @@ struct MixerContext : public NodeContext
 		if (context->bIsInTransition)
 			return NOS_RESULT_SUCCESS;
 
-		u32 programChannelIndex = *nodeParams.GetPinData<u32>(NSN_ProgramChannel);
-		u32 previewChannelIndex = *nodeParams.GetPinData<u32>(NSN_PreviewChannel);
+		u32 programChannelIndex = *nodeParams.GetPinValue<u32>(NSN_ProgramChannel);
+		u32 previewChannelIndex = *nodeParams.GetPinValue<u32>(NSN_PreviewChannel);
 		if (programChannelIndex == previewChannelIndex)
 			return NOS_RESULT_SUCCESS;
 
 		auto fnParams = nos::NodeExecuteParams(functionExecParams);
 
-		auto transitionType = *fnParams.GetPinData<MixerTransitionType>(NSN_Type);
-		auto transitionTarget = *fnParams.GetPinData<MixerTransitionTarget>(NSN_Target);
+		auto transitionType = *fnParams.GetPinValue<MixerTransitionType>(NSN_Type);
+		auto transitionTarget = *fnParams.GetPinValue<MixerTransitionTarget>(NSN_Target);
 
 		if (transitionType == MixerTransitionType::Cut)
 		{
@@ -1029,11 +1029,11 @@ struct MixerContext : public NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		context->TransitionDuration = *fnParams.GetPinData<float>(NSN_Duration);
-		context->WipeWidth = *fnParams.GetPinData<float>(NSN_WipeWidth);
-		context->TransitionInterp = *fnParams.GetPinData<TransitionInterpolation>(NSN_Interpolation);
-		context->TransitionEaseExponent = *fnParams.GetPinData<float>(NSN_EaseExponent);
-		context->TransitionStepCount = *fnParams.GetPinData<u32>(NSN_StepCount);
+		context->TransitionDuration = *fnParams.GetPinValue<float>(NSN_Duration);
+		context->WipeWidth = *fnParams.GetPinValue<float>(NSN_WipeWidth);
+		context->TransitionInterp = *fnParams.GetPinValue<TransitionInterpolation>(NSN_Interpolation);
+		context->TransitionEaseExponent = *fnParams.GetPinValue<float>(NSN_EaseExponent);
+		context->TransitionStepCount = *fnParams.GetPinValue<u32>(NSN_StepCount);
 		context->TransitionType = transitionType;
 		context->TransitionTarget = transitionTarget;
 		context->TransitionProgramChannel = programChannelIndex;

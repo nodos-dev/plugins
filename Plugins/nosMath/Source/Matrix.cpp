@@ -13,9 +13,9 @@ struct TransformNodeContext : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto* rhs = params.GetPinData<fb::mat4>(NOS_NAME("A"));
-		auto* lhs = params.GetPinData<fb::mat4>(NOS_NAME("B"));
-		fb::mat4 out = *params.GetPinData<fb::mat4>(NOS_NAME("Result"));
+		auto* rhs = params.GetPinValue<fb::mat4>(NOS_NAME("A"));
+		auto* lhs = params.GetPinValue<fb::mat4>(NOS_NAME("B"));
+		fb::mat4 out = *params.GetPinValue<fb::mat4>(NOS_NAME("Result"));
 
 		std::array o = { &out.mutable_x(), &out.mutable_y(), &out.mutable_z(), &out.mutable_w() };
 		std::array l = { &lhs->x(), &lhs->y(), &lhs->z(), &lhs->w() };
@@ -41,7 +41,7 @@ struct ToTransformMatrixNodeContext : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto* xform = params.GetPinData<fb::Transform>(NOS_NAME("Transform"));
+		auto* xform = params.GetPinValue<fb::Transform>(NOS_NAME("Transform"));
 
 		auto pos = xform->position();
 		auto rot = xform->rotation();
@@ -87,7 +87,7 @@ struct MatrixOperationNodeContext : NodeContext
 	template <typename T>
 	void ApplyOperation(nos::NodeExecuteParams const& params)
 	{
-		const T* in = params.GetPinData<T>(NOS_NAME("In"));
+		const T* in = params.GetPinValue<T>(NOS_NAME("In"));
 		T out{};
 #define OP(ty, glmty)								\
 			if constexpr (std::is_same_v<T, ty>)				\
