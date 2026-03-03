@@ -273,6 +273,7 @@ nosResult NOSAPI_CALL RegisterEvent(const nosRegisterEventParams* params)
 	eventGroup.Events[nextId] = {
 		.Id = nextId,
 		.PathGroupId = *pathGroupId,
+		.EventGroupId = eventGroup.Id,
 		.PfnReset = params->ResetFn,
 		.PfnWait = params->WaitFn,
 		.PfnNotifySyncGroupHealth = notifyHealthFn,
