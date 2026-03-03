@@ -491,10 +491,9 @@ nosResult NOSAPI_CALL WaitForConsensus(uint32_t eventId, uint64_t* outTimestamp,
 		event->NotifyHealth(&groupHealth);
 	}
 
-	// This is to match the behavior of non-waiting events, which return success even if they are not in sync with
-	// anyone, so that the caller can still use the timestamp and occurrence count for their logic without caring about
-	// the consensus result.
-	return NOS_RESULT_SUCCESS;
+	// TODO: We only return the consensus result to the waiter, others always receive NOS_RESULT_SUCCESS. Is this the
+	// correct behavior?
+	return consensusResult;
 }
 
 nosResult NOSAPI_CALL Export(uint32_t minorVersion, void** outSubsystemContext)
