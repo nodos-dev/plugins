@@ -1,3 +1,8 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-target_include_directories(${NOS_PLUGIN_TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../nosTrack/Include ${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/External/stb)
+if (NOT TARGET stb)
+    add_library(stb INTERFACE)
+    target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/External/stb)
+endif()
+
+target_link_libraries(${NOS_PLUGIN_TARGET} PRIVATE stb)
