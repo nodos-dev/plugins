@@ -65,7 +65,7 @@ struct TextureTransitionContext : public NodeContext
 	float TransitionDuration = 1.0f;
 	TransitionTarget TransitionTarget = TransitionTarget::Input1;
 	bool bIsInTransition = false;
-	std::chrono::steady_clock::time_point TransitionStart;
+	std::chrono::high_resolution_clock::time_point TransitionStart;
 
 
 	static nosResult GetFunctions(size_t* outCount, nosName* pName, nosPfnNodeFunctionExecute* outFunction)

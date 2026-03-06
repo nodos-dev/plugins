@@ -185,7 +185,7 @@ struct MixerContext : public NodeContext
 	float TransitionDuration = 1.0f;
 	MixerTransitionTarget TransitionTarget = MixerTransitionTarget::Program;
 	bool bIsInTransition = false;
-	std::chrono::steady_clock::time_point TransitionStart;
+	std::chrono::high_resolution_clock::time_point TransitionStart;
 	u32 TransitionProgramChannel;
 	u32 TransitionPreviewChannel;
 
