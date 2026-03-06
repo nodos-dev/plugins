@@ -15,7 +15,7 @@ NOS_REGISTER_NAME(History);
 // update texture size and format if needed
 bool UpdateTextureFormat(nos::ObjectRef& texture, glm::uvec2 res, const char* tag, nosFormat format)
 {
-	auto textureInfo = nos::sys::vulkan::GetResourceInfo(texture).value_or({});
+	auto textureInfo = nos::sys::vulkan::GetResourceInfo(texture).value_or(nosResourceInfo{});
 	if (format == NOS_FORMAT_NONE)
 		format = textureInfo.Texture.Format;
 

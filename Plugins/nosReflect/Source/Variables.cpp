@@ -214,11 +214,11 @@ struct SetVariableNode : VariableNodeBase
 			return;
 		flatbuffers::FlatBufferBuilder fbb;
 		size_t count = 0;
-		auto res = nosEngine.GetPinDataTypeNames(nullptr, &count);
+		auto res = nosEngine.GetPinValueTypeNames(nullptr, &count);
 		if (NOS_RESULT_FAILED == res)
 			return;
 		AllTypeNames.resize(count);
-		res = nosEngine.GetPinDataTypeNames(AllTypeNames.data(), &count);
+		res = nosEngine.GetPinValueTypeNames(AllTypeNames.data(), &count);
 		if (NOS_RESULT_FAILED == res)
 			return;
 		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> types;

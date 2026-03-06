@@ -455,11 +455,11 @@ struct ArithmeticNodeContext : NodeContext
 void RegisterArithmeticNodePresets() {
 	std::vector<nosName> typeNames;
 	size_t count = 0;
-	auto res = nosEngine.GetPinDataTypeNames(0, &count);
+	auto res = nosEngine.GetPinValueTypeNames(0, &count);
 	if (NOS_RESULT_FAILED != res)
 	{
 		typeNames.resize(count);
-		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
+		nosEngine.GetPinValueTypeNames(typeNames.data(), &count);
 	}
 	std::vector<nos::Buffer> nodePresets;
 	for (uint32_t binaryOpIndx = 0; binaryOpIndx < uint32_t(BinaryOperator::MAX) + 1; binaryOpIndx++) {

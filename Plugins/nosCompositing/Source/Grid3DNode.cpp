@@ -56,7 +56,7 @@ void UpdateVertexBuffer(
 {
 	uint32_t bufferSize = (uint32_t)(verticesSize + indicesSize);
 
-	auto info = nos::sys::vulkan::GetResourceInfo(bufferObject).value_or({});
+	auto info = nos::sys::vulkan::GetResourceInfo(bufferObject).value_or(nosResourceInfo{});
 	if (info.Buffer.Size < bufferSize)
 	{
 		bufferObject = {};

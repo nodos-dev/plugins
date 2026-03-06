@@ -132,11 +132,11 @@ struct MakeNode : NodeContext
 			return;
 		flatbuffers::FlatBufferBuilder fbb;
 		size_t count = 0;
-		auto res = nosEngine.GetPinDataTypeNames(nullptr, &count);
+		auto res = nosEngine.GetPinValueTypeNames(nullptr, &count);
 		if (NOS_RESULT_FAILED == res)
 			return;
 		AllTypeNames.resize(count);
-		res = nosEngine.GetPinDataTypeNames(AllTypeNames.data(), &count);
+		res = nosEngine.GetPinValueTypeNames(AllTypeNames.data(), &count);
 		if (NOS_RESULT_FAILED == res)
 			return;
 		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> types;
@@ -398,11 +398,11 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 	
 	std::vector<nosName> typeNames;
 	size_t count = 0;
-	auto res = nosEngine.GetPinDataTypeNames(0, &count);
+	auto res = nosEngine.GetPinValueTypeNames(0, &count);
 	if (NOS_RESULT_FAILED != res)
 	{
 		typeNames.resize(count);
-		nosEngine.GetPinDataTypeNames(typeNames.data(), &count);
+		nosEngine.GetPinValueTypeNames(typeNames.data(), &count);
 	}
 	std::vector<nos::Buffer> nodePresets;
 	for (auto& typeName : typeNames)

@@ -363,7 +363,7 @@ struct MixerContext : public NodeContext
 		if (!MultiviewerLabelsTexture)
 			return;
 
-		auto MultiviewerLabelsTextureInfo = nos::sys::vulkan::GetResourceInfo(MultiviewerLabelsTexture).value_or({});
+		auto MultiviewerLabelsTextureInfo = nos::sys::vulkan::GetResourceInfo(MultiviewerLabelsTexture).value_or(nosResourceInfo{});
 		glm::vec2 outputSize(
 			MultiviewerLabelsTextureInfo.Texture.Width,
 			MultiviewerLabelsTextureInfo.Texture.Height
@@ -504,7 +504,7 @@ struct MixerContext : public NodeContext
 	{
 		nosTextureFieldType currentFieldType = {};
 		nosVulkan->GetResourceFieldType(currentTexture, &currentFieldType);
-		auto currentInfo = nos::sys::vulkan::GetResourceInfo(currentTexture).value_or({});
+		auto currentInfo = nos::sys::vulkan::GetResourceInfo(currentTexture).value_or(nosResourceInfo{});
 		bool isInterlace = currentFieldType == NOS_TEXTURE_FIELD_TYPE_ODD || currentFieldType ==
 		                   NOS_TEXTURE_FIELD_TYPE_EVEN;
 		bool isLastInterlace = lastInfo.FieldType == NOS_TEXTURE_FIELD_TYPE_ODD || lastInfo.FieldType ==
@@ -539,7 +539,7 @@ struct MixerContext : public NodeContext
 
 		//
 		nos::ObjectRef multiviewerTexture = params.GetPinObject(NSN_Multiviewer);
-		auto multiviewerTextureInfo = nos::sys::vulkan::GetResourceInfo(multiviewerTexture).value_or({});
+		auto multiviewerTextureInfo = nos::sys::vulkan::GetResourceInfo(multiviewerTexture).value_or(nosResourceInfo{});
 
 		nos::ObjectRef channels[10] = {
 			params.GetPinObject(NSN_Channel1),
@@ -591,7 +591,7 @@ struct MixerContext : public NodeContext
 
 		//
 		nos::ObjectRef programTexture = params.GetPinObject(NSN_Program);
-		auto programTextureInfo = nos::sys::vulkan::GetResourceInfo(programTexture).value_or({});
+		auto programTextureInfo = nos::sys::vulkan::GetResourceInfo(programTexture).value_or(nosResourceInfo{});
 
 		bool needsProgramDebugTextUpdate = programChannelChanged || programChannelIndexChanged || NeedsLabelsUpdate;
 		if (HasTextureDebugInfoChanged(LastProgramDebugInfo, programTexture))
@@ -625,7 +625,7 @@ struct MixerContext : public NodeContext
 
 		//
 		nos::ObjectRef previewTexture = params.GetPinObject(NSN_Preview);
-		auto previewTextureInfo = nos::sys::vulkan::GetResourceInfo(previewTexture).value_or({});
+		auto previewTextureInfo = nos::sys::vulkan::GetResourceInfo(previewTexture).value_or(nosResourceInfo{});
 
 		bool needsPreviewDebugTextUpdate = previewChannelChanged || previewChannelIndexChanged || NeedsLabelsUpdate;
 		if (HasTextureDebugInfoChanged(LastPreviewDebugInfo, previewTexture))
@@ -678,8 +678,8 @@ struct MixerContext : public NodeContext
 
 	nos::ObjectRef getTransitionTextureInfo(nos::NodeExecuteParams const& params)
 	{
-		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Program)).value_or({});
-		auto TransitionTextureInfo = nos::sys::vulkan::GetResourceInfo(TransitionTexture).value_or({});
+		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Program)).value_or(nosResourceInfo{});
+		auto TransitionTextureInfo = nos::sys::vulkan::GetResourceInfo(TransitionTexture).value_or(nosResourceInfo{});
 
 		if (TransitionTextureInfo.Texture.Width == outputTextureInfo.Texture.Width
 		    && TransitionTextureInfo.Texture.Height == outputTextureInfo.Texture.Height
@@ -705,8 +705,8 @@ struct MixerContext : public NodeContext
 
 	bool UpdateLabelsTextureIfNeeded(nos::NodeExecuteParams const& params)
 	{
-		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Program)).value_or({});
-		auto MultiviewerLabelsTextureInfo = nos::sys::vulkan::GetResourceInfo(MultiviewerLabelsTexture).value_or({});
+		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(params.GetPinObject(NSN_Program)).value_or(nosResourceInfo{});
+		auto MultiviewerLabelsTextureInfo = nos::sys::vulkan::GetResourceInfo(MultiviewerLabelsTexture).value_or(nosResourceInfo{});
 		if (!MultiviewerLabelsTexture
 		    || MultiviewerLabelsTextureInfo.Texture.Width != outputTextureInfo.Texture.Width
 		    || MultiviewerLabelsTextureInfo.Texture.Height != outputTextureInfo.Texture.Height
@@ -842,7 +842,7 @@ struct MixerContext : public NodeContext
 
 		auto outputTexture = params.GetPinObject(NSN_Multiviewer);
 
-		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(outputTexture).value_or({});
+		auto outputTextureInfo = nos::sys::vulkan::GetResourceInfo(outputTexture).value_or(nosResourceInfo{});
 
 		nos::fb::vec2 texelSize(
 			1.0f / outputTextureInfo.Texture.Width,

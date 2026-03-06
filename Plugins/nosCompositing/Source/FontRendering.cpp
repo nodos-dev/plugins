@@ -94,7 +94,7 @@ TextBuilder& TextBuilder::Add(std::string text, float cHeight, glm::vec2 positio
 	float fontAspect = float(Font.Description.CellWidthPx - 2 * Font.Description.xCellPaddingPx) / letterHeightPx;
 	float cWidth = cHeight * fontAspect / outputAspect;
 
-    auto fontTextureInfo = nos::sys::vulkan::GetResourceInfo(Font.Texture).value_or({});
+    auto fontTextureInfo = nos::sys::vulkan::GetResourceInfo(Font.Texture).value_or(nosResourceInfo{});
 	float atlasWidth     = float(fontTextureInfo.Texture.Width);
 	float atlasHeight    = float(fontTextureInfo.Texture.Height);
 	float xCellUvPadding = float(Font.Description.xCellPaddingPx) / atlasWidth;
