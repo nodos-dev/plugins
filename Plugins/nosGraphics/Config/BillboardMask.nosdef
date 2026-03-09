@@ -16,6 +16,22 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
+						"name": "InDepth",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"format": "D32_SFLOAT"
+						}
+					},
+					{
+						"name": "ReadInDepth",
+						"type_name": "bool",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false
+					},
+					{
 						"name": "Size",
 						"type_name": "nos.fb.vec2",
 						"show_as": "INPUT_PIN",

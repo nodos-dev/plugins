@@ -22,7 +22,8 @@
   "node_definitions": [
     "Config/BillboardMask.nosdef",
     "Config/BillboardPositions.nosdef",
-    "Config/TrackToView.nosdef"
+    "Config/TrackToView.nosdef",
+    "Config/NormalizedRayDistanceToDepth.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []

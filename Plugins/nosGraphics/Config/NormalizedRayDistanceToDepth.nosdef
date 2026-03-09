@@ -1,0 +1,44 @@
+{
+	"nodes": [
+		{
+			"class_name": "NormalizedRayDistanceToDepth",
+			"menu_info": {
+				"category": "Rendering|Advanced",
+				"display_name": "Normalized Ray Distance To Depth"
+			},
+			"node": {
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "InDepth",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "RenderView",
+						"type_name": "nos.graphics.RenderView",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Scale",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1.0
+					},
+					{
+						"name": "OutDepth",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"data": {
+							"format": "D32_SFLOAT"
+						}
+					}
+				]
+			}
+		}
+	]
+}

@@ -16,6 +16,8 @@ NOS_REGISTER_NAME(RenderView)
 NOS_REGISTER_NAME(Resolution)
 NOS_REGISTER_NAME(OutRenderTarget)
 NOS_REGISTER_NAME(OutDepth)
+NOS_REGISTER_NAME(InDepth)
+NOS_REGISTER_NAME(ReadInDepth)
 
 NOS_REGISTER_NAME(BillboardMask_Pass)
 
@@ -28,6 +30,22 @@ struct BillboardMask : NodeContext
 		FailedToCreateRenderTarget = 1,
 		FailedToCreateDepthBuffer = 2,
 	};
+
+	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
+	{
+		if (pinName == NSN_ReadInDepth)
+		{
+			bool readInDepth = *nos::InterpretPinValue<bool>(value);
+			if (readInDepth)
+			{
+				SetPinOrphanState(NSN_InDepth, nos::fb::PinOrphanStateType::ACTIVE);
+			}
+			else
+			{
+				SetPinOrphanState(NSN_InDepth, nos::fb::PinOrphanStateType::ORPHAN, "Read In Depth is disabled");
+			}
+		}
+	}
 
 	std::unordered_map<StatusMessageType, nos::fb::TNodeStatusMessage> ActiveStatusMessages;
 
@@ -103,30 +121,52 @@ struct BillboardMask : NodeContext
 		}
 
 		nosResourceShareInfo depth = vkss::DeserializeTextureInfo(pins[NSN_OutDepth].Data->Data);
-		if (depth.Info.Texture.Width != resolution.x || depth.Info.Texture.Height != resolution.y ||
-			depth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
+		bool readInDepth = *pins.GetPinData<bool>(NSN_ReadInDepth);
+		if (readInDepth)
 		{
-			auto newDepth = vkss::Resource::Create(
-				nosTextureInfo{.Width = resolution.x,
-							   .Height = resolution.y,
-							   .Format = NOS_FORMAT_D32_SFLOAT,
-							   .Filter = NOS_TEXTURE_FILTER_LINEAR,
-							   .Usage = nosImageUsage(NOS_IMAGE_USAGE_SAMPLED | NOS_IMAGE_USAGE_DEPTH_STENCIL)},
-				"Billboard Mask Depth");
-			if (!newDepth)
+			auto inDepth = vkss::DeserializeTextureInfo(pins[NSN_InDepth].Data->Data);
+			if (nosVulkan->IsStockTexture(&inDepth, nullptr) || 
+				inDepth.Info.Texture.Width != resolution.x ||
+				inDepth.Info.Texture.Height != resolution.y || inDepth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
 			{
-				SetOrAddStatusMessage(StatusMessageType::FailedToCreateDepthBuffer,
-									  nos::fb::TNodeStatusMessage{
-										  .text = "Failed to create depth buffer for Billboard Mask node.",
-										  .type = nos::fb::NodeStatusMessageType::FAILURE,
-									  });
-				depth = {};
+				nosEngine.LogW(
+					"Billboard Mask node is set to read input depth, but the provided texture is not a valid depth "
+					"texture. Please provide a valid depth texture.");
+				return NOS_RESULT_FAILED;
 			}
 			else
 			{
-				SetPinValue(NSN_OutDepth, newDepth->ToPinData());
-				depth = nosResourceShareInfo(*newDepth);
-				RemoveStatusMessage(StatusMessageType::FailedToCreateDepthBuffer);
+				SetPinValue(NSN_OutDepth, *pins[NSN_InDepth].Data);
+				depth = inDepth;
+			}
+		}
+		else
+		{
+			if (depth.Info.Texture.Width != resolution.x || depth.Info.Texture.Height != resolution.y ||
+				depth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
+			{
+				auto newDepth = vkss::Resource::Create(
+					nosTextureInfo{.Width = resolution.x,
+								   .Height = resolution.y,
+								   .Format = NOS_FORMAT_D32_SFLOAT,
+								   .Filter = NOS_TEXTURE_FILTER_LINEAR,
+								   .Usage = nosImageUsage(NOS_IMAGE_USAGE_SAMPLED | NOS_IMAGE_USAGE_DEPTH_STENCIL)},
+					"Billboard Mask Depth");
+				if (!newDepth)
+				{
+					SetOrAddStatusMessage(StatusMessageType::FailedToCreateDepthBuffer,
+										  nos::fb::TNodeStatusMessage{
+											  .text = "Failed to create depth buffer for Billboard Mask node.",
+											  .type = nos::fb::NodeStatusMessageType::FAILURE,
+										  });
+					depth = {};
+				}
+				else
+				{
+					SetPinValue(NSN_OutDepth, newDepth->ToPinData());
+					depth = nosResourceShareInfo(*newDepth);
+					RemoveStatusMessage(StatusMessageType::FailedToCreateDepthBuffer);
+				}
 			}
 		}
 
@@ -174,7 +214,7 @@ struct BillboardMask : NodeContext
 			.Benchmark = 0,
 			.DoNotClear = false,
 			.ClearCol = {0.f, 0.f, 0.f, 0.f},
-			.DepthAttachment = nosDepthAttachment{.DepthBuffer = depth, .DoNotClear = false, .ClearValue = 1.0f}};
+			.DepthAttachment = nosDepthAttachment{.DepthBuffer = depth, .DoNotClear = readInDepth, .ClearValue = 1.0f}};
 
 		auto cmd = vkss::BeginCmd(NOS_NAME("Billboard Mask"), NodeId);
 		nosVulkan->RunPass2(cmd, &passParams);

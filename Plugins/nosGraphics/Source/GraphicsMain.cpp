@@ -18,12 +18,14 @@ enum Nodes : int
 	TrackToView,
 	BillboardMask,
 	BillboardPositions,
+	NormalizedRayDistanceToDepth,
 	Count
 };
 
 nosResult RegisterTrackToView(nosNodeFunctions*);
 nosResult RegisterBillboardMask(nosNodeFunctions*);
 nosResult RegisterBillboardPositions(nosNodeFunctions*);
+nosResult RegisterNormalizedRayDistanceToDepth(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -47,6 +49,7 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(TrackToView)
 				GEN_CASE_NODE(BillboardMask)
 				GEN_CASE_NODE(BillboardPositions)
+				GEN_CASE_NODE(NormalizedRayDistanceToDepth)
 			default: break;
 			}
 		}
