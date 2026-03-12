@@ -101,6 +101,10 @@ void nosWebRTCClient::InterpretReceivedMessage()
 			else if (jsonMessage.contains(nosWebRTCJsonConfig::candidateKey)) {
 				ICECandidateReceivedCallback(std::move(currentMessage));
 			}
+			else if (jsonMessage[nosWebRTCJsonConfig::typeKey] == nosWebRTCJsonConfig::typePeerDisconnected
+				&& PeerDisconnectedReceivedCallback) {
+				PeerDisconnectedReceivedCallback(std::move(currentMessage));
+			}
 		}
 	}
 }
@@ -157,6 +161,11 @@ void nosWebRTCClient::SetSDPAnswerReceivedCallback(std::function<void(std::strin
 void nosWebRTCClient::SetICECandidateReceivedCallback(std::function<void(std::string&&)> iceCandidateReceived)
 {
 	ICECandidateReceivedCallback = iceCandidateReceived;
+}
+
+void nosWebRTCClient::SetPeerDisconnectedReceivedCallback(std::function<void(std::string&&)> peerDisconnectedReceived)
+{
+	PeerDisconnectedReceivedCallback = peerDisconnectedReceived;
 }
 
 #pragma endregion

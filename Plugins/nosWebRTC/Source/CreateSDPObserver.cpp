@@ -8,22 +8,45 @@ nosCreateSDPObserver::nosCreateSDPObserver(int id) : peerConnectionID(id)
 
 void nosCreateSDPObserver::SetSuccessCallback(std::function<void(webrtc::SessionDescriptionInterface*, int)> callback)
 {
+	std::lock_guard lock(CallbackMutex);
 	SuccessCallback = callback;
 }
 
 void nosCreateSDPObserver::SetFailureCallback(std::function<void(webrtc::RTCError, int)> callback)
 {
+	std::lock_guard lock(CallbackMutex);
 	FailureCallback = callback;
+}
+
+void nosCreateSDPObserver::ClearCallbacks()
+{
+	std::lock_guard lock(CallbackMutex);
+	SuccessCallback = {};
+	FailureCallback = {};
 }
 
 void nosCreateSDPObserver::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
-	SuccessCallback(desc, peerConnectionID);
+	std::function<void(webrtc::SessionDescriptionInterface*, int)> callback;
+	{
+		std::lock_guard lock(CallbackMutex);
+		callback = SuccessCallback;
+	}
+	if (callback) {
+		callback(desc, peerConnectionID);
+	}
 }
 
 void nosCreateSDPObserver::OnFailure(webrtc::RTCError error)
 {
-	FailureCallback(error, peerConnectionID);
+	std::function<void(webrtc::RTCError, int)> callback;
+	{
+		std::lock_guard lock(CallbackMutex);
+		callback = FailureCallback;
+	}
+	if (callback) {
+		callback(error, peerConnectionID);
+	}
 }
 
 void nosCreateSDPObserver::AddRef() const

@@ -50,6 +50,7 @@ public:
 	void SetSDPOfferReceivedCallback(std::function<void(std::string&&)> sdpOfferReceived);
 	void SetSDPAnswerReceivedCallback(std::function<void(std::string&&)> sdpAnswerReceived);
 	void SetICECandidateReceivedCallback(std::function<void(std::string&&)> iceCandidateReceived);
+	void SetPeerDisconnectedReceivedCallback(std::function<void(std::string&&)> peerDisconnectedReceived);
 
 private:
 	void ResetConnections();
@@ -83,5 +84,6 @@ private:
 	std::function<void(std::string&&)> SDPOfferReceivedCallback;
 	std::function<void(std::string&&)> SDPAnswerReceivedCallback;
 	std::function<void(std::string&&)> ICECandidateReceivedCallback;
+	std::function<void(std::string&&)> PeerDisconnectedReceivedCallback;
 
 };

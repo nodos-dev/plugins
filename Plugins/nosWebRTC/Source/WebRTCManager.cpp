@@ -88,7 +88,10 @@ bool nosWebRTCManager::MainLoop(int cms)
 }
 
 
-bool nosWebRTCManager::AddPeerConnection() {
+bool nosWebRTCManager::AddPeerConnection(int& connectionID) {
+    connectionID = -1;
+    if (!p_PeerConnectionFactory)
+        return false;
     
     webrtc::PeerConnectionInterface::RTCConfiguration config;
     config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;
@@ -97,56 +100,96 @@ bool nosWebRTCManager::AddPeerConnection() {
     server.uri = "stun:stun.l.google.com:19302"; //Use google STUN server for now.
     config.servers.push_back(server);
 
-    int lastIdx = p_PeerConnections.size();
+    {
+        std::lock_guard lock(PeerConnectionsMutex);
+        connectionID = NextPeerConnectionID++;
+    }
 
-    p_PeerConnectionObservers.push_back(std::make_shared<nosPeerConnectionObserver>(lastIdx));
-    RegisterToPeerConnectionObserverCallbacks(p_PeerConnectionObservers[lastIdx].get());
+    auto observer = std::make_shared<nosPeerConnectionObserver>(connectionID);
+    RegisterToPeerConnectionObserverCallbacks(observer.get());
 
-    p_PeerConnections.push_back(
-        p_PeerConnectionFactory->CreatePeerConnection(
-            config, nullptr, nullptr, p_PeerConnectionObservers[lastIdx].get()));
+    rtc::scoped_refptr<nosCreateSDPObserver> createSDPObserver = new nosCreateSDPObserver(connectionID);
+    RegisterToCreateSDPObserverCallbacks(createSDPObserver.get());
 
-    if (p_PeerConnections[p_PeerConnections.size() - 1] == nullptr)
+    rtc::scoped_refptr<nosSetSDPObserver> setSDPObserver = new nosSetSDPObserver(connectionID);
+    RegisterToSetSDPObserverCallbacks(setSDPObserver.get());
+
+    PeerConnectionPtr peerConnection = p_PeerConnectionFactory->CreatePeerConnection(
+        config, nullptr, nullptr, observer.get());
+
+    if (!peerConnection)
         return false;
+
+    {
+        nosPeerConnectionState state;
+        state.Observer = observer;
+        state.CreateSDPObserver = createSDPObserver;
+        state.SetSDPObserver = setSDPObserver;
+        state.PeerConnection = peerConnection;
+
+        std::lock_guard lock(PeerConnectionsMutex);
+        p_PeerConnections.emplace(connectionID, std::move(state));
+    }
     
     //Add video tracks
     for (auto track : p_VideoTracks) {
-        auto err = p_PeerConnections[lastIdx]->AddTrack(track, {"NodosStreamID"} );
+        auto err = peerConnection->AddTrack(track, {"NodosStreamID"} );
         //TODO: handle errors?
     }
 
     return true;
 }
 
-void nosWebRTCManager::RemovePeerConnection(int id)
+void nosWebRTCManager::RemovePeerConnection(int connectionID)
 {
-    if (p_PeerConnections.empty() || !PeerConnectionIdx_PeerID.contains(id))
+    nosPeerConnectionState removedState;
+    ReleasePeerConnectionState(connectionID, &removedState);
+
+    if (!removedState.PeerConnection)
         return;
 
-    for (const auto& sender : p_PeerConnections[id]->GetSenders()) {
+    if (removedState.Observer) {
+        removedState.Observer->ClearCallbacks();
+    }
+    if (removedState.CreateSDPObserver) {
+        removedState.CreateSDPObserver->ClearCallbacks();
+    }
+    if (removedState.SetSDPObserver) {
+        removedState.SetSDPObserver->ClearCallbacks();
+    }
+
+    for (const auto& sender : removedState.PeerConnection->GetSenders()) {
         for (auto& videoTrack : p_VideoTracks) {
             if (videoTrack == sender->track()) {
-                p_PeerConnections[id]->RemoveTrack(sender);
+                removedState.PeerConnection->RemoveTrack(sender);
             }
         }
     }
-    //First remove the peer id from map to prevent infinite recursion
-    PeerConnectionIdx_PeerID.erase(id);
-    p_PeerConnections[id]->Close();
-    p_PeerConnections[id] = nullptr;
-    p_PeerConnections.erase(p_PeerConnections.begin() + id);
-
-    p_PeerConnectionObservers.erase(p_PeerConnectionObservers.begin() + id);
-    p_CreateSDPObservers.erase(p_CreateSDPObservers.begin() + id);
-    p_SetSDPObservers.erase(p_SetSDPObservers.begin() + id);
+    removedState.PeerConnection->Close();
 }
 
 void nosWebRTCManager::Dispose()
 {
-    if (IsDisposed)
-        return;
+    std::vector<PeerConnectionPtr> peerConnections;
+    {
+        std::lock_guard lock(PeerConnectionsMutex);
+        if (IsDisposed)
+            return;
 
-    for (auto& peerConnection : p_PeerConnections) {
+        IsDisposed = true;
+        peerConnections.reserve(p_PeerConnections.size());
+        for (const auto& [connectionID, state] : p_PeerConnections) {
+            if (state.PeerConnection) {
+                peerConnections.push_back(state.PeerConnection);
+            }
+        }
+        p_PeerConnections.clear();
+        p_PeerIDToConnectionID.clear();
+    }
+
+    for (auto& peerConnection : peerConnections) {
+        if (!peerConnection)
+            continue;
 
         for (const auto& sender : peerConnection->GetSenders()) {
             for (auto& videoTrack : p_VideoTracks) {
@@ -159,7 +202,6 @@ void nosWebRTCManager::Dispose()
         peerConnection->Close();
         peerConnection = nullptr;
     }
-    p_PeerConnections.clear();
 
     //scoped_refptr overloads = operator so that it releases 
     // old pointer and decrements refCount when you assign new one
@@ -175,13 +217,14 @@ void nosWebRTCManager::Dispose()
     p_VideoSources.clear();
     p_PeerConnectionFactory = nullptr;
 
-    SignalingThread->Stop();
-    WorkerThread->Stop();
+    if (SignalingThread) {
+        SignalingThread->Stop();
+    }
+    if (WorkerThread) {
+        WorkerThread->Stop();
+    }
 
     p_nosWebRTCClient = nullptr;
-    PeerConnectionIdx_PeerID.clear();
-
-    IsDisposed = true;
 }
 
 void nosWebRTCManager::OnImageEncoded()
@@ -191,31 +234,35 @@ void nosWebRTCManager::OnImageEncoded()
 
 void nosWebRTCManager::SendOffer(int id)
 {
-    if (AddPeerConnection()) {
-        int internalID = p_PeerConnections.size() - 1;
-
-        //This is crucial to handle multiple peers. We need to map peerIDs with the PeerConnection objects we created
-        PeerConnectionIdx_PeerID.insert({ internalID, id });
-
-        //TODO: may be make a function for this purpose:
-        p_SetSDPObservers.push_back(new nosSetSDPObserver(internalID));
-        RegisterToSetSDPObserverCallbacks(p_SetSDPObservers[internalID].get());
-
-        p_CreateSDPObservers.push_back(new nosCreateSDPObserver(internalID));
-        RegisterToCreateSDPObserverCallbacks(p_CreateSDPObservers[internalID].get());
-        webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offerOptions;
-        offerOptions.offer_to_receive_video = 1;
-
-        p_PeerConnections[internalID]->CreateOffer(
-            p_CreateSDPObservers[internalID].get(), offerOptions);
+    int existingConnectionID = -1;
+    if (TryGetConnectionIDFromPeerID(existingConnectionID, id)) {
+        RemovePeerConnection(existingConnectionID);
     }
+
+    int connectionID = -1;
+    if (!AddPeerConnection(connectionID))
+        return;
+
+    AttachPeerIDToConnection(connectionID, id);
+
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(connectionID, state) || !state.PeerConnection || !state.CreateSDPObserver)
+        return;
+
+    webrtc::PeerConnectionInterface::RTCOfferAnswerOptions offerOptions;
+    offerOptions.offer_to_receive_video = 1;
+
+    state.PeerConnection->CreateOffer(state.CreateSDPObserver.get(), offerOptions);
 }
 
 void nosWebRTCManager::UpdateBitrates(int bitrateKBPS)
 {
     targetKbps = bitrateKBPS;
 
-    for (auto& peerConnection : p_PeerConnections) {
+    for (auto& peerConnection : GetPeerConnectionsSnapshot()) {
+        if (!peerConnection)
+            continue;
+
         for (auto& sender : peerConnection->GetSenders()) {
             auto bitrate = sender->GetParameters();
             for (auto& encoding : bitrate.encodings) {
@@ -285,14 +332,14 @@ void nosWebRTCManager::RegisterToCreateSDPObserverCallbacks(nosCreateSDPObserver
 
 void nosWebRTCManager::OnSDPCreateSuccess(webrtc::SessionDescriptionInterface* desc, int id)
 {
-    [[unlikely]]
-    if (p_PeerConnections.empty())
-    {
-        //FATAL, smth is seriously wrong. Should abort?
-        //abort();
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(id, state) || !state.PeerConnection || !state.SetSDPObserver)
         return;
-    }
-    p_PeerConnections[id]->SetLocalDescription(p_SetSDPObservers[id].get(), desc);
+
+    if (state.PeerID < 0)
+        return;
+
+    state.PeerConnection->SetLocalDescription(state.SetSDPObserver.get(), desc);
 
     //TODO: there might be an issue if the encryption is disabled, so you may need to implement a loopback mechanism
     std::string SDP;
@@ -306,19 +353,19 @@ void nosWebRTCManager::OnSDPCreateSuccess(webrtc::SessionDescriptionInterface* d
 
     jsonSDP[nosWebRTCJsonConfig::typeKey] = webrtc::SdpTypeToString(desc->GetType());
     jsonSDP[nosWebRTCJsonConfig::sdpKey] = SDP;
-    jsonSDP[nosWebRTCJsonConfig::peerIDKey] = std::to_string(PeerConnectionIdx_PeerID[id]);
+    jsonSDP[nosWebRTCJsonConfig::peerIDKey] = std::to_string(state.PeerID);
     
     p_nosWebRTCClient->SendMessageToServer(jsonSDP.dump());
 
 
-    if (p_PeerConnections[id]->GetSenders().size() > 0) {
-        auto bitrate = p_PeerConnections[id]->GetSenders()[0]->GetParameters();
+    if (state.PeerConnection->GetSenders().size() > 0) {
+        auto bitrate = state.PeerConnection->GetSenders()[0]->GetParameters();
         for (auto& encoding : bitrate.encodings) {
             encoding.max_framerate = 300;
             encoding.max_bitrate_bps = targetKbps * 2 * 10 * 1000;
             encoding.min_bitrate_bps = targetKbps * 2 * 5 * 1000;
         }
-        p_PeerConnections[id]->GetSenders()[0]->SetParameters(bitrate);
+        state.PeerConnection->GetSenders()[0]->SetParameters(bitrate);
     }
 
 }
@@ -346,15 +393,82 @@ void nosWebRTCManager::OnSDPSetFailure(webrtc::RTCError error, int id)
     //TODO: should handle some stuff for SDPSetFailure
 }
 
-bool nosWebRTCManager::ReadInternalIDFromPeerID(int& internalID, int peerID)
+bool nosWebRTCManager::TryGetPeerConnectionState(int connectionID, nosPeerConnectionState& state) const
 {
-    for (auto [_internalID, _peerID] : PeerConnectionIdx_PeerID) {
-        if (_peerID == peerID) {
-            internalID = _internalID;
-            return true;
+    std::lock_guard lock(PeerConnectionsMutex);
+    auto it = p_PeerConnections.find(connectionID);
+    if (it == p_PeerConnections.end())
+        return false;
+
+    state = it->second;
+    return true;
+}
+
+bool nosWebRTCManager::TryGetConnectionIDFromPeerID(int& connectionID, int peerID) const
+{
+    std::lock_guard lock(PeerConnectionsMutex);
+    auto it = p_PeerIDToConnectionID.find(peerID);
+    if (it == p_PeerIDToConnectionID.end())
+        return false;
+
+    connectionID = it->second;
+    return true;
+}
+
+bool nosWebRTCManager::RemovePeerConnectionByPeerID(int peerID)
+{
+    int connectionID = -1;
+    if (!TryGetConnectionIDFromPeerID(connectionID, peerID))
+        return false;
+
+    RemovePeerConnection(connectionID);
+    return true;
+}
+
+void nosWebRTCManager::AttachPeerIDToConnection(int connectionID, int peerID)
+{
+    std::lock_guard lock(PeerConnectionsMutex);
+    auto it = p_PeerConnections.find(connectionID);
+    if (it == p_PeerConnections.end())
+        return;
+
+    if (it->second.PeerID >= 0) {
+        p_PeerIDToConnectionID.erase(it->second.PeerID);
+    }
+
+    it->second.PeerID = peerID;
+    p_PeerIDToConnectionID[peerID] = connectionID;
+}
+
+void nosWebRTCManager::ReleasePeerConnectionState(int connectionID, nosPeerConnectionState* removedState)
+{
+    std::lock_guard lock(PeerConnectionsMutex);
+    auto it = p_PeerConnections.find(connectionID);
+    if (it == p_PeerConnections.end())
+        return;
+
+    if (it->second.PeerID >= 0) {
+        p_PeerIDToConnectionID.erase(it->second.PeerID);
+    }
+
+    if (removedState) {
+        *removedState = it->second;
+    }
+
+    p_PeerConnections.erase(it);
+}
+
+std::vector<PeerConnectionPtr> nosWebRTCManager::GetPeerConnectionsSnapshot() const
+{
+    std::vector<PeerConnectionPtr> peerConnections;
+    std::lock_guard lock(PeerConnectionsMutex);
+    peerConnections.reserve(p_PeerConnections.size());
+    for (const auto& [connectionID, state] : p_PeerConnections) {
+        if (state.PeerConnection) {
+            peerConnections.push_back(state.PeerConnection);
         }
     }
-    return false;
+    return peerConnections;
 }
 #pragma endregion
 
@@ -372,6 +486,7 @@ void nosWebRTCManager::RegisterToWebRTCClientCallbacks()
     p_nosWebRTCClient->SetSDPOfferReceivedCallback([this](std::string&& message) {this->OnSDPOfferReceived(std::move(message)); });
     p_nosWebRTCClient->SetSDPAnswerReceivedCallback([this](std::string&& message) {this->OnSDPAnswerReceived(std::move(message)); });
     p_nosWebRTCClient->SetICECandidateReceivedCallback([this](std::string&& message) {this->OnICECandidateReceived(std::move(message)); });
+    p_nosWebRTCClient->SetPeerDisconnectedReceivedCallback([this](std::string&& message) {this->OnPeerDisconnectedReceived(std::move(message)); });
 }
 
 void nosWebRTCManager::OnServerConnectionSuccesful()
@@ -404,48 +519,42 @@ void nosWebRTCManager::OnRawMessageReceived(void* data, size_t length)
 
 void nosWebRTCManager::OnSDPOfferReceived(std::string&& offer)
 {
-    //
-    if (AddPeerConnection()) {
-        json jsonOffer = json::parse(offer);
-        {
-            std::string peerIDstr = jsonOffer[nosWebRTCJsonConfig::peerIDKey];
-            int peerID = std::stoi(peerIDstr);
-            int internalID = p_PeerConnections.size() - 1;
-            
-            //This is crucial to handle multiple peers. We need to map peerIDs with the PeerConnection objects we created
-            PeerConnectionIdx_PeerID.insert({ internalID, peerID });
-            
-            webrtc::SdpParseError error;
-            
-            std::unique_ptr<webrtc::SessionDescriptionInterface> webRTCSessionDescription =
-                webrtc::CreateSessionDescription(webrtc::SdpType::kOffer, jsonOffer[nosWebRTCJsonConfig::sdpKey].get<std::string>(), &error);
+    json jsonOffer = json::parse(offer);
+    std::string peerIDstr = jsonOffer[nosWebRTCJsonConfig::peerIDKey];
+    int peerID = std::stoi(peerIDstr);
 
-            if (!webRTCSessionDescription) {
-                //abort the mission. Clear the recently created objects in AddPeerConnection and remove them from map.
-                p_PeerConnections.pop_back();
-                p_PeerConnectionObservers.pop_back();
-                p_CreateSDPObservers.pop_back();
-                p_SetSDPObservers.pop_back();
-                PeerConnectionIdx_PeerID.erase(internalID);
-                std::cout << "SDP parsing failed: " << error.description << std::endl;
-                return;
-            }
+    webrtc::SdpParseError error;
+    std::unique_ptr<webrtc::SessionDescriptionInterface> webRTCSessionDescription =
+        webrtc::CreateSessionDescription(webrtc::SdpType::kOffer, jsonOffer[nosWebRTCJsonConfig::sdpKey].get<std::string>(), &error);
 
-            //TODO: may be make a function for this purpose:
-            p_SetSDPObservers.push_back(new nosSetSDPObserver(internalID));
-            RegisterToSetSDPObserverCallbacks(p_SetSDPObservers[internalID].get());
-
-            p_PeerConnections[internalID]->SetRemoteDescription(
-                p_SetSDPObservers[internalID].get(), webRTCSessionDescription.release());
-
-            p_CreateSDPObservers.push_back(new nosCreateSDPObserver(internalID));
-            RegisterToCreateSDPObserverCallbacks(p_CreateSDPObservers[internalID].get());
-
-            p_PeerConnections[internalID]->CreateAnswer(
-                p_CreateSDPObservers[internalID].get(), webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
-
-        }
+    if (!webRTCSessionDescription) {
+        std::cout << "SDP parsing failed: " << error.description << std::endl;
+        return;
     }
+
+    int existingConnectionID = -1;
+    if (TryGetConnectionIDFromPeerID(existingConnectionID, peerID)) {
+        RemovePeerConnection(existingConnectionID);
+    }
+
+    int connectionID = -1;
+    if (!AddPeerConnection(connectionID))
+        return;
+
+    AttachPeerIDToConnection(connectionID, peerID);
+
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(connectionID, state) || !state.PeerConnection
+        || !state.SetSDPObserver || !state.CreateSDPObserver) {
+        RemovePeerConnection(connectionID);
+        return;
+    }
+
+    state.PeerConnection->SetRemoteDescription(
+        state.SetSDPObserver.get(), webRTCSessionDescription.release());
+
+    state.PeerConnection->CreateAnswer(
+        state.CreateSDPObserver.get(), webrtc::PeerConnectionInterface::RTCOfferAnswerOptions());
 }
 
 void nosWebRTCManager::OnSDPAnswerReceived(std::string&& answer)
@@ -456,7 +565,7 @@ void nosWebRTCManager::OnSDPAnswerReceived(std::string&& answer)
         std::string peerIDstr = jsonAnswer[nosWebRTCJsonConfig::peerIDKey];
         int peerID = std::stoi(peerIDstr);
         int internalID = -1;
-        if(!ReadInternalIDFromPeerID(internalID, peerID)){
+        if(!TryGetConnectionIDFromPeerID(internalID, peerID)){
             //oops..
             std::cerr << "No corresponding peer connection found for the answer from peer: " << peerID;
             return;
@@ -469,19 +578,18 @@ void nosWebRTCManager::OnSDPAnswerReceived(std::string&& answer)
             webrtc::CreateSessionDescription(webrtc::SdpType::kAnswer, jsonAnswer[nosWebRTCJsonConfig::sdpKey].get<std::string>(), &error);
 
         if (!webRTCSessionDescription) {
-            //Abort the mission, clear corresponding items
-            p_PeerConnections.erase(p_PeerConnections.begin() + internalID);
-            p_PeerConnectionObservers.erase(p_PeerConnectionObservers.begin() + internalID);
-            p_CreateSDPObservers.erase(p_CreateSDPObservers.begin() + internalID);
-            p_SetSDPObservers.erase(p_SetSDPObservers.begin() + internalID);
-            PeerConnectionIdx_PeerID.erase(internalID);
+            RemovePeerConnection(internalID);
             std::cout << "SDP parsing failed: " << error.description << std::endl;
             return;
         }
 
+        nosPeerConnectionState state;
+        if (!TryGetPeerConnectionState(internalID, state) || !state.PeerConnection || !state.SetSDPObserver)
+            return;
+
         //Forward answer to webrtc internal stuff
-        p_PeerConnections[internalID]->SetRemoteDescription(
-            p_SetSDPObservers[internalID].get(), webRTCSessionDescription.release());
+        state.PeerConnection->SetRemoteDescription(
+            state.SetSDPObserver.get(), webRTCSessionDescription.release());
 
 
     }
@@ -492,7 +600,7 @@ void nosWebRTCManager::OnICECandidateReceived(std::string&& iceCandidate)
     json jsonICE = json::parse(iceCandidate);
     int peerID = std::stoi(jsonICE[nosWebRTCJsonConfig::peerIDKey].get<std::string>());
     int internalID;
-    if (!ReadInternalIDFromPeerID(internalID, peerID)) {
+    if (!TryGetConnectionIDFromPeerID(internalID, peerID)) {
         nosEngine.LogI("No corresponding peer connection found for the ICE candidate from peer: %d", peerID);
         return;
     }
@@ -509,8 +617,25 @@ void nosWebRTCManager::OnICECandidateReceived(std::string&& iceCandidate)
         return;
     }
     nosEngine.LogI("Adding ICE candidate to peer connection for peerID: %d", peerID);
-    p_PeerConnections[internalID]->AddIceCandidate(candidate.get());
+
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(internalID, state) || !state.PeerConnection)
+        return;
+
+    state.PeerConnection->AddIceCandidate(candidate.get());
     //check for error when adding?
+}
+
+void nosWebRTCManager::OnPeerDisconnectedReceived(std::string&& peerDisconnected)
+{
+    json jsonMessage = json::parse(peerDisconnected);
+    int peerID = std::stoi(jsonMessage[nosWebRTCJsonConfig::peerIDKey].get<std::string>());
+    if (!RemovePeerConnectionByPeerID(peerID))
+        return;
+
+    if (PeerDisconnectedCallback) {
+        PeerDisconnectedCallback();
+    }
 }
 #pragma endregion
 
@@ -569,21 +694,22 @@ void nosWebRTCManager::OnRenegotiationNeeded(int id)
 
 void nosWebRTCManager::OnIceConnectionChange(webrtc::PeerConnectionInterface::IceConnectionState new_state, int id)
 {
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(id, state))
+        return;
+
     if (new_state == webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionConnected
         && PeerConnectedCallback) {
         PeerConnectedCallback();
     }
-    else if (new_state == webrtc::PeerConnectionInterface::kIceConnectionFailed 
-        && PeerDisconnectedCallback) {
-        //Handle the errors!!1
-        //TODO: delete peer connections
-        PeerDisconnectedCallback();
+    else if (new_state == webrtc::PeerConnectionInterface::kIceConnectionFailed) {
+        if (PeerDisconnectedCallback) {
+            PeerDisconnectedCallback();
+        }
         RemovePeerConnection(id);
     }
-    else if (new_state == webrtc::PeerConnectionInterface::kIceConnectionClosed 
-        && PeerDisconnectedCallback) {
-        //PeerDisconnectedCallback();
-        //RemovePeerConnection(id);
+    else if (new_state == webrtc::PeerConnectionInterface::kIceConnectionClosed) {
+        RemovePeerConnection(id);
     }
 }
 
@@ -611,8 +737,12 @@ void nosWebRTCManager::OnIceCandidate(const webrtc::IceCandidateInterface* candi
     std::string ICEcandidate;
     candidate->ToString(&ICEcandidate);
     json jsonICE;
-    
-    jsonICE[nosWebRTCJsonConfig::peerIDKey] = std::to_string(PeerConnectionIdx_PeerID[id]);
+
+    nosPeerConnectionState state;
+    if (!TryGetPeerConnectionState(id, state) || state.PeerID < 0)
+        return;
+
+    jsonICE[nosWebRTCJsonConfig::peerIDKey] = std::to_string(state.PeerID);
     jsonICE[nosWebRTCJsonConfig::typeKey] = nosWebRTCJsonConfig::typeICE;
     jsonICE[nosWebRTCJsonConfig::candidateKey][nosWebRTCJsonConfig::sdpMidKey] = candidate->sdp_mid();
     jsonICE[nosWebRTCJsonConfig::candidateKey][nosWebRTCJsonConfig::sdpMidLineIndexKey] = candidate->sdp_mline_index();
