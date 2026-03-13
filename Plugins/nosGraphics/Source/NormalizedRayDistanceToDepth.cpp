@@ -19,6 +19,8 @@ NOS_REGISTER_NAME(NormalizedRayDistanceToDepth_Frag)
 
 struct NormalizedRayDistanceToDepth : NodeContext
 {
+	std::optional<vkss::Resource> TempColorOutput;
+
 	using NodeContext::NodeContext;
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -39,15 +41,16 @@ struct NormalizedRayDistanceToDepth : NodeContext
 		glm::vec2 clipPlanes = reinterpret_cast<glm::vec2 const&>(view.projection->clip_planes);
 
 		nosResourceShareInfo outputDepth = vkss::DeserializeTextureInfo(pins[NSN_OutDepth].Data->Data);
-
-		auto tmpOutput = vkss::Resource::Create(
-			nosTextureInfo{.Width = outputDepth.Info.Texture.Width,
-						   .Height = outputDepth.Info.Texture.Height,
-						   .Format = NOS_FORMAT_R8_UNORM,
-						   .Filter = NOS_TEXTURE_FILTER_LINEAR,
-						   .Usage = NOS_IMAGE_USAGE_RENDER_TARGET},
-			"NormalizedRayDistanceToDepth Temp Output");
-		if (!tmpOutput)
+		if (!TempColorOutput || TempColorOutput->Info.Texture.Width != outputDepth.Info.Texture.Width ||
+			TempColorOutput->Info.Texture.Height != outputDepth.Info.Texture.Height)
+			TempColorOutput = vkss::Resource::Create(
+				nosTextureInfo{.Width = outputDepth.Info.Texture.Width,
+							   .Height = outputDepth.Info.Texture.Height,
+							   .Format = NOS_FORMAT_R8_UNORM,
+							   .Filter = NOS_TEXTURE_FILTER_LINEAR,
+							   .Usage = NOS_IMAGE_USAGE_RENDER_TARGET},
+				"NormalizedRayDistanceToDepth Temp Output");
+		if (!TempColorOutput)
 		{
 			nosEngine.LogE("Failed to create temporary render target for NormalizedRayDistanceToDepth.");
 			return NOS_RESULT_FAILED;
@@ -70,7 +73,7 @@ struct NormalizedRayDistanceToDepth : NodeContext
 		pass.Key = NSN_NormalizedRayDistanceToDepth_Pass;
 		pass.Bindings = bindings.data();
 		pass.BindingCount = bindings.size();
-		pass.Output = *tmpOutput;
+		pass.Output = *TempColorOutput;
 		pass.Benchmark = 0;
 		pass.DoNotClear = false;
 		pass.DepthAttachment = {
