@@ -6,7 +6,6 @@
 layout(binding = 0) uniform sampler2D Input;
 layout (binding = 1, std430) uniform UBO 
 {
-    mat4 InverseProjection;
     float Scale;
     float ClipNear;
     float ClipFar;
@@ -20,7 +19,6 @@ float RayDistanceToDepth(
     float normalizedRayDistance,
     float scale,
     vec2 uv,
-    mat4 invProj,
     float zNear,
     float zFar)
 {
@@ -40,7 +38,6 @@ void main()
         normalizedRayDistance,
         ubo.Scale,
         uv,
-        ubo.InverseProjection,
         ubo.ClipNear,
         ubo.ClipFar);
 

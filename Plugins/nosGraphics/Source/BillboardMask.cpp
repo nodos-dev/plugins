@@ -29,6 +29,7 @@ struct BillboardMask : NodeContext
 	{
 		FailedToCreateRenderTarget = 1,
 		FailedToCreateDepthBuffer = 2,
+		InvalidInputDepth = 3,
 	};
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
@@ -129,6 +130,11 @@ struct BillboardMask : NodeContext
 				inDepth.Info.Texture.Width != resolution.x ||
 				inDepth.Info.Texture.Height != resolution.y || inDepth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
 			{
+				SetOrAddStatusMessage(StatusMessageType::InvalidInputDepth,
+									  nos::fb::TNodeStatusMessage{
+										  .text = "Read In Depth is enabled, but InDepth is not a valid D32 depth texture matching Resolution.",
+										  .type = nos::fb::NodeStatusMessageType::FAILURE,
+									  });
 				nosEngine.LogW(
 					"Billboard Mask node is set to read input depth, but the provided texture is not a valid depth "
 					"texture. Please provide a valid depth texture.");
@@ -136,12 +142,15 @@ struct BillboardMask : NodeContext
 			}
 			else
 			{
+				RemoveStatusMessage(StatusMessageType::InvalidInputDepth);
+				RemoveStatusMessage(StatusMessageType::FailedToCreateDepthBuffer);
 				SetPinValue(NSN_OutDepth, *pins[NSN_InDepth].Data);
 				depth = inDepth;
 			}
 		}
 		else
 		{
+			RemoveStatusMessage(StatusMessageType::InvalidInputDepth);
 			if (depth.Info.Texture.Width != resolution.x || depth.Info.Texture.Height != resolution.y ||
 				depth.Info.Texture.Format != NOS_FORMAT_D32_SFLOAT)
 			{

@@ -36,8 +36,6 @@ struct NormalizedRayDistanceToDepth : NodeContext
 		}
 
 		float scale = *pins.GetPinData<float>(NSN_Scale);
-		glm::mat4 projection = reinterpret_cast<glm::mat4 const&>(view.left_handed_projection_matrix);
-		glm::mat4 inverseProjection = glm::inverse(projection);
 		glm::vec2 clipPlanes = reinterpret_cast<glm::vec2 const&>(view.projection->clip_planes);
 
 		nosResourceShareInfo outputDepth = vkss::DeserializeTextureInfo(pins[NSN_OutDepth].Data->Data);
@@ -58,7 +56,6 @@ struct NormalizedRayDistanceToDepth : NodeContext
 
 		std::vector<nosShaderBinding> bindings;
 		bindings.emplace_back(vkss::ShaderBinding(NOS_NAME("Input"), inputTexture));
-		bindings.emplace_back(vkss::ShaderBinding(NOS_NAME("InverseProjection"), inverseProjection));
 		bindings.emplace_back(vkss::ShaderBinding(NSN_Scale, scale));
 		bindings.emplace_back(vkss::ShaderBinding(NOS_NAME("ClipNear"), clipPlanes.x));
 		bindings.emplace_back(vkss::ShaderBinding(NOS_NAME("ClipFar"), clipPlanes.y));
