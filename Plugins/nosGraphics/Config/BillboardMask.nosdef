@@ -7,19 +7,22 @@
 				"display_name": "Billboard Mask"
 			},
 			"node": {
+				"description": "Renders a camera-facing billboard mask into a color target and depth buffer.",
 				"contents_type": "Job",
 				"pins": [
 					{
 						"name": "Position",
 						"type_name": "nos.fb.vec3",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard base center."
 					},
 					{
 						"name": "InDepth",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Optional D32 depth texture to reuse when ReadInDepth is enabled.",
 						"data": {
 							"format": "D32_SFLOAT"
 						}
@@ -27,15 +30,17 @@
 					{
 						"name": "ReadInDepth",
 						"type_name": "bool",
-						"show_as": "INPUT_PIN",
+						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": false
+						"description": "Uses InDepth as the output depth buffer instead of creating a new one.",
+						"data": true
 					},
 					{
 						"name": "Size",
 						"type_name": "nos.fb.vec2",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Billboard size in world units as width and height.",
 						"data": {
 							"x": 100.0,
 							"y": 100.0
@@ -45,13 +50,15 @@
 						"name": "RenderView",
 						"type_name": "nos.graphics.RenderView",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Render view used to orient the billboard and build its matrices."
 					},
 					{
 						"name": "Resolution",
 						"type_name": "nos.fb.vec2u",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Output resolution for the generated render target and depth buffer.",
 						"data": {
 							"x": 1920,
 							"y": 1080
@@ -61,13 +68,15 @@
 						"name": "OutRenderTarget",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Mask texture rendered by the billboard pass."
 					},
 					{
 						"name": "OutDepth",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Depth texture written by the pass or forwarded from InDepth.",
 						"data": {
 							"format": "D32_SFLOAT"
 						}

@@ -15,14 +15,14 @@ layout (binding = 1, std430) uniform UBO
 layout(location = 0) out float FragColor;
 layout(location = 0) in vec2 uv;
 
-float RayDistanceToDepth(
-    float normalizedRayDistance,
+float NormalizedDepthToDepthBufValue(
+    float normalizedDepth,
     float scale,
     vec2 uv,
     float zNear,
     float zFar)
 {
-    float zView = normalizedRayDistance * scale;
+    float zView = normalizedDepth * scale;
 
     float depth =
         zFar / (zFar - zNear) -
@@ -33,9 +33,9 @@ float RayDistanceToDepth(
 
 void main()
 {
-    float normalizedRayDistance = texture(Input, uv).r;
-    float finDepth = RayDistanceToDepth(
-        normalizedRayDistance,
+    float normalizedDepth = texture(Input, uv).r;
+    float finDepth = NormalizedDepthToDepthBufValue(
+        normalizedDepth,
         ubo.Scale,
         uv,
         ubo.ClipNear,

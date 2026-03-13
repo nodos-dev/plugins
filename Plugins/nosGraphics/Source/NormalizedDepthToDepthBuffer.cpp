@@ -7,17 +7,17 @@
 
 namespace nos::graphics
 {
-NOS_REGISTER_NAME(NormalizedRayDistanceToDepth)
+NOS_REGISTER_NAME(NormalizedDepthToDepthBuffer)
 
 NOS_REGISTER_NAME(InDepth)
 NOS_REGISTER_NAME(RenderView)
 NOS_REGISTER_NAME(Scale)
 NOS_REGISTER_NAME(OutDepth)
 
-NOS_REGISTER_NAME(NormalizedRayDistanceToDepth_Pass)
-NOS_REGISTER_NAME(NormalizedRayDistanceToDepth_Frag)
+NOS_REGISTER_NAME(NormalizedDepthToDepthBuffer_Pass)
+NOS_REGISTER_NAME(NormalizedDepthToDepthBuffer_Frag)
 
-struct NormalizedRayDistanceToDepth : NodeContext
+struct NormalizedDepthToDepthBuffer : NodeContext
 {
 	std::optional<vkss::Resource> TempColorOutput;
 
@@ -31,7 +31,7 @@ struct NormalizedRayDistanceToDepth : NodeContext
 		TRenderView view = pins.GetPinData<TRenderView>(NSN_RenderView);
 		if (!view.projection)
 		{
-			nosEngine.LogW("NormalizedRayDistanceToDepth requires a valid RenderView projection.");
+			nosEngine.LogW("NormalizedDepthToDepthBuffer requires a valid RenderView projection.");
 			return NOS_RESULT_FAILED;
 		}
 
@@ -47,10 +47,10 @@ struct NormalizedRayDistanceToDepth : NodeContext
 							   .Format = NOS_FORMAT_R8_UNORM,
 							   .Filter = NOS_TEXTURE_FILTER_LINEAR,
 							   .Usage = NOS_IMAGE_USAGE_RENDER_TARGET},
-				"NormalizedRayDistanceToDepth Temp Output");
+				"NormalizedDepthToDepthBuffer Temp Output");
 		if (!TempColorOutput)
 		{
-			nosEngine.LogE("Failed to create temporary render target for NormalizedRayDistanceToDepth.");
+			nosEngine.LogE("Failed to create temporary render target for NormalizedDepthToDepthBuffer.");
 			return NOS_RESULT_FAILED;
 		}
 
@@ -61,13 +61,13 @@ struct NormalizedRayDistanceToDepth : NodeContext
 		bindings.emplace_back(vkss::ShaderBinding(NOS_NAME("ClipFar"), clipPlanes.y));
 
 		nosCmd cmd = {};
-		nosCmdBeginParams beginParams{.Name = NOS_NAME("Normalized Ray Distance To Depth"),
+		nosCmdBeginParams beginParams{.Name = NOS_NAME("Normalized Depth To Depth Buffer"),
 									  .AssociatedNodeId = NodeId,
 									  .OutCmdHandle = &cmd};
 		nosVulkan->Begin(&beginParams);
 
 		nosRunPassParams pass = {};
-		pass.Key = NSN_NormalizedRayDistanceToDepth_Pass;
+		pass.Key = NSN_NormalizedDepthToDepthBuffer_Pass;
 		pass.Bindings = bindings.data();
 		pass.BindingCount = bindings.size();
 		pass.Output = *TempColorOutput;
@@ -91,17 +91,17 @@ struct NormalizedRayDistanceToDepth : NodeContext
 	}
 };
 
-nosResult RegisterNormalizedRayDistanceToDepth(nosNodeFunctions* fn)
+nosResult RegisterNormalizedDepthToDepthBuffer(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NSN_NormalizedRayDistanceToDepth, NormalizedRayDistanceToDepth, fn);
+	NOS_BIND_NODE_CLASS(NSN_NormalizedDepthToDepthBuffer, NormalizedDepthToDepthBuffer, fn);
 
 	fs::path root = nosEngine.Module->RootFolderPath;
-	auto fragPath = (root / "Shaders" / "NormalizedRayDistanceToDepth.frag").generic_string();
+	auto fragPath = (root / "Shaders" / "NormalizedDepthToDepthBuffer.frag").generic_string();
 
 	nosShaderInfo shader{
-		.ShaderName = NSN_NormalizedRayDistanceToDepth_Frag,
+		.ShaderName = NSN_NormalizedDepthToDepthBuffer_Frag,
 		.Source = {.Stage = NOS_SHADER_STAGE_FRAG, .GLSLPath = fragPath.c_str()},
-		.AssociatedNodeClassName = NSN_NormalizedRayDistanceToDepth,
+		.AssociatedNodeClassName = NSN_NormalizedDepthToDepthBuffer,
 	};
 
 	auto ret = nosVulkan->RegisterShaders(1, &shader);
@@ -109,8 +109,8 @@ nosResult RegisterNormalizedRayDistanceToDepth(nosNodeFunctions* fn)
 		return ret;
 
 	nosPassInfo pass = {
-		.Key = NSN_NormalizedRayDistanceToDepth_Pass,
-		.Shader = NSN_NormalizedRayDistanceToDepth_Frag,
+		.Key = NSN_NormalizedDepthToDepthBuffer_Pass,
+		.Shader = NSN_NormalizedDepthToDepthBuffer_Frag,
 		.MultiSample = 1,
 	};
 

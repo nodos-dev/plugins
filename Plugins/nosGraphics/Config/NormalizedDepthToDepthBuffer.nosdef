@@ -1,31 +1,35 @@
 {
 	"nodes": [
 		{
-			"class_name": "NormalizedRayDistanceToDepth",
+			"class_name": "NormalizedDepthToDepthBuffer",
 			"menu_info": {
 				"category": "Rendering|Advanced",
-				"display_name": "Normalized Ray Distance To Depth"
+				"display_name": "Convert Normalized Depth To Depth Buffer"
 			},
 			"node": {
+				"description": "Converts a normalized depth texture into a D32 depth buffer using the render view clip planes.",
 				"contents_type": "Job",
 				"pins": [
 					{
 						"name": "InDepth",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Input texture whose red channel stores normalized depth values."
 					},
 					{
 						"name": "RenderView",
 						"type_name": "nos.graphics.RenderView",
 						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Render view that provides the near and far clip planes for reconstruction."
 					},
 					{
 						"name": "Scale",
 						"type_name": "float",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Multiplier applied to the sampled normalized depth before reconstruction.",
 						"data": 1.0
 					},
 					{
@@ -33,6 +37,7 @@
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Output D32 depth buffer texture.",
 						"data": {
 							"format": "D32_SFLOAT"
 						}
