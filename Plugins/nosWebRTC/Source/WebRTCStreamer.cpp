@@ -442,7 +442,10 @@ struct WebRTCNodeContext : nos::NodeContext {
 
 	void OnPeerDisconnected() {
 		nosEngine.LogI("WebRTC Streamer peer disconnected.");
-		--PeerCount;
+		int previousPeerCount = PeerCount.fetch_sub(1);
+		if (previousPeerCount <= 0) {
+			PeerCount.store(0);
+		}
 		currentState = EWebRTCPlayerStates::eDISCONNECTED_FROM_PEER;
 		WebRTCCallbacksCV.notify_one();
 	}
@@ -702,6 +705,11 @@ struct WebRTCNodeContext : nos::NodeContext {
 						HandleEvent(nos::CreateAppEvent(fbb, nos::app::CreateSetThreadNameDirect(fbb, (uint64_t)FrameSenderThread.native_handle(), "WebRTC Frame Sender")));
 					}
 					SetPinOrphanState(InputPinUUID, nos::fb::PinOrphanStateType::ACTIVE);
+					nosScheduleNodeParams scheduleParams
+					{
+						NodeID, InputRing->FreeCount, false
+					};
+					nosEngine.ScheduleNode(&scheduleParams);
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}
@@ -717,7 +725,10 @@ struct WebRTCNodeContext : nos::NodeContext {
 				}
 				case EWebRTCPlayerStates::eDISCONNECTED_FROM_PEER:
 				{
-					//shouldSendFrame = false;
+					if (PeerCount <= 0) {
+						PeerCount = 0;
+						SetPinOrphanState(InputPinUUID, nos::fb::PinOrphanStateType::ORPHAN, "No peers connected");
+					}
 					currentState = EWebRTCPlayerStates::eNONE;
 					break;
 				}

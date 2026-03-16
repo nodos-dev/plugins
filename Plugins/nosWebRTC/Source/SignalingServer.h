@@ -48,6 +48,7 @@ private:
 	void OnStreamerMessage(int id, std::string path, std::string message);
 
 	void OnPlayerMessage(int id, std::string path, std::string message);
+	void NotifyPeerDisconnected(int targetID, int peerID);
 
 	std::unique_ptr<nosWebSocketServer> p_ServerSocket;
 	
