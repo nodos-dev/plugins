@@ -3,6 +3,7 @@
  */
 
 #pragma once
+#include <mutex>
 #include "api/peer_connection_interface.h"
 #include "api/scoped_refptr.h"
 
@@ -11,6 +12,7 @@ public:
 	nosCreateSDPObserver(int id);
 	void SetSuccessCallback(std::function<void(webrtc::SessionDescriptionInterface*, int)> callback);
 	void SetFailureCallback(std::function<void(webrtc::RTCError, int)> callback);
+	void ClearCallbacks();
 
 	void AddRef() const override;
 	rtc::RefCountReleaseStatus Release() const override;
@@ -20,6 +22,7 @@ private:
 
 	std::function<void(webrtc::SessionDescriptionInterface*, int)> SuccessCallback;
 	std::function<void(webrtc::RTCError, int)> FailureCallback;
+	mutable std::mutex CallbackMutex;
 	int peerConnectionID;
 	mutable webrtc::webrtc_impl::RefCounter ref_count_{ 0 };
 };

@@ -8,6 +8,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "api/media_stream_interface.h"
 #include "api/peer_connection_interface.h"
@@ -19,6 +20,14 @@
 #include "CustomVideoSink.h"
 
 typedef rtc::scoped_refptr<webrtc::PeerConnectionInterface> PeerConnectionPtr;
+
+struct nosPeerConnectionState {
+    int PeerID = -1;
+    std::shared_ptr<nosPeerConnectionObserver> Observer;
+    rtc::scoped_refptr<nosCreateSDPObserver> CreateSDPObserver;
+    rtc::scoped_refptr<nosSetSDPObserver> SetSDPObserver;
+    PeerConnectionPtr PeerConnection;
+};
 
 class nosWebRTCManager {
 public:
@@ -43,8 +52,8 @@ public:
     rtc::RefCountReleaseStatus Release() const;
 protected:
 
-    bool AddPeerConnection();
-    void RemovePeerConnection(int id);
+    bool AddPeerConnection(int& connectionID);
+    void RemovePeerConnection(int connectionID);
 
     void OnImageEncoded();
 
@@ -58,6 +67,7 @@ protected:
     void OnSDPOfferReceived(std::string&& offer);
     void OnSDPAnswerReceived(std::string&& answer);
     void OnICECandidateReceived(std::string&& iceCandidate);
+    void OnPeerDisconnectedReceived(std::string&& peerDisconnected);
 
     #pragma endregion
 
@@ -91,18 +101,22 @@ protected:
     #pragma endregion
     // Send a message to the signaling server.
 
-    bool ReadInternalIDFromPeerID(int& internalID, int peerID);
+    bool TryGetPeerConnectionState(int connectionID, nosPeerConnectionState& state) const;
+    bool TryGetConnectionIDFromPeerID(int& connectionID, int peerID) const;
+    void AttachPeerIDToConnection(int connectionID, int peerID);
+    bool RemovePeerConnectionByPeerID(int peerID);
+    void ReleasePeerConnectionState(int connectionID, nosPeerConnectionState* removedState = nullptr);
+    std::vector<PeerConnectionPtr> GetPeerConnectionsSnapshot() const;
     
     std::unique_ptr<rtc::Thread> SignalingThread;
     std::unique_ptr<rtc::Thread> WorkerThread;
     //We will register ourselves so that we will be notified whether SDP creation succeed or failed
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> p_PeerConnectionFactory;
-    std::vector<std::shared_ptr<nosPeerConnectionObserver>> p_PeerConnectionObservers;
-    std::vector<rtc::scoped_refptr<nosCreateSDPObserver>> p_CreateSDPObservers;
-    std::vector<rtc::scoped_refptr<nosSetSDPObserver>> p_SetSDPObservers;
-    std::vector<PeerConnectionPtr> p_PeerConnections;
-    
-    std::map<int, int> PeerConnectionIdx_PeerID;
+    mutable std::mutex PeerConnectionsMutex;
+    std::unordered_map<int, nosPeerConnectionState> p_PeerConnections;
+    std::unordered_map<int, int> p_PeerIDToConnectionID;
+    int NextPeerConnectionID = 0;
+
     std::vector<rtc::scoped_refptr<nosCustomVideoSource>> p_VideoSources;
     std::vector<rtc::scoped_refptr<nosCustomVideoSink>> p_VideoSinks;
     std::vector<rtc::scoped_refptr<webrtc::VideoTrackInterface>> p_VideoTracks;

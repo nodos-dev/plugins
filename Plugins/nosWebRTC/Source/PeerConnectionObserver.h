@@ -3,11 +3,13 @@
  */
 
 #pragma once
+#include <mutex>
 #include "api/peer_connection_interface.h"
 
 class nosPeerConnectionObserver : public webrtc::PeerConnectionObserver {
 public:
 	nosPeerConnectionObserver(int peerConnectionID);
+    void ClearCallbacks();
     
     void SetSignalingChangeCallback(std::function<void(webrtc::PeerConnectionInterface::SignalingState, int)> callback);
     void SetAddTrackCallback(std::function<void(rtc::scoped_refptr<webrtc::RtpReceiverInterface>,
@@ -51,4 +53,5 @@ private:
     std::function<void(webrtc::PeerConnectionInterface::IceConnectionState, int)> IceConnectionChangeCallback;
     std::function<void(webrtc::PeerConnectionInterface::IceGatheringState, int)> IceGatheringChangeCallback;
     std::function<void(const webrtc::IceCandidateInterface*, int)> IceCandidateCallback;
+    std::mutex CallbackMutex;
 };

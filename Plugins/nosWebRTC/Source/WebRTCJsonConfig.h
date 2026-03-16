@@ -16,6 +16,7 @@ namespace nosWebRTCJsonConfig{
 	static std::string typeAnswer = "answer";
 	static std::string typeOffer = "offer";
 	static std::string typeICE = "iceCandidate";
+	static std::string typePeerDisconnected = "peerDisconnected";
 }
 
 #endif // !NOS_WEBRTC_JSON_CONFIG

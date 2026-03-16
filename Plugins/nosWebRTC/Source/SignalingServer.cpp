@@ -96,12 +96,19 @@ void nosSignalingServer::OnNewStreamerConnected(int id, std::string path)
 
 void nosSignalingServer::OnStreamerDisconnected(int id, std::string path)
 {
-	if (streamerPathIDMap.contains(path)) {
-		streamerPathIDMap.erase(path);
-	}
-	if (StreamerDisconnectedCallback) {
-		StreamerDisconnectedCallback(id, path);
-	}
+    if (streamerPathIDMap.contains(path)) {
+        streamerPathIDMap.erase(path);
+    }
+
+    if (p_ServerSocket && playerPathIDMap.contains(path)) {
+        for (int playerID : playerPathIDMap[path]) {
+            NotifyPeerDisconnected(playerID, id);
+        }
+    }
+
+    if (StreamerDisconnectedCallback) {
+        StreamerDisconnectedCallback(id, path);
+    }
 }
 
 void nosSignalingServer::OnNewPlayerConnected(int id, std::string path)
@@ -115,15 +122,27 @@ void nosSignalingServer::OnNewPlayerConnected(int id, std::string path)
 
 void nosSignalingServer::OnPlayerDisconnected(int id, std::string path)
 {
-	if (playerPathIDMap.contains(path)) {
-		auto it = std::find(playerPathIDMap[path].begin(), playerPathIDMap[path].end(), id);
-		if (it != playerPathIDMap[path].end()) {
-			playerPathIDMap[path].erase(it);
-		}
+    if (p_ServerSocket && streamerPathIDMap.contains(path)) {
+        NotifyPeerDisconnected(streamerPathIDMap[path], id);
+    }
+
+    if (playerPathIDMap.contains(path)) {
+        auto it = std::find(playerPathIDMap[path].begin(), playerPathIDMap[path].end(), id);
+        if (it != playerPathIDMap[path].end()) {
+            playerPathIDMap[path].erase(it);
+        }
 	}
-	if (PlayerDisconnectedCallback) {
-		PlayerDisconnectedCallback(id, path);
-	}
+    if (PlayerDisconnectedCallback) {
+        PlayerDisconnectedCallback(id, path);
+    }
+}
+
+void nosSignalingServer::NotifyPeerDisconnected(int targetID, int peerID)
+{
+    json jsonMessage;
+    jsonMessage[nosWebRTCJsonConfig::typeKey] = nosWebRTCJsonConfig::typePeerDisconnected;
+    jsonMessage[nosWebRTCJsonConfig::peerIDKey] = std::to_string(peerID);
+    p_ServerSocket->SendMessageTo(targetID, jsonMessage.dump());
 }
 
 //TODO: we may ensure the message is in correct format
