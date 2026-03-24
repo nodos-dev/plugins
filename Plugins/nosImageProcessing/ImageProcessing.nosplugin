@@ -30,7 +30,7 @@
 		],
 		"category": "Image Processing"
 	},
-	"binary_path": "Binaries/nosImageProcessing",
+	"binary_path": "Binaries/nosImageprocessing",
 	"plugin_options": [
 		{
 			"plugin": "nos.sys.vulkan",
