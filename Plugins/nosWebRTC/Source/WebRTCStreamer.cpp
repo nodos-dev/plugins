@@ -570,7 +570,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 			}
 			auto& buf = InputBuffers[readIndex];
 #pragma endregion
-			auto inputRgba8Info = nos::sys::vulkan::GetResourceInfo(InputRGBA8).value_or(nosResourceInfo{});
+			auto inputRgba8Info = nos::sys::vulkan::GetResourceInfo(InputRGBA8).value_or(nosTextureInfo{});
 #pragma region RGB to YUV Buffer Conversion
 			auto yuvBufferIndex = NextYuvBufferIndex;
 			NextYuvBufferIndex = (NextYuvBufferIndex + 1) % BufferCount;
