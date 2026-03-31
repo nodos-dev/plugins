@@ -15,12 +15,14 @@ enum TrackNode : int
 	FreeD,
 	UserTrack,
 	AddTrack,
+	RecordTrackCOLMAP,
 	Count
 };
 
 void RegisterFreeDNode(nosNodeFunctions* functions);
 void RegisterController(nosNodeFunctions* functions);
 void RegisterAddTrack(nosNodeFunctions*);
+void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -40,7 +42,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			RegisterController(node);
 			break;
 		case TrackNode::AddTrack:
-			RegisterAddTrack(node); 
+			RegisterAddTrack(node);
+			break;
+		case TrackNode::RecordTrackCOLMAP:
+			RegisterRecordTrackCOLMAP(node);
 			break;
 		}
 	}

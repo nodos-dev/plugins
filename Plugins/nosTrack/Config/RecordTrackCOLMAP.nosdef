@@ -1,0 +1,114 @@
+{
+	"nodes": [
+		{
+			"class_name": "RecordTrackCOLMAP",
+			"menu_info": {
+				"category": "nosTrack",
+				"display_name": "Record Track (COLMAP)",
+				"name_aliases": [ "colmap", "export camera", "record camera" ]
+			},
+			"node": {
+				"class_name": "RecordTrackCOLMAP",
+				"display_name": "Record Track (COLMAP)",
+				"contents_type": "Job",
+				"description": "Records camera tracking data each frame while recording is enabled, then exports cameras.txt and images.txt in COLMAP format. Intrinsics (focal length, distortion) are derived from the Track's FOV, sensor size, and lens distortion. Extrinsics (rotation, translation) are stored per frame in world-to-camera convention.",
+				"pins": [
+					{
+						"name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Incoming camera tracking data to record. Position, rotation, FOV, sensor size, and lens distortion are captured each frame."
+					},
+					{
+						"name": "TrackOut",
+						"display_name": "Track Out",
+						"type_name": "nos.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Pass-through of the incoming Track data."
+					},
+					{
+						"name": "OutputDirectory",
+						"display_name": "Output Directory",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "FOLDER_PICKER" },
+						"description": "Directory where cameras.txt and images.txt will be written when recording stops. Must be empty to start recording."
+					},
+					{
+						"name": "ImageResolution",
+						"display_name": "Image Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						},
+						"description": "Image resolution in pixels (width, height). Used to compute focal length and principal point for COLMAP camera model."
+					},
+					{
+						"name": "EulerOrder",
+						"display_name": "Euler Order",
+						"type_name": "nos.track.EulerOrder",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "ZYX",
+						"description": "Euler angle rotation order used when converting Track rotation to COLMAP extrinsics. Default ZYX matches the FreeD node convention."
+					},
+					{
+						"name": "Record",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"description": "Toggle recording. Mirrors Record/Stop functions. Enabling clears previous frames and starts capturing. Will fail if the output directory is not empty."
+					},
+					{
+						"name": "FrameCount",
+						"display_name": "Frame Count",
+						"type_name": "uint",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0,
+						"description": "Number of frames recorded in the current session."
+					}
+				],
+				"functions": [
+					{
+						"class_name": "RecordTrackCOLMAP_Record",
+						"display_name": "Record",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "RecordTrackCOLMAP_Stop",
+						"display_name": "Stop",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "RecordTrackCOLMAP_Save",
+						"display_name": "Save",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "RecordTrackCOLMAP_Clear",
+						"display_name": "Clear",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "RecordTrackCOLMAP_OpenFolder",
+						"display_name": "Open Folder",
+						"contents_type": "Job",
+						"pins": []
+					}
+				]
+			}
+		}
+	]
+}

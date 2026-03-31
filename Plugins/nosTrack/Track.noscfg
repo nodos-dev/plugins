@@ -16,7 +16,8 @@
 	"node_definitions": [
 		"Config/FreeD.nosdef",
 		"Config/UserTrack.nosdef",
-		"Config/AddTrack.nosdef"
+		"Config/AddTrack.nosdef",
+		"Config/RecordTrackCOLMAP.nosdef"
 	],
 	"defaults": [
 		"Config/Defaults.json"
