@@ -99,7 +99,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 	void SyncRecordPin(bool value)
 	{
 		SyncingRecordPin = true;
-		nosEngine.SetPinValueByName(NodeId, NSN_Record, nosBuffer{.Data = &value, .Size = sizeof(value)});
+		SetPinValue(NSN_Record, nosBuffer{.Data = &value, .Size = sizeof(value)});
 		SyncingRecordPin = false;
 	}
 
@@ -185,7 +185,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 	void UpdateFrameCountPin()
 	{
 		uint32_t count = (uint32_t)Frames.size();
-		nosEngine.SetPinValueByName(NodeId, NSN_FrameCount, nosBuffer{.Data = &count, .Size = sizeof(count)});
+		SetPinValue(NSN_FrameCount, nosBuffer{.Data = &count, .Size = sizeof(count)});
 	}
 
 	void UpdateStatus()
@@ -205,25 +205,23 @@ struct RecordTrackCOLMAPContext : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		auto pins = GetPinValues(params);
-		auto ids = GetPinIds(params);
 
 		// Pass through Track input to output
-		auto trackPinData = pins[NOS_NAME("Track")];
-		size_t trackDataSize = 0;
+		nosBuffer trackBuf{};
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			if (params->Pins[i].Name == NOS_NAME("Track"))
+			if (params->Pins[i].Name == NOS_NAME("InTrack"))
 			{
-				trackDataSize = params->Pins[i].Data->Size;
+				trackBuf = {.Data = (void*)params->Pins[i].Data->Data, .Size = params->Pins[i].Data->Size};
 				break;
 			}
 		}
-		nosEngine.SetPinValue(ids[NOS_NAME("TrackOut")], {.Data = trackPinData, .Size = trackDataSize});
+		SetPinValue(NOS_NAME("OutTrack"), trackBuf);
 
 		if (!Recording)
 			return NOS_RESULT_SUCCESS;
 
-		auto* trackData = flatbuffers::GetRoot<track::Track>(trackPinData);
+		auto* trackData = flatbuffers::GetRoot<track::Track>(trackBuf.Data);
 		if (!trackData)
 			return NOS_RESULT_SUCCESS;
 

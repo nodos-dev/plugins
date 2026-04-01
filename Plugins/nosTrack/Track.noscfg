@@ -17,7 +17,8 @@
 		"Config/FreeD.nosdef",
 		"Config/UserTrack.nosdef",
 		"Config/AddTrack.nosdef",
-		"Config/RecordTrackCOLMAP.nosdef"
+		"Config/RecordTrackCOLMAP.nosdef",
+		"Config/PlaybackTrackCOLMAP.nosdef"
 	],
 	"defaults": [
 		"Config/Defaults.json"
