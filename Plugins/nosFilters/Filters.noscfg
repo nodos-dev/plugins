@@ -2,22 +2,22 @@
     "info": {
         "id": {
             "name": "nos.filters",
-            "version": "1.6.0"
+            "version": "1.7.0"
         },
         "display_name": "Filters",
         "description": "Collection of image filters.",
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "6.6.0"
+                "version": "6.6"
             },
             {
                 "name": "nos.math",
-                "version": "1.9.0"
+                "version": "1.9"
             },
             {
                 "name": "nos.mediaio",
-                "version": "2.5.0"
+                "version": "2.5"
             }
         ],
         "category": "Image Processing"

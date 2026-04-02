@@ -24,6 +24,13 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
+						"name": "Homography",
+						"type_name": "nos.fb.mat4",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "3x3 homography matrix padded into a mat4 for std140 layout compatibility."
+					},
+					{
 						"name": "Output",
 						"type_name": "nos.sys.vulkan.Texture",
 						"show_as": "OUTPUT_PIN",
