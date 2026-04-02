@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.math",
-      "version": "1.9.3"
+      "version": "1.10.0"
     },
     "description": "Nodes for math operations.",
     "display_name": "Math",
@@ -23,7 +23,9 @@
     "Config/Boolean.nosdef",
     "Config/Xor.nosdef",
     "Config/Random.nosdef",
-    "Config/Lerp.nosdef"
+    "Config/Lerp.nosdef",
+    "Config/Vec3ToVec4.nosdef",
+    "Config/EmbedMat3ToMat4.nosdef"
   ],
   "binary_path": "Binaries/nosMath",
   "third_party_software": [
