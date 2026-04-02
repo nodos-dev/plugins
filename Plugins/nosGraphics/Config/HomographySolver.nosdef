@@ -1,0 +1,89 @@
+{
+	"nodes": [
+		{
+			"class_name": "HomographySolver",
+			"menu_info": {
+				"category": "Graphics",
+				"display_name": "Homography Solver"
+			},
+			"node": {
+				"class_name": "HomographySolver",
+				"contents_type": "Job",
+				"description": "Computes a 3x3 homography matrix from 4 point correspondences using the DLT algorithm.",
+				"pins": [
+					{
+						"name": "Source 1",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "First point in the source plane.",
+						"data": { "x": 0.0, "y": 0.0 }
+					},
+					{
+						"name": "Source 2",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Second point in the source plane.",
+						"data": { "x": 1.0, "y": 0.0 }
+					},
+					{
+						"name": "Source 3",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Third point in the source plane.",
+						"data": { "x": 1.0, "y": 1.0 }
+					},
+					{
+						"name": "Source 4",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Fourth point in the source plane.",
+						"data": { "x": 0.0, "y": 1.0 }
+					},
+					{
+						"name": "Target 1",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "First point in the target plane, corresponding to Source 1.",
+						"data": { "x": 0.0, "y": 0.0 }
+					},
+					{
+						"name": "Target 2",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Second point in the target plane, corresponding to Source 2.",
+						"data": { "x": 1.0, "y": 0.0 }
+					},
+					{
+						"name": "Target 3",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Third point in the target plane, corresponding to Source 3.",
+						"data": { "x": 1.0, "y": 1.0 }
+					},
+					{
+						"name": "Target 4",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Fourth point in the target plane, corresponding to Source 4.",
+						"data": { "x": 0.0, "y": 1.0 }
+					},
+					{
+						"name": "Homography",
+						"type_name": "nos.fb.mat3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "3x3 homography matrix that maps source points to target points in homogeneous coordinates."
+					}
+				]
+			}
+		}
+	]
+}

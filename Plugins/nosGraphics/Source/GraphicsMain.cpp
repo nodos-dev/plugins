@@ -19,6 +19,7 @@ enum Nodes : int
 	BillboardMask,
 	BillboardPositions,
 	NormalizedDepthToDepthBuffer,
+	HomographySolver,
 	Count
 };
 
@@ -26,6 +27,7 @@ nosResult RegisterTrackToView(nosNodeFunctions*);
 nosResult RegisterBillboardMask(nosNodeFunctions*);
 nosResult RegisterBillboardPositions(nosNodeFunctions*);
 nosResult RegisterNormalizedDepthToDepthBuffer(nosNodeFunctions*);
+nosResult RegisterHomographySolver(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -50,6 +52,7 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(BillboardMask)
 				GEN_CASE_NODE(BillboardPositions)
 				GEN_CASE_NODE(NormalizedDepthToDepthBuffer)
+				GEN_CASE_NODE(HomographySolver)
 			default: break;
 			}
 		}
