@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.graphics",
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     "description": "Types & Nodes for graphics operations.",
     "display_name": "Graphics",
@@ -23,7 +23,11 @@
     "Config/BillboardMask.nosdef",
     "Config/BillboardPositions.nosdef",
     "Config/TrackToView.nosdef",
-    "Config/NormalizedDepthToDepthBuffer.nosdef"
+    "Config/NormalizedDepthToDepthBuffer.nosdef",
+    "Config/Project.nosdef",
+    "Config/TranslationMatrix.nosdef",
+    "Config/WorldToScreen.nosdef",
+    "Config/HomographySolver.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []
