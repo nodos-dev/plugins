@@ -68,13 +68,22 @@
 						"description": "Toggle recording. Mirrors Record/Stop functions. Enabling clears previous frames and starts capturing. Will fail if the output directory is not empty."
 					},
 					{
+						"name": "RecordingFrame",
+						"display_name": "Recording Frame",
+						"type_name": "uint",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0,
+						"description": "Current recording frame index. Outputs 0 when not recording."
+					},
+					{
 						"name": "FrameCount",
 						"display_name": "Frame Count",
 						"type_name": "uint",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"data": 0,
-						"description": "Number of frames recorded in the current session."
+						"description": "Number of frames in the buffer."
 					}
 				],
 				"functions": [

@@ -21,6 +21,7 @@ NOS_REGISTER_NAME(ImageResolution);
 NOS_REGISTER_NAME(EulerOrder);
 NOS_REGISTER_NAME(Record);
 NOS_REGISTER_NAME(FrameCount);
+NOS_REGISTER_NAME(RecordingFrame);
 
 NOS_REGISTER_NAME(RecordTrackCOLMAP_Record);
 NOS_REGISTER_NAME(RecordTrackCOLMAP_Stop);
@@ -117,6 +118,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		Recording = true;
 		SyncRecordPin(true);
 		UpdateFrameCountPin();
+		UpdateRecordingFramePin();
 		UpdateFunctionOrphanStates();
 		UpdateStatus();
 		nosEngine.LogI("RecordTrackCOLMAP: Recording started");
@@ -127,6 +129,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 	{
 		Recording = false;
 		SyncRecordPin(false);
+		UpdateRecordingFramePin();
 		UpdateFunctionOrphanStates();
 		UpdateStatus();
 		nosEngine.LogI("RecordTrackCOLMAP: Recording stopped (%zu frames in buffer)", Frames.size());
@@ -188,6 +191,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 		SetPinValue(NSN_FrameCount, nosBuffer{.Data = &count, .Size = sizeof(count)});
 	}
 
+	void UpdateRecordingFramePin()
+	{
+		uint32_t frame = Recording ? (uint32_t)Frames.size() : 0;
+		SetPinValue(NSN_RecordingFrame, nosBuffer{.Data = &frame, .Size = sizeof(frame)});
+	}
+
 	void UpdateStatus()
 	{
 		if (!LastError.empty())
@@ -243,6 +252,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		Frames.push_back(frame);
 
 		UpdateFrameCountPin();
+		UpdateRecordingFramePin();
 		UpdateStatus();
 
 		return NOS_RESULT_SUCCESS;
