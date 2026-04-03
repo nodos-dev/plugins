@@ -57,6 +57,7 @@ enum Utilities : int
 	GridOutputLayout,
 	LoadCubeLUT,
 	RepeatingJunction,
+	MultiLiveOut,
 	Count
 };
 
@@ -93,6 +94,7 @@ nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
 nosResult RegisterRepeatingJunction(nosNodeFunctions*);
+nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -145,6 +147,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(GridOutputLayout)
 			GEN_CASE_NODE(LoadCubeLUT)
 			GEN_CASE_NODE(RepeatingJunction)
+			GEN_CASE_NODE(MultiLiveOut)
 		}
 	}
 	return NOS_RESULT_SUCCESS;

@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.14.8"
+			"version": "3.15.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -63,7 +63,8 @@
 		"Config/CalculateDispatchSize.nosdef",
 		"Config/YADIF.nosdef",
 		"Config/YADIFWithAutoDispatchSize.nosdef",
-		"Config/RepeatingJunction.nosdef"
+		"Config/RepeatingJunction.nosdef",
+		"Config/MultiLiveOut.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
