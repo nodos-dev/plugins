@@ -449,7 +449,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		};
 
 		names[2] = NOS_NAME_STATIC("PlaybackTrackCOLMAP_OpenFolder");
-		fns[3] = [](void* ctx, nosFunctionExecuteParams*) {
+		fns[2] = [](void* ctx, nosFunctionExecuteParams*) {
 			auto* self = static_cast<PlaybackTrackCOLMAPContext*>(ctx);
 			if (self->InputDir.empty())
 			{
