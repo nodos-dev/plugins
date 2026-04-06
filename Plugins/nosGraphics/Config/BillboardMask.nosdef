@@ -47,6 +47,21 @@
 						}
 					},
 					{
+						"name": "ShadowDepth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 50.0
+					},
+					{
+						"name": "GroundLevel",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "World-space vertical coordinate of the ground plane.",
+						"data": 0.0
+					},
+					{
 						"name": "RenderView",
 						"type_name": "nos.graphics.RenderView",
 						"show_as": "INPUT_PIN",
