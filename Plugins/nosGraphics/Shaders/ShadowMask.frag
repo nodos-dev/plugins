@@ -24,7 +24,7 @@ void main()
     vec2 ndc = vec2(screenUv.x * 2.0 - 1.0, screenUv.y * 2.0 - 1.0);
     vec4 worldPos = ubo.InvViewProj * vec4(ndc, sceneDepth, 1.0);
     worldPos /= worldPos.w;
-    if (worldPos.z >= (ubo.GroundLevel + 0.5))
+    if (worldPos.z >= ubo.GroundLevel)
         discard;
 
     rt = vec4(uv.y, 0.0, 0.0, 1.0);

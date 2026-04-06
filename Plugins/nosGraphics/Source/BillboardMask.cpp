@@ -190,7 +190,6 @@ struct BillboardMask : NodeContext
 		glm::mat4 viewMat = reinterpret_cast<glm::mat4&>(view.view);
 		glm::mat4 projMat = reinterpret_cast<glm::mat4&>(view.left_handed_projection_matrix);
 		glm::mat4 viewProjMat = projMat * viewMat;
-		glm::mat4 invViewProjMat = glm::inverse(viewProjMat);
 
 		glm::mat4 modelMat = glm::mat4(1.0f);
 		// Face the camera
@@ -237,6 +236,7 @@ struct BillboardMask : NodeContext
 		float shadowDepth = *pins.GetPinData<float>(NSN_ShadowDepth);
 		if (shadowDepth > 0.0f)
 		{
+			glm::mat4 invViewProjMat = glm::inverse(viewProjMat);
 			float groundLevel = *pins.GetPinData<float>(NSN_GroundLevel);
 			auto shadowMat = glm::scale(modelMat, glm::vec3(size.x, 1.0f, shadowDepth));
 			glm::mat4 shadowMvp = viewProjMat * shadowMat;

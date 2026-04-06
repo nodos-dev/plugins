@@ -51,6 +51,7 @@
 						"type_name": "float",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Shadow extrusion depth in world units below the billboard.",
 						"data": 50.0
 					},
 					{
