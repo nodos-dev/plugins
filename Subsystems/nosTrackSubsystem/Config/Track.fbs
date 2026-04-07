@@ -2,7 +2,7 @@ include "Builtins.fbs";
 
 attribute "force_make";
 
-namespace nos.track;
+namespace nos.sys.track;
 
 struct LensDistortion {
     k1k2:               nos.fb.vec2(native_inline, id: 0);

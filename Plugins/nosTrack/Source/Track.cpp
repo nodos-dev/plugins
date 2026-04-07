@@ -21,8 +21,8 @@ TrackNodeContext::TrackNodeContext(nos::fb::Node const* node) : NodeContext(node
 		LoadField<bool>(pin, NSN_NegateTilt, Args.NegateRot.y);
 		LoadField<bool>(pin, NSN_NegateRoll, Args.NegateRot.x);
 		LoadField<float>(pin, NSN_TransformScale, Args.TransformScale);
-		LoadField<track::CoordinateSystem>(pin, NSN_CoordinateSystem, Args.CoordinateSystem);
-		LoadField<track::RotationSystem>(pin, NSN_RotationSystem, Args.RotationSystem);
+		LoadField<nos::sys::track::CoordinateSystem>(pin, NSN_CoordinateSystem, Args.CoordinateSystem);
+		LoadField<nos::sys::track::RotationSystem>(pin, NSN_RotationSystem, Args.RotationSystem);
 		LoadField<glm::vec3>(pin, NSN_DevicePosition, Args.DevicePosition);
 		LoadField<glm::vec3>(pin, NSN_DeviceRotation, Args.DeviceRotation);
 		LoadField<glm::vec3>(pin, NSN_CameraPosition, Args.CameraPosition);
@@ -160,7 +160,7 @@ nosResult TrackNodeContext::ExecuteNode(nosNodeExecuteParams* params)
 		Restart();
 		ShouldRestart = false;
 	}
-	track::TTrack track;
+	nos::sys::track::TTrack track;
 #if _DEBUG
 	size_t queueSize = 0;
 #endif
@@ -221,8 +221,8 @@ void TrackNodeContext::OnPinValueChanged(nos::Name pinName, uuid const& pinId, n
 
 	SET_VALUE(bool, EnableEffectiveFOV, EnableEffectiveFOV);
 	SET_VALUE(float, TransformScale, TransformScale);
-	SET_VALUE(track::CoordinateSystem, CoordinateSystem, CoordinateSystem);
-	SET_VALUE(track::RotationSystem, Pan_Tilt_Roll, RotationSystem);
+	SET_VALUE(nos::sys::track::CoordinateSystem, CoordinateSystem, CoordinateSystem);
+	SET_VALUE(nos::sys::track::RotationSystem, Pan_Tilt_Roll, RotationSystem);
 
 	SET_VALUE(glm::vec3, DevicePosition, DevicePosition);
 	SET_VALUE(glm::vec3, DeviceRotation, DeviceRotation);
@@ -296,7 +296,7 @@ void TrackNodeContext::OnPinValueChanged(nos::Name pinName, uuid const& pinId, n
 
 void TrackNodeContext::Restart()
 {
-	track::TTrack defaultTrack = GetDefaultOrFirstTrack();
+	nos::sys::track::TTrack defaultTrack = GetDefaultOrFirstTrack();
 	std::unique_lock<std::mutex> guard(QMutex);
 	while (DataQueue.size() > Delay + SpareCount)
 		DataQueue.pop();
@@ -307,14 +307,14 @@ void TrackNodeContext::Restart()
 		DataQueue.push({ defaultTrack, 0 });
 }
 
-track::TTrack TrackNodeContext::GetDefaultOrFirstTrack()
+nos::sys::track::TTrack TrackNodeContext::GetDefaultOrFirstTrack()
 {
 	{
 		std::unique_lock guard(QMutex);
 		if (!DataQueue.empty())
 			return DataQueue.front().first;
 	}
-	return GetDefaultValueOfType(NOS_NAME_STATIC(nos::track::Track::GetFullyQualifiedName()))->As<track::TTrack>();
+	return GetDefaultValueOfType(NOS_NAME_STATIC(nos::sys::track::Track::GetFullyQualifiedName()))->As<nos::sys::track::TTrack>();
 }
 
 double CalculateR(double R, glm::dvec2 k1k2)
@@ -378,7 +378,7 @@ glm::vec3 TrackNodeContext::Swizzle(glm::vec3 v, glm::bvec3 n, uint8_t control)
 	return glm::mix(v, -v, n);
 }
 
-nos::Buffer TrackNodeContext::UpdateTrackOut(track::TTrack& outTrack)
+nos::Buffer TrackNodeContext::UpdateTrackOut(nos::sys::track::TTrack& outTrack)
 {
 	auto xf = Args;
 
@@ -435,8 +435,8 @@ void TrackNodeContext::Run()
 		}
 	}
 	uint8_t buf[4096];
-	auto defaultTrackData = GetDefaultValueOfType(NOS_NAME_STATIC(nos::track::Track::GetFullyQualifiedName()));
-	auto defaultTrack = defaultTrackData->As<track::TTrack>();
+	auto defaultTrackData = GetDefaultValueOfType(NOS_NAME_STATIC(nos::sys::track::Track::GetFullyQualifiedName()));
+	auto defaultTrack = defaultTrackData->As<nos::sys::track::TTrack>();
 	bool reviveFromOrphanOnFirstSuccess = false;
 	while (!ShouldStop)
 	{
@@ -446,7 +446,7 @@ void TrackNodeContext::Run()
 			size_t len = sock->receive_from(asio::buffer(buf, 4096), sender_endpoint);
 			uint64_t nanoSeconds = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 			{
-				track::TTrack data = defaultTrack;
+				nos::sys::track::TTrack data = defaultTrack;
 				if (Parse(std::vector<uint8_t>{buf, buf + len}, data))
 				{
 					std::unique_lock<std::mutex> guard(QMutex);

@@ -27,5 +27,5 @@ void main()
     if (worldPos.z >= ubo.GroundLevel)
         discard;
 
-    rt = vec4(uv.y, 0.0, 0.0, 1.0);
+    rt = vec4(uv.yyy, 1.0);
 }
