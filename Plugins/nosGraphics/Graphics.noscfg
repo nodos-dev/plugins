@@ -13,8 +13,8 @@
         "version": "6.0"
       },
       {
-        "name": "nos.track",
-        "version": "1.9"
+        "name": "nos.sys.track",
+        "version": "1.0"
       }
     ]
   },

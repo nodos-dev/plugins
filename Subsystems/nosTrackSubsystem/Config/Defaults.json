@@ -1,7 +1,7 @@
 {
 	"defaults": [
 		{
-			"type_name": "nos.track.Track",
+			"type_name": "nos.sys.track.Track",
 			"def": {
 				"location": {
 					"x": 600,
@@ -37,7 +37,7 @@
 			}
 		},
 		{
-			"type_name": "nos.track.LensDistortion",
+			"type_name": "nos.sys.track.LensDistortion",
 			"def": {
 				"distortion_scale": 1.0,
 				"k1k2": {

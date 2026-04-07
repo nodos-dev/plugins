@@ -12,7 +12,7 @@
 				"pins": [
 					{
 						"name": "X",
-						"type_name": "nos.track.Track",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": {
@@ -51,7 +51,7 @@
 					},
 					{
 						"name": "Y",
-						"type_name": "nos.track.Track",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": {
@@ -90,7 +90,7 @@
 					},
 					{
 						"name": "Z",
-						"type_name": "nos.track.Track",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 						"data": {

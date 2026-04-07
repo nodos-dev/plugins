@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Helpers.hpp>
-#include "Track_generated.h"
+#include <nosSysTrack/Track_generated.h>
 #include <glm/glm.hpp>
 
 namespace nos::track
@@ -12,9 +12,9 @@ void RegisterAddTrack(nosNodeFunctions* funcs) {
 		auto pins = GetPinValues(params);
 		auto ids = GetPinIds(params);
 		// TODO: Remove these once generic table aritmetic ops are supported
-		auto* xTrack = flatbuffers::GetMutableRoot<track::Track>(pins[NOS_NAME("X")]);
-		auto* yTrack = flatbuffers::GetMutableRoot<track::Track>(pins[NOS_NAME("Y")]);
-		track::TTrack sumTrack;
+		auto* xTrack = flatbuffers::GetMutableRoot<nos::sys::track::Track>(pins[NOS_NAME("X")]);
+		auto* yTrack = flatbuffers::GetMutableRoot<nos::sys::track::Track>(pins[NOS_NAME("Y")]);
+		nos::sys::track::TTrack sumTrack;
 		xTrack->UnPackTo(&sumTrack);
 		reinterpret_cast<glm::vec3&>(sumTrack.location) += reinterpret_cast<const glm::vec3&>(*yTrack->location());
 		reinterpret_cast<glm::vec3&>(sumTrack.rotation) += reinterpret_cast<const glm::vec3&>(*yTrack->rotation());
