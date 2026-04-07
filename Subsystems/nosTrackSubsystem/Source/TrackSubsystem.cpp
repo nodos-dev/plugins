@@ -139,7 +139,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportSubsystem(nosSubsystemFunctions* subs
 
 	nosAnimationInterpolator transformInterpolator = {.TypeName = NOS_NAME(nos::fb::Transform::GetFullyQualifiedName()),
 													  .InterpolateCallback = nos::sys::track::InterpolateTransform};
-	nosAnimation->RegisterInterpolator(&trackInterpolator);
+	nosAnimation->RegisterInterpolator(&transformInterpolator);
 	return NOS_RESULT_SUCCESS;
 }
 }
