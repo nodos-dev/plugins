@@ -20,14 +20,10 @@ namespace nos::track
 
 NOS_REGISTER_NAME_SPACED(Playback_InputDirectory, "InputDirectory");
 NOS_REGISTER_NAME_SPACED(Playback_EulerOrder, "EulerOrder");
-NOS_REGISTER_NAME_SPACED(Playback_Mode, "Mode");
-NOS_REGISTER_NAME_SPACED(Playback_Loop, "Loop");
 NOS_REGISTER_NAME_SPACED(Playback_InFrameIndex, "InFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_OutFrameIndex, "OutFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_FrameCount, "FrameCount");
 
-NOS_REGISTER_NAME(PlaybackTrackCOLMAP_Play);
-NOS_REGISTER_NAME(PlaybackTrackCOLMAP_Stop);
 NOS_REGISTER_NAME(PlaybackTrackCOLMAP_OpenFolder);
 
 struct COLMAPCamera
@@ -52,30 +48,17 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
 	track::EulerOrder EulerOrd = track::EulerOrder::ZYX;
-	track::PlaybackMode Mode = track::PlaybackMode::Sequential;
-	bool Loop = true;
-	bool Playing = false;
-	uint32_t ManualFrame = 0;
+	uint32_t FrameIndex = 0;
 	std::string LastError;
 	std::vector<track::TTrack> Frames;
 	uint32_t CurrentFrame = 0;
-	std::unordered_map<nos::Name, uuid> FunctionIds;
-	std::unordered_map<nos::Name, uuid> PinIds;
-
 	PlaybackTrackCOLMAPContext(nosFbNodePtr node) : NodeContext(node)
 	{
-		if (node->functions())
-		{
-			for (auto* func : *node->functions())
-				FunctionIds[nos::Name(func->class_name()->c_str())] = *func->id();
-		}
-
 		if (node->pins())
 		{
 			for (auto* pin : *node->pins())
 			{
 				auto name = nos::Name(pin->name()->c_str());
-				PinIds[name] = *pin->id();
 				if (flatbuffers::IsFieldPresent(pin, fb::Pin::VT_DATA))
 				{
 					nosBuffer value = {.Data = (void*)pin->data()->data(), .Size = pin->data()->size()};
@@ -83,51 +66,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 				}
 			}
 		}
-		UpdateOrphanStates();
 		UpdateStatus();
-	}
-
-	void SetFunctionOrphanState(nos::Name funcName, fb::NodeOrphanStateType type)
-	{
-		auto it = FunctionIds.find(funcName);
-		if (it != FunctionIds.end())
-			NodeContext::SetNodeOrphanState(it->second, type);
-	}
-
-	void SetPinOrphanState(nos::Name pinName, fb::PinOrphanStateType type)
-	{
-		auto it = PinIds.find(pinName);
-		if (it != PinIds.end())
-			NodeContext::SetPinOrphanState(it->second, type);
-	}
-
-	void UpdateOrphanStates()
-	{
-		bool sequential = Mode == track::PlaybackMode::Sequential;
-
-		// Sequential: Play/Stop active, Load/FrameInput orphaned
-		// Manual: Load/FrameInput active, Play/Stop orphaned
-		if (sequential)
-		{
-			SetPinOrphanState(NSN_Playback_InFrameIndex, fb::PinOrphanStateType::ORPHAN);
-
-			if (Playing)
-			{
-				SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Play, fb::NodeOrphanStateType::ORPHAN);
-				SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Stop, fb::NodeOrphanStateType::ACTIVE);
-			}
-			else
-			{
-				SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Play, fb::NodeOrphanStateType::ACTIVE);
-				SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Stop, fb::NodeOrphanStateType::ORPHAN);
-			}
-		}
-		else
-		{
-			SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Play, fb::NodeOrphanStateType::ORPHAN);
-			SetFunctionOrphanState(NSN_PlaybackTrackCOLMAP_Stop, fb::NodeOrphanStateType::ORPHAN);
-			SetPinOrphanState(NSN_Playback_InFrameIndex, fb::PinOrphanStateType::ACTIVE);
-		}
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer val) override
@@ -136,28 +75,19 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		{
 			InputDir = InterpretPinValue<const char>(val.Data);
 			LastError.clear();
-			if (Mode == track::PlaybackMode::Manual && !InputDir.empty())
+			if (!InputDir.empty())
 				LoadFromDirectory();
 			else
 				UpdateStatus();
 		}
 		else if (pinName == NSN_Playback_EulerOrder)
-			EulerOrd = *(track::EulerOrder*)val.Data;
-		else if (pinName == NSN_Playback_Mode)
 		{
-			auto newMode = *(track::PlaybackMode*)val.Data;
-			if (newMode != Mode)
-			{
-				Mode = newMode;
-				Playing = false;
-				UpdateOrphanStates();
-				UpdateStatus();
-			}
+			EulerOrd = *(track::EulerOrder*)val.Data;
+			if (!InputDir.empty())
+				LoadFromDirectory();
 		}
-		else if (pinName == NSN_Playback_Loop)
-			Loop = *(bool*)val.Data;
 		else if (pinName == NSN_Playback_InFrameIndex)
-			ManualFrame = *(uint32_t*)val.Data;
+			FrameIndex = *(uint32_t*)val.Data;
 	}
 
 	void UpdateFrameCountPin()
@@ -179,8 +109,6 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			SetNodeStatusMessage("Set input directory", fb::NodeStatusMessageType::WARNING);
 		else if (Frames.empty())
 			SetNodeStatusMessage("No data loaded", fb::NodeStatusMessageType::WARNING);
-		else if (Mode == track::PlaybackMode::Sequential && Playing)
-			SetNodeStatusMessage("Playing (" + std::to_string(CurrentFrame + 1) + "/" + std::to_string(Frames.size()) + ")", fb::NodeStatusMessageType::INFO);
 		else
 			SetNodeStatusMessage("Loaded (" + std::to_string(Frames.size()) + " frames)", fb::NodeStatusMessageType::INFO);
 	}
@@ -381,75 +309,24 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		uint32_t frameIdx = 0;
-		if (Mode == track::PlaybackMode::Sequential)
-		{
-			if (!Playing)
-			{
-				frameIdx = CurrentFrame;
-			}
-			else
-			{
-				frameIdx = CurrentFrame;
-				uint32_t next = CurrentFrame + 1;
-				if (next >= (uint32_t)Frames.size())
-					next = Loop ? 0 : (uint32_t)Frames.size() - 1;
-				CurrentFrame = next;
-			}
-		}
-		else
-		{
-			frameIdx = ManualFrame < (uint32_t)Frames.size() ? ManualFrame : (uint32_t)Frames.size() - 1;
-			CurrentFrame = frameIdx;
-		}
+		uint32_t frameIdx = FrameIndex < (uint32_t)Frames.size() ? FrameIndex : (uint32_t)Frames.size() - 1;
+		CurrentFrame = frameIdx;
 
 		auto buf = nos::Buffer::From(Frames[frameIdx]);
 		SetPinValue(NOS_NAME("Track"), {.Data = buf.Data(), .Size = buf.Size()});
 		UpdateFrameIndexPin();
-
-		if (Mode == track::PlaybackMode::Sequential && Playing)
-			UpdateStatus();
 
 		return NOS_RESULT_SUCCESS;
 	}
 
 	static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
 	{
-		*count = 3;
+		*count = 1;
 		if (!names || !fns)
 			return NOS_RESULT_SUCCESS;
 
-		names[0] = NOS_NAME_STATIC("PlaybackTrackCOLMAP_Play");
+		names[0] = NOS_NAME_STATIC("PlaybackTrackCOLMAP_OpenFolder");
 		fns[0] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<PlaybackTrackCOLMAPContext*>(ctx);
-			if (self->Playing)
-				return NOS_RESULT_SUCCESS;
-			if (self->Frames.empty())
-				self->LoadFromDirectory();
-			if (self->Frames.empty())
-				return NOS_RESULT_SUCCESS;
-			self->Playing = true;
-			self->CurrentFrame = 0;
-			self->UpdateOrphanStates();
-			self->UpdateStatus();
-			nosEngine.LogI("PlaybackTrackCOLMAP: Playing (%zu frames)", self->Frames.size());
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[1] = NOS_NAME_STATIC("PlaybackTrackCOLMAP_Stop");
-		fns[1] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<PlaybackTrackCOLMAPContext*>(ctx);
-			if (!self->Playing)
-				return NOS_RESULT_SUCCESS;
-			self->Playing = false;
-			self->UpdateOrphanStates();
-			self->UpdateStatus();
-			nosEngine.LogI("PlaybackTrackCOLMAP: Stopped at frame %u", self->CurrentFrame);
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[2] = NOS_NAME_STATIC("PlaybackTrackCOLMAP_OpenFolder");
-		fns[2] = [](void* ctx, nosFunctionExecuteParams*) {
 			auto* self = static_cast<PlaybackTrackCOLMAPContext*>(ctx);
 			if (self->InputDir.empty())
 			{

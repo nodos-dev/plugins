@@ -51,8 +51,3 @@ enum EulerOrder : uint {
   ZXY = 4,
   XZY = 5,
 }
-
-enum PlaybackMode : uint {
-  Sequential = 0,
-  Manual = 1,
-}

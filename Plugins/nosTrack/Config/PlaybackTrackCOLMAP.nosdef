@@ -12,7 +12,7 @@
 				"display_name": "Playback Track (COLMAP)",
 				"contents_type": "Job",
 				"always_execute": true,
-				"description": "Loads camera tracking data from COLMAP text format (cameras.txt + images.txt) and outputs Track data. Sequential mode auto-advances each frame with Play/Stop control. Manual mode outputs the frame at a given index.",
+				"description": "Loads camera tracking data from COLMAP text format (cameras.txt + images.txt) and outputs Track data at a given frame index.",
 				"pins": [
 					{
 						"name": "InputDirectory",
@@ -33,29 +33,13 @@
 						"description": "Euler angle rotation order for converting COLMAP quaternion to Track rotation. Default ZYX matches the FreeD node convention."
 					},
 					{
-						"name": "Mode",
-						"type_name": "nos.track.PlaybackMode",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "Sequential",
-						"description": "Sequential: auto-advances one frame per execution with Play/Stop control. Manual: outputs the frame at the given Frame Input index."
-					},
-					{
-						"name": "Loop",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": true,
-						"description": "Loop playback to the beginning when the last frame is reached."
-					},
-					{
 						"name": "InFrameIndex",
 						"display_name": "Frame Index",
 						"type_name": "uint",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 0,
-						"description": "Frame index to output (Manual mode only)."
+						"description": "Frame index to output."
 					},
 					{
 						"name": "Track",
@@ -84,18 +68,6 @@
 					}
 				],
 				"functions": [
-					{
-						"class_name": "PlaybackTrackCOLMAP_Play",
-						"display_name": "Play",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "PlaybackTrackCOLMAP_Stop",
-						"display_name": "Stop",
-						"contents_type": "Job",
-						"pins": []
-					},
 					{
 						"class_name": "PlaybackTrackCOLMAP_OpenFolder",
 						"display_name": "Open Folder",
