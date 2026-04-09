@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/PluginHelpers.hpp>
-#include "Track_generated.h"
+#include "nosSysTrack/Track_generated.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -18,7 +18,7 @@ namespace nos::track
 
 NOS_REGISTER_NAME(OutputDirectory);
 NOS_REGISTER_NAME(ImageResolution);
-NOS_REGISTER_NAME(EulerOrder);
+NOS_REGISTER_NAME(CoordinateSystem);
 NOS_REGISTER_NAME(Record);
 NOS_REGISTER_NAME(FrameCount);
 NOS_REGISTER_NAME(RecordingFrame);
@@ -45,7 +45,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 {
 	std::string OutputDir;
 	nosVec2u ImageResolution = {1920, 1080};
-	track::EulerOrder EulerOrd = track::EulerOrder::ZYX;
+	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
 	bool Recording = false;
 	bool SyncingRecordPin = false;
 	std::string LastError;
@@ -145,8 +145,8 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 		else if (pinName == NSN_ImageResolution)
 			ImageResolution = *(nosVec2u*)val.Data;
-		else if (pinName == NSN_EulerOrder)
-			EulerOrd = *(track::EulerOrder*)val.Data;
+		else if (pinName == NSN_CoordinateSystem)
+			CoordSys = *(sys::track::CoordinateSystem*)val.Data;
 		else if (pinName == NSN_Record)
 		{
 			if (SyncingRecordPin)
@@ -230,7 +230,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		if (!Recording)
 			return NOS_RESULT_SUCCESS;
 
-		auto* trackData = flatbuffers::GetRoot<track::Track>(trackBuf.Data);
+		auto* trackData = flatbuffers::GetRoot<sys::track::Track>(trackBuf.Data);
 		if (!trackData)
 			return NOS_RESULT_SUCCESS;
 
@@ -331,7 +331,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 	}
 
-	static glm::mat3 EulerToRotationMatrix(glm::vec3 rot, track::EulerOrder order)
+	static glm::mat3 EulerToRotationMatrix(glm::vec3 rot, sys::track::CoordinateSystem order)
 	{
 		// rot is (roll, tilt, pan) = (x, y, z) in radians
 		// Sign convention matches MakeRotation: negate roll (x) and tilt (y)
@@ -339,12 +339,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 		switch (order)
 		{
 		default:
-		case track::EulerOrder::ZYX: return glm::mat3(glm::eulerAngleZYX(p, t, r));
-		case track::EulerOrder::XYZ: return glm::mat3(glm::eulerAngleXYZ(r, t, p));
-		case track::EulerOrder::YXZ: return glm::mat3(glm::eulerAngleYXZ(t, r, p));
-		case track::EulerOrder::YZX: return glm::mat3(glm::eulerAngleYZX(t, p, r));
-		case track::EulerOrder::ZXY: return glm::mat3(glm::eulerAngleZXY(p, r, t));
-		case track::EulerOrder::XZY: return glm::mat3(glm::eulerAngleXZY(r, p, t));
+		case sys::track::CoordinateSystem::ZYX: return glm::mat3(glm::eulerAngleZYX(p, t, r));
+		case sys::track::CoordinateSystem::XYZ: return glm::mat3(glm::eulerAngleXYZ(r, t, p));
+		case sys::track::CoordinateSystem::YXZ: return glm::mat3(glm::eulerAngleYXZ(t, r, p));
+		case sys::track::CoordinateSystem::YZX: return glm::mat3(glm::eulerAngleYZX(t, p, r));
+		case sys::track::CoordinateSystem::ZXY: return glm::mat3(glm::eulerAngleZXY(p, r, t));
+		case sys::track::CoordinateSystem::XZY: return glm::mat3(glm::eulerAngleXZY(r, p, t));
 		}
 	}
 
@@ -371,7 +371,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 			// Convert Euler angles to rotation matrix
 			// Sign convention matches MakeRotation: negate roll (x) and tilt (y)
 			glm::vec3 rot = glm::radians(frame.Rotation);
-			glm::mat3 R_c2w = EulerToRotationMatrix(rot, EulerOrd);
+			glm::mat3 R_c2w = EulerToRotationMatrix(rot, CoordSys);
 
 			// COLMAP expects world-to-camera rotation
 			glm::mat3 R_w2c = glm::transpose(R_c2w);

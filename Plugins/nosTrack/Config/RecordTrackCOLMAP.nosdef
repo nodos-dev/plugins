@@ -17,7 +17,7 @@
 					{
 						"name": "InTrack",
 						"display_name": "Track",
-						"type_name": "nos.track.Track",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"description": "Incoming camera tracking data to record. Position, rotation, FOV, sensor size, and lens distortion are captured each frame."
@@ -25,7 +25,7 @@
 					{
 						"name": "OutTrack",
 						"display_name": "Track",
-						"type_name": "nos.track.Track",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "Pass-through of the incoming Track data."
@@ -52,9 +52,9 @@
 						"description": "Image resolution in pixels (width, height). Used to compute focal length and principal point for COLMAP camera model."
 					},
 					{
-						"name": "EulerOrder",
-						"display_name": "Euler Order",
-						"type_name": "nos.track.EulerOrder",
+						"name": "CoordinateSystem",
+						"display_name": "Coordinate System",
+						"type_name": "nos.sys.track.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "ZYX",

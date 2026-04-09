@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/PluginHelpers.hpp>
-#include "Track_generated.h"
+#include "nosSysTrack/Track_generated.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -19,7 +19,7 @@ namespace nos::track
 {
 
 NOS_REGISTER_NAME_SPACED(Playback_InputDirectory, "InputDirectory");
-NOS_REGISTER_NAME_SPACED(Playback_EulerOrder, "EulerOrder");
+NOS_REGISTER_NAME_SPACED(Playback_CoordinateSystem, "CoordinateSystem");
 NOS_REGISTER_NAME_SPACED(Playback_InFrameIndex, "InFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_OutFrameIndex, "OutFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_FrameCount, "FrameCount");
@@ -47,10 +47,10 @@ struct COLMAPImage
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
-	track::EulerOrder EulerOrd = track::EulerOrder::ZYX;
+	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
 	uint32_t FrameIndex = 0;
 	std::string LastError;
-	std::vector<track::TTrack> Frames;
+	std::vector<sys::track::TTrack> Frames;
 	uint32_t CurrentFrame = 0;
 	PlaybackTrackCOLMAPContext(nosFbNodePtr node) : NodeContext(node)
 	{
@@ -80,9 +80,9 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			else
 				UpdateStatus();
 		}
-		else if (pinName == NSN_Playback_EulerOrder)
+		else if (pinName == NSN_Playback_CoordinateSystem)
 		{
-			EulerOrd = *(track::EulerOrder*)val.Data;
+			CoordSys = *(sys::track::CoordinateSystem*)val.Data;
 			if (!InputDir.empty())
 				LoadFromDirectory();
 		}
@@ -161,7 +161,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 
 		for (auto& img : images)
 		{
-			track::TTrack trackData{};
+			sys::track::TTrack trackData{};
 			auto camIt = cameras.find(img.CameraId);
 
 			// Convert COLMAP world-to-camera back to camera-to-world
@@ -169,7 +169,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			glm::mat3 R_c2w = glm::transpose(R_w2c);
 			glm::vec3 C = -R_c2w * img.T;
 
-			glm::vec3 euler = RotationMatrixToEuler(R_c2w, EulerOrd);
+			glm::vec3 euler = RotationMatrixToEuler(R_c2w, CoordSys);
 			trackData.location = reinterpret_cast<nos::fb::vec3&>(C);
 			trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
 
@@ -280,18 +280,18 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 
 	// --- Euler extraction (inverse of EulerToRotationMatrix in RecordTrackCOLMAP) ---
 
-	static glm::vec3 RotationMatrixToEuler(const glm::mat3& R_c2w, track::EulerOrder order)
+	static glm::vec3 RotationMatrixToEuler(const glm::mat3& R_c2w, sys::track::CoordinateSystem order)
 	{
 		float r, t, p;
 		switch (order)
 		{
 		default:
-		case track::EulerOrder::ZYX: glm::extractEulerAngleZYX(glm::mat4(R_c2w), p, t, r); break;
-		case track::EulerOrder::XYZ: glm::extractEulerAngleXYZ(glm::mat4(R_c2w), r, t, p); break;
-		case track::EulerOrder::YXZ: glm::extractEulerAngleYXZ(glm::mat4(R_c2w), t, r, p); break;
-		case track::EulerOrder::YZX: glm::extractEulerAngleYZX(glm::mat4(R_c2w), t, p, r); break;
-		case track::EulerOrder::ZXY: glm::extractEulerAngleZXY(glm::mat4(R_c2w), p, r, t); break;
-		case track::EulerOrder::XZY: glm::extractEulerAngleXZY(glm::mat4(R_c2w), r, p, t); break;
+		case sys::track::CoordinateSystem::ZYX: glm::extractEulerAngleZYX(glm::mat4(R_c2w), p, t, r); break;
+		case sys::track::CoordinateSystem::XYZ: glm::extractEulerAngleXYZ(glm::mat4(R_c2w), r, t, p); break;
+		case sys::track::CoordinateSystem::YXZ: glm::extractEulerAngleYXZ(glm::mat4(R_c2w), t, r, p); break;
+		case sys::track::CoordinateSystem::YZX: glm::extractEulerAngleYZX(glm::mat4(R_c2w), t, p, r); break;
+		case sys::track::CoordinateSystem::ZXY: glm::extractEulerAngleZXY(glm::mat4(R_c2w), p, r, t); break;
+		case sys::track::CoordinateSystem::XZY: glm::extractEulerAngleXZY(glm::mat4(R_c2w), r, p, t); break;
 		}
 		// Undo sign convention: r = -roll, t = -tilt, p = pan
 		return glm::degrees(glm::vec3(-r, -t, p));
@@ -303,7 +303,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 	{
 		if (Frames.empty())
 		{
-			track::TTrack empty{};
+			sys::track::TTrack empty{};
 			auto buf = nos::Buffer::From(empty);
 			SetPinValue(NOS_NAME("Track"), {.Data = buf.Data(), .Size = buf.Size()});
 			return NOS_RESULT_SUCCESS;
