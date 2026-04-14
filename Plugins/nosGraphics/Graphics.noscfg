@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.graphics",
-      "version": "0.4.0"
+      "version": "0.4.1"
     },
     "description": "Types & Nodes for graphics operations.",
     "display_name": "Graphics",
@@ -15,6 +15,10 @@
       {
         "name": "nos.sys.track",
         "version": "1.0"
+      },
+      {
+        "name": "nos.reflect",
+        "version": "1.7"
       }
     ]
   },
