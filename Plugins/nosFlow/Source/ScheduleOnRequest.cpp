@@ -68,7 +68,7 @@ struct ScheduleOnRequestNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	NOS_DECLARE_FUNCTIONS(
+	NOS_DECLARE_FUNCTIONS_FOR(ScheduleOnRequestNode,
 		NOS_ADD_FUNCTION(NSN_Request, Request))
 };
 

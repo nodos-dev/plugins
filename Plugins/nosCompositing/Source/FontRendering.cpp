@@ -2,13 +2,39 @@
 #include "DejaVuSansMono.hpp.dat"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include <cuchar>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
 namespace nos::compositing
 {
+
+// Decode one UTF-8 codepoint from [ptr, end). Returns bytes consumed, 0 at
+// null terminator, or (size_t)-1 on invalid/truncated input. Avoids
+// std::mbrtoc32 because macOS libc++ declares it with using_if_exists.
+static std::size_t DecodeUtf8(const char* ptr, const char* end, char32_t& out)
+{
+	if (ptr >= end)
+		return 0;
+	unsigned char b0 = static_cast<unsigned char>(ptr[0]);
+	if (b0 == 0)
+		return 0;
+	if (b0 < 0x80) { out = b0; return 1; }
+	auto cont = [](const char* p) { return static_cast<char32_t>(static_cast<unsigned char>(*p) & 0x3F); };
+	if ((b0 & 0xE0) == 0xC0 && ptr + 2 <= end) {
+		out = ((b0 & 0x1Fu) << 6) | cont(ptr + 1);
+		return 2;
+	}
+	if ((b0 & 0xF0) == 0xE0 && ptr + 3 <= end) {
+		out = ((b0 & 0x0Fu) << 12) | (cont(ptr + 1) << 6) | cont(ptr + 2);
+		return 3;
+	}
+	if ((b0 & 0xF8) == 0xF0 && ptr + 4 <= end) {
+		out = ((b0 & 0x07u) << 18) | (cont(ptr + 1) << 12) | (cont(ptr + 2) << 6) | cont(ptr + 3);
+		return 4;
+	}
+	return static_cast<std::size_t>(-1);
+}
 
 static FontDescription DejaVuSansMono14pt = {
 	DejaVuSansMono14pt_Image,
@@ -103,15 +129,11 @@ TextBuilder& TextBuilder::Add(std::string text, float cHeight, glm::vec2 positio
 	float cUvHeight = float(Font.Description.CellHeightPx) / atlasHeight;
 
 	std::vector<char32_t> characters;
-	std::mbstate_t state{};
 	char32_t c32;
 	const char* ptr = text.c_str();
 	const char* end = text.c_str() + text.size() + 1;
-	while (std::size_t rc = std::mbrtoc32(&c32, ptr, end - ptr, &state)) {
-		assert(rc != (std::size_t)-3);
+	while (std::size_t rc = DecodeUtf8(ptr, end, c32)) {
 		if (rc == (std::size_t)-1)
-			break;
-		if (rc == (std::size_t)-2)
 			break;
 		ptr += rc;
 

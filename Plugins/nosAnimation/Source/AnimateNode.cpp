@@ -132,7 +132,7 @@ struct AnimateNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	NOS_DECLARE_FUNCTIONS(
+	NOS_DECLARE_FUNCTIONS_FOR(AnimateNode,
 		NOS_ADD_FUNCTION(NOS_NAME("Start"), Start),
 		NOS_ADD_FUNCTION(NOS_NAME("Pause"), Pause),
 		NOS_ADD_FUNCTION(NOS_NAME("Continue"), Continue),

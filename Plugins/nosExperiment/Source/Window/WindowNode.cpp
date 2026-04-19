@@ -6,6 +6,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #elif defined(__linux)
 #define GLFW_EXPOSE_NATIVE_X11
+#elif defined(__APPLE__)
+#define GLFW_EXPOSE_NATIVE_COCOA
 #else
 #error "Unsupported platform"
 #endif
@@ -153,6 +155,8 @@ void WindowNode::OnEnterRunnerThread(nosEnterRunnerThreadParams const& params)
 	glfwGetWin32Window(Window)
 #elif defined(__linux)
 	glfwGetX11Window(Window)
+#elif defined(__APPLE__)
+	glfwGetCocoaWindow(Window)
 #else
 #error "Unsupported platform"
 #endif
