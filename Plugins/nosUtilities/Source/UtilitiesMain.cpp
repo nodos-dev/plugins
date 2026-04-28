@@ -41,7 +41,9 @@ enum Utilities : int
 	PropagateExecution,
 	UploadBufferProvider,
 	BoundedQueue,
+	MultiBoundedQueue,
 	RingBuffer,
+	MultiRingBuffer,
 	Host,
 	DeinterlacedBoundedTextureQueue,
 	DeinterlacedBufferRing,
@@ -76,7 +78,9 @@ nosResult RegisterSink(nosNodeFunctions*);
 nosResult RegisterPropagateExecution(nosNodeFunctions*);
 nosResult RegisterUploadBufferProvider(nosNodeFunctions*);
 nosResult RegisterBoundedQueue(nosNodeFunctions*);
+nosResult RegisterMultiBoundedQueue(nosNodeFunctions*);
 nosResult RegisterRingBuffer(nosNodeFunctions*);
+nosResult RegisterMultiRingBuffer(nosNodeFunctions*);
 nosResult RegisterHost(nosNodeFunctions*);
 nosResult RegisterPin2Json(nosNodeFunctions*);
 nosResult RegisterJson2Pin(nosNodeFunctions*);
@@ -131,7 +135,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(PropagateExecution)
 			GEN_CASE_NODE(UploadBufferProvider)
 			GEN_CASE_NODE(BoundedQueue)
+			GEN_CASE_NODE(MultiBoundedQueue)
 			GEN_CASE_NODE(RingBuffer)
+			GEN_CASE_NODE(MultiRingBuffer)
 			GEN_CASE_NODE(Host)
 			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
 			GEN_CASE_NODE(DeinterlacedBufferRing)
