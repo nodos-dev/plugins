@@ -33,13 +33,39 @@
 						"description": "Euler angle rotation order for converting COLMAP quaternion to Track rotation. Default ZYX matches the FreeD node convention."
 					},
 					{
+						"name": "Mode",
+						"display_name": "Mode",
+						"type_name": "nos.track.PlaybackTrackMode",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "FrameIndex",
+						"description": "Selects how to index into the loaded frames. FrameIndex uses InFrameIndex; Timecode/FrameNumber look up via the timecodes.txt sidecar. The unused index pin is set to PASSIVE."
+					},
+					{
 						"name": "InFrameIndex",
 						"display_name": "Frame Index",
 						"type_name": "uint",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 0,
-						"description": "Frame index to output."
+						"description": "0-based frame index. Used when Mode=FrameIndex."
+					},
+					{
+						"name": "InTimecode",
+						"display_name": "Timecode",
+						"type_name": "string",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Timecode string (HH:MM:SS:FF or HH:MM:SS;FF) to look up. Used when Mode=Timecode. Requires a timecodes.txt sidecar."
+					},
+					{
+						"name": "InFrameNumber",
+						"display_name": "Frame Number",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0,
+						"description": "Absolute frame number to look up. Used when Mode=FrameNumber. Requires a timecodes.txt sidecar."
 					},
 					{
 						"name": "Track",

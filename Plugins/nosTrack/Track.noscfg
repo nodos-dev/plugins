@@ -20,6 +20,9 @@
 		"Config/RecordTrackCOLMAP.nosdef",
 		"Config/PlaybackTrackCOLMAP.nosdef"
 	],
+	"custom_types": [
+		"Config/PlaybackMode.fbs"
+	],
 	"defaults": [
 		"Config/Defaults.json"
 	],

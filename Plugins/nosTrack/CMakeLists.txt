@@ -13,4 +13,7 @@ endforeach()
 
 list(APPEND MODULE_DEPENDENCIES_TARGETS ${NOS_PLUGIN_SDK_TARGET})
 
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "" nosTrack_generated)
+list(APPEND MODULE_DEPENDENCIES_TARGETS nosTrack_generated)
+
 nos_add_plugin("nosTrack" "${MODULE_DEPENDENCIES_TARGETS}" "${CMAKE_CURRENT_LIST_DIR}/External/asio/asio/include")

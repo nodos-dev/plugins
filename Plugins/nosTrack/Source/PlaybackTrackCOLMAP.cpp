@@ -2,6 +2,7 @@
 
 #include <Nodos/PluginHelpers.hpp>
 #include "nosSysTrack/Track_generated.h"
+#include "PlaybackMode_generated.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -14,13 +15,17 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <unordered_map>
 
 namespace nos::track
 {
 
 NOS_REGISTER_NAME_SPACED(Playback_InputDirectory, "InputDirectory");
 NOS_REGISTER_NAME_SPACED(Playback_CoordinateSystem, "CoordinateSystem");
+NOS_REGISTER_NAME_SPACED(Playback_Mode, "Mode");
 NOS_REGISTER_NAME_SPACED(Playback_InFrameIndex, "InFrameIndex");
+NOS_REGISTER_NAME_SPACED(Playback_InTimecode, "InTimecode");
+NOS_REGISTER_NAME_SPACED(Playback_InFrameNumber, "InFrameNumber");
 NOS_REGISTER_NAME_SPACED(Playback_OutFrameIndex, "OutFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_FrameCount, "FrameCount");
 
@@ -44,14 +49,27 @@ struct COLMAPImage
 	uint32_t CameraId = 0;
 };
 
+struct TimecodeEntry
+{
+	std::string Timecode;
+	uint32_t FrameNumber = 0;
+};
+
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
 	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
+	PlaybackTrackMode Mode = PlaybackTrackMode::FrameIndex;
 	uint32_t FrameIndex = 0;
+	std::string InTimecode;
+	uint32_t InFrameNumber = 0;
 	std::string LastError;
 	std::vector<sys::track::TTrack> Frames;
+	std::vector<TimecodeEntry> Timecodes; // empty or same size as Frames
+	std::unordered_map<std::string, uint32_t> TimecodeToIndex;
+	std::unordered_map<uint32_t, uint32_t> FrameNumberToIndex;
 	uint32_t CurrentFrame = 0;
+
 	PlaybackTrackCOLMAPContext(nosFbNodePtr node) : NodeContext(node)
 	{
 		if (node->pins())
@@ -66,6 +84,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 				}
 			}
 		}
+		ApplyModeOrphanStates();
 		UpdateStatus();
 	}
 
@@ -86,8 +105,30 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			if (!InputDir.empty())
 				LoadFromDirectory();
 		}
+		else if (pinName == NSN_Playback_Mode)
+		{
+			Mode = *(PlaybackTrackMode*)val.Data;
+			ApplyModeOrphanStates();
+		}
 		else if (pinName == NSN_Playback_InFrameIndex)
 			FrameIndex = *(uint32_t*)val.Data;
+		else if (pinName == NSN_Playback_InTimecode)
+			InTimecode = InterpretPinValue<const char>(val.Data);
+		else if (pinName == NSN_Playback_InFrameNumber)
+			InFrameNumber = *(uint32_t*)val.Data;
+	}
+
+	void ApplyModeOrphanStates()
+	{
+		auto state = [](bool active) {
+			return active ? fb::PinOrphanStateType::ACTIVE : fb::PinOrphanStateType::PASSIVE;
+		};
+		const bool useIdx = Mode == PlaybackTrackMode::FrameIndex;
+		const bool useTC  = Mode == PlaybackTrackMode::Timecode;
+		const bool useFN  = Mode == PlaybackTrackMode::FrameNumber;
+		SetPinOrphanState(NSN_Playback_InFrameIndex,  state(useIdx));
+		SetPinOrphanState(NSN_Playback_InTimecode,    state(useTC));
+		SetPinOrphanState(NSN_Playback_InFrameNumber, state(useFN));
 	}
 
 	void UpdateFrameCountPin()
@@ -158,6 +199,11 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 
 		Frames.clear();
 		Frames.reserve(images.size());
+		Timecodes.clear();
+
+		auto timecodesPath = dir / "timecodes.txt";
+		if (std::filesystem::exists(timecodesPath))
+			ParseTimecodesTxt(timecodesPath, images.size());
 
 		for (auto& img : images)
 		{
@@ -278,6 +324,40 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		return true;
 	}
 
+	void ParseTimecodesTxt(const std::filesystem::path& path, size_t expectedCount)
+	{
+		std::ifstream file(path);
+		if (!file.is_open())
+			return;
+		std::unordered_map<uint32_t, TimecodeEntry> byId;
+		std::string line;
+		while (std::getline(file, line))
+		{
+			if (line.empty() || line[0] == '#')
+				continue;
+			std::istringstream ss(line);
+			uint32_t id = 0;
+			TimecodeEntry e;
+			ss >> id >> e.Timecode >> e.FrameNumber;
+			if (e.Timecode == "-")
+				e.Timecode.clear();
+			byId[id] = std::move(e);
+		}
+		Timecodes.assign(expectedCount, TimecodeEntry{});
+		TimecodeToIndex.clear();
+		FrameNumberToIndex.clear();
+		for (size_t i = 0; i < expectedCount; ++i)
+		{
+			auto it = byId.find(uint32_t(i + 1));
+			if (it == byId.end())
+				continue;
+			Timecodes[i] = it->second;
+			if (!Timecodes[i].Timecode.empty())
+				TimecodeToIndex.emplace(Timecodes[i].Timecode, uint32_t(i));
+			FrameNumberToIndex.emplace(Timecodes[i].FrameNumber, uint32_t(i));
+		}
+	}
+
 	// --- Euler extraction (inverse of EulerToRotationMatrix in RecordTrackCOLMAP) ---
 
 	static glm::vec3 RotationMatrixToEuler(const glm::mat3& R_c2w, sys::track::CoordinateSystem order)
@@ -299,6 +379,33 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 
 	// --- Execution ---
 
+	bool ResolveFrameIndex(uint32_t& outIdx)
+	{
+		switch (Mode)
+		{
+		case PlaybackTrackMode::Timecode:
+		{
+			auto it = TimecodeToIndex.find(InTimecode);
+			if (it == TimecodeToIndex.end())
+				return false;
+			outIdx = it->second;
+			return true;
+		}
+		case PlaybackTrackMode::FrameNumber:
+		{
+			auto it = FrameNumberToIndex.find(InFrameNumber);
+			if (it == FrameNumberToIndex.end())
+				return false;
+			outIdx = it->second;
+			return true;
+		}
+		case PlaybackTrackMode::FrameIndex:
+		default:
+			outIdx = FrameIndex < (uint32_t)Frames.size() ? FrameIndex : (uint32_t)Frames.size() - 1;
+			return true;
+		}
+	}
+
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		if (Frames.empty())
@@ -309,7 +416,9 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 		}
 
-		uint32_t frameIdx = FrameIndex < (uint32_t)Frames.size() ? FrameIndex : (uint32_t)Frames.size() - 1;
+		uint32_t frameIdx = 0;
+		if (!ResolveFrameIndex(frameIdx))
+			frameIdx = CurrentFrame < (uint32_t)Frames.size() ? CurrentFrame : 0;
 		CurrentFrame = frameIdx;
 
 		auto buf = nos::Buffer::From(Frames[frameIdx]);

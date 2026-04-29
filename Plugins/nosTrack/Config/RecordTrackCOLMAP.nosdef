@@ -23,6 +23,23 @@
 						"description": "Incoming camera tracking data to record. Position, rotation, FOV, sensor size, and lens distortion are captured each frame."
 					},
 					{
+						"name": "Timecode",
+						"display_name": "Timecode",
+						"type_name": "string",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Optional SMPTE timecode (HH:MM:SS:FF or HH:MM:SS;FF) for the current frame. Written to a timecodes.txt sidecar when non-empty."
+					},
+					{
+						"name": "FrameNumber",
+						"display_name": "Frame Number",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0,
+						"description": "Optional absolute frame number that pairs with Timecode (e.g. from ExtractTimecode). Written to the timecodes.txt sidecar."
+					},
+					{
 						"name": "OutTrack",
 						"display_name": "Track",
 						"type_name": "nos.sys.track.Track",

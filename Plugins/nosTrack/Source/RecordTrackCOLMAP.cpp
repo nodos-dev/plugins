@@ -39,6 +39,8 @@ struct RecordedFrame
 	float PixelAspectRatio;
 	float K1;
 	float K2;
+	std::string Timecode;
+	uint32_t FrameNumber;
 };
 
 struct RecordTrackCOLMAPContext : NodeContext
@@ -213,7 +215,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		auto pins = GetPinValues(params);
+		nos::NodeExecuteParams execParams(params);
 
 		// Pass through Track input to output
 		nosBuffer trackBuf{};
@@ -235,6 +237,9 @@ struct RecordTrackCOLMAPContext : NodeContext
 			return NOS_RESULT_SUCCESS;
 
 		RecordedFrame frame{};
+		if (const char* tc = execParams.GetPinData<const char>(NOS_NAME_STATIC("Timecode")))
+			frame.Timecode = tc;
+		frame.FrameNumber = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("FrameNumber"));
 		if (auto* loc = trackData->location())
 			frame.Location = {loc->x(), loc->y(), loc->z()};
 		if (auto* rot = trackData->rotation())
@@ -285,7 +290,37 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 		WriteCamerasTxt(outDir);
 		WriteImagesTxt(outDir);
+		WriteTimecodesTxt(outDir);
 		nosEngine.LogI("RecordTrackCOLMAP: Saved %zu frames to %s", Frames.size(), OutputDir.c_str());
+	}
+
+	void WriteTimecodesTxt(const std::filesystem::path& outDir)
+	{
+		// Skip the sidecar entirely if no frame carried a timecode — keeps the
+		// output minimal when the upstream graph isn't producing TC.
+		bool any = false;
+		for (auto& f : Frames)
+			if (!f.Timecode.empty() || f.FrameNumber != 0) { any = true; break; }
+		if (!any)
+			return;
+
+		auto path = outDir / "timecodes.txt";
+		std::ofstream file(path);
+		if (!file.is_open())
+		{
+			nosEngine.LogE("RecordTrackCOLMAP: Cannot open %s", nos::PathToUtf8(path).c_str());
+			return;
+		}
+		file << "# Timecode sidecar paired with images.txt by IMAGE_ID.\n";
+		file << "# IMAGE_ID, TIMECODE, FRAME_NUMBER\n";
+		file << "# Number of entries: " << Frames.size() << "\n";
+		for (size_t i = 0; i < Frames.size(); ++i)
+		{
+			const auto& f = Frames[i];
+			file << (i + 1) << " "
+				 << (f.Timecode.empty() ? "-" : f.Timecode) << " "
+				 << f.FrameNumber << "\n";
+		}
 	}
 
 	float ComputeFocalLengthPixels(const RecordedFrame& frame) const
