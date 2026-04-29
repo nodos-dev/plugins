@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <set>
+
 #include <Nodos/PluginHelpers.hpp>
 
 // External
@@ -67,6 +69,11 @@ struct MultiRingBufferNodeContext : NodeContext
 	std::map<char, std::unique_ptr<Channel>> Channels;
 	std::unordered_map<uuid, char> PinIdToLetter;
 	MultiRing Ring;
+	// Channels popped since the last SendScheduleRequest. One producer run
+	// pushes one slot per live channel, so we must only schedule again once
+	// every live channel has been popped — otherwise schedule requests pile
+	// up by a factor of N (channels) per consumer tick.
+	std::set<char> PoppedSinceLastSchedule;
 
 	OnRestartType OnRestart = OnRestartType::WAIT_UNTIL_FULL;
 	std::optional<uint32_t> RequestedRingSize = std::nullopt;
@@ -151,7 +158,10 @@ struct MultiRingBufferNodeContext : NodeContext
 				}
 			}
 			if (any)
+			{
 				Ring.Stop();
+				PoppedSinceLastSchedule.clear();
+			}
 		});
 		AddPinValueWatcher(NOS_NAME_STATIC("RepeatWhenFilling"),
 						   [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
@@ -228,6 +238,7 @@ struct MultiRingBufferNodeContext : NodeContext
 			nosEngine.SendPathCommand(ch->InputId, ringSizeChange);
 		}
 		Ring.Stop();
+		PoppedSinceLastSchedule.clear();
 		SendPathRestart();
 		RequestedRingSize = size;
 	}
@@ -250,6 +261,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		{
 			nosEngine.SendPathRestart(ch->InputId);
 			Ring.Stop();
+			PoppedSinceLastSchedule.clear();
 			ch->NeedsRecreation = true;
 		}
 	}
@@ -271,6 +283,7 @@ struct MultiRingBufferNodeContext : NodeContext
 		if (ch.RingChannel)
 		{
 			Ring.Stop();
+			PoppedSinceLastSchedule.clear();
 			Ring.RemoveChannel(*letter);
 			ch.RingChannel = nullptr;
 		}
@@ -493,7 +506,17 @@ struct MultiRingBufferNodeContext : NodeContext
 		cpy->FrameNumber = slot->FrameNumber;
 
 		ch->LastPopped = slot;
-		SendScheduleRequest(1);
+
+		PoppedSinceLastSchedule.insert(ch->Letter);
+		size_t liveCount = 0;
+		for (auto& [_, c] : Channels)
+			if (c->IsOutLive)
+				++liveCount;
+		if (PoppedSinceLastSchedule.size() >= liveCount)
+		{
+			SendScheduleRequest(1);
+			PoppedSinceLastSchedule.clear();
+		}
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -550,12 +573,15 @@ struct MultiRingBufferNodeContext : NodeContext
 			}
 		}
 		Ring.Stop();
+		PoppedSinceLastSchedule.clear();
 	}
 
 	void OnPathStart() override
 	{
 		if (Channels.empty())
 			return;
+
+		PoppedSinceLastSchedule.clear();
 
 		if (OnRestart == OnRestartType::RESET || RepeatWhenFilling)
 			Ring.ResetAll(false);
