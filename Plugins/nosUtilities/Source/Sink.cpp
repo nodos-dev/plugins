@@ -5,6 +5,7 @@
 
 // stl
 #include <chrono>
+#include <list>
 #include <nosUtil/Stopwatch.hpp>
 
 #include "Sink_generated.h"
@@ -18,6 +19,33 @@ constexpr uint64_t VULKAN_TIMEOUT_BEFORE_LEAK =
 
 struct SinkNode : NodeContext
 {
+	enum MenuCommandType : uint8_t
+	{
+		ADD_INPUT = 0,
+		REMOVE_INPUT = 1,
+	};
+
+	struct MenuCommand
+	{
+		MenuCommandType Type;
+		uint8_t InputIndex;
+		MenuCommand(uint32_t cmd) {
+			Type = static_cast<MenuCommandType>(cmd & 0xFF);
+			InputIndex = static_cast<uint8_t>((cmd >> 8) & 0xFF);
+		}
+		MenuCommand(MenuCommandType type, uint8_t inputIndex) : Type(type), InputIndex(inputIndex) {}
+		operator uint32_t() const { return (InputIndex << 8) | Type; }
+	};
+
+	static const std::unordered_set<std::string_view>& StaticPinNames()
+	{
+		static const std::unordered_set<std::string_view> names = {
+			"InExe", "Sink Input", "Sink FPS", "HasGPUWork", "GPUFrameBuffering",
+			"AcceptsRepeat", "SinkMode", "LatencyBudget"
+		};
+		return names;
+	}
+
 	std::mutex Mutex;
 	std::atomic<bool> ShouldStop = false;
 	std::atomic<float> Fps = 1000.0f / 60.0f;
@@ -31,9 +59,27 @@ struct SinkNode : NodeContext
 	std::optional<std::vector<nosGPUEvent>> GPUFrameSyncEvents = std::nullopt;
 	size_t GPUFrameBuffering = 1;
 	uint64_t CurrentGPUEventIndex = 0;
+	std::vector<uuid> DynamicInputs;
 
 
 	SinkNode(nosFbNodePtr inNode) : NodeContext(inNode) {
+		std::list<uuid> pinsToUnorphan;
+		for (auto i = 0; i < inNode->pins()->size(); i++)
+		{
+			auto pin = inNode->pins()->Get(i);
+			if (pin->show_as() != fb::ShowAs::INPUT_PIN)
+				continue;
+			if (StaticPinNames().contains(pin->name()->string_view()))
+				continue;
+			DynamicInputs.push_back(*pin->id());
+			if (auto orphanState = pin->orphan_state())
+			{
+				if (orphanState->type() == fb::PinOrphanStateType::ORPHAN)
+					pinsToUnorphan.push_back(*pin->id());
+			}
+		}
+		for (auto const& pinId : pinsToUnorphan)
+			SetPinOrphanState(pinId, fb::PinOrphanStateType::ACTIVE);
 		AddPinValueWatcher(NOS_NAME("HasGPUWork"),
 						   [this](nosBuffer const& newVal, std::optional<nos::Buffer> oldValue) {
 							   bool hasGpuWork = *static_cast<bool*>(newVal.Data);
@@ -252,6 +298,93 @@ struct SinkNode : NodeContext
 					break;
 				ScheduleNode();
 			}
+		}
+	}
+
+	void OnNodeMenuRequested(nosContextMenuRequestPtr request) override
+	{
+		uint32_t cmd = MenuCommand(ADD_INPUT, 0);
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector items = {
+			nos::CreateContextMenuItemDirect(fbb, "Add Sink", cmd, nullptr)
+		};
+		HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(
+			fbb, request->item_id(), request->pos(), request->instigator(), &items)));
+	}
+
+	void OnPinMenuRequested(nos::Name pinName, nosContextMenuRequestPtr request) override
+	{
+		if (StaticPinNames().contains(pinName.AsString()))
+			return;
+		auto pinId = GetPinId(pinName);
+		if (!pinId)
+			return;
+		auto it = std::find(DynamicInputs.begin(), DynamicInputs.end(), *pinId);
+		if (it == DynamicInputs.end())
+			return;
+		auto index = std::distance(DynamicInputs.begin(), it);
+		uint32_t cmd = MenuCommand(REMOVE_INPUT, static_cast<uint8_t>(index));
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector items = {
+			nos::CreateContextMenuItemDirect(fbb, "Remove Input", cmd, nullptr)
+		};
+		HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(
+			fbb, request->item_id(), request->pos(), request->instigator(), &items)));
+	}
+
+	void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
+	{
+		auto command = MenuCommand(cmd);
+		switch (command.Type)
+		{
+		case ADD_INPUT:
+		{
+			std::string pinName;
+			for (size_t i = 2;; i++)
+			{
+				auto candidate = "Sink Input " + std::to_string(i);
+				if (!GetPinId(nos::Name(candidate)))
+				{
+					pinName = std::move(candidate);
+					break;
+				}
+			}
+			flatbuffers::FlatBufferBuilder fbb;
+			uuid pinId = nosEngine.GenerateID();
+			std::vector pins = {
+				fb::CreatePinDirect(fbb, &pinId, pinName.c_str(), "nos.Generic",
+					fb::ShowAs::INPUT_PIN, fb::CanShowAs::INPUT_PIN_ONLY)
+			};
+			HandleEvent(CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, 0, &pins)));
+			break;
+		}
+		case REMOVE_INPUT:
+		{
+			if (command.InputIndex >= DynamicInputs.size())
+				return;
+			auto pinId = DynamicInputs[command.InputIndex];
+			flatbuffers::FlatBufferBuilder fbb;
+			std::vector pinsToRemove = { *&pinId };
+			HandleEvent(CreateAppEvent(fbb, CreatePartialNodeUpdateDirect(fbb, &NodeId, ClearFlags::NONE, &pinsToRemove)));
+			break;
+		}
+		}
+	}
+
+	void OnNodeUpdated(nosNodeUpdate const* update) override
+	{
+		if (update->Type == NOS_NODE_UPDATE_PIN_DELETED)
+		{
+			std::erase_if(DynamicInputs, [&](auto id) { return id == update->PinDeleted; });
+		}
+		else if (update->Type == NOS_NODE_UPDATE_PIN_CREATED)
+		{
+			auto* pin = update->PinCreated;
+			if (pin->show_as() != fb::ShowAs::INPUT_PIN)
+				return;
+			if (StaticPinNames().contains(pin->name()->string_view()))
+				return;
+			DynamicInputs.push_back(*pin->id());
 		}
 	}
 
