@@ -87,16 +87,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 	void UpdateFunctionOrphanStates()
 	{
-		if (Recording)
-		{
-			SetFunctionOrphanState(NSN_RecordTrackCOLMAP_Record, fb::NodeOrphanStateType::ORPHAN);
-			SetFunctionOrphanState(NSN_RecordTrackCOLMAP_Stop, fb::NodeOrphanStateType::ACTIVE);
-		}
-		else
-		{
-			SetFunctionOrphanState(NSN_RecordTrackCOLMAP_Record, fb::NodeOrphanStateType::ACTIVE);
-			SetFunctionOrphanState(NSN_RecordTrackCOLMAP_Stop, fb::NodeOrphanStateType::ORPHAN);
-		}
+		// Disabled: toggling NodeOrphanState on Record/Stop function nodes invalidates the
+		// engine's compiled execution path, causing a recompile hitch on the first recorded
+		// frame. NodeOrphanStateType has no PASSIVE variant (only pins do), so we can't
+		// express "visual-only, no topology change" today. Re-enable once the engine adds
+		// PASSIVE to NodeOrphanStateType (or otherwise skips path invalidation for
+		// orphan-state changes on function nodes).
 	}
 
 	void SyncRecordPin(bool value)
