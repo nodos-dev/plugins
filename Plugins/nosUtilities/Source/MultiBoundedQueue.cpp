@@ -395,6 +395,13 @@ struct MultiBoundedQueueNodeContext : NodeContext
 		if (!slot)
 			return Ring.Exit ? NOS_RESULT_FAILED : NOS_RESULT_PENDING;
 
+		// Propagate the slot resource's descriptor onto the output pin before
+		// Copy reads cpy->PinData as the destination — otherwise the GPU copy
+		// targets the stale (default-sized) output descriptor.
+		nos::Buffer outPinVal;
+		if (ch->RingChannel->ResInterface->BeginCopyFrom(slot, *cpy->PinData, outPinVal))
+			nosEngine.SetPinValueByName(NodeId, ch->OutputName, outPinVal);
+
 		ch->RingChannel->ResInterface->Copy(slot, cpy, NodeId);
 
 		cpy->CopyFromOptions.ShouldSetSourceFrameNumber = true;
