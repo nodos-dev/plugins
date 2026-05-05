@@ -129,8 +129,10 @@ struct RecordTrackCOLMAPContext : NodeContext
 		SyncRecordPin(false);
 		UpdateRecordingFramePin();
 		UpdateFunctionOrphanStates();
-		UpdateStatus();
 		nosEngine.LogI("RecordTrackCOLMAP: Recording stopped (%zu frames in buffer)", Frames.size());
+		if (!Frames.empty())
+			WriteFiles();
+		UpdateStatus();
 	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer val) override

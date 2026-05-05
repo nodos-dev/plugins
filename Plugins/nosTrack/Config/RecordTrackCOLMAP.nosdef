@@ -12,7 +12,7 @@
 				"display_name": "Record Track (COLMAP)",
 				"contents_type": "Job",
 				"always_execute": true,
-				"description": "Records camera tracking data each frame while recording is enabled, then exports cameras.txt and images.txt in COLMAP format. Intrinsics (focal length, distortion) are derived from the Track's FOV, sensor size, and lens distortion. Extrinsics (rotation, translation) are stored per frame in world-to-camera convention.",
+				"description": "Records camera tracking data each frame while recording is enabled, then exports cameras.txt and images.txt in COLMAP format the moment recording stops. The Save function is still available for re-exporting the buffered frames on demand. Intrinsics (focal length, distortion) are derived from the Track's FOV, sensor size, and lens distortion. Extrinsics (rotation, translation) are stored per frame in world-to-camera convention.",
 				"pins": [
 					{
 						"name": "InTrack",
