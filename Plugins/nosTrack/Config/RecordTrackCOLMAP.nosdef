@@ -12,7 +12,7 @@
 				"display_name": "Record Track (COLMAP)",
 				"contents_type": "Job",
 				"always_execute": true,
-				"description": "Records camera tracking data each frame while recording is enabled, then exports cameras.txt and images.txt in COLMAP format the moment recording stops. The Save function is still available for re-exporting the buffered frames on demand. Intrinsics (focal length, distortion) are derived from the Track's FOV, sensor size, and lens distortion. Extrinsics (rotation, translation) are stored per frame in world-to-camera convention.",
+				"description": "Records camera tracking data each frame while the Record pin is true, then exports cameras.txt and images.txt in COLMAP format the moment recording stops, and clears the buffer. The Record pin is the single driver — wire it to an upstream Recording flag (e.g. from SonyVeniceANCParser) for automatic record-following capture. The MinOffFrames pin debounces brief drops in the Record signal so SDI bit flips don't end a take prematurely. Intrinsics (focal length, distortion) are derived from the Track's FOV, sensor size, and lens distortion. Extrinsics (rotation, translation) are stored per frame in world-to-camera convention.",
 				"pins": [
 					{
 						"name": "InTrack",
@@ -83,7 +83,17 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": false,
-						"description": "Toggle recording. Mirrors Record/Stop functions. Enabling clears previous frames and starts capturing. Will fail if the output directory is not empty."
+						"description": "Drives recording: rising edge clears the buffer and starts capture; falling edge stops capture (subject to MinOffFrames debouncing) and exports the COLMAP files. Will fail to start if the output directory is not empty."
+					},
+					{
+						"name": "MinOffFrames",
+						"display_name": "Min Off Frames",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1,
+						"min": "1",
+						"description": "Debounce: minimum number of consecutive frames with Record=false before recording actually stops. Default 1 = stop immediately. Use higher values (e.g. 5-15) to ride out short glitches in the upstream Record signal — useful when Record is wired to a camera-derived flag that can momentarily flip due to SDI bit errors."
 					},
 					{
 						"name": "RecordingFrame",
@@ -102,38 +112,6 @@
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"data": 0,
 						"description": "Number of frames in the buffer."
-					}
-				],
-				"functions": [
-					{
-						"class_name": "RecordTrackCOLMAP_Record",
-						"display_name": "Record",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "RecordTrackCOLMAP_Stop",
-						"display_name": "Stop",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "RecordTrackCOLMAP_Save",
-						"display_name": "Save",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "RecordTrackCOLMAP_Clear",
-						"display_name": "Clear",
-						"contents_type": "Job",
-						"pins": []
-					},
-					{
-						"class_name": "RecordTrackCOLMAP_OpenFolder",
-						"display_name": "Open Folder",
-						"contents_type": "Job",
-						"pins": []
 					}
 				]
 			}

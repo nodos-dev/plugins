@@ -20,25 +20,26 @@ NOS_REGISTER_NAME(OutputDirectory);
 NOS_REGISTER_NAME(ImageResolution);
 NOS_REGISTER_NAME(CoordinateSystem);
 NOS_REGISTER_NAME(Record);
+NOS_REGISTER_NAME(MinOffFrames);
 NOS_REGISTER_NAME(FrameCount);
 NOS_REGISTER_NAME(RecordingFrame);
-
-NOS_REGISTER_NAME(RecordTrackCOLMAP_Record);
-NOS_REGISTER_NAME(RecordTrackCOLMAP_Stop);
-NOS_REGISTER_NAME(RecordTrackCOLMAP_Save);
-NOS_REGISTER_NAME(RecordTrackCOLMAP_Clear);
-NOS_REGISTER_NAME(RecordTrackCOLMAP_OpenFolder);
 
 struct RecordedFrame
 {
 	glm::vec3 Location;
 	glm::vec3 Rotation; // Euler degrees (roll, tilt, pan)
 	float FOV;
+	float Zoom;
+	float Focus;
+	float RenderRatio;
 	glm::vec2 SensorSize;
-	float FocusDistance;
 	float PixelAspectRatio;
+	float NodalOffset;
+	float FocusDistance;
 	float K1;
 	float K2;
+	glm::vec2 CenterShift;
+	float DistortionScale;
 	std::string Timecode;
 	uint32_t FrameNumber;
 };
@@ -49,19 +50,13 @@ struct RecordTrackCOLMAPContext : NodeContext
 	nosVec2u ImageResolution = {1920, 1080};
 	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
 	bool Recording = false;
-	bool SyncingRecordPin = false;
+	uint32_t ConsecutiveOffFrames = 0;
+	bool LastRequestRecord = false;
 	std::string LastError;
 	std::vector<RecordedFrame> Frames;
-	std::unordered_map<nos::Name, uuid> FunctionIds;
 
 	RecordTrackCOLMAPContext(nosFbNodePtr node) : NodeContext(node)
 	{
-		if (node->functions())
-		{
-			for (auto* func : *node->functions())
-				FunctionIds[nos::Name(func->class_name()->c_str())] = *func->id();
-		}
-
 		if (node->pins())
 		{
 			for (auto* pin : *node->pins())
@@ -74,32 +69,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 				}
 			}
 		}
-		UpdateFunctionOrphanStates();
 		UpdateStatus();
-	}
-
-	void SetFunctionOrphanState(nos::Name funcName, fb::NodeOrphanStateType type)
-	{
-		auto it = FunctionIds.find(funcName);
-		if (it != FunctionIds.end())
-			NodeContext::SetNodeOrphanState(it->second, type);
-	}
-
-	void UpdateFunctionOrphanStates()
-	{
-		// Disabled: toggling NodeOrphanState on Record/Stop function nodes invalidates the
-		// engine's compiled execution path, causing a recompile hitch on the first recorded
-		// frame. NodeOrphanStateType has no PASSIVE variant (only pins do), so we can't
-		// express "visual-only, no topology change" today. Re-enable once the engine adds
-		// PASSIVE to NodeOrphanStateType (or otherwise skips path invalidation for
-		// orphan-state changes on function nodes).
-	}
-
-	void SyncRecordPin(bool value)
-	{
-		SyncingRecordPin = true;
-		SetPinValue(NSN_Record, nosBuffer{.Data = &value, .Size = sizeof(value)});
-		SyncingRecordPin = false;
 	}
 
 	bool StartRecording()
@@ -114,10 +84,9 @@ struct RecordTrackCOLMAPContext : NodeContext
 		LastError.clear();
 		Frames.clear();
 		Recording = true;
-		SyncRecordPin(true);
+		ConsecutiveOffFrames = 0;
 		UpdateFrameCountPin();
 		UpdateRecordingFramePin();
-		UpdateFunctionOrphanStates();
 		UpdateStatus();
 		nosEngine.LogI("RecordTrackCOLMAP: Recording started");
 		return true;
@@ -126,12 +95,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 	void StopRecording()
 	{
 		Recording = false;
-		SyncRecordPin(false);
-		UpdateRecordingFramePin();
-		UpdateFunctionOrphanStates();
 		nosEngine.LogI("RecordTrackCOLMAP: Recording stopped (%zu frames in buffer)", Frames.size());
 		if (!Frames.empty())
 			WriteFiles();
+		Frames.clear();
+		UpdateFrameCountPin();
+		UpdateRecordingFramePin();
 		UpdateStatus();
 	}
 
@@ -147,16 +116,6 @@ struct RecordTrackCOLMAPContext : NodeContext
 			ImageResolution = *(nosVec2u*)val.Data;
 		else if (pinName == NSN_CoordinateSystem)
 			CoordSys = *(sys::track::CoordinateSystem*)val.Data;
-		else if (pinName == NSN_Record)
-		{
-			if (SyncingRecordPin)
-				return;
-			bool newVal = *(bool*)val.Data;
-			if (newVal && !Recording)
-				StartRecording();
-			else if (!newVal && Recording)
-				StopRecording();
-		}
 	}
 
 	bool CanStartRecording(std::string& outError)
@@ -205,8 +164,6 @@ struct RecordTrackCOLMAPContext : NodeContext
 			SetNodeStatusMessage("Set output directory", fb::NodeStatusMessageType::WARNING);
 		else if (Recording)
 			SetNodeStatusMessage("Recording (" + std::to_string(Frames.size()) + " frames)", fb::NodeStatusMessageType::INFO);
-		else if (!Frames.empty())
-			SetNodeStatusMessage("Idle (" + std::to_string(Frames.size()) + " frames in buffer)", fb::NodeStatusMessageType::INFO);
 		else
 			SetNodeStatusMessage("Idle", fb::NodeStatusMessageType::INFO);
 	}
@@ -227,6 +184,27 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 		SetPinValue(NOS_NAME("OutTrack"), trackBuf);
 
+		// Drive recording state from the Record pin, with off-state debouncing to
+		// ride out brief glitches in the upstream signal (e.g. SDI bit flips on a
+		// camera-derived recording flag). Start happens immediately on a rising
+		// edge; stop only after MinOffFrames consecutive false frames.
+		const bool requestRecord = *execParams.GetPinData<bool>(NSN_Record);
+		const uint32_t minOffFrames = *execParams.GetPinData<uint32_t>(NSN_MinOffFrames);
+
+		const bool risingEdge = requestRecord && !LastRequestRecord;
+		LastRequestRecord = requestRecord;
+
+		if (risingEdge && !Recording)
+			StartRecording();
+
+		if (Recording)
+		{
+			if (requestRecord)
+				ConsecutiveOffFrames = 0;
+			else if (++ConsecutiveOffFrames >= std::max(1u, minOffFrames))
+				StopRecording();
+		}
+
 		if (!Recording)
 			return NOS_RESULT_SUCCESS;
 
@@ -243,14 +221,20 @@ struct RecordTrackCOLMAPContext : NodeContext
 		if (auto* rot = trackData->rotation())
 			frame.Rotation = {rot->x(), rot->y(), rot->z()};
 		frame.FOV = trackData->fov();
+		frame.Zoom = trackData->zoom();
+		frame.Focus = trackData->focus();
+		frame.RenderRatio = trackData->render_ratio();
 		if (auto* ss = trackData->sensor_size())
 			frame.SensorSize = {ss->x(), ss->y()};
-		frame.FocusDistance = trackData->focus_distance();
 		frame.PixelAspectRatio = trackData->pixel_aspect_ratio();
+		frame.NodalOffset = trackData->nodal_offset();
+		frame.FocusDistance = trackData->focus_distance();
 		if (auto* ld = trackData->lens_distortion())
 		{
 			frame.K1 = ld->k1k2().x();
 			frame.K2 = ld->k1k2().y();
+			frame.CenterShift = {ld->center_shift().x(), ld->center_shift().y()};
+			frame.DistortionScale = ld->distortion_scale();
 		}
 		Frames.push_back(frame);
 
@@ -289,7 +273,42 @@ struct RecordTrackCOLMAPContext : NodeContext
 		WriteCamerasTxt(outDir);
 		WriteImagesTxt(outDir);
 		WriteTimecodesTxt(outDir);
+		WriteExtrasTxt(outDir);
 		nosEngine.LogI("RecordTrackCOLMAP: Saved %zu frames to %s", Frames.size(), OutputDir.c_str());
+	}
+
+	void WriteExtrasTxt(const std::filesystem::path& outDir)
+	{
+		// Sidecar for Track fields that don't fit COLMAP's standard cameras.txt /
+		// images.txt format. Keyed by IMAGE_ID so it pairs 1:1 with images.txt.
+		auto path = outDir / "extras.txt";
+		std::ofstream file(path);
+		if (!file.is_open())
+		{
+			nosEngine.LogE("RecordTrackCOLMAP: Cannot open %s", nos::PathToUtf8(path).c_str());
+			return;
+		}
+		file << std::setprecision(12);
+		file << "# Nodos Track sidecar paired with images.txt by IMAGE_ID.\n";
+		file << "# Carries fields that don't fit COLMAP's cameras.txt/images.txt:\n";
+		file << "#   - sensor_size in mm (cameras.txt only stores pixel WIDTH/HEIGHT)\n";
+		file << "#   - original Euler rotation in degrees (avoids quaternion round-trip drift)\n";
+		file << "#   - nodos-only fields with no COLMAP equivalent\n";
+		file << "# IMAGE_ID, ZOOM, FOCUS, FOCUS_DISTANCE, RENDER_RATIO, NODAL_OFFSET, DISTORTION_SCALE, SENSOR_W_MM, SENSOR_H_MM, ROT_X, ROT_Y, ROT_Z\n";
+		file << "# Number of entries: " << Frames.size() << "\n";
+		for (size_t i = 0; i < Frames.size(); ++i)
+		{
+			const auto& f = Frames[i];
+			file << (i + 1) << " "
+				 << f.Zoom << " "
+				 << f.Focus << " "
+				 << f.FocusDistance << " "
+				 << f.RenderRatio << " "
+				 << f.NodalOffset << " "
+				 << f.DistortionScale << " "
+				 << f.SensorSize.x << " " << f.SensorSize.y << " "
+				 << f.Rotation.x << " " << f.Rotation.y << " " << f.Rotation.z << "\n";
+		}
 	}
 
 	void WriteTimecodesTxt(const std::filesystem::path& outDir)
@@ -351,8 +370,15 @@ struct RecordTrackCOLMAPContext : NodeContext
 			if (Frames[i].PixelAspectRatio > 0.0f)
 				fy = fx / Frames[i].PixelAspectRatio;
 
+			// center_shift is in the same units as sensor_size (mm); convert to
+			// pixel offset on the principal point. See TrackToView.cpp:30 for the
+			// canonical centerShift / sensorSize relationship.
 			float cx = ImageResolution.x * 0.5f;
 			float cy = ImageResolution.y * 0.5f;
+			if (Frames[i].SensorSize.x > 0.0f)
+				cx += Frames[i].CenterShift.x * ImageResolution.x / Frames[i].SensorSize.x;
+			if (Frames[i].SensorSize.y > 0.0f)
+				cy += Frames[i].CenterShift.y * ImageResolution.y / Frames[i].SensorSize.y;
 
 			// OPENCV model: fx, fy, cx, cy, k1, k2, p1, p2
 			float k1 = Frames[i].K1;
@@ -422,81 +448,6 @@ struct RecordTrackCOLMAPContext : NodeContext
 			// Empty points line (required by COLMAP format)
 			file << "\n";
 		}
-	}
-
-	// TODO: Replace std::system with platform APIs (ShellExecuteW / posix_spawnp) to avoid shell injection via crafted paths
-	static void OpenFolderInExplorer(const std::filesystem::path& folder)
-	{
-#if defined(_WIN32)
-		std::string cmd = "explorer \"" + nos::PathToUtf8(folder) + "\"";
-#elif defined(__APPLE__)
-		std::string cmd = "open \"" + nos::PathToUtf8(folder) + "\"";
-#else
-		std::string cmd = "xdg-open \"" + nos::PathToUtf8(folder) + "\"";
-#endif
-		std::system(cmd.c_str());
-	}
-
-	static nosResult GetFunctions(size_t* count, nosName* names, nosPfnNodeFunctionExecute* fns)
-	{
-		*count = 5;
-		if (!names || !fns)
-			return NOS_RESULT_SUCCESS;
-
-		names[0] = NOS_NAME_STATIC("RecordTrackCOLMAP_Record");
-		fns[0] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<RecordTrackCOLMAPContext*>(ctx);
-			if (self->Recording)
-				return NOS_RESULT_SUCCESS;
-			self->StartRecording();
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[1] = NOS_NAME_STATIC("RecordTrackCOLMAP_Stop");
-		fns[1] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<RecordTrackCOLMAPContext*>(ctx);
-			if (!self->Recording)
-				return NOS_RESULT_SUCCESS;
-			self->StopRecording();
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[2] = NOS_NAME_STATIC("RecordTrackCOLMAP_Save");
-		fns[2] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<RecordTrackCOLMAPContext*>(ctx);
-			self->WriteFiles();
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[3] = NOS_NAME_STATIC("RecordTrackCOLMAP_Clear");
-		fns[3] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<RecordTrackCOLMAPContext*>(ctx);
-			self->Frames.clear();
-			self->UpdateFrameCountPin();
-			self->UpdateStatus();
-			nosEngine.LogI("RecordTrackCOLMAP: Buffer cleared");
-			return NOS_RESULT_SUCCESS;
-		};
-
-		names[4] = NOS_NAME_STATIC("RecordTrackCOLMAP_OpenFolder");
-		fns[4] = [](void* ctx, nosFunctionExecuteParams*) {
-			auto* self = static_cast<RecordTrackCOLMAPContext*>(ctx);
-			if (self->OutputDir.empty())
-			{
-				nosEngine.LogW("RecordTrackCOLMAP: Output directory not set");
-				return NOS_RESULT_FAILED;
-			}
-			std::filesystem::path outDir = nos::Utf8ToPath(self->OutputDir);
-			if (!std::filesystem::exists(outDir))
-			{
-				nosEngine.LogW("RecordTrackCOLMAP: Directory does not exist: %s", self->OutputDir.c_str());
-				return NOS_RESULT_FAILED;
-			}
-			OpenFolderInExplorer(outDir);
-			return NOS_RESULT_SUCCESS;
-		};
-
-		return NOS_RESULT_SUCCESS;
 	}
 };
 

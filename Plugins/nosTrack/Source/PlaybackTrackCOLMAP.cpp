@@ -55,6 +55,22 @@ struct TimecodeEntry
 	uint32_t FrameNumber = 0;
 };
 
+struct ExtrasEntry
+{
+	bool Present = false;
+	float Zoom = 0;
+	float Focus = 0;
+	float FocusDistance = 0;
+	float RenderRatio = 0;
+	float NodalOffset = 0;
+	float DistortionScale = 0;
+	float SensorWmm = 0;
+	float SensorHmm = 0;
+	float RotX = 0;
+	float RotY = 0;
+	float RotZ = 0;
+};
+
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
@@ -205,29 +221,81 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		if (std::filesystem::exists(timecodesPath))
 			ParseTimecodesTxt(timecodesPath, images.size());
 
-		for (auto& img : images)
+		std::vector<ExtrasEntry> extras;
+		auto extrasPath = dir / "extras.txt";
+		if (std::filesystem::exists(extrasPath))
+			ParseExtrasTxt(extrasPath, images.size(), extras);
+
+		for (size_t i = 0; i < images.size(); ++i)
 		{
+			auto& img = images[i];
 			sys::track::TTrack trackData{};
 			auto camIt = cameras.find(img.CameraId);
+			const ExtrasEntry* ex = (i < extras.size() && extras[i].Present) ? &extras[i] : nullptr;
 
-			// Convert COLMAP world-to-camera back to camera-to-world
+			// Position: invert COLMAP world-to-camera. Stable round-trip.
 			glm::mat3 R_w2c = glm::mat3_cast(img.Q);
 			glm::mat3 R_c2w = glm::transpose(R_w2c);
 			glm::vec3 C = -R_c2w * img.T;
-
-			glm::vec3 euler = RotationMatrixToEuler(R_c2w, CoordSys);
 			trackData.location = reinterpret_cast<nos::fb::vec3&>(C);
-			trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
+
+			// Rotation: prefer the original Euler from extras (avoids quaternion-
+			// to-Euler ambiguity near gimbal lock); fall back to extracting from
+			// the COLMAP rotation matrix when no extras sidecar exists.
+			if (ex)
+			{
+				glm::vec3 euler(ex->RotX, ex->RotY, ex->RotZ);
+				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
+			}
+			else
+			{
+				glm::vec3 euler = RotationMatrixToEuler(R_c2w, CoordSys);
+				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
+			}
 
 			if (camIt != cameras.end())
 			{
 				auto& cam = camIt->second;
 				if (cam.Fx > 0)
 					trackData.fov = glm::degrees(2.0f * std::atan(cam.Width * 0.5f / cam.Fx));
-				trackData.sensor_size = nos::fb::vec2(cam.Width, cam.Height);
 				if (cam.Fx > 0 && cam.Fy > 0)
 					trackData.pixel_aspect_ratio = cam.Fx / cam.Fy;
 				trackData.lens_distortion.mutable_k1k2() = nos::fb::vec2(cam.K1, cam.K2);
+
+				// sensor_size: COLMAP only stores pixel dims, but Track expects mm.
+				// Use the extras value when present; otherwise fall back to pixels
+				// (matches pre-extras behaviour).
+				glm::vec2 sensorMm(0);
+				if (ex && ex->SensorWmm > 0 && ex->SensorHmm > 0)
+				{
+					sensorMm = {ex->SensorWmm, ex->SensorHmm};
+					trackData.sensor_size = nos::fb::vec2(sensorMm.x, sensorMm.y);
+				}
+				else
+				{
+					trackData.sensor_size = nos::fb::vec2(cam.Width, cam.Height);
+				}
+
+				// center_shift: invert the (cx, cy) encoding written by record.
+				// Needs sensor_size in mm to be meaningful, so only reconstructed
+				// when extras provided it.
+				if (sensorMm.x > 0 && cam.Width > 0 && sensorMm.y > 0 && cam.Height > 0)
+				{
+					glm::vec2 shift{
+						(cam.Cx - cam.Width * 0.5f) * sensorMm.x / cam.Width,
+						(cam.Cy - cam.Height * 0.5f) * sensorMm.y / cam.Height};
+					trackData.lens_distortion.mutable_center_shift() = reinterpret_cast<nos::fb::vec2&>(shift);
+				}
+			}
+
+			if (ex)
+			{
+				trackData.zoom = ex->Zoom;
+				trackData.focus = ex->Focus;
+				trackData.focus_distance = ex->FocusDistance;
+				trackData.render_ratio = ex->RenderRatio;
+				trackData.nodal_offset = ex->NodalOffset;
+				trackData.lens_distortion.mutate_distortion_scale(ex->DistortionScale);
 			}
 
 			Frames.push_back(std::move(trackData));
@@ -322,6 +390,39 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 
 		std::sort(images.begin(), images.end(), [](auto& a, auto& b) { return a.Id < b.Id; });
 		return true;
+	}
+
+	void ParseExtrasTxt(const std::filesystem::path& path, size_t expectedCount, std::vector<ExtrasEntry>& outExtras)
+	{
+		std::ifstream file(path);
+		if (!file.is_open())
+			return;
+		std::unordered_map<uint32_t, ExtrasEntry> byId;
+		std::string line;
+		while (std::getline(file, line))
+		{
+			if (line.empty() || line[0] == '#')
+				continue;
+			std::istringstream ss(line);
+			uint32_t id = 0;
+			ExtrasEntry e;
+			ss >> id >> e.Zoom >> e.Focus >> e.FocusDistance >> e.RenderRatio
+			   >> e.NodalOffset >> e.DistortionScale
+			   >> e.SensorWmm >> e.SensorHmm
+			   >> e.RotX >> e.RotY >> e.RotZ;
+			if (!ss.fail())
+			{
+				e.Present = true;
+				byId[id] = e;
+			}
+		}
+		outExtras.assign(expectedCount, ExtrasEntry{});
+		for (size_t i = 0; i < expectedCount; ++i)
+		{
+			auto it = byId.find(uint32_t(i + 1));
+			if (it != byId.end())
+				outExtras[i] = it->second;
+		}
 	}
 
 	void ParseTimecodesTxt(const std::filesystem::path& path, size_t expectedCount)
