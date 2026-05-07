@@ -14,7 +14,9 @@
       }
     ]
   },
-  "custom_types": [],
+  "custom_types": [
+    "Config/Math.fbs"
+  ],
   "node_definitions": [
     "Config/Math.nosdef",
     "Config/Eval.nosdef",
@@ -25,7 +27,9 @@
     "Config/Random.nosdef",
     "Config/Lerp.nosdef",
     "Config/Vec3ToVec4.nosdef",
-    "Config/EmbedMat3ToMat4.nosdef"
+    "Config/EmbedMat3ToMat4.nosdef",
+    "Config/EulerToQuaternion.nosdef",
+    "Config/QuaternionToEuler.nosdef"
   ],
   "binary_path": "Binaries/nosMath",
   "third_party_software": [

@@ -6,6 +6,10 @@ add_library(tinyexpr_cpp STATIC ${TINYEXPR_SOURCES})
 target_include_directories(tinyexpr_cpp PUBLIC External/tinyexpr-cpp)
 nos_group_targets("tinyexpr_cpp" "External")
 
-set(DEPENDENCIES ${NOS_PLUGIN_SDK_TARGET} tinyexpr_cpp)
+set(GENERATED_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${GENERATED_OUTPUT_DIR}" "cpp" "${NOS_SDK_DIR}/Types" nosMath_generated)
 
-nos_add_plugin("nosMath" "${DEPENDENCIES}" "")
+set(DEPENDENCIES ${NOS_PLUGIN_SDK_TARGET} tinyexpr_cpp nosMath_generated)
+set(INCLUDE_FOLDERS "${GENERATED_OUTPUT_DIR}")
+
+nos_add_plugin("nosMath" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
