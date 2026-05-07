@@ -54,6 +54,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 	bool LastRequestRecord = false;
 	std::string LastError;
 	std::vector<RecordedFrame> Frames;
+	nosVec2u DeltaSeconds{}; // {numerator, denominator}; 0/0 if not in fixed-step mode
 
 	RecordTrackCOLMAPContext(nosFbNodePtr node) : NodeContext(node)
 	{
@@ -171,6 +172,9 @@ struct RecordTrackCOLMAPContext : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nos::NodeExecuteParams execParams(params);
+
+		if (params->TimingInfo.TimingMode == NOS_EXECUTION_TIMING_MODE_FIXED_STEP)
+			DeltaSeconds = params->TimingInfo.FixedStepTiming.DeltaSeconds;
 
 		// Pass through Track input to output
 		nosBuffer trackBuf{};
@@ -328,9 +332,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 			nosEngine.LogE("RecordTrackCOLMAP: Cannot open %s", nos::PathToUtf8(path).c_str());
 			return;
 		}
+		double dt = (DeltaSeconds.y != 0) ? (double)DeltaSeconds.x / (double)DeltaSeconds.y : 0.0;
 		file << "# Timecode sidecar paired with images.txt by IMAGE_ID.\n";
+		file << "# First non-comment line: per-frame delta seconds (0 if recording wasn't in fixed-step timing).\n";
 		file << "# IMAGE_ID, TIMECODE, FRAME_NUMBER\n";
 		file << "# Number of entries: " << Frames.size() << "\n";
+		file << std::setprecision(12) << dt << "\n";
 		for (size_t i = 0; i < Frames.size(); ++i)
 		{
 			const auto& f = Frames[i];
