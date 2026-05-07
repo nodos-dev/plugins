@@ -13,6 +13,41 @@ NOS_REGISTER_NAME_SPACED(Nos_Utilities_ChannelViewer, "nos.utilities.ChannelView
 
 namespace nos::utilities
 {
+static nosResult MigrateNode(nosFbNodePtr nodePtr, nosBuffer* outBuffer)
+{
+	fb::TNode tNode;
+	nodePtr->UnPackTo(&tNode);
+	bool migrated = false;
+	for (auto& pin : tNode.pins)
+	{
+		if (!pin || pin->name != "Format")
+			continue;
+		bool legacyType = pin->type_name == "nos.utilities.ChannelViewerFormats" ||
+		                  pin->type_name == "nos.fb.ChannelViewerFormats";
+		const char* newValue = nullptr;
+		if (!pin->data.empty())
+		{
+			std::string_view oldValue(reinterpret_cast<const char*>(pin->data.data()), pin->data.size() - 1);
+			if (oldValue == "Rec_601") newValue = "REC601";
+			else if (oldValue == "Rec_709") newValue = "REC709";
+			else if (oldValue == "Rec_2020") newValue = "REC2020";
+		}
+		if (!legacyType && !newValue)
+			continue;
+		pin->type_name = "nos.mediaio.ColorSpace";
+		if (newValue)
+		{
+			std::string s = newValue;
+			pin->data = std::vector<uint8_t>(s.c_str(), s.c_str() + s.size() + 1);
+		}
+		migrated = true;
+	}
+	if (!migrated)
+		return NOS_RESULT_SUCCESS;
+	*outBuffer = EngineBuffer::CopyFrom(tNode).Release();
+	return NOS_RESULT_SUCCESS;
+}
+
 static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
 {
 	auto values = GetPinValues(pins);
@@ -25,7 +60,8 @@ static nosResult ExecuteNode(void* ctx, nosNodeExecuteParams* pins)
 	glm::vec4 val{};
 	val[channel & 3] = 1;
 
-	constexpr glm::vec3 coeffs[3] = {{.299f, .587f, .114f}, {.2126f, .7152f, .0722f}, {.2627f, .678f, .0593f}};
+	// Indexed by nos.mediaio.ColorSpace: REC709=0, REC601=1, REC2020=2
+	constexpr glm::vec3 coeffs[3] = {{.2126f, .7152f, .0722f}, {.299f, .587f, .114f}, {.2627f, .678f, .0593f}};
 
 	glm::vec4 multipliers = glm::vec4(coeffs[format], channel > 3);
 	std::vector bindings = {
@@ -51,6 +87,7 @@ nosResult RegisterChannelViewer(nosNodeFunctions* out)
 {
 	out->ClassName = NSN_Nos_Utilities_ChannelViewer;
 	out->ExecuteNode = ExecuteNode;
+	out->MigrateNode = MigrateNode;
 
 	fs::path root = nosEngine.Module->RootFolderPath;
 	auto chViewerPath = (root / "Shaders" / "ChannelViewer.frag").generic_string();
