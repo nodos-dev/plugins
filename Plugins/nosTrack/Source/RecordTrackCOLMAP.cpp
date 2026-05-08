@@ -5,7 +5,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 #include <fstream>
 #include <filesystem>
@@ -13,12 +12,14 @@
 #include <cmath>
 #include <iomanip>
 
+#include "CoordinateFrameConv.h"
+
 namespace nos::track
 {
 
 NOS_REGISTER_NAME(OutputDirectory);
 NOS_REGISTER_NAME(ImageResolution);
-NOS_REGISTER_NAME(CoordinateSystem);
+NOS_REGISTER_NAME(SourceFrame);
 NOS_REGISTER_NAME(Record);
 NOS_REGISTER_NAME(MinOffFrames);
 NOS_REGISTER_NAME(FrameCount);
@@ -27,7 +28,7 @@ NOS_REGISTER_NAME(RecordingFrame);
 struct RecordedFrame
 {
 	glm::vec3 Location;
-	glm::vec3 Rotation; // Euler degrees (roll, tilt, pan)
+	glm::vec3 Rotation; // Euler degrees in the SourceFrame's convention.
 	float FOV;
 	float Zoom;
 	float Focus;
@@ -48,7 +49,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 {
 	std::string OutputDir;
 	nosVec2u ImageResolution = {1920, 1080};
-	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
+	convention::Frame SourceFrame = convention::Frame::LH_ZUp_FwdX_RightY;
 	bool Recording = false;
 	uint32_t ConsecutiveOffFrames = 0;
 	bool LastRequestRecord = false;
@@ -115,8 +116,8 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 		else if (pinName == NSN_ImageResolution)
 			ImageResolution = *(nosVec2u*)val.Data;
-		else if (pinName == NSN_CoordinateSystem)
-			CoordSys = *(sys::track::CoordinateSystem*)val.Data;
+		else if (pinName == NSN_SourceFrame)
+			SourceFrame = *(convention::Frame*)val.Data;
 	}
 
 	bool CanStartRecording(std::string& outError)
@@ -292,12 +293,17 @@ struct RecordTrackCOLMAPContext : NodeContext
 			nosEngine.LogE("RecordTrackCOLMAP: Cannot open %s", nos::PathToUtf8(path).c_str());
 			return;
 		}
+		const char* frameName =
+			SourceFrame == convention::Frame::LH_ZUp_FwdX_RightY    ? "LH_ZUp_FwdX_RightY"
+			: SourceFrame == convention::Frame::RH_YUp_FwdNegZ_RightX ? "RH_YUp_FwdNegZ_RightX"
+			: "Unknown";
 		file << std::setprecision(12);
 		file << "# Nodos Track sidecar paired with images.txt by IMAGE_ID.\n";
 		file << "# Carries fields that don't fit COLMAP's cameras.txt/images.txt:\n";
 		file << "#   - sensor_size in mm (cameras.txt only stores pixel WIDTH/HEIGHT)\n";
 		file << "#   - original Euler rotation in degrees (avoids quaternion round-trip drift)\n";
 		file << "#   - nodos-only fields with no COLMAP equivalent\n";
+		file << "# SourceFrame: " << frameName << " (Euler convention used for ROT_X, ROT_Y, ROT_Z below).\n";
 		file << "# IMAGE_ID, ZOOM, FOCUS, FOCUS_DISTANCE, RENDER_RATIO, NODAL_OFFSET, DISTORTION_SCALE, SENSOR_W_MM, SENSOR_H_MM, ROT_X, ROT_Y, ROT_Z\n";
 		file << "# Number of entries: " << Frames.size() << "\n";
 		for (size_t i = 0; i < Frames.size(); ++i)
@@ -317,7 +323,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 	void WriteTimecodesTxt(const std::filesystem::path& outDir)
 	{
-		// Skip the sidecar entirely if no frame carried a timecode — keeps the
+		// Skip the sidecar entirely if no frame carried a timecode -- keeps the
 		// output minimal when the upstream graph isn't producing TC.
 		bool any = false;
 		for (auto& f : Frames)
@@ -366,6 +372,8 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 
 		file << std::setprecision(12);
+		file << "# COLMAP camera intrinsics. Standard format (colmap.github.io/format.html).\n";
+		file << "# OPENCV model: PARAMS = fx, fy, cx, cy, k1, k2, p1, p2 (pixels).\n";
 		file << "# Camera list with one line of data per camera:\n";
 		file << "# CAMERA_ID, MODEL, WIDTH, HEIGHT, PARAMS[]\n";
 		file << "# Number of cameras: " << Frames.size() << "\n";
@@ -387,30 +395,12 @@ struct RecordTrackCOLMAPContext : NodeContext
 			if (Frames[i].SensorSize.y > 0.0f)
 				cy += Frames[i].CenterShift.y * ImageResolution.y / Frames[i].SensorSize.y;
 
-			// OPENCV model: fx, fy, cx, cy, k1, k2, p1, p2
 			float k1 = Frames[i].K1;
 			float k2 = Frames[i].K2;
 
 			file << (i + 1) << " OPENCV " << ImageResolution.x << " " << ImageResolution.y << " "
 				 << fx << " " << fy << " " << cx << " " << cy << " "
 				 << k1 << " " << k2 << " 0 0\n";
-		}
-	}
-
-	static glm::mat3 EulerToRotationMatrix(glm::vec3 rot, sys::track::CoordinateSystem order)
-	{
-		// rot is (roll, tilt, pan) = (x, y, z) in radians
-		// Sign convention matches MakeRotation: negate roll (x) and tilt (y)
-		float r = -rot.x, t = -rot.y, p = rot.z;
-		switch (order)
-		{
-		default:
-		case sys::track::CoordinateSystem::ZYX: return glm::mat3(glm::eulerAngleZYX(p, t, r));
-		case sys::track::CoordinateSystem::XYZ: return glm::mat3(glm::eulerAngleXYZ(r, t, p));
-		case sys::track::CoordinateSystem::YXZ: return glm::mat3(glm::eulerAngleYXZ(t, r, p));
-		case sys::track::CoordinateSystem::YZX: return glm::mat3(glm::eulerAngleYZX(t, p, r));
-		case sys::track::CoordinateSystem::ZXY: return glm::mat3(glm::eulerAngleZXY(p, r, t));
-		case sys::track::CoordinateSystem::XZY: return glm::mat3(glm::eulerAngleXZY(r, p, t));
 		}
 	}
 
@@ -425,28 +415,35 @@ struct RecordTrackCOLMAPContext : NodeContext
 		}
 
 		file << std::setprecision(12);
+		file << "# COLMAP poses. Standard format (colmap.github.io/format.html).\n";
+		file << "# Frame: RH, +X right, +Y down, +Z forward (camera looks along +Z).\n";
+		file << "# (QW, QX, QY, QZ) is the world-to-camera rotation R_w2c.\n";
+		file << "# (TX, TY, TZ) is the world-to-camera translation: t = -R_w2c * camera_world_position.\n";
+		file << "# Recover camera position in the COLMAP world frame as: C = -R_w2c^T * t.\n";
 		file << "# Image list with two lines of data per image:\n";
 		file << "# IMAGE_ID, QW, QX, QY, QZ, TX, TY, TZ, CAMERA_ID, NAME\n";
 		file << "# POINTS2D[] as (X, Y, POINT3D_ID)\n";
 		file << "# Number of images: " << Frames.size() << "\n";
 
+		// M maps the SourceFrame to the COLMAP frame. Used to convert both the
+		// source-frame R_c2w and the source-frame camera position into COLMAP.
+		const glm::dmat3 M = convention::BasisChangeToColmap(SourceFrame);
+		const glm::dmat3 Minv = glm::inverse(M);
+
 		for (size_t i = 0; i < Frames.size(); ++i)
 		{
 			auto& frame = Frames[i];
 
-			// Convert Euler angles to rotation matrix
-			// Sign convention matches MakeRotation: negate roll (x) and tilt (y)
-			glm::vec3 rot = glm::radians(frame.Rotation);
-			glm::mat3 R_c2w = EulerToRotationMatrix(rot, CoordSys);
+			// Build R_c2w in the source frame, then conjugate by M to land in
+			// the COLMAP frame. Likewise frame the position.
+			glm::dmat3 R_c2w_src = convention::EulerToMat(SourceFrame, glm::dvec3(frame.Rotation));
+			glm::dmat3 R_c2w_colmap = M * R_c2w_src * Minv;
+			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location);
 
-			// COLMAP expects world-to-camera rotation
-			glm::mat3 R_w2c = glm::transpose(R_c2w);
-			glm::quat q_w2c = glm::quat_cast(R_w2c);
+			glm::dmat3 R_w2c = glm::transpose(R_c2w_colmap);
+			glm::dquat q_w2c = glm::quat_cast(R_w2c);
+			glm::dvec3 t = -R_w2c * pos_colmap;
 
-			// COLMAP translation: t = -R * C (camera center in world coords)
-			glm::vec3 t = -R_w2c * frame.Location;
-
-			// IMAGE_ID, QW, QX, QY, QZ, TX, TY, TZ, CAMERA_ID, NAME
 			file << (i + 1) << " "
 				 << q_w2c.w << " " << q_w2c.x << " " << q_w2c.y << " " << q_w2c.z << " "
 				 << t.x << " " << t.y << " " << t.z << " "

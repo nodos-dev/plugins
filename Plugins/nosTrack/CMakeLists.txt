@@ -1,6 +1,6 @@
 # Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
-set(MODULE_DEPENDENCIES "nos.sys.track-1.0")
+set(MODULE_DEPENDENCIES "nos.sys.track-1.1")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     # module_name_version: <MODULE_NAME>-<MODULE_VERSION>

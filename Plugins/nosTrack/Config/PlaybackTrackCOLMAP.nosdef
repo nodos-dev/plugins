@@ -12,7 +12,7 @@
 				"display_name": "Playback Track (COLMAP)",
 				"contents_type": "Job",
 				"always_execute": true,
-				"description": "Loads camera tracking data from COLMAP text format (cameras.txt + images.txt) and outputs Track data at a given frame index.",
+				"description": "Loads camera track from COLMAP-spec cameras.txt + images.txt.\nReads world-to-camera poses in the COLMAP frame (RH, +X right, +Y down, +Z forward) and converts to the chosen TargetFrame.\nWhen an extras.txt sidecar is present, original Euler/FOV/sensor metadata is restored verbatim (no quaternion round-trip drift).",
 				"pins": [
 					{
 						"name": "InputDirectory",
@@ -21,16 +21,16 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "FOLDER_PICKER" },
-						"description": "Directory containing cameras.txt and images.txt in COLMAP text format."
+						"description": "Directory with cameras.txt + images.txt (and optional timecodes.txt / extras.txt sidecars)."
 					},
 					{
-						"name": "CoordinateSystem",
-						"display_name": "Coordinate System",
-						"type_name": "nos.sys.track.CoordinateSystem",
+						"name": "TargetFrame",
+						"display_name": "Target Frame",
+						"type_name": "nos.sys.track.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "ZYX",
-						"description": "Euler angle rotation order for converting COLMAP quaternion to Track rotation. Default ZYX matches the FreeD node convention."
+						"data": "LH_ZUp_FwdX_RightY",
+						"description": "Coordinate frame of the produced Track.\nCOLMAP poses are converted into this frame.\nDefault matches FreeD / UE convention."
 					},
 					{
 						"name": "Mode",
@@ -39,7 +39,7 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "FrameIndex",
-						"description": "Selects how to index into the loaded frames. FrameIndex uses InFrameIndex; Timecode/FrameNumber look up via the timecodes.txt sidecar. The unused index pin is set to PASSIVE."
+						"description": "Selects how to index frames.\nFrameIndex uses InFrameIndex.\nTimecode / FrameNumber look up via timecodes.txt sidecar.\nThe unused index pin becomes PASSIVE."
 					},
 					{
 						"name": "InFrameIndex",
@@ -56,7 +56,7 @@
 						"type_name": "string",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Timecode string (HH:MM:SS:FF or HH:MM:SS;FF) to look up. Used when Mode=Timecode. Requires a timecodes.txt sidecar."
+						"description": "Timecode string (HH:MM:SS:FF) to look up. Used when Mode=Timecode. Requires timecodes.txt."
 					},
 					{
 						"name": "InFrameNumber",
@@ -65,14 +65,14 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 0,
-						"description": "Absolute frame number to look up. Used when Mode=FrameNumber. Requires a timecodes.txt sidecar."
+						"description": "Absolute frame number to look up. Used when Mode=FrameNumber. Requires timecodes.txt."
 					},
 					{
 						"name": "Track",
 						"type_name": "nos.sys.track.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "Track data for the current frame."
+						"description": "Track for the current frame, expressed in the TargetFrame convention."
 					},
 					{
 						"name": "OutFrameIndex",
@@ -90,7 +90,7 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"data": 0,
-						"description": "Total number of frames loaded."
+						"description": "Total frames loaded."
 					}
 				],
 				"functions": [

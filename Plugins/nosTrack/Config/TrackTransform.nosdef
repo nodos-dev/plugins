@@ -1,0 +1,54 @@
+{
+	"nodes": [
+		{
+			"class_name": "TrackTransform",
+			"menu_info": {
+				"category": "Track|Coordinate System",
+				"display_name": "Track Transform"
+			},
+			"node": {
+				"class_name": "TrackTransform",
+				"contents_type": "Job",
+				"description": "Transforms a Track between coordinate frames.\nThe Source and Target enums select axis assignments, handedness, and the Euler convention used for the rotation field.\nLocation: basis-changed (Source -> Target), then multiplied by WorldScale (e.g. 0.01 for cm -> m, 100 for m -> cm).\nRotation: built in the source Euler convention, conjugated by the basis-change matrix, re-extracted in the target convention.\nOther Track fields (fov, focus, sensor_size, lens_distortion, ...) pass through unchanged.",
+				"pins": [
+					{
+						"name": "In",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Source",
+						"type_name": "nos.sys.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "LH_ZUp_FwdX_RightY",
+						"description": "Coordinate system convention of the input Track."
+					},
+					{
+						"name": "Target",
+						"type_name": "nos.sys.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "RH_YUp_FwdNegZ_RightX",
+						"description": "Coordinate system convention of the output Track."
+					},
+					{
+						"name": "WorldScale",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1.0,
+						"description": "Uniform scale applied only to the output location after the basis change. Use to convert linear units (e.g. 0.01 for cm -> m, 100 for m -> cm). Does not affect rotation, fov, sensor size, focus, or lens distortion."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
+}

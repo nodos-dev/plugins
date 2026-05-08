@@ -17,6 +17,7 @@ enum TrackNode : int
 	AddTrack,
 	RecordTrackCOLMAP,
 	PlaybackTrackCOLMAP,
+	TrackTransform,
 	Count
 };
 
@@ -25,6 +26,7 @@ void RegisterController(nosNodeFunctions* functions);
 void RegisterAddTrack(nosNodeFunctions*);
 void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
 void RegisterPlaybackTrackCOLMAP(nosNodeFunctions*);
+void RegisterTrackTransform(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -51,6 +53,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			break;
 		case TrackNode::PlaybackTrackCOLMAP:
 			RegisterPlaybackTrackCOLMAP(node);
+			break;
+		case TrackNode::TrackTransform:
+			RegisterTrackTransform(node);
 			break;
 		}
 	}

@@ -6,7 +6,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
 
 #include <fstream>
 #include <filesystem>
@@ -17,11 +16,13 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include "CoordinateFrameConv.h"
+
 namespace nos::track
 {
 
 NOS_REGISTER_NAME_SPACED(Playback_InputDirectory, "InputDirectory");
-NOS_REGISTER_NAME_SPACED(Playback_CoordinateSystem, "CoordinateSystem");
+NOS_REGISTER_NAME_SPACED(Playback_TargetFrame, "TargetFrame");
 NOS_REGISTER_NAME_SPACED(Playback_Mode, "Mode");
 NOS_REGISTER_NAME_SPACED(Playback_InFrameIndex, "InFrameIndex");
 NOS_REGISTER_NAME_SPACED(Playback_InTimecode, "InTimecode");
@@ -44,8 +45,8 @@ struct COLMAPCamera
 struct COLMAPImage
 {
 	uint32_t Id = 0;
-	glm::quat Q{1, 0, 0, 0};
-	glm::vec3 T{0};
+	glm::quat Q{1, 0, 0, 0};  // R_w2c in COLMAP camera frame.
+	glm::vec3 T{0};           // t = -R_w2c * camera_world_position (COLMAP world frame).
 	uint32_t CameraId = 0;
 };
 
@@ -74,7 +75,7 @@ struct ExtrasEntry
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
-	sys::track::CoordinateSystem CoordSys = sys::track::CoordinateSystem::ZYX;
+	convention::Frame TargetFrame = convention::Frame::LH_ZUp_FwdX_RightY;
 	PlaybackTrackMode Mode = PlaybackTrackMode::FrameIndex;
 	uint32_t FrameIndex = 0;
 	std::string InTimecode;
@@ -115,9 +116,9 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			else
 				UpdateStatus();
 		}
-		else if (pinName == NSN_Playback_CoordinateSystem)
+		else if (pinName == NSN_Playback_TargetFrame)
 		{
-			CoordSys = *(sys::track::CoordinateSystem*)val.Data;
+			TargetFrame = *(convention::Frame*)val.Data;
 			if (!InputDir.empty())
 				LoadFromDirectory();
 		}
@@ -226,6 +227,15 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		if (std::filesystem::exists(extrasPath))
 			ParseExtrasTxt(extrasPath, images.size(), extras);
 
+		// Inverse of RecordTrackCOLMAP::WriteImagesTxt:
+		//   images.txt holds R_w2c in COLMAP frame, t = -R_w2c * pos_colmap.
+		//   pos_colmap = -R_c2w_colmap * t   (R_c2w_colmap = R_w2c^T)
+		//   pos_target = M^-1 * pos_colmap
+		//   R_c2w_target = M^-1 * R_c2w_colmap * M
+		//   Track.rotation = MatToEuler(TargetFrame, R_c2w_target)
+		const glm::dmat3 Minv = convention::BasisChangeFromColmap(TargetFrame);
+		const glm::dmat3 M = glm::inverse(Minv);
+
 		for (size_t i = 0; i < images.size(); ++i)
 		{
 			auto& img = images[i];
@@ -233,11 +243,13 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			auto camIt = cameras.find(img.CameraId);
 			const ExtrasEntry* ex = (i < extras.size() && extras[i].Present) ? &extras[i] : nullptr;
 
-			// Position: invert COLMAP world-to-camera. Stable round-trip.
-			glm::mat3 R_w2c = glm::mat3_cast(img.Q);
-			glm::mat3 R_c2w = glm::transpose(R_w2c);
-			glm::vec3 C = -R_c2w * img.T;
-			trackData.location = reinterpret_cast<nos::fb::vec3&>(C);
+			glm::dmat3 R_w2c = glm::dmat3(glm::mat3_cast(img.Q));
+			glm::dmat3 R_c2w_colmap = glm::transpose(R_w2c);
+			glm::dvec3 pos_colmap = -R_c2w_colmap * glm::dvec3(img.T);
+
+			glm::dvec3 pos_target = Minv * pos_colmap;
+			glm::vec3 locF((float)pos_target.x, (float)pos_target.y, (float)pos_target.z);
+			trackData.location = reinterpret_cast<nos::fb::vec3&>(locF);
 
 			// Rotation: prefer the original Euler from extras (avoids quaternion-
 			// to-Euler ambiguity near gimbal lock); fall back to extracting from
@@ -249,8 +261,10 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			}
 			else
 			{
-				glm::vec3 euler = RotationMatrixToEuler(R_c2w, CoordSys);
-				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
+				glm::dmat3 R_c2w_target = Minv * R_c2w_colmap * M;
+				glm::dvec3 eulerD = convention::MatToEuler(TargetFrame, R_c2w_target);
+				glm::vec3 eulerF((float)eulerD.x, (float)eulerD.y, (float)eulerD.z);
+				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(eulerF);
 			}
 
 			if (camIt != cameras.end())
@@ -457,25 +471,6 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 				TimecodeToIndex.emplace(Timecodes[i].Timecode, uint32_t(i));
 			FrameNumberToIndex.emplace(Timecodes[i].FrameNumber, uint32_t(i));
 		}
-	}
-
-	// --- Euler extraction (inverse of EulerToRotationMatrix in RecordTrackCOLMAP) ---
-
-	static glm::vec3 RotationMatrixToEuler(const glm::mat3& R_c2w, sys::track::CoordinateSystem order)
-	{
-		float r, t, p;
-		switch (order)
-		{
-		default:
-		case sys::track::CoordinateSystem::ZYX: glm::extractEulerAngleZYX(glm::mat4(R_c2w), p, t, r); break;
-		case sys::track::CoordinateSystem::XYZ: glm::extractEulerAngleXYZ(glm::mat4(R_c2w), r, t, p); break;
-		case sys::track::CoordinateSystem::YXZ: glm::extractEulerAngleYXZ(glm::mat4(R_c2w), t, r, p); break;
-		case sys::track::CoordinateSystem::YZX: glm::extractEulerAngleYZX(glm::mat4(R_c2w), t, p, r); break;
-		case sys::track::CoordinateSystem::ZXY: glm::extractEulerAngleZXY(glm::mat4(R_c2w), p, r, t); break;
-		case sys::track::CoordinateSystem::XZY: glm::extractEulerAngleXZY(glm::mat4(R_c2w), r, p, t); break;
-		}
-		// Undo sign convention: r = -roll, t = -tilt, p = pan
-		return glm::degrees(glm::vec3(-r, -t, p));
 	}
 
 	// --- Execution ---
