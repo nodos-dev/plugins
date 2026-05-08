@@ -29,7 +29,8 @@
     "Config/Vec3ToVec4.nosdef",
     "Config/EmbedMat3ToMat4.nosdef",
     "Config/EulerToQuaternion.nosdef",
-    "Config/QuaternionToEuler.nosdef"
+    "Config/QuaternionToEuler.nosdef",
+    "Config/QuaternionMultiply.nosdef"
   ],
   "binary_path": "Binaries/nosMath",
   "third_party_software": [

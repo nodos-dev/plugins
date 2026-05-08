@@ -106,6 +106,7 @@ enum class MathNodeTypes : int {
 	Random,
 	EulerToQuaternion,
 	QuaternionToEuler,
+	QuaternionMultiply,
 	Count
 };
 
@@ -172,6 +173,7 @@ void RegisterNot(nosNodeFunctions*);
 void RegisterRandom(nosNodeFunctions*);
 void RegisterEulerToQuaternion(nosNodeFunctions*);
 void RegisterQuaternionToEuler(nosNodeFunctions*);
+void RegisterQuaternionMultiply(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
 {
@@ -291,6 +293,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 		}
 		case MathNodeTypes::QuaternionToEuler: {
 			RegisterQuaternionToEuler(node);
+			break;
+		}
+		case MathNodeTypes::QuaternionMultiply: {
+			RegisterQuaternionMultiply(node);
 			break;
 		}
 		default:
