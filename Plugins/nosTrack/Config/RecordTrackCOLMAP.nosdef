@@ -15,14 +15,6 @@
 				"description": "Records camera track data each frame while Record is true.\nOn falling edge (after MinOffFrames debounce) writes COLMAP-spec cameras.txt + images.txt and clears the buffer.\nIntrinsics come from FOV/sensor/distortion. Extrinsics are written as world-to-camera in the COLMAP frame (RH, +X right, +Y down, +Z forward).\nSet SourceFrame to match the convention of the connected Track.",
 				"pins": [
 					{
-						"name": "InTrack",
-						"display_name": "Track",
-						"type_name": "nos.sys.track.Track",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Camera track to record. Interpreted in the SourceFrame convention (location, rotation Euler, FOV, sensor, lens distortion)."
-					},
-					{
 						"name": "Timecode",
 						"display_name": "Timecode",
 						"type_name": "string",
@@ -38,14 +30,6 @@
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 0,
 						"description": "Optional absolute frame number paired with Timecode. Written to timecodes.txt sidecar."
-					},
-					{
-						"name": "OutTrack",
-						"display_name": "Track",
-						"type_name": "nos.sys.track.Track",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "Pass-through of InTrack."
 					},
 					{
 						"name": "OutputDirectory",
@@ -112,6 +96,22 @@
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"data": 0,
 						"description": "Frames in the buffer."
+					},
+					{
+						"name": "InTrack",
+						"display_name": "Track",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Camera track to record. Interpreted in the SourceFrame convention (location, rotation Euler, FOV, sensor, lens distortion)."
+					},
+					{
+						"name": "OutTrack",
+						"display_name": "Track",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Pass-through of InTrack."
 					}
 				]
 			}

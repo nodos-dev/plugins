@@ -68,13 +68,6 @@
 						"description": "Absolute frame number to look up. Used when Mode=FrameNumber. Requires timecodes.txt."
 					},
 					{
-						"name": "Track",
-						"type_name": "nos.sys.track.Track",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "Track for the current frame, expressed in the TargetFrame convention."
-					},
-					{
 						"name": "OutFrameIndex",
 						"display_name": "Frame Index",
 						"type_name": "uint",
@@ -91,6 +84,13 @@
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"data": 0,
 						"description": "Total frames loaded."
+					},
+					{
+						"name": "Track",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Track for the current frame, expressed in the TargetFrame convention."
 					}
 				],
 				"functions": [
