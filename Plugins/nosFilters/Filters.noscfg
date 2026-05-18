@@ -29,6 +29,8 @@
         "Config/DirectionalBlur.nosdef",
         "Config/DirectionalDof.nosdef",
         "Config/DepthOfField.nosdef",
+        "Config/BokehDof.nosdef",
+        "Config/BokehShape.nosdef",
         "Config/KawaseLightStreak.nosdef",
         "Config/Kuwahara.nosdef",
         "Config/PremultiplyAlpha.nosdef",
