@@ -1,0 +1,990 @@
+{ "nodes": [
+    {
+      "class_name": "nos.filters.DepthOfField",
+      "node": {
+        "id": "5899940c-437e-4f71-b119-bb80fb5d1e1a",
+        "name": "DepthOfField",
+        "class_name": "nos.filters.DepthOfField",
+        "pins": [
+          {
+            "id": "1950c2e6-a0f6-485b-8a02-bded8a2f6ed5",
+            "name": "Depth",
+            "type_name": "nos.sys.vulkan.Texture",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": {
+              "resolution": "HD",
+              "width": 1920,
+              "height": 1080,
+              "format": "R16G16B16A16_SFLOAT",
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+            },
+            "def": {
+            },
+            "advanced_property": true,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "74a1bfd0-4f2d-447b-945c-8d0cb67a2120" }
+          },
+          {
+            "id": "e0b8f433-212f-48f6-ba4f-c8a194e1a707",
+            "name": "FocusDistance",
+            "type_name": "float",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": 5.0,
+            "min": 0.0,
+            "max": 1000.0,
+            "def": 5.0,
+            "step": 10.0,
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "e709c7b4-9a59-4546-be53-0dc51abc5605" }
+          },
+          {
+            "id": "68187c92-92f3-40d0-8b24-df6f33f9f649",
+            "name": "FocusRange",
+            "type_name": "float",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": 2.0,
+            "min": 0.01,
+            "max": 1000.0,
+            "def": 2.0,
+            "step": 9.9999,
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "534a26e9-1ebd-4ed2-89fb-bdf5d34b6ec1" }
+          },
+          {
+            "id": "42554a0a-2d70-4ec4-a2ea-594ad71559f3",
+            "name": "MaxRadius",
+            "type_name": "float",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": 16.0,
+            "min": 0.0,
+            "max": 128.0,
+            "def": 16.0,
+            "step": 1.28,
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "63f77504-73aa-4b89-8849-65e27649b272" }
+          },
+          {
+            "id": "312c4450-a4ad-4690-ba3d-afcbc93da6eb",
+            "name": "MinRadius",
+            "type_name": "float",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": 0.5,
+            "min": 0.0,
+            "max": 8.0,
+            "def": 0.5,
+            "step": 0.08,
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "97561978-6da1-4a33-a6bc-c654008a8261" }
+          },
+          {
+            "id": "ce6c0d45-8ce1-47ef-bd73-addda06d826e",
+            "name": "Output",
+            "type_name": "nos.sys.vulkan.Texture",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": {
+              "resolution": "HD",
+              "width": 1920,
+              "height": 1080,
+              "format": "R16G16B16A16_SFLOAT",
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+            },
+            "def": {
+              "resolution": "HD",
+              "width": 1920,
+              "height": 1080,
+              "format": "R16G16B16A16_SFLOAT",
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+            },
+            "advanced_property": true,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "c278680b-43b5-40ce-b1af-a4551c2e58f0" }
+          },
+          {
+            "id": "2be9d3ba-9386-43b0-ae1c-58168be2a289",
+            "name": "Input",
+            "type_name": "nos.sys.vulkan.Texture",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": {
+              "resolution": "HD",
+              "width": 1920,
+              "height": 1080,
+              "format": "R16G16B16A16_SFLOAT",
+              "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+              "filtering": "LINEAR"
+            },
+            "def": {
+              "filtering": "LINEAR"
+            },
+            "advanced_property": true,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "479248dc-200d-4a4d-87d2-f2c7c77f667f" }
+          }
+        ],
+        "pos": { "x": 0.0, "y": 0.0 },
+        "contents_type": "Graph",
+        "contents": { "nodes": [
+            {
+              "id": "393281e0-2cb8-4b90-a98e-a8e708719229",
+              "name": "Output",
+              "class_name": "nos.internal.GraphOutput",
+              "pins": [
+                {
+                  "id": "2e4ec877-e014-49ae-ae1d-881a0e4d1ac5",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "def": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "c278680b-43b5-40ce-b1af-a4551c2e58f0",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "referred_by": [
+                    "ce6c0d45-8ce1-47ef-bd73-addda06d826e"
+                  ],
+                  "def": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" },
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 1329.0, "y": 1025.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "6a261add-ff1c-49ba-b9b7-a3bbad8e1fb3",
+              "name": "Directional DoF (1)",
+              "class_name": "nos.filters.DirectionalDof",
+              "pins": [
+                {
+                  "id": "b1b03fce-6863-42e6-a78a-260743b5441d",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET",
+                    "filtering": "LINEAR"
+                  },
+                  "def": {
+                    "filtering": "LINEAR"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "14aab6c6-10ce-4a39-9c6f-8c5633fe59e2",
+                  "name": "Depth",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                  },
+                  "def": {
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "d6a91b7a-b576-487b-bd2c-89fee90a37d1",
+                  "name": "FocusDistance",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 7.4,
+                  "min": 0.0,
+                  "max": 1000.0,
+                  "def": 5.0,
+                  "step": 10.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "55bffdc3-e0fa-4c0f-9ead-5a3b96c232bf",
+                  "name": "FocusRange",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 3.1,
+                  "min": 0.01,
+                  "max": 1000.0,
+                  "def": 2.0,
+                  "step": 9.9999,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "bdc5ae5a-10cc-4c3c-b013-573a64bd8ec6",
+                  "name": "MaxRadius",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 5.0,
+                  "min": 0.0,
+                  "max": 128.0,
+                  "def": 16.0,
+                  "step": 1.28,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "d77d3716-69f5-4c5d-a342-414dc11597fb",
+                  "name": "MinRadius",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "min": 0.0,
+                  "max": 8.0,
+                  "def": 0.5,
+                  "step": 0.08,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "ad25df82-1942-4f9f-a062-c072261a2d92",
+                  "name": "BackgroundIsFar",
+                  "type_name": "float",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 1.0,
+                  "step": 0.01,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "aaff92e1-63fe-4253-8edb-1f34a76019c9",
+                  "name": "Direction",
+                  "type_name": "nos.fb.vec2",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.0, "y": 1.0 },
+                  "min": { "x": -1.0, "y": -1.0 },
+                  "max": { "x": 1.0, "y": 1.0 },
+                  "def": { "x": 1.0, "y": 0.0 },
+                  "step": 0.02,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "ad6603e0-2b1d-4bf6-a1d1-af0fc05978a2",
+                  "name": "SampleCount",
+                  "type_name": "float",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 12.0,
+                  "min": 1.0,
+                  "max": 64.0,
+                  "def": 12.0,
+                  "step": 0.63,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "0ef0f439-9766-4957-8931-a02ce1019bd1",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "def": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 1129.0, "y": 1073.0 },
+              "contents_type": "Job",
+              "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
+              "function_category": "Default Node",
+              "description": "1D depth-aware blur. CoC is computed per pixel from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a separable disc bokeh.",
+              "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
+            },
+            {
+              "id": "deac982f-b51b-4ae0-b6c6-9b2998d3e5a9",
+              "name": "MaxRadius",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "d5387b2e-f8c6-4b2e-8a42-a11eed779a1d",
+                  "name": "Output",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": 5.0,
+                  "min": 0.0,
+                  "max": 128.0,
+                  "def": 16.0,
+                  "step": 1.28,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "63f77504-73aa-4b89-8849-65e27649b272",
+                  "name": "Input",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 16.0,
+                  "referred_by": [
+                    "42554a0a-2d70-4ec4-a2ea-594ad71559f3"
+                  ],
+                  "min": 0.0,
+                  "max": 128.0,
+                  "def": 16.0,
+                  "step": 1.28,
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1250.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "af576b2d-dde0-4d7b-86fc-37cb9f97b49e",
+              "name": "Directional DoF",
+              "class_name": "nos.filters.DirectionalDof",
+              "pins": [
+                {
+                  "id": "9e368dde-bb31-44d8-aaad-782e92fe2366",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                    "filtering": "LINEAR"
+                  },
+                  "def": {
+                    "filtering": "LINEAR"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "7e88a91a-1eca-4cc5-8dce-7c4aca61368d",
+                  "name": "Depth",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                  },
+                  "def": {
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "c1b814c4-e424-40a0-99d6-0437d948d1d7",
+                  "name": "FocusDistance",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 7.4,
+                  "min": 0.0,
+                  "max": 1000.0,
+                  "def": 5.0,
+                  "step": 10.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "78893474-3dfc-4a36-b897-77760ba19c8c",
+                  "name": "FocusRange",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 3.1,
+                  "min": 0.01,
+                  "max": 1000.0,
+                  "def": 2.0,
+                  "step": 9.9999,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "4f471215-bebf-49be-a6e4-909c394d1f1a",
+                  "name": "MaxRadius",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 5.0,
+                  "min": 0.0,
+                  "max": 128.0,
+                  "def": 16.0,
+                  "step": 1.28,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "05132381-cf95-4253-9fc2-e87f84b70dd8",
+                  "name": "MinRadius",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "min": 0.0,
+                  "max": 8.0,
+                  "def": 0.5,
+                  "step": 0.08,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "2b52da00-b45d-41ae-a1ec-c88566879043",
+                  "name": "BackgroundIsFar",
+                  "type_name": "float",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "min": 0.0,
+                  "max": 1.0,
+                  "def": 1.0,
+                  "step": 0.01,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "ac684e31-1a90-462f-8b64-2b368a93b563",
+                  "name": "Direction",
+                  "type_name": "nos.fb.vec2",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.0, "y": 0.0 },
+                  "min": { "x": -1.0, "y": -1.0 },
+                  "max": { "x": 1.0, "y": 1.0 },
+                  "def": { "x": 1.0, "y": 0.0 },
+                  "step": 0.02,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "b8527f03-5c5c-4a41-b485-fa05e0f50cb1",
+                  "name": "SampleCount",
+                  "type_name": "float",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 12.0,
+                  "min": 1.0,
+                  "max": 64.0,
+                  "def": 12.0,
+                  "step": 0.63,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "8f4d23a7-3b94-4a1c-ba14-d1ce47e92acd",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "def": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 855.0, "y": 977.0 },
+              "contents_type": "Job",
+              "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "Shaders/DirectionalDof.frag" } },
+              "function_category": "Default Node",
+              "description": "1D depth-aware blur. CoC is computed per pixel from a linear view-space Z input. Chain two instances along (1,0) and (0,1) for a separable disc bokeh.",
+              "plugin_version": { "major": 1, "minor": 7, "patch": 0 }
+            },
+            {
+              "id": "8b497dab-5466-4d32-a440-125976e3a3ee",
+              "name": "Depth",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "9587b7b1-8fc7-437b-9459-ee73f90de097",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                  },
+                  "def": {
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "74a1bfd0-4f2d-447b-945c-8d0cb67a2120",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                  },
+                  "referred_by": [
+                    "1950c2e6-a0f6-485b-8a02-bded8a2f6ed5"
+                  ],
+                  "def": {
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" },
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1025.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "9813ee9d-1f75-4554-9f9c-b9ecafc2e9fe",
+              "name": "FocusDistance",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "7c60934b-ba19-4faf-9923-411511649cd0",
+                  "name": "Output",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": 7.4,
+                  "min": 0.0,
+                  "max": 1000.0,
+                  "def": 5.0,
+                  "step": 10.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "e709c7b4-9a59-4546-be53-0dc51abc5605",
+                  "name": "Input",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 5.0,
+                  "referred_by": [
+                    "e0b8f433-212f-48f6-ba4f-c8a194e1a707"
+                  ],
+                  "min": 0.0,
+                  "max": 1000.0,
+                  "def": 5.0,
+                  "step": 10.0,
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1100.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "2c0861b9-e416-4741-b56d-8dfa81c49516",
+              "name": "FocusRange",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "6a933bab-7bf6-4388-b990-abd1b9729e64",
+                  "name": "Output",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": 3.1,
+                  "min": 0.01,
+                  "max": 1000.0,
+                  "def": 2.0,
+                  "step": 9.9999,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "534a26e9-1ebd-4ed2-89fb-bdf5d34b6ec1",
+                  "name": "Input",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 2.0,
+                  "referred_by": [
+                    "68187c92-92f3-40d0-8b24-df6f33f9f649"
+                  ],
+                  "min": 0.01,
+                  "max": 1000.0,
+                  "def": 2.0,
+                  "step": 9.9999,
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1175.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "3951aaae-16df-4b07-b1a9-b8b2a01b19c7",
+              "name": "MinRadius",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "f0feee29-3782-49fe-a834-94e2b57916a8",
+                  "name": "Output",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "min": 0.0,
+                  "max": 8.0,
+                  "def": 0.5,
+                  "step": 0.08,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "97561978-6da1-4a33-a6bc-c654008a8261",
+                  "name": "Input",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.5,
+                  "referred_by": [
+                    "312c4450-a4ad-4690-ba3d-afcbc93da6eb"
+                  ],
+                  "min": 0.0,
+                  "max": 8.0,
+                  "def": 0.5,
+                  "step": 0.08,
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1325.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "a1d16ddd-0144-4daa-97b2-e9b3b019c8c1",
+              "name": "Input",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "c271ac23-2923-45c2-b262-b654455a93c3",
+                  "name": "Output",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                    "filtering": "LINEAR"
+                  },
+                  "def": {
+                    "filtering": "LINEAR"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "479248dc-200d-4a4d-87d2-f2c7c77f667f",
+                  "name": "Input",
+                  "type_name": "nos.sys.vulkan.Texture",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "resolution": "HD",
+                    "width": 1920,
+                    "height": 1080,
+                    "format": "R16G16B16A16_SFLOAT",
+                    "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                    "filtering": "LINEAR"
+                  },
+                  "referred_by": [
+                    "2be9d3ba-9386-43b0-ae1c-58168be2a289"
+                  ],
+                  "def": {
+                    "filtering": "LINEAR"
+                  },
+                  "advanced_property": true,
+                  "meta_data_map": [
+                    { "key": "AdvancedProperty", "value": "true" },
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 655.0, "y": 1400.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            }
+          ], "connections": [
+            { "from": "8f4d23a7-3b94-4a1c-ba14-d1ce47e92acd", "to": "b1b03fce-6863-42e6-a78a-260743b5441d", "id": "83839676-0760-4699-ae80-c0a789e273d8" },
+            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "d77d3716-69f5-4c5d-a342-414dc11597fb", "id": "4c05135f-6001-4679-b39c-b248559ae56d" },
+            { "from": "9587b7b1-8fc7-437b-9459-ee73f90de097", "to": "14aab6c6-10ce-4a39-9c6f-8c5633fe59e2", "id": "231cdfe5-7ac7-4013-9d20-68d5af8509b7" },
+            { "from": "7c60934b-ba19-4faf-9923-411511649cd0", "to": "d6a91b7a-b576-487b-bd2c-89fee90a37d1", "id": "1cdaef73-876c-472a-97ff-04bf1f01348e" },
+            { "from": "c271ac23-2923-45c2-b262-b654455a93c3", "to": "9e368dde-bb31-44d8-aaad-782e92fe2366", "id": "231fc88c-a52e-48d0-a6ee-8c2fdfe3ef0d" },
+            { "from": "6a933bab-7bf6-4388-b990-abd1b9729e64", "to": "55bffdc3-e0fa-4c0f-9ead-5a3b96c232bf", "id": "7c1cae59-5834-420e-9d3d-e4767f6c3273" },
+            { "from": "d5387b2e-f8c6-4b2e-8a42-a11eed779a1d", "to": "bdc5ae5a-10cc-4c3c-b013-573a64bd8ec6", "id": "d74bdb3a-8c8c-4f82-8038-01a237e27a89" },
+            { "from": "0ef0f439-9766-4957-8931-a02ce1019bd1", "to": "2e4ec877-e014-49ae-ae1d-881a0e4d1ac5", "id": "353cc954-d098-417a-8331-357b879ba654" },
+            { "from": "9587b7b1-8fc7-437b-9459-ee73f90de097", "to": "7e88a91a-1eca-4cc5-8dce-7c4aca61368d", "id": "b126f4c4-d748-46f2-be51-ce1c778c0c4b" },
+            { "from": "7c60934b-ba19-4faf-9923-411511649cd0", "to": "c1b814c4-e424-40a0-99d6-0437d948d1d7", "id": "fc25a2f4-0af4-49ae-9052-133a76cfc044" },
+            { "from": "6a933bab-7bf6-4388-b990-abd1b9729e64", "to": "78893474-3dfc-4a36-b897-77760ba19c8c", "id": "f6ba18f8-0ef1-42db-a774-c4b02aa78fac" },
+            { "from": "d5387b2e-f8c6-4b2e-8a42-a11eed779a1d", "to": "4f471215-bebf-49be-a6e4-909c394d1f1a", "id": "afd9d7ff-f9e2-4a67-b874-2cfb2f870447" },
+            { "from": "f0feee29-3782-49fe-a834-94e2b57916a8", "to": "05132381-cf95-4253-9fc2-e87f84b70dd8", "id": "82919455-4a51-490a-8ab2-201952d2e126" }
+          ] },
+        "function_category": "Default Node",
+        "display_name": "Depth of Field",
+        "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+      }
+    }
+  ] }

@@ -27,6 +27,8 @@
         "Config/Diff.nosdef",
         "Config/GaussianBlur.nosdef",
         "Config/DirectionalBlur.nosdef",
+        "Config/DirectionalDof.nosdef",
+        "Config/DepthOfField.nosdef",
         "Config/KawaseLightStreak.nosdef",
         "Config/Kuwahara.nosdef",
         "Config/PremultiplyAlpha.nosdef",
