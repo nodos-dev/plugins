@@ -34,3 +34,6 @@
 [submodule "Plugins/nosWebRTC/Source/ssl-cert"]
 	path = Plugins/nosWebRTC/Source/ssl-cert
 	url = https://github.com/mediaz/ssl-cert.git
+[submodule "Plugins/nosUtilities/External/freetype"]
+	path = Plugins/nosUtilities/External/freetype
+	url = https://github.com/freetype/freetype.git
