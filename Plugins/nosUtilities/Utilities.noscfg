@@ -67,7 +67,8 @@
 		"Config/YADIFWithAutoDispatchSize.nosdef",
 		"Config/RepeatingJunction.nosdef",
 		"Config/MultiLiveOut.nosdef",
-		"Config/TextRender.nosdef"
+		"Config/TextRender.nosdef",
+		"Config/ScheduleRequest.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",

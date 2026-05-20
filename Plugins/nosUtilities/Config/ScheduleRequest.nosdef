@@ -1,0 +1,58 @@
+{
+	"nodes": [
+		{
+			"class_name": "ScheduleRequest",
+			"menu_info": {
+				"category": "Execution",
+				"display_name": "Schedule Request",
+				"aliases": [ "schedule", "on demand", "request" ]
+			},
+			"node": {
+				"class_name": "ScheduleRequest",
+				"display_name": "Schedule Request",
+				"contents_type": "Job",
+				"description": "Drives an on-demand path. Each execution, and each path start, queues another\nschedule request so the path feeding Trigger keeps running. Wire the resource you\nwant scheduled into Sink.",
+				"pins": [
+					{
+						"name": "Trigger",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Sink",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "DeltaSeconds",
+						"display_name": "Delta Seconds",
+						"description": "Target time between path runs, as a rational x/y seconds. Default 1/60.",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": { "x": 1, "y": 60 }
+					},
+					{
+						"name": "Importance",
+						"description": "Conflicting paths are controlled by the node of higher importance.",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1
+					},
+					{
+						"name": "TryAgainOnFailure",
+						"display_name": "Try Again On Failure",
+						"description": "If enabled, the request is retried when a node on the path returns an error.",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": true
+					}
+				]
+			}
+		}
+	]
+}
