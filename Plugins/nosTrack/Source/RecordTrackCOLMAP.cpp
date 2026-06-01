@@ -12,7 +12,7 @@
 #include <cmath>
 #include <iomanip>
 
-#include "CoordinateFrameConv.h"
+#include <nosSysTrack/CoordinateFrameConv.h>
 
 namespace nos::track
 {

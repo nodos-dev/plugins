@@ -1,0 +1,78 @@
+{
+	"nodes": [
+		{
+			"class_name": "ReadFBXTransform",
+			"menu_info": {
+				"category": "Geometry",
+				"display_name": "Read FBX Transform",
+				"name_aliases": [ "FBX", "Load FBX", "FBX Transform", "FBX Reader" ]
+			},
+			"node": {
+				"class_name": "ReadFBXTransform",
+				"contents_type": "Job",
+				"description": "Reads an .fbx file and outputs the local and global transform of a\nselected object inside it. Pick the object from the 'Object' dropdown,\nwhich is populated with the names found in the file.",
+				"pins": [
+					{
+						"name": "Path",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": {
+							"type": "FILE_PICKER",
+							"file_extensions": [ "fbx" ],
+							"file_picker_type": "OPEN"
+						},
+						"description": "Path to the .fbx file to read."
+					},
+					{
+						"name": "Object",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY",
+						"data": "",
+						"visualizer": {
+							"type": "COMBO_BOX",
+							"name": ""
+						},
+						"description": "Object inside the .fbx whose transform is reported.\nThe list is populated once the file is loaded."
+					},
+					{
+						"name": "SourceFrame",
+						"display_name": "Source Frame",
+						"type_name": "nos.sys.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "RH_YUp_FwdNegZ_RightX",
+						"description": "Coordinate frame the .fbx is authored in. The output transforms are expressed in this frame; set Convert Transform's 'SourceFrame' to the same value."
+					},
+					{
+						"name": "LocalTransform",
+						"display_name": "Local Transform",
+						"type_name": "nos.fb.Transform",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Transform of the object relative to its parent."
+					},
+					{
+						"name": "GlobalTransform",
+						"display_name": "Global Transform",
+						"type_name": "nos.fb.Transform",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "World transform of the object, accounting for its parent hierarchy."
+					},
+					{
+						"name": "IsLoaded",
+						"display_name": "Is Loaded",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"readonly": true,
+						"description": "True if a valid 'Path' was selected and the file could be loaded."
+					}
+				]
+			}
+		}
+	]
+}

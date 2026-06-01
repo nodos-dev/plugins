@@ -4,7 +4,7 @@
 #include <nosSysTrack/Track_generated.h>
 #include <glm/glm.hpp>
 
-#include "CoordinateFrameConv.h"
+#include <nosSysTrack/CoordinateFrameConv.h>
 
 namespace nos::track
 {

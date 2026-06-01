@@ -19,7 +19,8 @@
 		"Config/AddTrack.nosdef",
 		"Config/RecordTrackCOLMAP.nosdef",
 		"Config/PlaybackTrackCOLMAP.nosdef",
-		"Config/TrackTransform.nosdef"
+		"Config/TrackTransform.nosdef",
+		"Config/ConvertTransform.nosdef"
 	],
 	"custom_types": [
 		"Config/PlaybackMode.fbs"

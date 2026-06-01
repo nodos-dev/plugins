@@ -1,10 +1,16 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-// Frame-conversion helpers shared by TrackTransform / RecordTrackCOLMAP /
-// PlaybackTrackCOLMAP. Encodes per-frame Euler conventions and basis-change
-// matrices to the COLMAP camera/world frame.
+// Frame-conversion helpers for nos.sys.track.CoordinateFrame, shared by the
+// Track nodes (TrackTransform / RecordTrackCOLMAP / PlaybackTrackCOLMAP /
+// ConvertTransform) and by transform producers such as nos.geometry's FBX
+// reader. Encodes per-frame Euler conventions and basis-change matrices to the
+// COLMAP camera/world frame.
 #pragma once
 
-#include "nosSysTrack/Track_generated.h"
+#include <nosSysTrack/Track_generated.h>
+
+#ifndef GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
 

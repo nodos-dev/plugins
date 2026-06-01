@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include "CoordinateFrameConv.h"
+#include <nosSysTrack/CoordinateFrameConv.h>
 
 namespace nos::track
 {

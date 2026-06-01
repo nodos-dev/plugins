@@ -42,6 +42,7 @@ add_subdirectory(nosReflect)
 add_subdirectory(nosStrings)
 add_subdirectory(nosAnimation)
 add_subdirectory(nosGraphics)
+add_subdirectory(nosGeometry)
 
 nos_get_targets(PLUGINS_COMMON_EXTERNAL_TARGETS "./External")
 nos_group_targets("${PLUGINS_COMMON_EXTERNAL_TARGETS}" "External")
