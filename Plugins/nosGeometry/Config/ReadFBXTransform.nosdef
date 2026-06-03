@@ -28,7 +28,7 @@
 						"name": "Object",
 						"type_name": "string",
 						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "",
 						"visualizer": {
 							"type": "COMBO_BOX",
@@ -48,7 +48,7 @@
 					{
 						"name": "LocalTransform",
 						"display_name": "Local Transform",
-						"type_name": "nos.fb.Transform",
+						"type_name": "nos.graphics.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "Transform of the object relative to its parent."
@@ -56,7 +56,7 @@
 					{
 						"name": "GlobalTransform",
 						"display_name": "Global Transform",
-						"type_name": "nos.fb.Transform",
+						"type_name": "nos.graphics.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "World transform of the object, accounting for its parent hierarchy."

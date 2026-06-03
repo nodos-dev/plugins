@@ -3,12 +3,15 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <Nodos/Helpers.hpp>
 
-// Framework builtins (nos.fb.Transform / nos.fb.vec3d)
+// Framework builtins (nos.fb.vec3d / nos.fb.vec4d)
 #include <Builtins_generated.h>
+// nos.graphics.TransformQ (generated from nos.graphics' Graphics.fbs)
+#include <Graphics_generated.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
-// Shared CoordinateFrame enum + Euler conversion helpers (nos.sys.track).
+// Shared CoordinateFrame enum (nos.sys.track); documents the FBX authoring frame.
 #include <nosSysTrack/CoordinateFrameConv.h>
 
 // Vendored FBX reader
@@ -31,7 +34,6 @@ NOS_REGISTER_NAME(LocalTransform)
 NOS_REGISTER_NAME(GlobalTransform)
 NOS_REGISTER_NAME(IsLoaded)
 
-namespace conv = nos::track::convention;
 using Frame = nos::sys::track::CoordinateFrame;
 
 // Frame-independent decomposition of an FBX object's transform. Rotation is kept
@@ -71,14 +73,15 @@ static RawTransform DecomposeMatrix(ofbx::DMatrix const& m)
 	return out;
 }
 
-// Express a decomposed transform as a nos.fb.Transform, packing the rotation in
-// `frame`'s Euler convention so it composes with the Convert Transform node.
-static fb::Transform ToTransform(RawTransform const& t, Frame frame)
+// Express a decomposed transform as a nos.graphics.TransformQ. The rotation is
+// emitted as a quaternion (x, y, z, w) taken directly from the rotation matrix,
+// which is frame-independent (no per-frame Euler convention or gimbal lock).
+static graphics::TransformQ ToTransformQ(RawTransform const& t)
 {
-	glm::dvec3 euler = conv::MatToEuler(frame, t.Rotation);
-	return fb::Transform(
+	glm::dquat q = glm::normalize(glm::quat_cast(t.Rotation));
+	return graphics::TransformQ(
 		fb::vec3d(t.Translation.x, t.Translation.y, t.Translation.z),
-		fb::vec3d(euler.x, euler.y, euler.z),
+		fb::vec4d(q.x, q.y, q.z, q.w),
 		fb::vec3d(t.Scale.x, t.Scale.y, t.Scale.z));
 }
 
@@ -219,8 +222,8 @@ struct ReadFBXTransformContext : NodeContext
 		auto it = Transforms.find(selection);
 		if (it == Transforms.end())
 			return;
-		SetPinValue(NSN_LocalTransform, nos::Buffer::From(ToTransform(it->second.Local, CurrentFrame)));
-		SetPinValue(NSN_GlobalTransform, nos::Buffer::From(ToTransform(it->second.Global, CurrentFrame)));
+		SetPinValue(NSN_LocalTransform, nos::Buffer::From(ToTransformQ(it->second.Local)));
+		SetPinValue(NSN_GlobalTransform, nos::Buffer::From(ToTransformQ(it->second.Global)));
 	}
 
 	void Finish(bool ok, std::string const& message)
