@@ -20,6 +20,9 @@ enum Nodes : int
 	BillboardPositions,
 	NormalizedDepthToDepthBuffer,
 	HomographySolver,
+	ConvertCoordinateFrame,
+	CameraGuide,
+	TrackToTransformQ,
 	Count
 };
 
@@ -28,6 +31,9 @@ nosResult RegisterBillboardMask(nosNodeFunctions*);
 nosResult RegisterBillboardPositions(nosNodeFunctions*);
 nosResult RegisterNormalizedDepthToDepthBuffer(nosNodeFunctions*);
 nosResult RegisterHomographySolver(nosNodeFunctions*);
+nosResult RegisterConvertCoordinateFrame(nosNodeFunctions*);
+nosResult RegisterCameraGuide(nosNodeFunctions*);
+nosResult RegisterTrackToTransformQ(nosNodeFunctions*);
 
 struct PluginFunctions : nos::PluginFunctions
 {
@@ -53,6 +59,9 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(BillboardPositions)
 				GEN_CASE_NODE(NormalizedDepthToDepthBuffer)
 				GEN_CASE_NODE(HomographySolver)
+				GEN_CASE_NODE(ConvertCoordinateFrame)
+				GEN_CASE_NODE(CameraGuide)
+				GEN_CASE_NODE(TrackToTransformQ)
 			default: break;
 			}
 		}

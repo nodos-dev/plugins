@@ -14,7 +14,7 @@
       },
       {
         "name": "nos.sys.track",
-        "version": "1.0"
+        "version": "1.1"
       },
       {
         "name": "nos.reflect",
@@ -31,7 +31,10 @@
     "Config/Project.nosdef",
     "Config/TranslationMatrix.nosdef",
     "Config/WorldToScreen.nosdef",
-    "Config/HomographySolver.nosdef"
+    "Config/HomographySolver.nosdef",
+    "Config/ConvertCoordinateFrame.nosdef",
+    "Config/CameraGuide.nosdef",
+    "Config/TrackToTransformQ.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []

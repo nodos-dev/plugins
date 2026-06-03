@@ -43,4 +43,13 @@ struct Transform
     scale:    nos.fb.vec3d;
 }
 
+// Like Transform, but rotation is a quaternion (x, y, z, w) instead of Euler
+// angles, avoiding gimbal lock and convention ambiguity.
+struct TransformQ
+{
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec4d;
+    scale:    nos.fb.vec3d;
+}
+
 // TODO: Move nos.fb.Transform here too

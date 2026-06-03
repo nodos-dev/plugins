@@ -1,0 +1,41 @@
+{
+	"nodes": [
+		{
+			"class_name": "TrackToTransformQ",
+			"menu_info": {
+				"category": "Graphics|Coordinate System",
+				"display_name": "Track To TransformQ"
+			},
+			"node": {
+				"class_name": "TrackToTransformQ",
+				"contents_type": "Job",
+				"description": "Converts a Track's location and Euler rotation into a TransformQ.\nThe rotation is interpreted in Frame's Euler convention and emitted as a\nquaternion. No frame conversion is performed: the output is expressed in Frame,\nso a downstream Camera Guide must use the same Frame. Track carries no scale,\nso the output scale is identity.",
+				"pins": [
+					{
+						"name": "Track",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Track whose location and rotation are converted."
+					},
+					{
+						"name": "Frame",
+						"display_name": "Frame",
+						"type_name": "nos.sys.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "LH_ZUp_FwdX_RightY",
+						"description": "Coordinate frame the Track's Euler rotation is authored in, and the frame the output TransformQ is expressed in. No conversion is performed."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.graphics.TransformQ",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Track pose expressed as a quaternion TransformQ."
+					}
+				]
+			}
+		}
+	]
+}
