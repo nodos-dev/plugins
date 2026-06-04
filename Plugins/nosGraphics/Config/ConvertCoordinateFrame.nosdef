@@ -20,7 +20,7 @@
 					{
 						"name": "SourceFrame",
 						"display_name": "Source Frame",
-						"type_name": "nos.sys.track.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "LH_ZUp_FwdX_RightY",
@@ -29,7 +29,7 @@
 					{
 						"name": "TargetFrame",
 						"display_name": "Target Frame",
-						"type_name": "nos.sys.track.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "RH_YUp_FwdNegZ_RightX",

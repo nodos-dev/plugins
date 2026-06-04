@@ -11,8 +11,8 @@
 
 #include <cmath>
 
-// Shared CoordinateFrame basis matrices (nos.sys.track).
-#include <nosSysTrack/CoordinateFrameConv.h>
+// Shared CoordinateFrame basis matrices.
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::graphics
 {
@@ -32,16 +32,15 @@ struct ConvertCoordinateFrameNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		namespace conv = nos::track::convention;
 		nos::NodeExecuteParams pins(params);
 
 		auto* in = pins.GetPinData<TransformQ>(NSN_In);
-		auto source = *pins.GetPinData<conv::Frame>(NSN_SourceFrame);
-		auto target = *pins.GetPinData<conv::Frame>(NSN_TargetFrame);
+		auto source = *pins.GetPinData<Frame>(NSN_SourceFrame);
+		auto target = *pins.GetPinData<Frame>(NSN_TargetFrame);
 		double worldScale = *pins.GetPinData<float>(NSN_WorldScale);
 
-		const glm::dmat3 S_src = conv::BasisMatrix(source);
-		const glm::dmat3 S_tgt = conv::BasisMatrix(target);
+		const glm::dmat3 S_src = BasisMatrix(source);
+		const glm::dmat3 S_tgt = BasisMatrix(target);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
 
 		// Position: basis change, then uniform world-scale (unit conversion).

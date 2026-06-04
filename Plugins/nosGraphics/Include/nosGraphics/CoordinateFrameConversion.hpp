@@ -1,12 +1,13 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-// Frame-conversion helpers for nos.sys.track.CoordinateFrame, shared by the
-// Track nodes (TrackTransform / RecordTrackCOLMAP / PlaybackTrackCOLMAP /
-// ConvertTransform) and by transform producers such as nos.geometry's FBX
-// reader. Encodes per-frame Euler conventions and basis-change matrices to the
-// COLMAP camera/world frame.
+// Frame-conversion helpers for nos.graphics.CoordinateFrame, shared by the
+// graphics nodes (ConvertCoordinateFrame / TrackToTransformQ / CameraGuide),
+// the Track nodes (TrackTransform / RecordTrackCOLMAP / PlaybackTrackCOLMAP /
+// ConvertTransform) and transform producers such as nos.geometry's FBX reader.
+// Encodes per-frame Euler conventions and basis-change matrices to the COLMAP
+// camera/world frame.
 #pragma once
 
-#include <nosSysTrack/Track_generated.h>
+#include <Graphics_generated.h>
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
@@ -14,10 +15,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-namespace nos::track::convention
+namespace nos::graphics
 {
 
-using Frame = sys::track::CoordinateFrame;
+using Frame = CoordinateFrame;
 
 // Basis matrix S for a CoordinateFrame: maps semantic (forward, right, up)
 // to engine coords (vx, vy, vz). v_engine = S * (forward, right, up).
@@ -50,7 +51,7 @@ inline glm::dmat3 ColmapBasisMatrix()
 		glm::dvec3( 0.0, -1.0,  0.0)); // up -> -Y (Y is down)
 }
 
-// Build R_c2w in `frame` from Track.rotation Euler degrees.
+// Build R_c2w in `frame` from rotation Euler degrees.
 inline glm::dmat3 EulerToMat(Frame frame, glm::dvec3 const& degRot)
 {
 	glm::dvec3 r = glm::radians(degRot);
@@ -70,7 +71,7 @@ inline glm::dmat3 EulerToMat(Frame frame, glm::dvec3 const& degRot)
 }
 
 // Inverse of EulerToMat: extract Euler degrees in `frame`'s convention.
-// Output is packed into the (rot.x, rot.y, rot.z) Track layout for that frame.
+// Output is packed into the (rot.x, rot.y, rot.z) layout for that frame.
 inline glm::dvec3 MatToEuler(Frame frame, glm::dmat3 const& R)
 {
 	glm::dmat4 M(R);
@@ -103,4 +104,4 @@ inline glm::dmat3 BasisChangeFromColmap(Frame frame)
 	return BasisMatrix(frame) * glm::inverse(ColmapBasisMatrix());
 }
 
-}  // namespace nos::track::convention
+}  // namespace nos::graphics

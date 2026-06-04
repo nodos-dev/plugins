@@ -11,11 +11,10 @@ if (NOT TARGET nosGeometry_openFBX)
     nos_group_targets("nosGeometry_openFBX" "External")
 endif()
 
-# nos.sys.track provides the CoordinateFrame type and the shared
-# CoordinateFrameConv.h helpers used to express FBX transforms in a frame
-# convention that composes with nosTrack's Convert/Track Transform nodes.
-# nos.graphics provides the nos.graphics.TransformQ output type.
-set(MODULE_DEPENDENCIES "nos.sys.track-1.1" "nos.graphics-0.4")
+# nos.graphics provides the nos.graphics.TransformQ output type and the
+# CoordinateFrame enum used to express FBX transforms in a frame convention
+# that composes with nosTrack's Convert/Track Transform nodes.
+set(MODULE_DEPENDENCIES "nos.graphics-0.4")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     string(REPLACE "-" ";" module_name_version ${module_name_version})

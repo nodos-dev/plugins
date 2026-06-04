@@ -9,10 +9,6 @@
         "category": "Geometry",
         "dependencies": [
             {
-                "name": "nos.sys.track",
-                "version": "1.1"
-            },
-            {
                 "name": "nos.graphics",
                 "version": "0.4"
             }

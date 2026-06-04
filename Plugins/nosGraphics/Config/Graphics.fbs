@@ -20,6 +20,21 @@ enum ProjectionType : ubyte
 	Orthographic
 }
 
+// World coordinate frame convention used by a transform endpoint. Encodes axis
+// assignments to world-semantic directions (forward, right, up), the implied
+// handedness, and the Euler convention for Euler-angle rotation fields.
+enum CoordinateFrame : ubyte {
+    // Left-handed, Z-up. +X forward, +Y right, +Z up.
+    // Rotation: rot.x = roll (X), rot.y = pitch (Y), rot.z = yaw (Z),
+    // intrinsic ZYX => R = Rz(yaw) * Ry(pitch) * Rx(roll).
+    LH_ZUp_FwdX_RightY = 0,
+
+    // Right-handed, Y-up. +X right, +Y up, -Z forward.
+    // Rotation: rot.x = pitch (X), rot.y = yaw (Y), rot.z = roll (Z),
+    // intrinsic YXZ => R = Ry(yaw) * Rx(pitch) * Rz(roll).
+    RH_YUp_FwdNegZ_RightX = 1,
+}
+
 table Projection
 {
 	clip_planes: nos.fb.vec2 (native_inline);

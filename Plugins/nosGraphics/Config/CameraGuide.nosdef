@@ -28,7 +28,7 @@
 					{
 						"name": "Frame",
 						"display_name": "Frame",
-						"type_name": "nos.sys.track.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "LH_ZUp_FwdX_RightY",

@@ -16,8 +16,8 @@
 #include <optional>
 #include <string>
 
-// Shared CoordinateFrame basis matrices + Euler extraction (nos.sys.track).
-#include <nosSysTrack/CoordinateFrameConv.h>
+// Shared CoordinateFrame basis matrices + Euler extraction.
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::graphics
 {
@@ -28,7 +28,7 @@ NOS_REGISTER_NAME(PositionTolerance)
 NOS_REGISTER_NAME(AngleTolerance)
 NOS_REGISTER_NAME(Out)
 
-using GuideFrame = nos::track::convention::Frame;
+using GuideFrame = Frame;
 
 enum class GuideLevel : uint8_t
 {
@@ -62,7 +62,6 @@ struct CameraGuideNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		namespace conv = nos::track::convention;
 		nos::NodeExecuteParams pins(params);
 
 		nos::sys::track::TTrack const& src = pins.GetPinData<nos::sys::track::TTrack>(NSN_Source);
@@ -78,8 +77,8 @@ struct CameraGuideNode : NodeContext
 		// are decoded with the same basis -- no cross-frame mismatch is possible.
 		auto const& sr = src.rotation;
 		auto const& tr = tgt.rotation;
-		glm::dmat3 R_src = conv::EulerToMat(frame, glm::dvec3(sr.x(), sr.y(), sr.z()));
-		glm::dmat3 R_tgt = conv::EulerToMat(frame, glm::dvec3(tr.x(), tr.y(), tr.z()));
+		glm::dmat3 R_src = EulerToMat(frame, glm::dvec3(sr.x(), sr.y(), sr.z()));
+		glm::dmat3 R_tgt = EulerToMat(frame, glm::dvec3(tr.x(), tr.y(), tr.z()));
 
 		auto const& sp = src.location;
 		auto const& tp = tgt.location;
@@ -89,7 +88,7 @@ struct CameraGuideNode : NodeContext
 		glm::dvec3 dLocal = glm::transpose(R_src) * dWorld;
 
 		// Semantic axes (engine-space columns of S): 0 forward, 1 right, 2 up.
-		glm::dmat3 S = nos::track::convention::BasisMatrix(frame);
+		glm::dmat3 S = BasisMatrix(frame);
 		double fwd = glm::dot(dLocal, glm::dvec3(S[0]));
 		double right = glm::dot(dLocal, glm::dvec3(S[1]));
 		double up = glm::dot(dLocal, glm::dvec3(S[2]));

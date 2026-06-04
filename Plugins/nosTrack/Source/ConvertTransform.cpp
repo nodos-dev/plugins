@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-#include <nosSysTrack/CoordinateFrameConv.h>
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -20,12 +20,12 @@ void RegisterConvertTransform(nosNodeFunctions* funcs)
 
 		// nos.fb.Transform is a struct, so the pin data is the raw struct bytes.
 		auto* in = static_cast<nos::fb::Transform*>(pins[NOS_NAME("In")]);
-		auto source = *static_cast<convention::Frame*>(pins[NOS_NAME("SourceFrame")]);
-		auto target = *static_cast<convention::Frame*>(pins[NOS_NAME("TargetFrame")]);
+		auto source = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("SourceFrame")]);
+		auto target = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("TargetFrame")]);
 		float worldScale = *static_cast<float*>(pins[NOS_NAME("WorldScale")]);
 
-		const glm::dmat3 S_src = convention::BasisMatrix(source);
-		const glm::dmat3 S_tgt = convention::BasisMatrix(target);
+		const glm::dmat3 S_src = nos::graphics::BasisMatrix(source);
+		const glm::dmat3 S_tgt = nos::graphics::BasisMatrix(target);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
 
 		// Position: basis change, then uniform world-scale (unit conversion).
@@ -35,9 +35,9 @@ void RegisterConvertTransform(nosNodeFunctions* funcs)
 		// Rotation: build in source frame, conjugate by M (orthogonal => M^-1 = M^T),
 		// extract in target frame.
 		const auto& r = in->rotation();
-		glm::dmat3 R_src = convention::EulerToMat(source, glm::dvec3(r.x(), r.y(), r.z()));
+		glm::dmat3 R_src = nos::graphics::EulerToMat(source, glm::dvec3(r.x(), r.y(), r.z()));
 		glm::dmat3 R_tgt = M * R_src * glm::transpose(M);
-		glm::dvec3 outRot = convention::MatToEuler(target, R_tgt);
+		glm::dvec3 outRot = nos::graphics::MatToEuler(target, R_tgt);
 
 		// Scale: M is a signed axis permutation, so the per-axis factors just reorder.
 		const auto& s = in->scale();

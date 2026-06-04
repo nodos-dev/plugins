@@ -11,8 +11,8 @@
 #include <glm/gtc/quaternion.hpp>
 
 // Track.rotation is Euler degrees in a frame-specific convention; EulerToMat
-// turns it into a rotation matrix (nos.sys.track).
-#include <nosSysTrack/CoordinateFrameConv.h>
+// turns it into a rotation matrix.
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::graphics
 {
@@ -30,16 +30,15 @@ struct TrackToTransformQNode : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		namespace conv = nos::track::convention;
 		nos::NodeExecuteParams pins(params);
 
 		nos::sys::track::TTrack const& track = pins.GetPinData<nos::sys::track::TTrack>(NSN_Track);
-		auto frame = *pins.GetPinData<conv::Frame>(NSN_Frame);
+		auto frame = *pins.GetPinData<Frame>(NSN_Frame);
 
 		auto const& loc = track.location;
 		auto const& rot = track.rotation;
 
-		glm::dmat3 R = conv::EulerToMat(frame, glm::dvec3(rot.x(), rot.y(), rot.z()));
+		glm::dmat3 R = EulerToMat(frame, glm::dvec3(rot.x(), rot.y(), rot.z()));
 		glm::dquat q = glm::normalize(glm::quat_cast(R));
 
 		TransformQ out(

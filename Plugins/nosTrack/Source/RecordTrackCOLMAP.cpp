@@ -12,7 +12,7 @@
 #include <cmath>
 #include <iomanip>
 
-#include <nosSysTrack/CoordinateFrameConv.h>
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -49,7 +49,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 {
 	std::string OutputDir;
 	nosVec2u ImageResolution = {1920, 1080};
-	convention::Frame SourceFrame = convention::Frame::LH_ZUp_FwdX_RightY;
+	nos::graphics::Frame SourceFrame = nos::graphics::Frame::LH_ZUp_FwdX_RightY;
 	bool Recording = false;
 	uint32_t ConsecutiveOffFrames = 0;
 	bool LastRequestRecord = false;
@@ -117,7 +117,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		else if (pinName == NSN_ImageResolution)
 			ImageResolution = *(nosVec2u*)val.Data;
 		else if (pinName == NSN_SourceFrame)
-			SourceFrame = *(convention::Frame*)val.Data;
+			SourceFrame = *(nos::graphics::Frame*)val.Data;
 	}
 
 	bool CanStartRecording(std::string& outError)
@@ -294,8 +294,8 @@ struct RecordTrackCOLMAPContext : NodeContext
 			return;
 		}
 		const char* frameName =
-			SourceFrame == convention::Frame::LH_ZUp_FwdX_RightY    ? "LH_ZUp_FwdX_RightY"
-			: SourceFrame == convention::Frame::RH_YUp_FwdNegZ_RightX ? "RH_YUp_FwdNegZ_RightX"
+			SourceFrame == nos::graphics::Frame::LH_ZUp_FwdX_RightY    ? "LH_ZUp_FwdX_RightY"
+			: SourceFrame == nos::graphics::Frame::RH_YUp_FwdNegZ_RightX ? "RH_YUp_FwdNegZ_RightX"
 			: "Unknown";
 		file << std::setprecision(12);
 		file << "# Nodos Track sidecar paired with images.txt by IMAGE_ID.\n";
@@ -427,7 +427,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 		// M maps the SourceFrame to the COLMAP frame. Used to convert both the
 		// source-frame R_c2w and the source-frame camera position into COLMAP.
-		const glm::dmat3 M = convention::BasisChangeToColmap(SourceFrame);
+		const glm::dmat3 M = nos::graphics::BasisChangeToColmap(SourceFrame);
 		const glm::dmat3 Minv = glm::inverse(M);
 
 		for (size_t i = 0; i < Frames.size(); ++i)
@@ -436,7 +436,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 			// Build R_c2w in the source frame, then conjugate by M to land in
 			// the COLMAP frame. Likewise frame the position.
-			glm::dmat3 R_c2w_src = convention::EulerToMat(SourceFrame, glm::dvec3(frame.Rotation));
+			glm::dmat3 R_c2w_src = nos::graphics::EulerToMat(SourceFrame, glm::dvec3(frame.Rotation));
 			glm::dmat3 R_c2w_colmap = M * R_c2w_src * Minv;
 			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location);
 

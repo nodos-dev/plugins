@@ -5,14 +5,12 @@
 
 // Framework builtins (nos.fb.vec3d / nos.fb.vec4d)
 #include <Builtins_generated.h>
-// nos.graphics.TransformQ (generated from nos.graphics' Graphics.fbs)
+// nos.graphics.TransformQ and the CoordinateFrame enum (generated from
+// nos.graphics' Graphics.fbs); the latter documents the FBX authoring frame.
 #include <Graphics_generated.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-// Shared CoordinateFrame enum (nos.sys.track); documents the FBX authoring frame.
-#include <nosSysTrack/CoordinateFrameConv.h>
 
 // Vendored FBX reader
 #include <ofbx.h>
@@ -34,7 +32,7 @@ NOS_REGISTER_NAME(LocalTransform)
 NOS_REGISTER_NAME(GlobalTransform)
 NOS_REGISTER_NAME(IsLoaded)
 
-using Frame = nos::sys::track::CoordinateFrame;
+using Frame = nos::graphics::CoordinateFrame;
 
 // Frame-independent decomposition of an FBX object's transform. Rotation is kept
 // as a matrix so it can be re-expressed in whatever CoordinateFrame the user picks

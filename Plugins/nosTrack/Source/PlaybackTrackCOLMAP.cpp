@@ -16,7 +16,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include <nosSysTrack/CoordinateFrameConv.h>
+#include <nosGraphics/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -75,7 +75,7 @@ struct ExtrasEntry
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
-	convention::Frame TargetFrame = convention::Frame::LH_ZUp_FwdX_RightY;
+	nos::graphics::Frame TargetFrame = nos::graphics::Frame::LH_ZUp_FwdX_RightY;
 	PlaybackTrackMode Mode = PlaybackTrackMode::FrameIndex;
 	uint32_t FrameIndex = 0;
 	std::string InTimecode;
@@ -118,7 +118,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		}
 		else if (pinName == NSN_Playback_TargetFrame)
 		{
-			TargetFrame = *(convention::Frame*)val.Data;
+			TargetFrame = *(nos::graphics::Frame*)val.Data;
 			if (!InputDir.empty())
 				LoadFromDirectory();
 		}
@@ -233,7 +233,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		//   pos_target = M^-1 * pos_colmap
 		//   R_c2w_target = M^-1 * R_c2w_colmap * M
 		//   Track.rotation = MatToEuler(TargetFrame, R_c2w_target)
-		const glm::dmat3 Minv = convention::BasisChangeFromColmap(TargetFrame);
+		const glm::dmat3 Minv = nos::graphics::BasisChangeFromColmap(TargetFrame);
 		const glm::dmat3 M = glm::inverse(Minv);
 
 		for (size_t i = 0; i < images.size(); ++i)
@@ -262,7 +262,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			else
 			{
 				glm::dmat3 R_c2w_target = Minv * R_c2w_colmap * M;
-				glm::dvec3 eulerD = convention::MatToEuler(TargetFrame, R_c2w_target);
+				glm::dvec3 eulerD = nos::graphics::MatToEuler(TargetFrame, R_c2w_target);
 				glm::vec3 eulerF((float)eulerD.x, (float)eulerD.y, (float)eulerD.z);
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(eulerF);
 			}
