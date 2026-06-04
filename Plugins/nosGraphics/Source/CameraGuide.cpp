@@ -3,6 +3,7 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <Nodos/Helpers.hpp>
 
+#include <nosSysTrack/Track_generated.h>
 #include <Builtins_generated.h>
 #include <Graphics_generated.h>
 
@@ -59,29 +60,29 @@ struct CameraGuideContext : NodeContext
 	// Last evaluated state; status is pushed only when this changes.
 	std::optional<GuideState> LastState;
 
-	static glm::dquat ReadQuat(nos::fb::vec4d const& r)
-	{
-		return glm::normalize(glm::dquat(r.w(), r.x(), r.y(), r.z()));
-	}
-
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
+		namespace conv = nos::track::convention;
 		nos::NodeExecuteParams pins(params);
 
-		auto* src = pins.GetPinData<TransformQ>(NSN_Source);
-		auto* tgt = pins.GetPinData<TransformQ>(NSN_Target);
+		nos::sys::track::TTrack const& src = pins.GetPinData<nos::sys::track::TTrack>(NSN_Source);
+		nos::sys::track::TTrack const& tgt = pins.GetPinData<nos::sys::track::TTrack>(NSN_Target);
 		auto frame = *pins.GetPinData<GuideFrame>(NSN_Frame);
 		double posTol = *pins.GetPinData<float>(NSN_PositionTolerance);
 		double angTol = *pins.GetPinData<float>(NSN_AngleTolerance);
 
 		// Bypass: Source -> Out, unchanged.
-		SetPinValue(NSN_Out, nos::Buffer::From(*src));
+		SetPinValue(NSN_Out, nos::Buffer::From(src));
 
-		glm::dmat3 R_src = glm::mat3_cast(ReadQuat(src->rotation()));
-		glm::dmat3 R_tgt = glm::mat3_cast(ReadQuat(tgt->rotation()));
+		// Both Tracks carry Euler rotation in the same Frame convention, so they
+		// are decoded with the same basis -- no cross-frame mismatch is possible.
+		auto const& sr = src.rotation;
+		auto const& tr = tgt.rotation;
+		glm::dmat3 R_src = conv::EulerToMat(frame, glm::dvec3(sr.x(), sr.y(), sr.z()));
+		glm::dmat3 R_tgt = conv::EulerToMat(frame, glm::dvec3(tr.x(), tr.y(), tr.z()));
 
-		auto const& sp = src->position();
-		auto const& tp = tgt->position();
+		auto const& sp = src.location;
+		auto const& tp = tgt.location;
 		glm::dvec3 dWorld(tp.x() - sp.x(), tp.y() - sp.y(), tp.z() - sp.z());
 
 		// Express the positional delta in Source's local axes (egocentric).

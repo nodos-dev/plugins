@@ -9,21 +9,21 @@
 			"node": {
 				"class_name": "CameraGuide",
 				"contents_type": "Job",
-				"description": "Passes Source straight through to Out and reports, in its node status, the\negocentric motion needed to bring Source roughly onto Target.\nTranslation is given along Source's local axes (forward/back, right/left,\nup/down) in the chosen coordinate Frame.\nRotation is in camera-operator terms taken against the Frame's vertical:\npan rotates about world up, tilt changes elevation, roll changes bank about\nforward. Roll CW/CCW is as seen by an operator looking along the camera's\nforward axis (through the lens), so looking around (pan + tilt) yields no roll.\nComponents below the Position/Angle tolerances are omitted.",
+				"description": "Passes Source straight through to Out and reports, in its node status, the\negocentric motion needed to bring Source roughly onto Target.\nTranslation is given along Source's local axes (forward/back, right/left,\nup/down) in the chosen coordinate Frame.\nRotation is in camera-operator terms taken against the Frame's vertical:\npan rotates about world up, tilt changes elevation, roll changes bank about\nforward. Roll CW/CCW is as seen by an operator looking along the camera's\nforward axis (through the lens), so looking around (pan + tilt) yields no roll.\nBoth Tracks' Euler rotations are decoded with the same Frame, so no cross-frame\nmismatch is possible. Components below the Position/Angle tolerances are omitted.",
 				"pins": [
 					{
 						"name": "Source",
-						"type_name": "nos.graphics.TransformQ",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Transform to align. Forwarded unchanged to Out."
+						"description": "Track to align. Forwarded unchanged to Out."
 					},
 					{
 						"name": "Target",
-						"type_name": "nos.graphics.TransformQ",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Transform that Source should be brought onto."
+						"description": "Track that Source should be brought onto."
 					},
 					{
 						"name": "Frame",
@@ -32,7 +32,7 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": "LH_ZUp_FwdX_RightY",
-						"description": "Coordinate frame both transforms are expressed in; must match the frame they were produced in (e.g. Track To TransformQ's Frame). Sets which axes map to forward/right/up. A mismatch makes pan read as roll, etc."
+						"description": "Euler convention both Tracks' rotations are authored in. Sets which axes map to forward/right/up. Both Tracks are decoded with this same Frame."
 					},
 					{
 						"name": "PositionTolerance",
@@ -54,7 +54,7 @@
 					},
 					{
 						"name": "Out",
-						"type_name": "nos.graphics.TransformQ",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 						"description": "Source, forwarded unchanged."
