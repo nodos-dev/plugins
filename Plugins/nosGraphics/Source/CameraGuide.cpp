@@ -53,7 +53,7 @@ struct GuideState
 // along Source's local axes (forward/right/up of the chosen frame) and rotation
 // about them (pan = yaw about up, tilt = pitch about right, roll about forward).
 // Source is passed straight through to Out (bypass).
-struct CameraGuideContext : NodeContext
+struct CameraGuideNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
@@ -202,7 +202,7 @@ struct CameraGuideContext : NodeContext
 
 nosResult RegisterCameraGuide(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.CameraGuide"), CameraGuideContext, fn);
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.CameraGuide"), CameraGuideNode, fn);
 	return NOS_RESULT_SUCCESS;
 }
 

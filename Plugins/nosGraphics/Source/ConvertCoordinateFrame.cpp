@@ -26,7 +26,7 @@ NOS_REGISTER_NAME(Out)
 // nos.track.ConvertTransform, but rotation is carried as a quaternion so no
 // Euler convention is involved: the quaternion is conjugated by the basis-change
 // matrix directly.
-struct ConvertCoordinateFrameContext : NodeContext
+struct ConvertCoordinateFrameNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
@@ -76,7 +76,7 @@ struct ConvertCoordinateFrameContext : NodeContext
 
 nosResult RegisterConvertCoordinateFrame(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.ConvertCoordinateFrame"), ConvertCoordinateFrameContext, fn);
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.ConvertCoordinateFrame"), ConvertCoordinateFrameNode, fn);
 	return NOS_RESULT_SUCCESS;
 }
 

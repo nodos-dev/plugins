@@ -24,7 +24,7 @@ NOS_REGISTER_NAME(Out)
 // nos.graphics.TransformQ. The Euler angles are interpreted in Frame's
 // convention and emitted as a quaternion; no frame conversion is performed, so
 // the output is expressed in Frame. Track carries no scale, so scale is identity.
-struct TrackToTransformQContext : NodeContext
+struct TrackToTransformQNode : NodeContext
 {
 	using NodeContext::NodeContext;
 
@@ -54,7 +54,7 @@ struct TrackToTransformQContext : NodeContext
 
 nosResult RegisterTrackToTransformQ(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.TrackToTransformQ"), TrackToTransformQContext, fn);
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.TrackToTransformQ"), TrackToTransformQNode, fn);
 	return NOS_RESULT_SUCCESS;
 }
 
