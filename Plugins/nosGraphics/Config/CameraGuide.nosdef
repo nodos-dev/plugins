@@ -58,6 +58,21 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 						"description": "Source, forwarded unchanged."
+					},
+					{
+						"name": "Guidance",
+						"type_name": "nos.graphics.TransformGuidance",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Structured correction (alignment, forward/right/up, pan/tilt/roll). Compose display text downstream."
+					},
+					{
+						"name": "GuidanceText",
+						"display_name": "Guidance Text",
+						"type_name": "string",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Prebuilt status text, for a downstream text renderer."
 					}
 				]
 			}

@@ -67,4 +67,22 @@ struct TransformQ
     scale:    nos.fb.vec3d;
 }
 
+enum AlignmentState : ubyte {
+    Aligned = 0,         // within tolerance
+    NeedsCorrection = 1, // a move and/or turn is required
+}
+
+// Egocentric correction to bring a Source transform onto a Target, as computed
+// by CameraGuide. Translation is along Source's local axes; rotation is in
+// operator terms (degrees). Compose display text downstream.
+struct TransformGuidance {
+    alignment: AlignmentState;
+    forward:   float; // +forward / -back
+    right:     float; // +right / -left
+    up:        float; // +up / -down
+    pan:       float; // degrees, + = pan right
+    tilt:      float; // degrees, + = tilt up
+    roll:      float; // degrees, + = roll CCW (operator looking along forward)
+}
+
 // TODO: Move nos.fb.Transform here too

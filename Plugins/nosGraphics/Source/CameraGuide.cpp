@@ -27,6 +27,8 @@ NOS_REGISTER_NAME(Frame)
 NOS_REGISTER_NAME(PositionTolerance)
 NOS_REGISTER_NAME(AngleTolerance)
 NOS_REGISTER_NAME(Out)
+NOS_REGISTER_NAME(Guidance)
+NOS_REGISTER_NAME(GuidanceText)
 
 using GuideFrame = Frame;
 
@@ -194,6 +196,16 @@ struct CameraGuideNode : NodeContext
 		SetNodeStatusMessage(status, state.Level == GuideLevel::Aligned
 										 ? fb::NodeStatusMessageType::INFO
 										 : fb::NodeStatusMessageType::WARNING);
+
+		// Structured guidance on an output pin; compose display text downstream.
+		TransformGuidance guidance(
+			state.Level == GuideLevel::Aligned ? AlignmentState::Aligned
+											   : AlignmentState::NeedsCorrection,
+			(float)fwd, (float)right, (float)up, (float)pan, (float)tilt, (float)roll);
+		SetPinValue(NSN_Guidance, nos::Buffer::From(guidance));
+
+		// Same text as the node status, for a downstream text renderer.
+		SetPinValue(NSN_GuidanceText, nos::Buffer(status.c_str(), status.size() + 1));
 
 		return NOS_RESULT_SUCCESS;
 	}
