@@ -12,7 +12,7 @@
 				"pins": [
 					{
 						"name": "Track",
-						"type_name": "nos.sys.track.Track",
+						"type_name": "nos.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"description": "Tracked camera data used to derive the view and perspective projection."

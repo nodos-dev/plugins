@@ -2,14 +2,14 @@
 	"info": {
 		"id": {
 			"name": "nos.track",
-			"version": "1.10.0"
+			"version": "1.10.1"
 		},
 		"display_name": "Track",
 		"category": "Virtual Studio",
 		"dependencies": [
 			{
-				"name": "nos.sys.track",
-				"version": "1.0"
+				"name": "nos.sys.animation",
+				"version": "1.5"
 			}
 		]
 	},
@@ -17,6 +17,9 @@
 		"Config/FreeD.nosdef",
 		"Config/UserTrack.nosdef",
 		"Config/AddTrack.nosdef"
+	],
+	"custom_types": [
+		"Config/Track.fbs"
 	],
 	"defaults": [
 		"Config/Defaults.json"

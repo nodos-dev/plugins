@@ -1,7 +1,7 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/PluginHelpers.hpp>
-#include <nosSysTrack/Track_generated.h>
+#include <nosTrack/Track_generated.h>
 #include <Graphics_generated.h>
 
 #include <glm/glm.hpp>
@@ -48,7 +48,7 @@ struct TrackToView : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		NodeExecuteParams pins(params);
-		nos::sys::track::TTrack const& track = pins.GetPinData<nos::sys::track::TTrack>(NSN_Track);
+		nos::track::TTrack const& track = pins.GetPinData<nos::track::TTrack>(NSN_Track);
 		nos::fb::vec2 clip = *pins.GetPinData<nos::fb::vec2>(NSN_Clip);
 
 		glm::vec2 sensorSize = reinterpret_cast<glm::vec2 const&>(track.sensor_size);

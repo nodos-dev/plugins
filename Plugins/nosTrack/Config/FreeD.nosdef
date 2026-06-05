@@ -27,7 +27,7 @@
 					},
 					{
 						"name": "Track",
-						"type_name": "nos.sys.track.Track",
+						"type_name": "nos.fb.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					},
@@ -87,7 +87,7 @@
 					},
 					{
 						"name": "CoordinateSystem",
-						"type_name": "nos.sys.track.CoordinateSystem",
+						"type_name": "nos.fb.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "Transform Mapping",
@@ -116,7 +116,7 @@
 					},
 					{
 						"name": "Pan_Tilt_Roll",
-						"type_name": "nos.sys.track.RotationSystem",
+						"type_name": "nos.fb.RotationSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "Transform Mapping",

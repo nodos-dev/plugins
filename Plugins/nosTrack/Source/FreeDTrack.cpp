@@ -231,7 +231,7 @@ struct FreeDNodeContext : public TrackNodeContext
 		bool InvertZoom = false;
 		bool InvertFocus = false;
 
-        bool Parse(std::vector<uint8_t> const& data, nos::sys::track::TTrack& TrackData) override
+        bool Parse(std::vector<uint8_t> const& data, track::TTrack& TrackData) override
         {
             if(data.size() < sizeof(FreeDMessage_D1))
             {
@@ -292,4 +292,4 @@ void RegisterFreeDNode(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.track.FreeD"), FreeDNodeContext, functions);
 }
 
-} // namespace nos::track
+} // namespace zd
