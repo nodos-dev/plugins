@@ -1,0 +1,10 @@
+namespace nos.utilities;
+
+enum ScheduleRequestMode: uint
+{
+    // Queue another request on every execution and let the engine pace the path.
+    Continuous = 0,
+    // Busy-wait so the path fires monotonically at even DeltaSeconds intervals,
+    // absorbing upstream execution time instead of adding it to the interval.
+    FixedStep = 1,
+}

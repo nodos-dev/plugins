@@ -1,0 +1,56 @@
+{
+	"nodes": [
+		{
+			"class_name": "Counter",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Counter",
+				"aliases": [ "counter", "increment", "tally", "index" ]
+			},
+			"node": {
+				"class_name": "Counter",
+				"display_name": "Counter",
+				"contents_type": "Job",
+				"description": "Outputs a running count that advances by Step every time the node runs.\nDrive it through the In/Out exe pins to schedule it, and call Reset to zero the count.",
+				"pins": [
+					{
+						"name": "InExe",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "OutExe",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Step",
+						"description": "Amount added to the count on each run. Use a negative value to count down.",
+						"type_name": "int",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1
+					},
+					{
+						"name": "Count",
+						"description": "The current count. Advances by Step on each run; zeroed by Reset.",
+						"type_name": "ulong",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0
+					}
+				],
+				"functions": [
+					{
+						"class_name": "Reset",
+						"contents_type": "Job",
+						"description": "Zeroes the count.",
+						"pins": []
+					}
+				]
+			}
+		}
+	]
+}

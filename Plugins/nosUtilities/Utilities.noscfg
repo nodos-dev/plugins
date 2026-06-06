@@ -68,7 +68,8 @@
 		"Config/RepeatingJunction.nosdef",
 		"Config/MultiLiveOut.nosdef",
 		"Config/TextRender.nosdef",
-		"Config/ScheduleRequest.nosdef"
+		"Config/ScheduleRequest.nosdef",
+		"Config/Counter.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
@@ -79,7 +80,8 @@
 		"Config/ChannelViewer.fbs",
 		"Config/Sink.fbs",
 		"Config/Layout.fbs",
-		"Config/TextRender.fbs"
+		"Config/TextRender.fbs",
+		"Config/ScheduleRequest.fbs"
 	],
 	"defaults": [
 		"Config/Defaults.json"

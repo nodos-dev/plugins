@@ -62,6 +62,7 @@ enum Utilities : int
 	MultiLiveOut,
 	TextRender,
 	ScheduleRequest,
+	Counter,
 	Count
 };
 
@@ -103,6 +104,7 @@ nosResult RegisterRepeatingJunction(nosNodeFunctions*);
 nosResult RegisterMultiLiveOut(nosNodeFunctions*);
 nosResult RegisterTextRender(nosNodeFunctions*);
 nosResult RegisterScheduleRequest(nosNodeFunctions*);
+nosResult RegisterCounter(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -160,6 +162,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(MultiLiveOut)
 			GEN_CASE_NODE(TextRender)
 			GEN_CASE_NODE(ScheduleRequest)
+			GEN_CASE_NODE(Counter)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
