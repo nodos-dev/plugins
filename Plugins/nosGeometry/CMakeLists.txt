@@ -14,7 +14,7 @@ endif()
 # nos.graphics provides the nos.graphics.TransformQ output type and the
 # CoordinateFrame enum used to express FBX transforms in a frame convention
 # that composes with nosTrack's Convert/Track Transform nodes.
-set(MODULE_DEPENDENCIES "nos.graphics-0.4")
+set(MODULE_DEPENDENCIES "nos.graphics-0.5")
 set(dep_idx 0)
 foreach(module_name_version ${MODULE_DEPENDENCIES})
     string(REPLACE "-" ";" module_name_version ${module_name_version})
@@ -27,7 +27,7 @@ endforeach()
 
 # Generate the C++ header for nos.graphics' custom types (TransformQ) from the
 # schema shipped with that module; nos.graphics does not ship the generated header.
-nos_find_module_path("nos.graphics" "0.4" NOS_GRAPHICS_PATH)
+nos_find_module_path("nos.graphics" "0.5" NOS_GRAPHICS_PATH)
 set(GENERATED_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 nos_generate_flatbuffers("${NOS_GRAPHICS_PATH}/Config/Graphics.fbs" "${GENERATED_OUTPUT_DIR}" "cpp" "${NOS_GRAPHICS_PATH}/Config" nosGeometry_generated)
 list(APPEND MODULE_DEPENDENCIES_TARGETS nosGeometry_generated)
