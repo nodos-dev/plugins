@@ -36,13 +36,20 @@ struct ScheduleRequestNode : NodeContext
 	bool HasDeadline = false;
 	Clock::time_point NextDeadline;
 
-	enum class Status
+	// Slots dropped to upstream overrun since the last (re)anchor, surfaced in status.
+	uint64_t DropCount = 0;
+	bool DropCountChanged = false;
+
+	enum class Warning
 	{
-		Ok,
+		None,
 		InvalidDeltaSeconds,
 		WaitCapped,
 	};
-	Status CurrentStatus = Status::Ok;
+	Warning CurrentWarning = Warning::None;
+
+	// Signature of the last status we pushed, so we only emit on change.
+	std::string LastStatusKey;
 
 	ScheduleRequestNode(nosFbNodePtr node) : NodeContext(node)
 	{
@@ -53,6 +60,7 @@ struct ScheduleRequestNode : NodeContext
 				if (data && data->size())
 					ReadPin(nos::Name(pin->name()->c_str()), data->data());
 			}
+		UpdateStatus();
 	}
 
 	void ReadPin(nos::Name name, const void* data)
@@ -63,17 +71,20 @@ struct ScheduleRequestNode : NodeContext
 			if (v.x != 0 && v.y != 0)
 			{
 				DeltaSeconds = v;
-				SetStatus(Status::Ok);
+				SetWarning(Warning::None);
 			}
 			else
-				SetStatus(Status::InvalidDeltaSeconds);
+				SetWarning(Warning::InvalidDeltaSeconds);
 		}
 		else if (name == NOS_NAME("Importance"))
 			Importance = *static_cast<const uint32_t*>(data);
 		else if (name == NOS_NAME("TryAgainOnFailure"))
 			TryAgainOnFailure = *static_cast<const bool*>(data);
 		else if (name == NOS_NAME("Mode"))
+		{
 			Mode = static_cast<ScheduleRequestMode>(*static_cast<const uint32_t*>(data));
+			UpdateStatus();
+		}
 		else if (name == NOS_NAME("MaxWaitSeconds"))
 			MaxWaitSeconds = *static_cast<const float*>(data);
 	}
@@ -85,22 +96,52 @@ struct ScheduleRequestNode : NodeContext
 			ResetSchedule();
 	}
 
-	void SetStatus(Status status)
+	void SetWarning(Warning warning)
 	{
-		if (status == CurrentStatus)
+		if (warning == CurrentWarning)
 			return;
-		CurrentStatus = status;
-		switch (status)
+		CurrentWarning = warning;
+		UpdateStatus();
+	}
+
+	static const char* ModeName(ScheduleRequestMode mode)
+	{
+		return mode == ScheduleRequestMode::FixedStep ? "Fixed Step" : "Continuous";
+	}
+
+	// Rebuild the full status: always the current mode, the Fixed Step drop count (when
+	// nonzero), and any active warning. Only emits when the composed status changed.
+	void UpdateStatus()
+	{
+		std::vector<fb::TNodeStatusMessage> messages;
+		messages.push_back({{}, std::string("Mode: ") + ModeName(Mode), fb::NodeStatusMessageType::INFO});
+		messages.push_back({{},
+							"Delta Seconds: " + std::to_string(DeltaSeconds.x) + "/" + std::to_string(DeltaSeconds.y),
+							fb::NodeStatusMessageType::INFO});
+
+		if (Mode == ScheduleRequestMode::FixedStep && DropCount > 0)
+			messages.push_back(
+				{{}, "Drop Count: " + std::to_string(DropCount), fb::NodeStatusMessageType::WARNING});
+
+		switch (CurrentWarning)
 		{
-		case Status::Ok: ClearNodeStatusMessages(); break;
-		case Status::InvalidDeltaSeconds:
-			SetNodeStatusMessage("Delta Seconds must be non-zero", fb::NodeStatusMessageType::WARNING);
+		case Warning::None: break;
+		case Warning::InvalidDeltaSeconds:
+			messages.push_back({{}, "Delta Seconds must be non-zero", fb::NodeStatusMessageType::WARNING});
 			break;
-		case Status::WaitCapped:
-			SetNodeStatusMessage("Delta Seconds exceeds Max Wait Seconds; raise it to run at the configured rate",
-								 fb::NodeStatusMessageType::WARNING);
+		case Warning::WaitCapped:
+			messages.push_back({{}, "Delta Seconds exceeds Max Wait Seconds; raise it to run at the configured rate",
+								fb::NodeStatusMessageType::WARNING});
 			break;
 		}
+
+		std::string key;
+		for (auto const& m : messages)
+			key += m.text + '\n';
+		if (key == LastStatusKey)
+			return;
+		LastStatusKey = std::move(key);
+		SetNodeStatusMessages(messages);
 	}
 
 	void GetScheduleInfo(nosScheduleInfo* info) override
@@ -159,7 +200,7 @@ struct ScheduleRequestNode : NodeContext
 				capped = true;
 			}
 		}
-		SetStatus(capped ? Status::WaitCapped : Status::Ok);
+		SetWarning(capped ? Warning::WaitCapped : Warning::None);
 
 		WaitUntil(deadline, interval);
 		NextDeadline += std::chrono::duration_cast<Clock::duration>(interval);
@@ -167,7 +208,11 @@ struct ScheduleRequestNode : NodeContext
 		// Drop slots missed by upstream overrun to stay phase-aligned.
 		now = Clock::now();
 		while (NextDeadline < now)
+		{
 			NextDeadline += std::chrono::duration_cast<Clock::duration>(interval);
+			++DropCount;
+			DropCountChanged = true;
+		}
 	}
 
 	void ScheduleOnce()
@@ -183,6 +228,8 @@ struct ScheduleRequestNode : NodeContext
 	void ResetSchedule()
 	{
 		HasDeadline = false;
+		DropCount = 0;
+		UpdateStatus();
 		nosEngine.RecompilePath(NodeId);
 		nosScheduleNodeParams params{ .NodeId = NodeId, .AddScheduleCount = 1, .Reset = true };
 		nosEngine.ScheduleNode(&params);
@@ -191,7 +238,14 @@ struct ScheduleRequestNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		if (Mode == ScheduleRequestMode::FixedStep)
+		{
 			PaceFixedStep();
+			if (DropCountChanged)
+			{
+				DropCountChanged = false;
+				UpdateStatus();
+			}
+		}
 		ScheduleOnce();
 		return NOS_RESULT_SUCCESS;
 	}
@@ -200,6 +254,8 @@ struct ScheduleRequestNode : NodeContext
 	{
 		// Re-anchor the FixedStep schedule on each path start.
 		HasDeadline = false;
+		DropCount = 0;
+		UpdateStatus();
 		ScheduleOnce();
 	}
 
