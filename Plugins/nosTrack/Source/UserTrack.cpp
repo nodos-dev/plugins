@@ -22,9 +22,9 @@ void RegisterController(nosNodeFunctions* functions)
 		uuid OutTrackId;
 		uuid InTrackId;
 
-		track::TTrack state;
+		nos::sys::track::TTrack state;
 
-        void ReadAndUpdate(track::TTrack const& track)
+        void ReadAndUpdate(nos::sys::track::TTrack const& track)
         {
 			state = track;
         	auto val = nos::Buffer::From(track);
@@ -56,7 +56,7 @@ void RegisterController(nosNodeFunctions* functions)
         c->InTrackId = *input->id();
 
 		auto inBuf = nos::Buffer(input->data());
-		c->ReadAndUpdate(inBuf.As<nos::track::TTrack>());
+		c->ReadAndUpdate(inBuf.As<nos::sys::track::TTrack>());
     };
 
     functions->OnNodeDeleted = [](void* ctx, auto) {delete (UserTrack*)ctx; };
@@ -114,7 +114,7 @@ void RegisterController(nosNodeFunctions* functions)
 		c->decay = glm::max(*(float*)values[NSN_Decay], 0.f);
         (glm::vec3&)c->state.location += c->v;
         c->v *= exp(-c->decay);
-		auto inTrack = GetPinValue<track::TTrack>(values, NSN_Input);
+		auto inTrack = GetPinValue<nos::sys::track::TTrack>(values, NSN_Input);
         c->ReadAndUpdate(inTrack);
         return NOS_RESULT_SUCCESS;
     };
