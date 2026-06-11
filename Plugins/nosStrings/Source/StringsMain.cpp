@@ -18,6 +18,7 @@ enum Nodes : int
 	Pin2Json,
 	Json2Pin,
 	Tokenizer,
+	StringFormat,
 	Count
 };
 
@@ -26,6 +27,7 @@ nosResult RegisterRegex(nosNodeFunctions*);
 nosResult RegisterPin2Json(nosNodeFunctions*);
 nosResult RegisterJson2Pin(nosNodeFunctions*);
 nosResult RegisterTokenizer(nosNodeFunctions*);
+nosResult RegisterStringFormat(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -52,6 +54,7 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(Pin2Json)
 			GEN_CASE_NODE(Json2Pin)
 			GEN_CASE_NODE(Tokenizer)
+			GEN_CASE_NODE(StringFormat)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
