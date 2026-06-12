@@ -11,6 +11,8 @@
 #include <filesystem>
 #include <vector>
 #include <cmath>
+#include <cstring>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -72,10 +74,54 @@ struct ExtrasEntry
 	float RotZ = 0;
 };
 
+template <typename TEnum, size_t N>
+static bool EnumFromName(TEnum const (&values)[N], char const* const* names, std::string const& name, TEnum& out)
+{
+	for (size_t i = 0; i < N; ++i)
+		if (name == names[i])
+		{
+			out = values[i];
+			return true;
+		}
+	return false;
+}
+
+// Inverse of the "# SourceFrame: up=... forward=... handedness=... rotation=..." header
+// written by RecordTrackCOLMAP::WriteExtrasTxt. Returns nullopt when any field is missing
+// or unrecognized (e.g. a hand-edited sidecar).
+static std::optional<nos::graphics::Frame> ParseSourceFrameComment(std::string const& line)
+{
+	auto value = [&](char const* key) -> std::string {
+		auto pos = line.find(key);
+		if (pos == std::string::npos)
+			return {};
+		pos += std::strlen(key);
+		return line.substr(pos, line.find(' ', pos) - pos);
+	};
+	nos::graphics::SignedAxis up{}, fwd{};
+	nos::graphics::Handedness hand{};
+	nos::graphics::RotationConvention rot{};
+	if (!EnumFromName(nos::graphics::EnumValuesSignedAxis(), nos::graphics::EnumNamesSignedAxis(), value("up="), up) ||
+		!EnumFromName(nos::graphics::EnumValuesSignedAxis(), nos::graphics::EnumNamesSignedAxis(), value("forward="), fwd) ||
+		!EnumFromName(nos::graphics::EnumValuesHandedness(), nos::graphics::EnumNamesHandedness(), value("handedness="), hand) ||
+		!EnumFromName(nos::graphics::EnumValuesRotationConvention(), nos::graphics::EnumNamesRotationConvention(), value("rotation="), rot))
+		return std::nullopt;
+	// meters_per_unit is irrelevant to rotation, which is all this frame is used for.
+	return nos::graphics::Frame(up, fwd, hand, rot, 1.0);
+}
+
+// True when Euler angles read in frame `a` decode to the same rotation in frame `b`
+// (same basis and same Euler convention; units don't enter into rotation).
+static bool SameRotationConvention(nos::graphics::Frame const& a, nos::graphics::Frame const& b)
+{
+	return a.up() == b.up() && a.forward() == b.forward() &&
+		   a.handedness() == b.handedness() && a.rotation() == b.rotation();
+}
+
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
-	nos::graphics::Frame TargetFrame = nos::graphics::Frame::LH_ZUp_FwdX_RightY;
+	nos::graphics::Frame TargetFrame = nos::graphics::UNREAL_SYSTEM;
 	PlaybackTrackMode Mode = PlaybackTrackMode::FrameIndex;
 	uint32_t FrameIndex = 0;
 	std::string InTimecode;
@@ -223,9 +269,10 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			ParseTimecodesTxt(timecodesPath, images.size());
 
 		std::vector<ExtrasEntry> extras;
+		std::optional<nos::graphics::Frame> extrasFrame;
 		auto extrasPath = dir / "extras.txt";
 		if (std::filesystem::exists(extrasPath))
-			ParseExtrasTxt(extrasPath, images.size(), extras);
+			ParseExtrasTxt(extrasPath, images.size(), extras, extrasFrame);
 
 		// Inverse of RecordTrackCOLMAP::WriteImagesTxt:
 		//   images.txt holds R_w2c in COLMAP frame, t = -R_w2c * pos_colmap.
@@ -235,6 +282,17 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		//   Track.rotation = MatToEuler(TargetFrame, R_c2w_target)
 		const glm::dmat3 Minv = nos::graphics::BasisChangeFromColmap(TargetFrame);
 		const glm::dmat3 M = glm::inverse(Minv);
+		// Scale COLMAP units (meters) back into the target system's units.
+		const double unitFactor = nos::graphics::UnitFactor(nos::graphics::COLMAP_SYSTEM, TargetFrame);
+
+		// Extras Euler is authored in the recording SourceFrame (recorded in the
+		// sidecar header). Re-express it in TargetFrame when the conventions
+		// differ; a sidecar without a parseable header is assumed to already
+		// match TargetFrame (pre-header recordings).
+		const bool convertExtrasRotation = extrasFrame && !SameRotationConvention(*extrasFrame, TargetFrame);
+		glm::dmat3 extrasC(1.0);
+		if (convertExtrasRotation)
+			extrasC = nos::graphics::BasisMatrix(TargetFrame) * glm::inverse(nos::graphics::BasisMatrix(*extrasFrame));
 
 		for (size_t i = 0; i < images.size(); ++i)
 		{
@@ -247,16 +305,22 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			glm::dmat3 R_c2w_colmap = glm::transpose(R_w2c);
 			glm::dvec3 pos_colmap = -R_c2w_colmap * glm::dvec3(img.T);
 
-			glm::dvec3 pos_target = Minv * pos_colmap;
+			glm::dvec3 pos_target = Minv * pos_colmap * unitFactor;
 			glm::vec3 locF((float)pos_target.x, (float)pos_target.y, (float)pos_target.z);
 			trackData.location = reinterpret_cast<nos::fb::vec3&>(locF);
 
 			// Rotation: prefer the original Euler from extras (avoids quaternion-
-			// to-Euler ambiguity near gimbal lock); fall back to extracting from
+			// to-Euler ambiguity near gimbal lock), converted into TargetFrame if
+			// it was recorded in a different one; fall back to extracting from
 			// the COLMAP rotation matrix when no extras sidecar exists.
 			if (ex)
 			{
 				glm::vec3 euler(ex->RotX, ex->RotY, ex->RotZ);
+				if (convertExtrasRotation)
+				{
+					glm::dmat3 R_src = nos::graphics::EulerToMat(*extrasFrame, glm::dvec3(euler));
+					euler = glm::vec3(nos::graphics::MatToEuler(TargetFrame, extrasC * R_src * glm::transpose(extrasC)));
+				}
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
 			}
 			else
@@ -406,7 +470,8 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		return true;
 	}
 
-	void ParseExtrasTxt(const std::filesystem::path& path, size_t expectedCount, std::vector<ExtrasEntry>& outExtras)
+	void ParseExtrasTxt(const std::filesystem::path& path, size_t expectedCount, std::vector<ExtrasEntry>& outExtras,
+						std::optional<nos::graphics::Frame>& outSourceFrame)
 	{
 		std::ifstream file(path);
 		if (!file.is_open())
@@ -415,6 +480,11 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		std::string line;
 		while (std::getline(file, line))
 		{
+			if (line.rfind("# SourceFrame:", 0) == 0)
+			{
+				outSourceFrame = ParseSourceFrameComment(line);
+				continue;
+			}
 			if (line.empty() || line[0] == '#')
 				continue;
 			std::istringstream ss(line);

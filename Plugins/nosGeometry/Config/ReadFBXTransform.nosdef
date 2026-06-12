@@ -10,7 +10,7 @@
 			"node": {
 				"class_name": "ReadFBXTransform",
 				"contents_type": "Job",
-				"description": "Reads an .fbx file and outputs the local and global transform of a\nselected object inside it. Pick the object from the 'Object' dropdown,\nwhich is populated with the names found in the file.",
+				"description": "Reads an .fbx file and outputs the local and global transform of a\nselected object, converted into the chosen Output Frame. Pick the object\nfrom the 'Object' dropdown, which is populated with the names found in the\nfile. The file's own coordinate frame is detected from its header; turn off\n'Auto-Detect Source' to declare it manually.",
 				"pins": [
 					{
 						"name": "Path",
@@ -37,13 +37,33 @@
 						"description": "Object inside the .fbx whose transform is reported.\nThe list is populated once the file is loaded."
 					},
 					{
-						"name": "SourceFrame",
-						"display_name": "Source Frame",
-						"type_name": "nos.graphics.CoordinateFrame",
+						"name": "OutputFrame",
+						"display_name": "Output Frame",
+						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "RH_YUp_FwdNegZ_RightX",
-						"description": "Coordinate frame the .fbx is authored in. The output transforms are expressed in this frame; set Convert Transform's 'SourceFrame' to the same value."
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"description": "Coordinate system the output transforms are expressed in. The node converts\nfrom the file's system (see 'Auto-Detect Source') into this one, including a\nunit change derived from the two systems' meters_per_unit."
+					},
+					{
+						"name": "AutoDetectSource",
+						"display_name": "Auto-Detect Source",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": true,
+						"description": "When on, the source system is read from the .fbx header (its up-axis,\nhandedness and unit scale). When off, the 'Source Frame' pin is used instead."
+					},
+					{
+						"name": "SourceFrame",
+						"display_name": "Source Frame",
+						"type_name": "nos.graphics.CoordinateSystem",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
+						"description": "Coordinate system the .fbx is authored in. Used only when 'Auto-Detect\nSource' is off; otherwise the detected system (see 'Detected Frame') wins."
 					},
 					{
 						"name": "LocalTransform",
@@ -51,7 +71,7 @@
 						"type_name": "nos.graphics.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "Transform of the object relative to its parent."
+						"description": "Transform of the object relative to its parent, in the Output Frame."
 					},
 					{
 						"name": "GlobalTransform",
@@ -59,7 +79,17 @@
 						"type_name": "nos.graphics.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
-						"description": "World transform of the object, accounting for its parent hierarchy."
+						"description": "World transform of the object, accounting for its parent hierarchy,\nin the Output Frame."
+					},
+					{
+						"name": "DetectedFrame",
+						"display_name": "Detected Frame",
+						"type_name": "string",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"data": "",
+						"readonly": true,
+						"description": "Source frame and unit scale read from the .fbx header. Shown so you can\nverify auto-detection; it drives the output only when 'Auto-Detect Source'\nis on."
 					},
 					{
 						"name": "IsLoaded",

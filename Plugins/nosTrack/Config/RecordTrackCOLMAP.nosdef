@@ -55,11 +55,12 @@
 					{
 						"name": "SourceFrame",
 						"display_name": "Source Frame",
-						"type_name": "nos.graphics.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "LH_ZUp_FwdX_RightY",
-						"description": "Coordinate frame of the connected Track.\nUsed to convert location and rotation into the COLMAP frame before writing.\nDefault matches FreeD / UE convention."
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the connected Track.\nUsed to convert location and rotation into the COLMAP frame (meters) before writing.\nDefault matches FreeD / UE convention."
 					},
 					{
 						"name": "Record",

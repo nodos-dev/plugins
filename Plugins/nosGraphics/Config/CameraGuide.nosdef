@@ -28,11 +28,12 @@
 					{
 						"name": "Frame",
 						"display_name": "Frame",
-						"type_name": "nos.graphics.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "LH_ZUp_FwdX_RightY",
-						"description": "Euler convention both Tracks' rotations are authored in. Sets which axes map to forward/right/up. Both Tracks are decoded with this same Frame."
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.graphics.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"description": "Coordinate system both Tracks' rotations are authored in. Sets which axes map to forward/right/up and the Euler convention. Both Tracks are decoded with this same system."
 					},
 					{
 						"name": "PositionTolerance",

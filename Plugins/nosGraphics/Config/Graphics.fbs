@@ -20,19 +20,39 @@ enum ProjectionType : ubyte
 	Orthographic
 }
 
-// World coordinate frame convention used by a transform endpoint. Encodes axis
-// assignments to world-semantic directions (forward, right, up), the implied
-// handedness, and the Euler convention for Euler-angle rotation fields.
-enum CoordinateFrame : ubyte {
-    // Left-handed, Z-up. +X forward, +Y right, +Z up.
-    // Rotation: rot.x = roll (X), rot.y = pitch (Y), rot.z = yaw (Z),
-    // intrinsic ZYX => R = Rz(yaw) * Ry(pitch) * Rx(roll).
-    LH_ZUp_FwdX_RightY = 0,
+// A signed coordinate axis, used to map world-semantic directions onto engine axes.
+enum SignedAxis : ubyte { PosX, NegX, PosY, NegY, PosZ, NegZ }
 
-    // Right-handed, Y-up. +X right, +Y up, -Z forward.
-    // Rotation: rot.x = pitch (X), rot.y = yaw (Y), rot.z = roll (Z),
-    // intrinsic YXZ => R = Ry(yaw) * Rx(pitch) * Rz(roll).
-    RH_YUp_FwdNegZ_RightX = 1,
+// Chirality of the coordinate system.
+enum Handedness : ubyte { RightHanded, LeftHanded }
+
+// Euler order + sign + roll/pitch/yaw packing for Euler-angle rotation fields. The
+// two initial values reproduce the conventions previously baked into CoordinateFrame;
+// new conventions can be added without touching consumers.
+enum RotationConvention : ubyte {
+    // rot=(roll,pitch,yaw), intrinsic ZYX, Unreal signs (pitch/roll negated vs std-RH).
+    UnrealZYX = 0,
+    // rot=(pitch,yaw,roll), intrinsic YXZ, standard right-handed signs.
+    OpenGLYXZ = 1,
+}
+
+// Full coordinate-system convention used by a transform endpoint: axis assignments to
+// world-semantic directions (forward, right, up), the implied handedness, the Euler
+// convention for Euler-angle rotation fields, and the unit scale. `right` is DERIVED
+// (right = +/-(forward x up), sign from handedness) and not stored.
+//
+// Common conventions are offered as named presets (see CoordinateSystemPresets.json):
+//   Unreal = {PosZ, PosX, LeftHanded,  UnrealZYX, 0.01}  (Z-up, cm)
+//   glTF   = {PosY, NegZ, RightHanded, OpenGLYXZ, 1.0}   (Y-up, m)
+struct CoordinateSystem {
+    up: SignedAxis;
+    forward: SignedAxis;
+    handedness: Handedness;
+    rotation: RotationConvention;
+    // Linear size of one unit, in meters (cm = 0.01, m = 1.0); matches USD's
+    // metersPerUnit. Unit conversion factor between two systems is
+    // src.meters_per_unit / tgt.meters_per_unit.
+    meters_per_unit: double;
 }
 
 table Projection

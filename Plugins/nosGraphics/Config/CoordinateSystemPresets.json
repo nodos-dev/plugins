@@ -1,0 +1,19 @@
+{
+    "name": "nos.graphics.CoordinateSystemPresets",
+    "values": [
+        {
+            "type_name": "nos.graphics.CoordinateSystem",
+            "pin_value": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+            "value_name": "Unreal"
+        },
+        {
+            "type_name": "nos.graphics.CoordinateSystem",
+            "pin_value": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
+            "value_name": "glTF"
+        },
+        {
+            "type_name": "nos.graphics.CoordinateSystem",
+            "value_name": "Custom"
+        }
+    ]
+}

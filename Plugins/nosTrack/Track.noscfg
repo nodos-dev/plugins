@@ -23,11 +23,15 @@
 		"Config/AddTrack.nosdef",
 		"Config/RecordTrackCOLMAP.nosdef",
 		"Config/PlaybackTrackCOLMAP.nosdef",
-		"Config/TrackTransform.nosdef",
-		"Config/ConvertTransform.nosdef"
+		"Config/ConvertTrackFrame.nosdef",
+		"Config/ConvertTransform.nosdef",
+		"Config/UpdateTrackTransform.nosdef"
 	],
 	"custom_types": [
 		"Config/PlaybackMode.fbs"
+	],
+	"named_values": [
+		"Config/CoordinateSystemPresets.json"
 	],
 	"defaults": [
 		"Config/Defaults.json"

@@ -26,11 +26,12 @@
 					{
 						"name": "TargetFrame",
 						"display_name": "Target Frame",
-						"type_name": "nos.graphics.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "LH_ZUp_FwdX_RightY",
-						"description": "Coordinate frame of the produced Track.\nCOLMAP poses are converted into this frame.\nDefault matches FreeD / UE convention."
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the produced Track.\nCOLMAP poses (meters) are converted into this system.\nDefault matches FreeD / UE convention."
 					},
 					{
 						"name": "Mode",

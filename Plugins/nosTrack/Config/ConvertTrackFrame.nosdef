@@ -1,45 +1,43 @@
 {
 	"nodes": [
 		{
-			"class_name": "ConvertTransform",
+			"class_name": "ConvertTrackFrame",
 			"menu_info": {
 				"category": "Track|Coordinate System",
-				"display_name": "Convert Transform"
+				"display_name": "Convert Track Frame"
 			},
 			"node": {
-				"class_name": "ConvertTransform",
+				"class_name": "ConvertTrackFrame",
 				"contents_type": "Job",
-				"description": "Converts a Transform between coordinate systems.\nThe Source and Target systems select axis assignments, handedness, units, and the Euler convention used for the rotation field.\nPosition: basis-changed (Source -> Target), then scaled by the ratio of the two systems' meters_per_unit (e.g. cm -> m yields 0.01).\nRotation: built in the source Euler convention, conjugated by the basis-change matrix, re-extracted in the target convention.\nScale: axis factors are reordered to follow the basis change.",
+				"description": "Transforms a Track between coordinate systems.\nThe Source and Target systems select axis assignments, handedness, units, and the Euler convention used for the rotation field.\nLocation: basis-changed (Source -> Target), then scaled by the ratio of the two systems' meters_per_unit (e.g. cm -> m yields 0.01).\nRotation: built in the source Euler convention, conjugated by the basis-change matrix, re-extracted in the target convention.\nOther Track fields (fov, focus, sensor_size, lens_distortion, ...) pass through unchanged.",
 				"pins": [
 					{
 						"name": "In",
-						"type_name": "nos.fb.Transform",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
 					},
 					{
-						"name": "SourceFrame",
-						"display_name": "Source Frame",
+						"name": "Source",
 						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
 						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
-						"description": "Coordinate system convention of the input Transform."
+						"description": "Coordinate system convention of the input Track."
 					},
 					{
-						"name": "TargetFrame",
-						"display_name": "Target Frame",
+						"name": "Target",
 						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
 						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
-						"description": "Coordinate system convention of the output Transform."
+						"description": "Coordinate system convention of the output Track."
 					},
 					{
 						"name": "Out",
-						"type_name": "nos.fb.Transform",
+						"type_name": "nos.sys.track.Track",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 					}

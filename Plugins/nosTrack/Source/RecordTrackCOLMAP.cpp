@@ -49,7 +49,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 {
 	std::string OutputDir;
 	nosVec2u ImageResolution = {1920, 1080};
-	nos::graphics::Frame SourceFrame = nos::graphics::Frame::LH_ZUp_FwdX_RightY;
+	nos::graphics::Frame SourceFrame = nos::graphics::UNREAL_SYSTEM;
 	bool Recording = false;
 	uint32_t ConsecutiveOffFrames = 0;
 	bool LastRequestRecord = false;
@@ -293,10 +293,11 @@ struct RecordTrackCOLMAPContext : NodeContext
 			nosEngine.LogE("RecordTrackCOLMAP: Cannot open %s", nos::PathToUtf8(path).c_str());
 			return;
 		}
-		const char* frameName =
-			SourceFrame == nos::graphics::Frame::LH_ZUp_FwdX_RightY    ? "LH_ZUp_FwdX_RightY"
-			: SourceFrame == nos::graphics::Frame::RH_YUp_FwdNegZ_RightX ? "RH_YUp_FwdNegZ_RightX"
-			: "Unknown";
+		const std::string frameName =
+			std::string("up=") + nos::graphics::EnumNameSignedAxis(SourceFrame.up())
+			+ " forward=" + nos::graphics::EnumNameSignedAxis(SourceFrame.forward())
+			+ " handedness=" + nos::graphics::EnumNameHandedness(SourceFrame.handedness())
+			+ " rotation=" + nos::graphics::EnumNameRotationConvention(SourceFrame.rotation());
 		file << std::setprecision(12);
 		file << "# Nodos Track sidecar paired with images.txt by IMAGE_ID.\n";
 		file << "# Carries fields that don't fit COLMAP's cameras.txt/images.txt:\n";
@@ -427,8 +428,11 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 		// M maps the SourceFrame to the COLMAP frame. Used to convert both the
 		// source-frame R_c2w and the source-frame camera position into COLMAP.
+		// Positions are also scaled into COLMAP's units (meters) by the ratio of
+		// the two systems' meters_per_unit.
 		const glm::dmat3 M = nos::graphics::BasisChangeToColmap(SourceFrame);
 		const glm::dmat3 Minv = glm::inverse(M);
+		const double unitFactor = nos::graphics::UnitFactor(SourceFrame, nos::graphics::COLMAP_SYSTEM);
 
 		for (size_t i = 0; i < Frames.size(); ++i)
 		{
@@ -438,7 +442,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 			// the COLMAP frame. Likewise frame the position.
 			glm::dmat3 R_c2w_src = nos::graphics::EulerToMat(SourceFrame, glm::dvec3(frame.Rotation));
 			glm::dmat3 R_c2w_colmap = M * R_c2w_src * Minv;
-			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location);
+			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location) * unitFactor;
 
 			glm::dmat3 R_w2c = glm::transpose(R_c2w_colmap);
 			glm::dquat q_w2c = glm::quat_cast(R_w2c);

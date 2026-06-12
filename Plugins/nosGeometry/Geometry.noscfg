@@ -19,5 +19,6 @@
         "Config/ReadFBXTransform.nosdef"
     ],
     "defaults": [],
-    "custom_types": []
+    "custom_types": [],
+    "named_values": [ "Config/CoordinateSystemPresets.json" ]
 }

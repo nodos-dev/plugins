@@ -22,15 +22,14 @@ void RegisterConvertTransform(nosNodeFunctions* funcs)
 		auto* in = static_cast<nos::fb::Transform*>(pins[NOS_NAME("In")]);
 		auto source = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("SourceFrame")]);
 		auto target = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("TargetFrame")]);
-		float worldScale = *static_cast<float*>(pins[NOS_NAME("WorldScale")]);
 
 		const glm::dmat3 S_src = nos::graphics::BasisMatrix(source);
 		const glm::dmat3 S_tgt = nos::graphics::BasisMatrix(target);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
 
-		// Position: basis change, then uniform world-scale (unit conversion).
+		// Position: basis change, then unit conversion derived from the two systems.
 		const auto& p = in->position();
-		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * static_cast<double>(worldScale);
+		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * nos::graphics::UnitFactor(source, target);
 
 		// Rotation: build in source frame, conjugate by M (orthogonal => M^-1 = M^T),
 		// extract in target frame.

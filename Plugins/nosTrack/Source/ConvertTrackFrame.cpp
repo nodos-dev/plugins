@@ -9,9 +9,9 @@
 namespace nos::track
 {
 
-void RegisterTrackTransform(nosNodeFunctions* funcs)
+void RegisterConvertTrackFrame(nosNodeFunctions* funcs)
 {
-	funcs->ClassName = NOS_NAME("TrackTransform");
+	funcs->ClassName = NOS_NAME("ConvertTrackFrame");
 	funcs->ExecuteNode = [](void*, nosNodeExecuteParams* params) {
 		auto pins = GetPinValues(params);
 		auto ids = GetPinIds(params);
@@ -19,7 +19,6 @@ void RegisterTrackTransform(nosNodeFunctions* funcs)
 		auto* inTrack = flatbuffers::GetMutableRoot<nos::sys::track::Track>(pins[NOS_NAME("In")]);
 		auto source = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("Source")]);
 		auto target = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("Target")]);
-		float worldScale = *static_cast<float*>(pins[NOS_NAME("WorldScale")]);
 
 		nos::sys::track::TTrack out;
 		inTrack->UnPackTo(&out);
@@ -28,11 +27,12 @@ void RegisterTrackTransform(nosNodeFunctions* funcs)
 		const glm::dmat3 S_tgt = nos::graphics::BasisMatrix(target);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
 
-		// Location: basis change, then uniform world-scale. Other Track fields
-		// (rotation, fov, focus, sensor_size, lens_distortion, ...) are unaffected.
+		// Location: basis change, then unit conversion derived from the two systems'
+		// meters_per_unit. Other Track fields (rotation, fov, focus, sensor_size,
+		// lens_distortion, ...) are unaffected.
 		const auto& inLoc = *inTrack->location();
 		glm::dvec3 loc(inLoc.x(), inLoc.y(), inLoc.z());
-		glm::dvec3 outLoc = M * loc * static_cast<double>(worldScale);
+		glm::dvec3 outLoc = M * loc * nos::graphics::UnitFactor(source, target);
 		out.location.mutate_x(static_cast<float>(outLoc.x));
 		out.location.mutate_y(static_cast<float>(outLoc.y));
 		out.location.mutate_z(static_cast<float>(outLoc.z));

@@ -21,11 +21,12 @@
 					{
 						"name": "Frame",
 						"display_name": "Frame",
-						"type_name": "nos.graphics.CoordinateFrame",
+						"type_name": "nos.graphics.CoordinateSystem",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "LH_ZUp_FwdX_RightY",
-						"description": "Coordinate frame the Track's Euler rotation is authored in, and the frame the output TransformQ is expressed in. No conversion is performed."
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.graphics.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"description": "Coordinate system the Track's Euler rotation is authored in, and the system the output TransformQ is expressed in. No conversion is performed."
 					},
 					{
 						"name": "Out",

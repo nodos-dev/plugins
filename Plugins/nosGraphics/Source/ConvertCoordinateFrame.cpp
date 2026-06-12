@@ -19,7 +19,6 @@ namespace nos::graphics
 NOS_REGISTER_NAME(In)
 NOS_REGISTER_NAME(SourceFrame)
 NOS_REGISTER_NAME(TargetFrame)
-NOS_REGISTER_NAME(WorldScale)
 NOS_REGISTER_NAME(Out)
 
 // Converts a nos.graphics.TransformQ between coordinate frames. Mirrors
@@ -37,15 +36,14 @@ struct ConvertCoordinateFrameNode : NodeContext
 		auto* in = pins.GetPinData<TransformQ>(NSN_In);
 		auto source = *pins.GetPinData<Frame>(NSN_SourceFrame);
 		auto target = *pins.GetPinData<Frame>(NSN_TargetFrame);
-		double worldScale = *pins.GetPinData<float>(NSN_WorldScale);
 
 		const glm::dmat3 S_src = BasisMatrix(source);
 		const glm::dmat3 S_tgt = BasisMatrix(target);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
 
-		// Position: basis change, then uniform world-scale (unit conversion).
+		// Position: basis change, then unit conversion derived from the two systems.
 		const auto& p = in->position();
-		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * worldScale;
+		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * UnitFactor(source, target);
 
 		// Rotation: quaternion -> matrix, conjugate by M (orthogonal => M^-1 = M^T).
 		// The conjugation preserves det(R) = 1, so the result stays a proper

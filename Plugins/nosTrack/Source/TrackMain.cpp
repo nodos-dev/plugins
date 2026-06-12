@@ -17,7 +17,7 @@ enum TrackNode : int
 	AddTrack,
 	RecordTrackCOLMAP,
 	PlaybackTrackCOLMAP,
-	TrackTransform,
+	ConvertTrackFrame,
 	ConvertTransform,
 	Count
 };
@@ -27,7 +27,7 @@ void RegisterController(nosNodeFunctions* functions);
 void RegisterAddTrack(nosNodeFunctions*);
 void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
 void RegisterPlaybackTrackCOLMAP(nosNodeFunctions*);
-void RegisterTrackTransform(nosNodeFunctions*);
+void RegisterConvertTrackFrame(nosNodeFunctions*);
 void RegisterConvertTransform(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
@@ -56,8 +56,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 		case TrackNode::PlaybackTrackCOLMAP:
 			RegisterPlaybackTrackCOLMAP(node);
 			break;
-		case TrackNode::TrackTransform:
-			RegisterTrackTransform(node);
+		case TrackNode::ConvertTrackFrame:
+			RegisterConvertTrackFrame(node);
 			break;
 		case TrackNode::ConvertTransform:
 			RegisterConvertTransform(node);
