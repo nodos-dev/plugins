@@ -30,8 +30,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
-						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
-						"description": "Coordinate system of the produced Track.\nCOLMAP poses (meters) are converted into this system.\nDefault matches FreeD / UE convention."
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the produced Track (axes, handedness, units, euler encoding).\nCOLMAP poses (meters) are converted into this system; the euler encoding is used when emitting the rotation.\nDefault matches FreeD / UE convention."
 					},
 					{
 						"name": "Mode",

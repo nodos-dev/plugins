@@ -23,25 +23,28 @@ void RegisterConvertTrackFrame(nosNodeFunctions* funcs)
 		nos::sys::track::TTrack out;
 		inTrack->UnPackTo(&out);
 
-		const glm::dmat3 S_src = nos::graphics::BasisMatrix(source);
-		const glm::dmat3 S_tgt = nos::graphics::BasisMatrix(target);
-		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
+		if (!nos::graphics::CoordinateSystemValid(source) || !nos::graphics::CoordinateSystemValid(target))
+		{
+			nosEngine.LogE("ConvertTrackFrame: Source/Target frame invalid (forward and up must be on different axes)");
+			return nosEngine.SetPinValue(ids[NOS_NAME("Out")], nos::Buffer::From(out));
+		}
+
+		const nos::graphics::FrameConvert conv = nos::graphics::MakeFrameConvert(source, target);
 
 		// Location: basis change, then unit conversion derived from the two systems'
-		// meters_per_unit. Other Track fields (rotation, fov, focus, sensor_size,
+		// meters_per_unit. Other Track fields (fov, focus, sensor_size,
 		// lens_distortion, ...) are unaffected.
 		const auto& inLoc = *inTrack->location();
-		glm::dvec3 loc(inLoc.x(), inLoc.y(), inLoc.z());
-		glm::dvec3 outLoc = M * loc * nos::graphics::UnitFactor(source, target);
+		glm::dvec3 outLoc = nos::graphics::ConvertPosition(conv, glm::dvec3(inLoc.x(), inLoc.y(), inLoc.z()));
 		out.location.mutate_x(static_cast<float>(outLoc.x));
 		out.location.mutate_y(static_cast<float>(outLoc.y));
 		out.location.mutate_z(static_cast<float>(outLoc.z));
 
-		// Rotation: build in source frame, conjugate by M, extract in target frame.
+		// Rotation: decode source Euler -> matrix, conjugate by M, re-encode as
+		// target Euler.
 		const auto& inRot = *inTrack->rotation();
-		glm::dmat3 R_src = nos::graphics::EulerToMat(source, glm::dvec3(inRot.x(), inRot.y(), inRot.z()));
-		glm::dmat3 R_tgt = M * R_src * glm::transpose(M);
-		glm::dvec3 outRotDeg = nos::graphics::MatToEuler(target, R_tgt);
+		glm::dmat3 R_src = nos::graphics::EulerToMat(source.euler(), glm::dvec3(inRot.x(), inRot.y(), inRot.z()));
+		glm::dvec3 outRotDeg = nos::graphics::MatToEuler(target.euler(), nos::graphics::ConvertRotation(conv, R_src));
 		out.rotation.mutate_x(static_cast<float>(outRotDeg.x));
 		out.rotation.mutate_y(static_cast<float>(outRotDeg.y));
 		out.rotation.mutate_z(static_cast<float>(outRotDeg.z));

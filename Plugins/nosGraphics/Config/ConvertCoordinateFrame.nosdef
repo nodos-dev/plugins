@@ -24,8 +24,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.graphics.CoordinateSystemPresets" },
-						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
-						"description": "Coordinate system convention of the input TransformQ."
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system convention of the input TransformQ (its euler encoding is unused on this quaternion node)."
 					},
 					{
 						"name": "TargetFrame",
@@ -34,8 +34,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.graphics.CoordinateSystemPresets" },
-						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
-						"description": "Coordinate system convention of the output TransformQ."
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
+						"description": "Coordinate system convention of the output TransformQ (its euler encoding is unused on this quaternion node)."
 					},
 					{
 						"name": "Out",

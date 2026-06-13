@@ -21,9 +21,9 @@ NOS_REGISTER_NAME(Frame)
 NOS_REGISTER_NAME(Out)
 
 // Converts a nos.sys.track.Track's location + Euler rotation into a
-// nos.graphics.TransformQ. The Euler angles are interpreted in Frame's
-// convention and emitted as a quaternion; no frame conversion is performed, so
-// the output is expressed in Frame. Track carries no scale, so scale is identity.
+// nos.graphics.TransformQ. The Euler angles are interpreted per Frame's euler
+// encoding and emitted as a quaternion; no frame conversion is performed, so the
+// output is expressed in Frame. Track carries no scale, so scale is identity.
 struct TrackToTransformQNode : NodeContext
 {
 	using NodeContext::NodeContext;
@@ -38,7 +38,7 @@ struct TrackToTransformQNode : NodeContext
 		auto const& loc = track.location;
 		auto const& rot = track.rotation;
 
-		glm::dmat3 R = EulerToMat(frame, glm::dvec3(rot.x(), rot.y(), rot.z()));
+		glm::dmat3 R = EulerToMat(frame.euler(), glm::dvec3(rot.x(), rot.y(), rot.z()));
 		glm::dquat q = glm::normalize(glm::quat_cast(R));
 
 		TransformQ out(

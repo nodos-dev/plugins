@@ -86,9 +86,9 @@ static bool EnumFromName(TEnum const (&values)[N], char const* const* names, std
 	return false;
 }
 
-// Inverse of the "# SourceFrame: up=... forward=... handedness=... rotation=..." header
-// written by RecordTrackCOLMAP::WriteExtrasTxt. Returns nullopt when any field is missing
-// or unrecognized (e.g. a hand-edited sidecar).
+// Inverse of the "# SourceFrame: up=... forward=... handedness=... euler_order=...
+// euler_sign=x,y,z" header written by RecordTrackCOLMAP::WriteExtrasTxt. Returns
+// nullopt when any field is missing or unrecognized (e.g. a hand-edited sidecar).
 static std::optional<nos::graphics::Frame> ParseSourceFrameComment(std::string const& line)
 {
 	auto value = [&](char const* key) -> std::string {
@@ -100,22 +100,35 @@ static std::optional<nos::graphics::Frame> ParseSourceFrameComment(std::string c
 	};
 	nos::graphics::SignedAxis up{}, fwd{};
 	nos::graphics::Handedness hand{};
-	nos::graphics::RotationConvention rot{};
+	nos::graphics::EulerOrder order{};
 	if (!EnumFromName(nos::graphics::EnumValuesSignedAxis(), nos::graphics::EnumNamesSignedAxis(), value("up="), up) ||
 		!EnumFromName(nos::graphics::EnumValuesSignedAxis(), nos::graphics::EnumNamesSignedAxis(), value("forward="), fwd) ||
 		!EnumFromName(nos::graphics::EnumValuesHandedness(), nos::graphics::EnumNamesHandedness(), value("handedness="), hand) ||
-		!EnumFromName(nos::graphics::EnumValuesRotationConvention(), nos::graphics::EnumNamesRotationConvention(), value("rotation="), rot))
+		!EnumFromName(nos::graphics::EnumValuesEulerOrder(), nos::graphics::EnumNamesEulerOrder(), value("euler_order="), order))
 		return std::nullopt;
+
+	// euler_sign=x,y,z, each +1/-1. Missing or garbled -> reject the whole header.
+	int sx = 0, sy = 0, sz = 0;
+	std::string signs = value("euler_sign=");
+	std::replace(signs.begin(), signs.end(), ',', ' ');
+	std::istringstream ss(signs);
+	if (!(ss >> sx >> sy >> sz))
+		return std::nullopt;
+
 	// meters_per_unit is irrelevant to rotation, which is all this frame is used for.
-	return nos::graphics::Frame(up, fwd, hand, rot, 1.0);
+	return nos::graphics::Frame(up, fwd, hand,
+		nos::graphics::EulerEncoding(order, (int8_t)sx, (int8_t)sy, (int8_t)sz), 1.0);
 }
 
-// True when Euler angles read in frame `a` decode to the same rotation in frame `b`
-// (same basis and same Euler convention; units don't enter into rotation).
+// True when Euler angles authored in `a` decode to the same rotation as in `b`
+// (same basis and same nested Euler encoding; units don't enter into rotation).
 static bool SameRotationConvention(nos::graphics::Frame const& a, nos::graphics::Frame const& b)
 {
-	return a.up() == b.up() && a.forward() == b.forward() &&
-		   a.handedness() == b.handedness() && a.rotation() == b.rotation();
+	return a.up() == b.up() && a.forward() == b.forward() && a.handedness() == b.handedness() &&
+		   a.euler().order() == b.euler().order() &&
+		   a.euler().sign_x() == b.euler().sign_x() &&
+		   a.euler().sign_y() == b.euler().sign_y() &&
+		   a.euler().sign_z() == b.euler().sign_z();
 }
 
 struct PlaybackTrackCOLMAPContext : NodeContext
@@ -318,15 +331,15 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 				glm::vec3 euler(ex->RotX, ex->RotY, ex->RotZ);
 				if (convertExtrasRotation)
 				{
-					glm::dmat3 R_src = nos::graphics::EulerToMat(*extrasFrame, glm::dvec3(euler));
-					euler = glm::vec3(nos::graphics::MatToEuler(TargetFrame, extrasC * R_src * glm::transpose(extrasC)));
+					glm::dmat3 R_src = nos::graphics::EulerToMat(extrasFrame->euler(), glm::dvec3(euler));
+					euler = glm::vec3(nos::graphics::MatToEuler(TargetFrame.euler(), extrasC * R_src * glm::transpose(extrasC)));
 				}
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
 			}
 			else
 			{
 				glm::dmat3 R_c2w_target = Minv * R_c2w_colmap * M;
-				glm::dvec3 eulerD = nos::graphics::MatToEuler(TargetFrame, R_c2w_target);
+				glm::dvec3 eulerD = nos::graphics::MatToEuler(TargetFrame.euler(), R_c2w_target);
 				glm::vec3 eulerF((float)eulerD.x, (float)eulerD.y, (float)eulerD.z);
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(eulerF);
 			}

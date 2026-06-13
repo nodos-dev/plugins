@@ -59,8 +59,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
-						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
-						"description": "Coordinate system of the connected Track.\nUsed to convert location and rotation into the COLMAP frame (meters) before writing.\nDefault matches FreeD / UE convention."
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the connected Track (axes, handedness, units, euler encoding).\nUsed to convert location and rotation into the COLMAP frame (meters) before writing; the euler encoding is recorded into the extras sidecar.\nDefault matches FreeD / UE convention."
 					},
 					{
 						"name": "Record",

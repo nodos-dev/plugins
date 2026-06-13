@@ -75,12 +75,12 @@ struct CameraGuideNode : NodeContext
 		// Bypass: Source -> Out, unchanged.
 		SetPinValue(NSN_Out, nos::Buffer::From(src));
 
-		// Both Tracks carry Euler rotation in the same Frame convention, so they
-		// are decoded with the same basis -- no cross-frame mismatch is possible.
+		// Both Tracks carry Euler rotation in the same Frame, so they are decoded
+		// the same way -- no cross-frame mismatch is possible.
 		auto const& sr = src.rotation;
 		auto const& tr = tgt.rotation;
-		glm::dmat3 R_src = EulerToMat(frame, glm::dvec3(sr.x(), sr.y(), sr.z()));
-		glm::dmat3 R_tgt = EulerToMat(frame, glm::dvec3(tr.x(), tr.y(), tr.z()));
+		glm::dmat3 R_src = EulerToMat(frame.euler(), glm::dvec3(sr.x(), sr.y(), sr.z()));
+		glm::dmat3 R_tgt = EulerToMat(frame.euler(), glm::dvec3(tr.x(), tr.y(), tr.z()));
 
 		auto const& sp = src.location;
 		auto const& tp = tgt.location;

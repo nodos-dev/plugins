@@ -24,8 +24,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
-						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
-						"description": "Coordinate system convention of the input Transform."
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the input Transform."
 					},
 					{
 						"name": "TargetFrame",
@@ -34,8 +34,8 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
-						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
-						"description": "Coordinate system convention of the output Transform."
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the output Transform."
 					},
 					{
 						"name": "Out",

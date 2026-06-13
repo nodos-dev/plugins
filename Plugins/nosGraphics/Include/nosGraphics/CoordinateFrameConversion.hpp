@@ -14,28 +14,46 @@
 #endif
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include <cmath>
 
 namespace nos::graphics
 {
 
 using Frame = CoordinateSystem;
 
-// Named presets matching CoordinateSystemPresets.json. COLMAP_SYSTEM is the COLMAP
-// camera/world frame (X right, Y down, Z forward, RH, meters); its basis equals
-// ColmapBasisMatrix() and it supplies meters_per_unit = 1.0 for unit conversion.
-inline CoordinateSystem const UNREAL_SYSTEM{SignedAxis::PosZ, SignedAxis::PosX, Handedness::LeftHanded,  RotationConvention::UnrealZYX, 0.01};
-inline CoordinateSystem const GLTF_SYSTEM  {SignedAxis::PosY, SignedAxis::NegZ, Handedness::RightHanded, RotationConvention::OpenGLYXZ, 1.0};
-inline CoordinateSystem const COLMAP_SYSTEM{SignedAxis::NegY, SignedAxis::PosZ, Handedness::RightHanded, RotationConvention::OpenGLYXZ, 1.0};
+// Euler encodings, used as the nested `euler` of the frame presets below.
+inline EulerEncoding const UNREAL_EULER{EulerOrder::ZYX, -1, -1, 1};
+inline EulerEncoding const OPENGL_EULER{EulerOrder::YXZ, 1, 1, 1};
+
+// Named frame presets matching CoordinateSystemPresets.json. COLMAP_SYSTEM is the
+// COLMAP camera/world frame (X right, Y down, Z forward, RH, meters); its basis
+// equals ColmapBasisMatrix() and it supplies meters_per_unit = 1.0 for unit conversion.
+inline CoordinateSystem const UNREAL_SYSTEM{SignedAxis::PosZ, SignedAxis::PosX, Handedness::LeftHanded,  UNREAL_EULER, 0.01};
+inline CoordinateSystem const GLTF_SYSTEM  {SignedAxis::PosY, SignedAxis::NegZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
+inline CoordinateSystem const COLMAP_SYSTEM{SignedAxis::NegY, SignedAxis::PosZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
+
+// A frame is usable iff forward and up name different axes; otherwise right =
+// forward x up is zero and BasisMatrix is singular (inverse -> NaN). Consumers
+// should reject invalid frames with a node error rather than emit NaN.
+inline bool CoordinateSystemValid(CoordinateSystem const& cs)
+{
+	// SignedAxis packs as {PosX,NegX,PosY,NegY,PosZ,NegZ}; /2 collapses sign to axis.
+	return (static_cast<int>(cs.forward()) / 2) != (static_cast<int>(cs.up()) / 2);
+}
 
 // Unit-conversion factor for a length expressed in `src` re-expressed in `tgt`:
-// src.meters_per_unit / tgt.meters_per_unit. Guards a non-positive target scale
-// (zero / negative / NaN) by returning 1.0 (no scaling, no mirrored world).
+// src.meters_per_unit / tgt.meters_per_unit. Guards a non-positive source or
+// target scale (zero / negative / NaN) by returning 1.0 (no scaling, no mirrored
+// or collapsed world).
 inline double UnitFactor(CoordinateSystem const& src, CoordinateSystem const& tgt)
 {
+	double s = src.meters_per_unit();
 	double t = tgt.meters_per_unit();
-	if (!(t > 0.0))
+	if (!(s > 0.0) || !(t > 0.0))
 		return 1.0;
-	return src.meters_per_unit() / t;
+	return s / t;
 }
 
 // Unit vector for a signed coordinate axis.
@@ -78,43 +96,49 @@ inline glm::dmat3 ColmapBasisMatrix()
 		glm::dvec3( 0.0, -1.0,  0.0)); // up -> -Y (Y is down)
 }
 
-// Build R_c2w in `cs` from rotation Euler degrees, per the system's Euler convention.
-inline glm::dmat3 EulerToMat(CoordinateSystem const& cs, glm::dvec3 const& degRot)
+// Build a rotation matrix from Euler degrees per an EulerEncoding. Component i
+// contributes (sign_i * angle_i) about axis i, applied in `order` (intrinsic).
+// Independent of any frame's axis geometry -- it only decodes the three numbers.
+inline glm::dmat3 EulerToMat(EulerEncoding const& enc, glm::dvec3 const& degRot)
 {
 	glm::dvec3 r = glm::radians(degRot);
-	switch (cs.rotation())
+	double x = enc.sign_x() * r.x;
+	double y = enc.sign_y() * r.y;
+	double z = enc.sign_z() * r.z;
+	switch (enc.order())
 	{
-	case RotationConvention::UnrealZYX:
-		// FRotator: rot.x = roll, rot.y = pitch, rot.z = yaw, intrinsic ZYX.
-		// UE sign convention has +pitch = look up and +roll = bank right via
-		// LH-rule rotations, equivalent to standard-RH Rz(yaw) * Ry(-pitch) * Rx(-roll).
-		return glm::dmat3(glm::eulerAngleZYX<double>(r.z, -r.y, -r.x));
-	case RotationConvention::OpenGLYXZ:
-		// rot.x = pitch, rot.y = yaw, rot.z = roll, intrinsic YXZ:
-		// R = Ry(yaw) * Rx(pitch) * Rz(roll), all standard-RH formulas.
-		return glm::dmat3(glm::eulerAngleYXZ<double>(r.y, r.x, r.z));
+	case EulerOrder::ZYX: return glm::dmat3(glm::eulerAngleZYX<double>(z, y, x));
+	case EulerOrder::XYZ: return glm::dmat3(glm::eulerAngleXYZ<double>(x, y, z));
+	case EulerOrder::YXZ: return glm::dmat3(glm::eulerAngleYXZ<double>(y, x, z));
+	case EulerOrder::YZX: return glm::dmat3(glm::eulerAngleYZX<double>(y, z, x));
+	case EulerOrder::ZXY: return glm::dmat3(glm::eulerAngleZXY<double>(z, x, y));
+	case EulerOrder::XZY: return glm::dmat3(glm::eulerAngleXZY<double>(x, z, y));
 	}
 	return glm::dmat3(1.0);
 }
 
-// Inverse of EulerToMat: extract Euler degrees in `cs`'s convention, packed into
-// the (rot.x, rot.y, rot.z) layout for that convention.
-inline glm::dvec3 MatToEuler(CoordinateSystem const& cs, glm::dmat3 const& R)
+// Inverse of EulerToMat: extract Euler degrees in `enc`'s convention, packed into
+// the (rot.x, rot.y, rot.z) = (angle about X, Y, Z) layout. glm::extractEulerAngleABC
+// yields the angles in the same A,B,C axis order its name lists; we scatter them
+// back to (x, y, z) and undo the per-axis signs (sign in {-1,+1} so multiply).
+inline glm::dvec3 MatToEuler(EulerEncoding const& enc, glm::dmat3 const& R)
 {
 	glm::dmat4 M(R);
-	double a = 0.0, b = 0.0, c = 0.0;
-	switch (cs.rotation())
+	double t1 = 0.0, t2 = 0.0, t3 = 0.0;
+	glm::dvec3 ang(0.0);  // ang.x about X, ang.y about Y, ang.z about Z
+	switch (enc.order())
 	{
-	case RotationConvention::UnrealZYX:
-		glm::extractEulerAngleZYX(M, a, b, c);  // a=yaw, b=pitch, c=roll
-		// Negate pitch and roll back to UE sign convention; pack as (roll, pitch, yaw).
-		return glm::degrees(glm::dvec3(-c, -b, a));
-	case RotationConvention::OpenGLYXZ:
-		glm::extractEulerAngleYXZ(M, a, b, c);  // a=yaw, b=pitch, c=roll
-		// Pack as (pitch, yaw, roll).
-		return glm::degrees(glm::dvec3(b, a, c));
+	case EulerOrder::ZYX: glm::extractEulerAngleZYX(M, t1, t2, t3); ang = {t3, t2, t1}; break;
+	case EulerOrder::XYZ: glm::extractEulerAngleXYZ(M, t1, t2, t3); ang = {t1, t2, t3}; break;
+	case EulerOrder::YXZ: glm::extractEulerAngleYXZ(M, t1, t2, t3); ang = {t2, t1, t3}; break;
+	case EulerOrder::YZX: glm::extractEulerAngleYZX(M, t1, t2, t3); ang = {t3, t1, t2}; break;
+	case EulerOrder::ZXY: glm::extractEulerAngleZXY(M, t1, t2, t3); ang = {t2, t3, t1}; break;
+	case EulerOrder::XZY: glm::extractEulerAngleXZY(M, t1, t2, t3); ang = {t1, t3, t2}; break;
 	}
-	return glm::dvec3(0.0);
+	ang.x *= enc.sign_x();
+	ang.y *= enc.sign_y();
+	ang.z *= enc.sign_z();
+	return glm::degrees(ang);
 }
 
 // Basis-change M from `cs` to COLMAP frame: M = S_colmap * S_cs^-1.
@@ -129,6 +153,54 @@ inline glm::dmat3 BasisChangeToColmap(CoordinateSystem const& cs)
 inline glm::dmat3 BasisChangeFromColmap(CoordinateSystem const& cs)
 {
 	return BasisMatrix(cs) * glm::inverse(ColmapBasisMatrix());
+}
+
+// --- Shared geometric conversion core -----------------------------------------
+// One frame-to-frame conversion, precomputed: the basis change M (maps a vector
+// from `src` engine coords to `tgt` engine coords) and the position unit factor.
+// All three Convert* nodes build one of these and apply the helpers below, so the
+// geometry lives in exactly one place. Rotation handling (Euler vs quaternion) is
+// the only thing the nodes do differently.
+struct FrameConvert
+{
+	glm::dmat3 M{1.0};
+	double UnitFactor = 1.0;
+};
+
+inline FrameConvert MakeFrameConvert(CoordinateSystem const& src, CoordinateSystem const& tgt)
+{
+	FrameConvert f;
+	f.M = BasisMatrix(tgt) * glm::inverse(BasisMatrix(src));
+	f.UnitFactor = nos::graphics::UnitFactor(src, tgt);
+	return f;
+}
+
+// Position: basis change, then unit conversion.
+inline glm::dvec3 ConvertPosition(FrameConvert const& f, glm::dvec3 const& p)
+{
+	return f.M * p * f.UnitFactor;
+}
+
+// Rotation: conjugate by M (orthogonal => M^-1 = M^T). Preserves det(R) = 1, so a
+// handedness-flipping (improper) M still yields a proper rotation.
+inline glm::dmat3 ConvertRotation(FrameConvert const& f, glm::dmat3 const& R)
+{
+	return f.M * R * glm::transpose(f.M);
+}
+
+inline glm::dquat ConvertRotation(FrameConvert const& f, glm::dquat const& q)
+{
+	return glm::normalize(glm::quat_cast(ConvertRotation(f, glm::mat3_cast(q))));
+}
+
+// Scale: M is a signed axis permutation, so the per-axis factors just reorder.
+inline glm::dvec3 ConvertScale(FrameConvert const& f, glm::dvec3 const& s)
+{
+	glm::dmat3 absM(0.0);
+	for (int c = 0; c < 3; ++c)
+		for (int row = 0; row < 3; ++row)
+			absM[c][row] = std::abs(f.M[c][row]);
+	return absM * s;
 }
 
 }  // namespace nos::graphics

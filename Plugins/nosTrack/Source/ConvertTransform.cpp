@@ -23,28 +23,27 @@ void RegisterConvertTransform(nosNodeFunctions* funcs)
 		auto source = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("SourceFrame")]);
 		auto target = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("TargetFrame")]);
 
-		const glm::dmat3 S_src = nos::graphics::BasisMatrix(source);
-		const glm::dmat3 S_tgt = nos::graphics::BasisMatrix(target);
-		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
+		if (!nos::graphics::CoordinateSystemValid(source) || !nos::graphics::CoordinateSystemValid(target))
+		{
+			nosEngine.LogE("ConvertTransform: Source/Target frame invalid (forward and up must be on different axes)");
+			return nosEngine.SetPinValue(ids[NOS_NAME("Out")], nos::Buffer::From(*in));
+		}
+
+		const nos::graphics::FrameConvert conv = nos::graphics::MakeFrameConvert(source, target);
 
 		// Position: basis change, then unit conversion derived from the two systems.
 		const auto& p = in->position();
-		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * nos::graphics::UnitFactor(source, target);
+		glm::dvec3 outPos = nos::graphics::ConvertPosition(conv, glm::dvec3(p.x(), p.y(), p.z()));
 
-		// Rotation: build in source frame, conjugate by M (orthogonal => M^-1 = M^T),
-		// extract in target frame.
+		// Rotation: decode source Euler -> matrix, conjugate by M, re-encode as
+		// target Euler. The encodings carry the per-frame Euler order/signs.
 		const auto& r = in->rotation();
-		glm::dmat3 R_src = nos::graphics::EulerToMat(source, glm::dvec3(r.x(), r.y(), r.z()));
-		glm::dmat3 R_tgt = M * R_src * glm::transpose(M);
-		glm::dvec3 outRot = nos::graphics::MatToEuler(target, R_tgt);
+		glm::dmat3 R_src = nos::graphics::EulerToMat(source.euler(), glm::dvec3(r.x(), r.y(), r.z()));
+		glm::dvec3 outRot = nos::graphics::MatToEuler(target.euler(), nos::graphics::ConvertRotation(conv, R_src));
 
 		// Scale: M is a signed axis permutation, so the per-axis factors just reorder.
 		const auto& s = in->scale();
-		glm::dmat3 absM(0.0);
-		for (int c = 0; c < 3; ++c)
-			for (int row = 0; row < 3; ++row)
-				absM[c][row] = std::abs(M[c][row]);
-		glm::dvec3 outScale = absM * glm::dvec3(s.x(), s.y(), s.z());
+		glm::dvec3 outScale = nos::graphics::ConvertScale(conv, glm::dvec3(s.x(), s.y(), s.z()));
 
 		nos::fb::Transform out(
 			nos::fb::vec3d(outPos.x, outPos.y, outPos.z),

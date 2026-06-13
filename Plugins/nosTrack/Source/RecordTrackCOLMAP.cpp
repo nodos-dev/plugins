@@ -297,7 +297,10 @@ struct RecordTrackCOLMAPContext : NodeContext
 			std::string("up=") + nos::graphics::EnumNameSignedAxis(SourceFrame.up())
 			+ " forward=" + nos::graphics::EnumNameSignedAxis(SourceFrame.forward())
 			+ " handedness=" + nos::graphics::EnumNameHandedness(SourceFrame.handedness())
-			+ " rotation=" + nos::graphics::EnumNameRotationConvention(SourceFrame.rotation());
+			+ " euler_order=" + nos::graphics::EnumNameEulerOrder(SourceFrame.euler().order())
+			+ " euler_sign=" + std::to_string((int)SourceFrame.euler().sign_x())
+			+ "," + std::to_string((int)SourceFrame.euler().sign_y())
+			+ "," + std::to_string((int)SourceFrame.euler().sign_z());
 		file << std::setprecision(12);
 		file << "# Nodos Track sidecar paired with images.txt by IMAGE_ID.\n";
 		file << "# Carries fields that don't fit COLMAP's cameras.txt/images.txt:\n";
@@ -440,7 +443,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 			// Build R_c2w in the source frame, then conjugate by M to land in
 			// the COLMAP frame. Likewise frame the position.
-			glm::dmat3 R_c2w_src = nos::graphics::EulerToMat(SourceFrame, glm::dvec3(frame.Rotation));
+			glm::dmat3 R_c2w_src = nos::graphics::EulerToMat(SourceFrame.euler(), glm::dvec3(frame.Rotation));
 			glm::dmat3 R_c2w_colmap = M * R_c2w_src * Minv;
 			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location) * unitFactor;
 

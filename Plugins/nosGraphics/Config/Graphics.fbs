@@ -26,29 +26,43 @@ enum SignedAxis : ubyte { PosX, NegX, PosY, NegY, PosZ, NegZ }
 // Chirality of the coordinate system.
 enum Handedness : ubyte { RightHanded, LeftHanded }
 
-// Euler order + sign + roll/pitch/yaw packing for Euler-angle rotation fields. The
-// two initial values reproduce the conventions previously baked into CoordinateFrame;
-// new conventions can be added without touching consumers.
-enum RotationConvention : ubyte {
-    // rot=(roll,pitch,yaw), intrinsic ZYX, Unreal signs (pitch/roll negated vs std-RH).
-    UnrealZYX = 0,
-    // rot=(pitch,yaw,roll), intrinsic YXZ, standard right-handed signs.
-    OpenGLYXZ = 1,
+// Intrinsic Euler rotation order. Each value names the sequence of axes a rotation
+// is built from; component i of an Euler triple is always the angle about axis i
+// (rot.x about X, rot.y about Y, rot.z about Z). Mirrors nos.math.EulerOrder
+// (kept local to avoid a cross-plugin schema include).
+enum EulerOrder : ubyte { ZYX, XYZ, YXZ, YZX, ZXY, XZY }
+
+// How a 3-component Euler-angle field (degrees) is decoded into a rotation. The
+// rotation is built as
+//   component i contributes (sign_i * angle_i) about axis i,
+// applied in the sequence given by `order` (intrinsic). Each sign is +1 or -1.
+// Engine conventions are pure DATA -- a new engine needs a new value, not new code:
+//   Unreal      = {ZYX, -1, -1, +1}   (pitch/roll negated vs standard right-handed)
+//   glTF/OpenGL = {YXZ, +1, +1, +1}
+// This is nested into CoordinateSystem (a frame's Euler convention travels with it),
+// but it is only consulted on the Euler-angle path; quaternion consumers ignore it.
+struct EulerEncoding {
+    order: EulerOrder;
+    sign_x: byte;
+    sign_y: byte;
+    sign_z: byte;
 }
 
-// Full coordinate-system convention used by a transform endpoint: axis assignments to
-// world-semantic directions (forward, right, up), the implied handedness, the Euler
-// convention for Euler-angle rotation fields, and the unit scale. `right` is DERIVED
-// (right = +/-(forward x up), sign from handedness) and not stored.
+// Full convention of a transform endpoint: axis assignments to world-semantic
+// directions (forward, up), the implied handedness, how its Euler-angle fields are
+// decoded (`euler`), and the unit scale. `right` is DERIVED (right = +/-(forward x
+// up), sign from handedness) and not stored. forward and up MUST lie on different
+// axes (else the basis is singular); consumers validate this. `euler` is inert for
+// quaternion-only flows.
 //
-// Common conventions are offered as named presets (see CoordinateSystemPresets.json):
-//   Unreal = {PosZ, PosX, LeftHanded,  UnrealZYX, 0.01}  (Z-up, cm)
-//   glTF   = {PosY, NegZ, RightHanded, OpenGLYXZ, 1.0}   (Y-up, m)
+// Common frames are offered as named presets (see CoordinateSystemPresets.json):
+//   Unreal = {PosZ, PosX, LeftHanded,  {ZYX,-1,-1,1}, 0.01}  (Z-up, cm)
+//   glTF   = {PosY, NegZ, RightHanded, {YXZ, 1, 1,1}, 1.0}   (Y-up, m)
 struct CoordinateSystem {
     up: SignedAxis;
     forward: SignedAxis;
     handedness: Handedness;
-    rotation: RotationConvention;
+    euler: EulerEncoding;
     // Linear size of one unit, in meters (cm = 0.01, m = 1.0); matches USD's
     // metersPerUnit. Unit conversion factor between two systems is
     // src.meters_per_unit / tgt.meters_per_unit.

@@ -93,7 +93,7 @@ static Frame DetectSystem(ofbx::GlobalSettings const* gs)
 	double mpu = 0.01; // FBX default UnitScaleFactor 1.0 (cm)
 	if (gs && gs->UnitScaleFactor > 0.0f)
 		mpu = static_cast<double>(gs->UnitScaleFactor) / 100.0;
-	return Frame(base.up(), base.forward(), base.handedness(), base.rotation(), mpu);
+	return Frame(base.up(), base.forward(), base.handedness(), base.euler(), mpu);
 }
 
 // Convert a frame-independent transform into `target`, applying a uniform

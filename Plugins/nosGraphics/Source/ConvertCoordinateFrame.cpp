@@ -37,29 +37,26 @@ struct ConvertCoordinateFrameNode : NodeContext
 		auto source = *pins.GetPinData<Frame>(NSN_SourceFrame);
 		auto target = *pins.GetPinData<Frame>(NSN_TargetFrame);
 
-		const glm::dmat3 S_src = BasisMatrix(source);
-		const glm::dmat3 S_tgt = BasisMatrix(target);
-		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
+		if (!CoordinateSystemValid(source) || !CoordinateSystemValid(target))
+		{
+			SetNodeStatusMessage("Source/Target frame is invalid: forward and up must be on different axes",
+								 fb::NodeStatusMessageType::FAILURE);
+			return NOS_RESULT_FAILED;
+		}
 
-		// Position: basis change, then unit conversion derived from the two systems.
+		const FrameConvert conv = MakeFrameConvert(source, target);
+
 		const auto& p = in->position();
-		glm::dvec3 outPos = M * glm::dvec3(p.x(), p.y(), p.z()) * UnitFactor(source, target);
+		glm::dvec3 outPos = ConvertPosition(conv, glm::dvec3(p.x(), p.y(), p.z()));
 
-		// Rotation: quaternion -> matrix, conjugate by M (orthogonal => M^-1 = M^T).
-		// The conjugation preserves det(R) = 1, so the result stays a proper
-		// rotation even when M is a handedness-flipping (improper) basis change.
+		// Rotation carried as a quaternion, so no Euler convention is involved: the
+		// quaternion is conjugated by the basis-change matrix directly.
 		const auto& r = in->rotation();
 		glm::dquat q = glm::normalize(glm::dquat(r.w(), r.x(), r.y(), r.z()));
-		glm::dmat3 R_tgt = M * glm::mat3_cast(q) * glm::transpose(M);
-		glm::dquat outQ = glm::normalize(glm::quat_cast(R_tgt));
+		glm::dquat outQ = ConvertRotation(conv, q);
 
-		// Scale: M is a signed axis permutation, so the per-axis factors reorder.
 		const auto& s = in->scale();
-		glm::dmat3 absM(0.0);
-		for (int c = 0; c < 3; ++c)
-			for (int row = 0; row < 3; ++row)
-				absM[c][row] = std::abs(M[c][row]);
-		glm::dvec3 outScale = absM * glm::dvec3(s.x(), s.y(), s.z());
+		glm::dvec3 outScale = ConvertScale(conv, glm::dvec3(s.x(), s.y(), s.z()));
 
 		TransformQ out(
 			fb::vec3d(outPos.x, outPos.y, outPos.z),

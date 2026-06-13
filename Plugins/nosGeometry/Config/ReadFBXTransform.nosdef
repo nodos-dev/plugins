@@ -43,7 +43,7 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
-						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "rotation": "UnrealZYX", "meters_per_unit": 0.01 },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
 						"description": "Coordinate system the output transforms are expressed in. The node converts\nfrom the file's system (see 'Auto-Detect Source') into this one, including a\nunit change derived from the two systems' meters_per_unit."
 					},
 					{
@@ -62,7 +62,7 @@
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
-						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "rotation": "OpenGLYXZ", "meters_per_unit": 1.0 },
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
 						"description": "Coordinate system the .fbx is authored in. Used only when 'Auto-Detect\nSource' is off; otherwise the detected system (see 'Detected Frame') wins."
 					},
 					{
