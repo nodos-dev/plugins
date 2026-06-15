@@ -25,7 +25,8 @@
 		"Config/PlaybackTrackCOLMAP.nosdef",
 		"Config/ConvertTrackFrame.nosdef",
 		"Config/ConvertTransform.nosdef",
-		"Config/UpdateTrackTransform.nosdef"
+		"Config/UpdateTrackTransform.nosdef",
+		"Config/ReOriginTrack.nosdef"
 	],
 	"custom_types": [
 		"Config/PlaybackMode.fbs"
