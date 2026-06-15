@@ -5,7 +5,7 @@
 
 // Framework builtins (nos.fb.vec3d / nos.fb.vec4d)
 #include <Builtins_generated.h>
-// nos.graphics.TransformQ and the CoordinateSystem struct (generated from
+// nos.graphics.TransformQ and the CoordinateFrame struct (generated from
 // nos.graphics' Graphics.fbs).
 #include <Graphics_generated.h>
 // BasisMatrix() / UnitFactor() for the source -> output system change, plus the
@@ -41,10 +41,10 @@ NOS_REGISTER_NAME(GlobalTransform)
 NOS_REGISTER_NAME(DetectedFrame)
 NOS_REGISTER_NAME(IsLoaded)
 
-using Frame = nos::graphics::CoordinateSystem;
+using Frame = nos::graphics::CoordinateFrame;
 
 // Frame-independent decomposition of an FBX object's transform. Rotation is kept
-// as a matrix so it can be re-expressed in whatever CoordinateSystem the user picks
+// as a matrix so it can be re-expressed in whatever CoordinateFrame the user picks
 // without re-reading the file.
 struct RawTransform
 {
@@ -80,7 +80,7 @@ static RawTransform DecomposeMatrix(ofbx::DMatrix const& m)
 	return out;
 }
 
-// Map an .fbx header's axis system + units onto a CoordinateSystem. The engine's
+// Map an .fbx header's axis system + units onto a CoordinateFrame. The engine's
 // preset bases are Z-up left-handed (Unreal) and Y-up right-handed (glTF), so the
 // up-axis is the deciding signal for the basis; openFBX's own header advises
 // ignoring FrontAxis (unreliable across exporters), so we key off UpAxis only. The

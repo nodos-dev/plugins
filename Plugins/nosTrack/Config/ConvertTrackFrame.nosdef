@@ -19,7 +19,7 @@
 					},
 					{
 						"name": "Source",
-						"type_name": "nos.graphics.CoordinateSystem",
+						"type_name": "nos.graphics.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
@@ -28,7 +28,7 @@
 					},
 					{
 						"name": "Target",
-						"type_name": "nos.graphics.CoordinateSystem",
+						"type_name": "nos.graphics.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },

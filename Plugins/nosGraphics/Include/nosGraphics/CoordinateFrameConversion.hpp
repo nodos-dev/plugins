@@ -1,9 +1,9 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-// Frame-conversion helpers for nos.graphics.CoordinateSystem, shared by the
+// Frame-conversion helpers for nos.graphics.CoordinateFrame, shared by the
 // graphics nodes (ConvertCoordinateFrame / TrackToTransformQ / CameraGuide),
 // the Track nodes (ConvertTrackFrame / RecordTrackCOLMAP / PlaybackTrackCOLMAP /
 // ConvertTransform) and transform producers such as nos.geometry's FBX reader.
-// Builds basis-change matrices from a CoordinateSystem's fields, encodes the
+// Builds basis-change matrices from a CoordinateFrame's fields, encodes the
 // per-system Euler conventions, and converts to/from the COLMAP camera/world frame.
 #pragma once
 
@@ -21,7 +21,7 @@
 namespace nos::graphics
 {
 
-using Frame = CoordinateSystem;
+using Frame = CoordinateFrame;
 
 // Euler encodings, used as the nested `euler` of the frame presets below.
 inline EulerEncoding const UNREAL_EULER{EulerOrder::ZYX, -1, -1, 1};
@@ -30,14 +30,14 @@ inline EulerEncoding const OPENGL_EULER{EulerOrder::YXZ, 1, 1, 1};
 // Named frame presets matching CoordinateSystemPresets.json. COLMAP_SYSTEM is the
 // COLMAP camera/world frame (X right, Y down, Z forward, RH, meters); its basis
 // equals ColmapBasisMatrix() and it supplies meters_per_unit = 1.0 for unit conversion.
-inline CoordinateSystem const UNREAL_SYSTEM{SignedAxis::PosZ, SignedAxis::PosX, Handedness::LeftHanded,  UNREAL_EULER, 0.01};
-inline CoordinateSystem const GLTF_SYSTEM  {SignedAxis::PosY, SignedAxis::NegZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
-inline CoordinateSystem const COLMAP_SYSTEM{SignedAxis::NegY, SignedAxis::PosZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
+inline CoordinateFrame const UNREAL_SYSTEM{SignedAxis::PosZ, SignedAxis::PosX, Handedness::LeftHanded,  UNREAL_EULER, 0.01};
+inline CoordinateFrame const GLTF_SYSTEM  {SignedAxis::PosY, SignedAxis::NegZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
+inline CoordinateFrame const COLMAP_SYSTEM{SignedAxis::NegY, SignedAxis::PosZ, Handedness::RightHanded, OPENGL_EULER, 1.0};
 
 // A frame is usable iff forward and up name different axes; otherwise right =
 // forward x up is zero and BasisMatrix is singular (inverse -> NaN). Consumers
 // should reject invalid frames with a node error rather than emit NaN.
-inline bool CoordinateSystemValid(CoordinateSystem const& cs)
+inline bool CoordinateFrameValid(CoordinateFrame const& cs)
 {
 	// SignedAxis packs as {PosX,NegX,PosY,NegY,PosZ,NegZ}; /2 collapses sign to axis.
 	return (static_cast<int>(cs.forward()) / 2) != (static_cast<int>(cs.up()) / 2);
@@ -47,7 +47,7 @@ inline bool CoordinateSystemValid(CoordinateSystem const& cs)
 // src.meters_per_unit / tgt.meters_per_unit. Guards a non-positive source or
 // target scale (zero / negative / NaN) by returning 1.0 (no scaling, no mirrored
 // or collapsed world).
-inline double UnitFactor(CoordinateSystem const& src, CoordinateSystem const& tgt)
+inline double UnitFactor(CoordinateFrame const& src, CoordinateFrame const& tgt)
 {
 	double s = src.meters_per_unit();
 	double t = tgt.meters_per_unit();
@@ -71,11 +71,11 @@ inline glm::dvec3 AxisVec(SignedAxis a)
 	return glm::dvec3(0.0);
 }
 
-// Basis matrix S for a CoordinateSystem: maps semantic (forward, right, up) to
+// Basis matrix S for a CoordinateFrame: maps semantic (forward, right, up) to
 // engine coords. v_engine = S * (forward, right, up). Columns are (forward, right,
 // up); `right` is derived as forward x up, flipped for left-handed systems.
 // det(S) > 0 for left-handed frames, < 0 for right-handed (with this ordering).
-inline glm::dmat3 BasisMatrix(CoordinateSystem const& cs)
+inline glm::dmat3 BasisMatrix(CoordinateFrame const& cs)
 {
 	glm::dvec3 fwd = AxisVec(cs.forward());
 	glm::dvec3 up = AxisVec(cs.up());
@@ -144,13 +144,13 @@ inline glm::dvec3 MatToEuler(EulerEncoding const& enc, glm::dmat3 const& R)
 // Basis-change M from `cs` to COLMAP frame: M = S_colmap * S_cs^-1.
 // For a vector:           v_colmap = M * v_cs.
 // For a rotation matrix:  R_colmap = M * R_cs * M^-1.
-inline glm::dmat3 BasisChangeToColmap(CoordinateSystem const& cs)
+inline glm::dmat3 BasisChangeToColmap(CoordinateFrame const& cs)
 {
 	return ColmapBasisMatrix() * glm::inverse(BasisMatrix(cs));
 }
 
 // Inverse of BasisChangeToColmap.
-inline glm::dmat3 BasisChangeFromColmap(CoordinateSystem const& cs)
+inline glm::dmat3 BasisChangeFromColmap(CoordinateFrame const& cs)
 {
 	return BasisMatrix(cs) * glm::inverse(ColmapBasisMatrix());
 }
@@ -167,7 +167,7 @@ struct FrameConvert
 	double UnitFactor = 1.0;
 };
 
-inline FrameConvert MakeFrameConvert(CoordinateSystem const& src, CoordinateSystem const& tgt)
+inline FrameConvert MakeFrameConvert(CoordinateFrame const& src, CoordinateFrame const& tgt)
 {
 	FrameConvert f;
 	f.M = BasisMatrix(tgt) * glm::inverse(BasisMatrix(src));

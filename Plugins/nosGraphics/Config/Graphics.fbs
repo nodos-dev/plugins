@@ -39,7 +39,7 @@ enum EulerOrder : ubyte { ZYX, XYZ, YXZ, YZX, ZXY, XZY }
 // Engine conventions are pure DATA -- a new engine needs a new value, not new code:
 //   Unreal      = {ZYX, -1, -1, +1}   (pitch/roll negated vs standard right-handed)
 //   glTF/OpenGL = {YXZ, +1, +1, +1}
-// This is nested into CoordinateSystem (a frame's Euler convention travels with it),
+// This is nested into CoordinateFrame (a frame's Euler convention travels with it),
 // but it is only consulted on the Euler-angle path; quaternion consumers ignore it.
 struct EulerEncoding {
     order: EulerOrder;
@@ -58,7 +58,7 @@ struct EulerEncoding {
 // Common frames are offered as named presets (see CoordinateSystemPresets.json):
 //   Unreal = {PosZ, PosX, LeftHanded,  {ZYX,-1,-1,1}, 0.01}  (Z-up, cm)
 //   glTF   = {PosY, NegZ, RightHanded, {YXZ, 1, 1,1}, 1.0}   (Y-up, m)
-struct CoordinateSystem {
+struct CoordinateFrame {
     up: SignedAxis;
     forward: SignedAxis;
     handedness: Handedness;

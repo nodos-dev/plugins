@@ -37,7 +37,7 @@ struct ConvertCoordinateFrameNode : NodeContext
 		auto source = *pins.GetPinData<Frame>(NSN_SourceFrame);
 		auto target = *pins.GetPinData<Frame>(NSN_TargetFrame);
 
-		if (!CoordinateSystemValid(source) || !CoordinateSystemValid(target))
+		if (!CoordinateFrameValid(source) || !CoordinateFrameValid(target))
 		{
 			SetNodeStatusMessage("Source/Target frame is invalid: forward and up must be on different axes",
 								 fb::NodeStatusMessageType::FAILURE);

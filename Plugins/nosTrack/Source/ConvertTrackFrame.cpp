@@ -23,7 +23,7 @@ void RegisterConvertTrackFrame(nosNodeFunctions* funcs)
 		nos::sys::track::TTrack out;
 		inTrack->UnPackTo(&out);
 
-		if (!nos::graphics::CoordinateSystemValid(source) || !nos::graphics::CoordinateSystemValid(target))
+		if (!nos::graphics::CoordinateFrameValid(source) || !nos::graphics::CoordinateFrameValid(target))
 		{
 			nosEngine.LogE("ConvertTrackFrame: Source/Target frame invalid (forward and up must be on different axes)");
 			return nosEngine.SetPinValue(ids[NOS_NAME("Out")], nos::Buffer::From(out));

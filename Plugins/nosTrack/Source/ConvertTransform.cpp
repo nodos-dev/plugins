@@ -23,7 +23,7 @@ void RegisterConvertTransform(nosNodeFunctions* funcs)
 		auto source = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("SourceFrame")]);
 		auto target = *static_cast<nos::graphics::Frame*>(pins[NOS_NAME("TargetFrame")]);
 
-		if (!nos::graphics::CoordinateSystemValid(source) || !nos::graphics::CoordinateSystemValid(target))
+		if (!nos::graphics::CoordinateFrameValid(source) || !nos::graphics::CoordinateFrameValid(target))
 		{
 			nosEngine.LogE("ConvertTransform: Source/Target frame invalid (forward and up must be on different axes)");
 			return nosEngine.SetPinValue(ids[NOS_NAME("Out")], nos::Buffer::From(*in));
