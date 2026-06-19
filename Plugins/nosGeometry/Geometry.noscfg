@@ -1,0 +1,24 @@
+{
+    "info": {
+        "id": {
+            "name": "nos.geometry",
+            "version": "0.1.0"
+        },
+        "display_name": "Geometry",
+        "description": "Nodes for reading 3D assets (FBX) and 3D geometry operations.",
+        "category": "Geometry",
+        "dependencies": [
+            {
+                "name": "nos.graphics",
+                "version": "0.5"
+            }
+        ]
+    },
+    "binary_path": "Binaries/nosGeometry",
+    "node_definitions": [
+        "Config/ReadFBXTransform.nosdef"
+    ],
+    "defaults": [],
+    "custom_types": [],
+    "named_values": [ "Config/CoordinateSystemPresets.json" ]
+}

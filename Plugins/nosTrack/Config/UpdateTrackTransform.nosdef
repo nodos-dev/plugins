@@ -1,0 +1,1023 @@
+{ "nodes": [
+    {
+      "class_name": "nos.track.UpdateTrackTransform",
+			"menu_info": {
+				"category": "Track|Coordinate System",
+				"display_name": "Update Track Transform"
+			},
+      "node": {
+        "id": "01cdc9dd-13d7-48bf-af24-8bfa764451f3",
+        "name": "UpdateTrackTransform",
+        "class_name": "nos.track.UpdateTrackTransform",
+        "pins": [
+          {
+            "id": "fafae63e-ef87-4d1e-a3e9-2997515ae14a",
+            "name": "Input",
+            "type_name": "nos.sys.track.Track",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": {
+              "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+              "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+              "fov": 74.0,
+              "render_ratio": 1.0,
+              "sensor_size": { "x": 9.59, "y": 5.394 },
+              "pixel_aspect_ratio": 1.0,
+              "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+            },
+            "def": {
+              "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+              "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+              "fov": 74.0,
+              "render_ratio": 1.0,
+              "sensor_size": { "x": 9.59, "y": 5.394 },
+              "pixel_aspect_ratio": 1.0,
+              "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+            },
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "66c23108-61e0-410f-879e-a8be578cbffa" }
+          },
+          {
+            "id": "1e206698-7549-4cbc-8f69-e1796a7828c0",
+            "name": "Output",
+            "type_name": "nos.sys.track.Track",
+            "show_as": "OUTPUT_PIN",
+            "can_show_as": "OUTPUT_PIN_ONLY",
+            "visualizer": {
+            },
+            "data": {
+              "location": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+              "rotation": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+              "fov": 74.0,
+              "zoom": 0.0,
+              "focus": 0.0,
+              "render_ratio": 1.0,
+              "sensor_size": { "x": 9.59, "y": 5.394 },
+              "pixel_aspect_ratio": 1.0,
+              "nodal_offset": 0.0,
+              "focus_distance": 0.0,
+              "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+            },
+            "def": {
+              "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+              "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+              "fov": 74.0,
+              "render_ratio": 1.0,
+              "sensor_size": { "x": 9.59, "y": 5.394 },
+              "pixel_aspect_ratio": 1.0,
+              "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+            },
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "6315f140-ca41-4744-9ccd-c1327ec8f8fb" },
+            "connection_conditions": "!array"
+          },
+          {
+            "id": "0efb4000-a3b6-49c0-9f1d-f9a7d0ace9c5",
+            "name": "Input (1)",
+            "type_name": "nos.graphics.TransformQ",
+            "show_as": "INPUT_PIN",
+            "can_show_as": "INPUT_PIN_OR_PROPERTY",
+            "visualizer": {
+            },
+            "data": { "position": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 }, "rotation": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
+            "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "scale": { "x": 0.0, "y": 0.0, "z": 0.0 } },
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "7fca9817-ae9e-44f6-80a0-b89c94a65e6c" }
+          }
+        ],
+        "pos": { "x": 0.0, "y": 0.0 },
+        "contents_type": "Graph",
+        "contents": { "nodes": [
+            {
+              "id": "065c2f4d-96bb-4d5f-b3b1-2c46886f9978",
+              "name": "Break (1)",
+              "class_name": "nos.reflect.Break",
+              "pins": [
+                {
+                  "id": "a2c593a9-5872-4dac-a3a0-8abcf6d3c3f8",
+                  "name": "Input",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "abbaf38d-ba75-4267-9745-75f1a5489518",
+                  "name": "location",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "79aaf6f5-dcf4-4319-ba54-833b8146fc5d",
+                  "name": "rotation",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "5c09eaa2-7ef7-42b0-8b76-f6bda3c425e4",
+                  "name": "fov",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 74.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "4172afc6-c51e-43f2-bc42-e08f3e0ecc2b",
+                  "name": "zoom",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "3494f976-ac03-453d-ac68-5c2c54212a5a",
+                  "name": "focus",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "0ba4419b-8ec6-4f85-8758-9b57d7327806",
+                  "name": "render_ratio",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "ba9d7ad4-0e35-4fdc-87b2-8d1dfeaa25b9",
+                  "name": "sensor_size",
+                  "type_name": "nos.fb.vec2",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 9.59, "y": 5.394 },
+                  "def": { "x": 0.0, "y": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "296ad361-3a04-4379-aae7-3ecf829f3944",
+                  "name": "pixel_aspect_ratio",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "049ef970-287e-4deb-8932-6c38d4a036e3",
+                  "name": "nodal_offset",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "15a26286-b94d-4463-b48f-cfeb5b861e1f",
+                  "name": "focus_distance",
+                  "type_name": "float",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "e48dd2d4-54dc-4b73-9a7e-9ec59f0e495a",
+                  "name": "lens_distortion",
+                  "type_name": "nos.sys.track.LensDistortion",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 },
+                  "def": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -74.339447, "y": 276.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "display_name": "Break nos.sys.track.Track",
+              "plugin_version": { "major": 1, "minor": 7, "patch": 16 }
+            },
+            {
+              "id": "e44ccb72-7ab7-4013-ae6d-0f05ded039c4",
+              "name": "Make",
+              "class_name": "nos.reflect.MakeDynamic",
+              "pins": [
+                {
+                  "id": "7fe370d1-27f8-4a86-a724-1ad6e81108dd",
+                  "name": "Output",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+                    "rotation": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                    "fov": 74.0,
+                    "zoom": 0.0,
+                    "focus": 0.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "nodal_offset": 0.0,
+                    "focus_distance": 0.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "connection_conditions": "!array"
+                },
+                {
+                  "id": "94caef70-59a7-43fb-af87-04a175108b23",
+                  "name": "location",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+                  "def": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "5630bbaf-c2c3-4f4c-9f63-a4564895246b",
+                  "name": "rotation",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "7fd5c452-6235-43c7-8e42-d584e383f5b8",
+                  "name": "fov",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 74.0,
+                  "def": 74.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "42abc862-9ff2-4132-92f5-878f179aa7f6",
+                  "name": "zoom",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "98309aef-54a4-4f92-a72c-37ff7fae714a",
+                  "name": "focus",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "8e535536-efda-42af-a134-bf9061f6084b",
+                  "name": "render_ratio",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "def": 1.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "aa232c30-4cff-4661-818a-341a09885715",
+                  "name": "sensor_size",
+                  "type_name": "nos.fb.vec2",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 9.59, "y": 5.394 },
+                  "def": { "x": 9.59, "y": 5.394 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "00a1685b-e159-4d62-9976-7cf86f99136d",
+                  "name": "pixel_aspect_ratio",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 1.0,
+                  "def": 1.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "223d74b4-41ec-439f-8526-2399c0857dc2",
+                  "name": "nodal_offset",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "4c090d0e-07f2-4441-b8a4-6f7988d4feec",
+                  "name": "focus_distance",
+                  "type_name": "float",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": 0.0,
+                  "def": 0.0,
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "338d2a08-6fe0-4cc4-a345-03916ed8ff24",
+                  "name": "lens_distortion",
+                  "type_name": "nos.sys.track.LensDistortion",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 },
+                  "def": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 327.660553, "y": 152.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "template_parameters": [
+                { "name": "Type", "type_name": "string", "value": "nos.sys.track.Track" }
+              ],
+              "plugin_version": { "major": 1, "minor": 7, "patch": 16 }
+            },
+            {
+              "id": "ef768cb1-5c61-4ad0-825c-46200d4b4865",
+              "name": "MultiplyByZ180",
+              "class_name": "nos.math.QuaternionMultiply",
+              "pins": [
+                {
+                  "id": "d6099291-af43-4207-a10e-04e00a2f4db0",
+                  "name": "A",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "41ff5dba-5c89-4a7b-afd5-cd477cc92845",
+                  "name": "B",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "description": "Constant 180-degree rotation about Z; see the comment box."
+                },
+                {
+                  "id": "d914d162-01e2-411e-9ea7-fe48df69fd89",
+                  "name": "Result",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "x": -0.081418113625, "y": -0.051124280864, "z": -0.52954090606, "w": -0.842818976702 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -310.339447, "y": 40.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 1, "minor": 11, "patch": 0 }
+            },
+            {
+              "id": "83184e80-15dd-4ace-87c3-00fcb0f6f1ce",
+              "name": "Z180Multiply",
+              "class_name": "nos.math.QuaternionMultiply",
+              "pins": [
+                {
+                  "id": "6e320bec-ee1b-4e1c-a8eb-3b797d57d2e4",
+                  "name": "A",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.0, "y": 0.0, "z": 1.0, "w": 0.0 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "description": "Constant 180-degree rotation about Z; see the comment box."
+                },
+                {
+                  "id": "fe67255f-4e7a-4e29-888f-cd8fa145e14e",
+                  "name": "B",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": -0.081418113625, "y": -0.051124280864, "z": -0.52954090606, "w": -0.842818976702 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "ffdef587-0897-4f6c-af59-26d07b70f6a4",
+                  "name": "Result",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.051124280864, "y": -0.081418113625, "z": -0.842818976702, "w": 0.52954090606 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -205.339447, "y": 40.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 1, "minor": 11, "patch": 0 }
+            },
+            {
+              "id": "e4efd422-cac1-408c-a6cd-202fb465c8c0",
+              "name": "vec3d to vec3 (1)",
+              "class_name": "cast.vec3d-vec3",
+              "pins": [
+                {
+                  "id": "191eeb28-af51-4117-be2e-95f492d98b9f",
+                  "name": "vec3d",
+                  "type_name": "nos.fb.vec3d",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "meta_data_map": [
+                    { "key": "Category", "value": "" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "824d62ae-7fb3-4e04-94fb-919379882d44",
+                  "name": "vec3",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "meta_data_map": [
+                    { "key": "Category", "value": "" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 123.660553, "y": 55.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "230c5120-42e0-4ebf-bea0-10a7c5a78ab3",
+              "name": "Output",
+              "class_name": "nos.internal.GraphOutput",
+              "pins": [
+                {
+                  "id": "56e18572-0d68-400e-b6fd-1d4c12e51ae5",
+                  "name": "Input",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+                    "rotation": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                    "fov": 74.0,
+                    "zoom": 0.0,
+                    "focus": 0.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "nodal_offset": 0.0,
+                    "focus_distance": 0.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "connection_conditions": "!array"
+                },
+                {
+                  "id": "6315f140-ca41-4744-9ccd-c1327ec8f8fb",
+                  "name": "Output",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+                    "rotation": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                    "fov": 74.0,
+                    "zoom": 0.0,
+                    "focus": 0.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "nodal_offset": 0.0,
+                    "focus_distance": 0.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "referred_by": [
+                    "1e206698-7549-4cbc-8f69-e1796a7828c0"
+                  ],
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "connection_conditions": "!array"
+                }
+              ],
+              "pos": { "x": 648.160522, "y": 117.122452 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "e255f826-8c61-4e81-864e-505c45166b3d",
+              "name": "vec3d to vec3",
+              "class_name": "cast.vec3d-vec3",
+              "pins": [
+                {
+                  "id": "052a9207-d336-49db-a48e-bb99e632caed",
+                  "name": "vec3d",
+                  "type_name": "nos.fb.vec3d",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "meta_data_map": [
+                    { "key": "Category", "value": "" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "1c25ba7f-7138-431e-8e07-023f20183cce",
+                  "name": "vec3",
+                  "type_name": "nos.fb.vec3",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.797839, "y": 2.031795, "z": 1.719097 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "meta_data_map": [
+                    { "key": "Category", "value": "" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": 107.660553, "y": -19.63736 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "69a22b8f-3289-4cfc-96d7-0ab1c53ebdc0",
+              "name": "Input",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "73fee6c1-7957-4dee-8625-dbca4628b374",
+                  "name": "Output",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "66c23108-61e0-410f-879e-a8be578cbffa",
+                  "name": "Input",
+                  "type_name": "nos.sys.track.Track",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "referred_by": [
+                    "fafae63e-ef87-4d1e-a3e9-2997515ae14a"
+                  ],
+                  "def": {
+                    "location": { "x": 600.0, "y": 50.0, "z": 100.0 },
+                    "rotation": { "x": 0.0, "y": 0.0, "z": 180.0 },
+                    "fov": 74.0,
+                    "render_ratio": 1.0,
+                    "sensor_size": { "x": 9.59, "y": 5.394 },
+                    "pixel_aspect_ratio": 1.0,
+                    "lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 1.0 }
+                  },
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -647.0, "y": 134.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "display_name": "Track",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            },
+            {
+              "id": "bdd381df-1f4b-4cac-9cd7-be6ca1ac19a5",
+              "name": "Break",
+              "class_name": "nos.reflect.Break",
+              "pins": [
+                {
+                  "id": "2f3e4085-584d-40e9-bc80-295ea5162b38",
+                  "name": "Input",
+                  "type_name": "nos.graphics.TransformQ",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "position": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 }, "rotation": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
+                  "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "scale": { "x": 0.0, "y": 0.0, "z": 0.0 } },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "b2ca7d18-24ac-4f94-8fd2-c60cfc30a93e",
+                  "name": "position",
+                  "type_name": "nos.fb.vec3d",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "d4d4246c-0e06-4766-8683-0a84b390597e",
+                  "name": "rotation",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "bd377b96-289c-4aae-8d62-128caa7dead2",
+                  "name": "scale",
+                  "type_name": "nos.fb.vec3d",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 1.0, "y": 1.0, "z": 1.0 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -388.339447, "y": -3.63736 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "display_name": "Break nos.graphics.TransformQ",
+              "plugin_version": { "major": 1, "minor": 7, "patch": 16 }
+            },
+            {
+              "id": "e8167069-39f5-4359-8a78-990aaf2a31a4",
+              "name": "QuaternionToEuler",
+              "class_name": "nos.math.QuaternionToEuler",
+              "pins": [
+                {
+                  "id": "68180c65-fc05-4c01-afbc-10257847873f",
+                  "name": "Quaternion",
+                  "type_name": "nos.fb.vec4d",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 0.051124280864, "y": -0.081418113625, "z": -0.842818976702, "w": 0.52954090606 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "150ab3d2-f0f2-41b6-95fd-f5a0f8512df0",
+                  "name": "Order",
+                  "type_name": "nos.math.EulerOrder",
+                  "show_as": "PROPERTY",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": "ZYX",
+                  "def": "ZYX",
+                  "contents_type": "JobPin",
+                  "contents": { },
+                  "description": "Euler intrinsic rotation order extracted into the (rot.x, rot.y, rot.z) output components."
+                },
+                {
+                  "id": "23e9fc73-a2c5-4278-916d-2c7a2941207f",
+                  "name": "Euler",
+                  "type_name": "nos.fb.vec3d",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "x": 11.0337, "y": -0.0029, "z": -115.7182 },
+                  "def": { "x": 0.0, "y": 0.0, "z": 0.0 },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -97.339447, "y": 40.36264 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "description": "Converts a unit quaternion (x, y, z, w) to Euler angles (degrees). The Order pin selects the intrinsic rotation order extracted (e.g. ZYX yields rot.z = first rotation about Z, rot.y about Y, rot.x about X). Inverse of EulerToQuaternion when the same Order is used on both ends.",
+              "plugin_version": { "major": 1, "minor": 11, "patch": 0 }
+            },
+            {
+              "id": "0fc9a01a-1402-4482-a82b-37a2766d0e51",
+              "name": "Input (1)",
+              "class_name": "nos.internal.GraphInput",
+              "pins": [
+                {
+                  "id": "f1eb6cf4-bbd1-4795-b678-9b66d49838b7",
+                  "name": "Output",
+                  "type_name": "nos.graphics.TransformQ",
+                  "show_as": "OUTPUT_PIN",
+                  "can_show_as": "OUTPUT_PIN_ONLY",
+                  "visualizer": {
+                  },
+                  "data": { "position": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 }, "rotation": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
+                  "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "scale": { "x": 0.0, "y": 0.0, "z": 0.0 } },
+                  "contents_type": "JobPin",
+                  "contents": { }
+                },
+                {
+                  "id": "7fca9817-ae9e-44f6-80a0-b89c94a65e6c",
+                  "name": "Input",
+                  "type_name": "nos.graphics.TransformQ",
+                  "show_as": "INPUT_PIN",
+                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                  "visualizer": {
+                  },
+                  "data": { "position": { "x": 1.797839413158, "y": 2.03179492706, "z": 1.719097147995 }, "rotation": { "x": 0.051124280864, "y": -0.081418113625, "z": 0.842818976702, "w": -0.52954090606 }, "scale": { "x": 1.0, "y": 1.0, "z": 1.0 } },
+                  "referred_by": [
+                    "0efb4000-a3b6-49c0-9f1d-f9a7d0ace9c5"
+                  ],
+                  "def": { "position": { "x": 0.0, "y": 0.0, "z": 0.0 }, "rotation": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "scale": { "x": 0.0, "y": 0.0, "z": 0.0 } },
+                  "meta_data_map": [
+                    { "key": "PinHidden", "value": "true" }
+                  ],
+                  "contents_type": "JobPin",
+                  "contents": { }
+                }
+              ],
+              "pos": { "x": -660.0, "y": 79.0 },
+              "contents_type": "Job",
+              "contents": { "type": "" },
+              "function_category": "Default Node",
+              "display_name": "Transform",
+              "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+            }
+          ], "comments": [
+            {
+              "id": "a0f3b3eb-7b9a-43b9-b22c-889e54215cb5",
+              "name": "Comment",
+              "hint": "Hint",
+              "content": "Embed Transform to Track.\nTrack.rotation is Unreal-convention (roll, pitch, yaw): R = Rz(yaw) * Ry(-pitch) * Rx(-roll), i.e. a plain ZYX extraction with the X and Y angles negated. No Euler order alone can produce those sign flips, but conjugating the quaternion by a 180-degree rotation about Z (qZ * q * qZ with qZ = (0, 0, 1, 0)) negates exactly the X and Y angles of the ZYX extraction, so QuaternionToEuler(ZYX) then lands directly in Track's convention.",
+              "pos": { "x": -45.339447, "y": 145.36264 },
+              "size": { "x": 987.0, "y": 492.0 },
+              "bg_color": { "x": 0.9, "y": 0.9, "z": 0.9, "w": 0.3 }
+            }
+          ], "connections": [
+            { "from": "1c25ba7f-7138-431e-8e07-023f20183cce", "to": "94caef70-59a7-43fb-af87-04a175108b23", "id": "9d5192c3-cda9-4070-8c6d-5e7cb6328642" },
+            { "from": "0ba4419b-8ec6-4f85-8758-9b57d7327806", "to": "8e535536-efda-42af-a134-bf9061f6084b", "id": "411559f6-b77a-43d8-bb6b-6651a7e78e89" },
+            { "from": "15a26286-b94d-4463-b48f-cfeb5b861e1f", "to": "4c090d0e-07f2-4441-b8a4-6f7988d4feec", "id": "849f3d7b-4a65-4ff4-a2d3-27c566f598b7" },
+            { "from": "824d62ae-7fb3-4e04-94fb-919379882d44", "to": "5630bbaf-c2c3-4f4c-9f63-a4564895246b", "id": "19b10a49-e35d-4e40-9ccd-5259ac8aceb3" },
+            { "from": "23e9fc73-a2c5-4278-916d-2c7a2941207f", "to": "191eeb28-af51-4117-be2e-95f492d98b9f", "id": "e33fc853-e29c-4766-a362-baae4e8d1b7b" },
+            { "from": "3494f976-ac03-453d-ac68-5c2c54212a5a", "to": "98309aef-54a4-4f92-a72c-37ff7fae714a", "id": "b9ed7e73-aeb1-493b-954b-ba6ea682ab26" },
+            { "from": "ba9d7ad4-0e35-4fdc-87b2-8d1dfeaa25b9", "to": "aa232c30-4cff-4661-818a-341a09885715", "id": "257ab3f2-bd42-4b55-a4be-9cf0f4c7a570" },
+            { "from": "5c09eaa2-7ef7-42b0-8b76-f6bda3c425e4", "to": "7fd5c452-6235-43c7-8e42-d584e383f5b8", "id": "44914b69-b404-45af-8525-4d1b25bbfb7a" },
+            { "from": "4172afc6-c51e-43f2-bc42-e08f3e0ecc2b", "to": "42abc862-9ff2-4132-92f5-878f179aa7f6", "id": "bc808b23-93bc-4bbb-9fca-22dce165f18b" },
+            { "from": "7fe370d1-27f8-4a86-a724-1ad6e81108dd", "to": "56e18572-0d68-400e-b6fd-1d4c12e51ae5", "id": "e99303d3-b859-421d-94e8-84b9582a184a" },
+            { "from": "296ad361-3a04-4379-aae7-3ecf829f3944", "to": "00a1685b-e159-4d62-9976-7cf86f99136d", "id": "772378b5-3aa6-4835-b2f1-8550ed75a162" },
+            { "from": "049ef970-287e-4deb-8932-6c38d4a036e3", "to": "223d74b4-41ec-439f-8526-2399c0857dc2", "id": "de05d70e-a92b-4a9b-bbd3-b528d110b6e6" },
+            { "from": "e48dd2d4-54dc-4b73-9a7e-9ec59f0e495a", "to": "338d2a08-6fe0-4cc4-a345-03916ed8ff24", "id": "10ba87e1-0744-42f7-8695-23c20555dc3a" },
+            { "from": "b2ca7d18-24ac-4f94-8fd2-c60cfc30a93e", "to": "052a9207-d336-49db-a48e-bb99e632caed", "id": "eae6b39a-226a-4d13-9740-24eee00cef0d" },
+            { "from": "d4d4246c-0e06-4766-8683-0a84b390597e", "to": "d6099291-af43-4207-a10e-04e00a2f4db0", "id": "60d7fc83-03fd-4487-8942-97a01e8b6986" },
+            { "from": "d914d162-01e2-411e-9ea7-fe48df69fd89", "to": "fe67255f-4e7a-4e29-888f-cd8fa145e14e", "id": "f4ca285e-efd4-42f4-ab5a-d9da5f68e46d" },
+            { "from": "ffdef587-0897-4f6c-af59-26d07b70f6a4", "to": "68180c65-fc05-4c01-afbc-10257847873f", "id": "0b06576a-c67d-4083-bf8a-f021b1e41ba0" },
+            { "from": "73fee6c1-7957-4dee-8625-dbca4628b374", "to": "a2c593a9-5872-4dac-a3a0-8abcf6d3c3f8", "id": "24bc5915-d94a-4174-8d23-a539c1f059c0" },
+            { "from": "f1eb6cf4-bbd1-4795-b678-9b66d49838b7", "to": "2f3e4085-584d-40e9-bc80-295ea5162b38", "id": "5c248d43-481d-418f-b9c5-79f56b416285" }
+          ] },
+        "function_category": "Default Node",
+        "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
+      }
+    }
+  ] }

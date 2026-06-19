@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.str",
-            "version": "0.3.1"
+            "version": "0.4.0"
         },
         "display_name": "Strings",
         "description": "Collection of string manipulation nodes",
@@ -15,7 +15,8 @@
         "Config/Regex.nosdef",
         "Config/Pin2Json.nosdef",
         "Config/Json2Pin.nosdef",
-        "Config/Tokenizer.nosdef"
+        "Config/Tokenizer.nosdef",
+        "Config/StringFormat.nosdef"
     ],
     "defaults": [],
     "custom_types": []

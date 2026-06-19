@@ -1,0 +1,38 @@
+{
+	"nodes": [
+		{
+			"class_name": "QuaternionToEuler",
+			"menu_info": {
+				"category": "Math|Linear Algebra",
+				"display_name": "Quaternion To Euler"
+			},
+			"node": {
+				"class_name": "QuaternionToEuler",
+				"contents_type": "Job",
+				"description": "Converts a unit quaternion (x, y, z, w) to Euler angles (degrees). The Order pin selects the intrinsic rotation order extracted (e.g. ZYX yields rot.z = first rotation about Z, rot.y about Y, rot.x about X). Inverse of EulerToQuaternion when the same Order is used on both ends.",
+				"pins": [
+					{
+						"name": "Quaternion",
+						"type_name": "nos.fb.vec4d",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Order",
+						"type_name": "nos.math.EulerOrder",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "ZYX",
+						"description": "Euler intrinsic rotation order extracted into the (rot.x, rot.y, rot.z) output components."
+					},
+					{
+						"name": "Euler",
+						"type_name": "nos.fb.vec3d",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}

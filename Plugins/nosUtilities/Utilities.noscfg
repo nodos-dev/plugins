@@ -2,7 +2,7 @@
 	"info": {
 		"id": {
 			"name": "nos.utilities",
-			"version": "3.14.8"
+			"version": "3.15.0"
 		},
 		"description": "Various utility nodes.",
 		"display_name": "Utilities",
@@ -43,7 +43,9 @@
 		"Config/UploadBufferProvider.nosdef",
 		"Config/TimedFunctionSignaller.nosdef",
 		"Config/RingBuffer.nosdef",
+		"Config/MultiRingBuffer.nosdef",
 		"Config/BoundedQueue.nosdef",
+		"Config/MultiBoundedQueue.nosdef",
 		"Config/Host.nosdef",
 		"Config/AutoResize.nosdef",
 		"Config/ExecDepend.nosdef",
@@ -63,7 +65,11 @@
 		"Config/CalculateDispatchSize.nosdef",
 		"Config/YADIF.nosdef",
 		"Config/YADIFWithAutoDispatchSize.nosdef",
-		"Config/RepeatingJunction.nosdef"
+		"Config/RepeatingJunction.nosdef",
+		"Config/MultiLiveOut.nosdef",
+		"Config/TextRender.nosdef",
+		"Config/ScheduleRequest.nosdef",
+		"Config/Counter.nosdef"
 	],
 	"custom_types": [
 		"Config/Merge.fbs",
@@ -73,7 +79,9 @@
 		"Config/TextureSwitcher.fbs",
 		"Config/ChannelViewer.fbs",
 		"Config/Sink.fbs",
-		"Config/Layout.fbs"
+		"Config/Layout.fbs",
+		"Config/TextRender.fbs",
+		"Config/ScheduleRequest.fbs"
 	],
 	"defaults": [
 		"Config/Defaults.json"

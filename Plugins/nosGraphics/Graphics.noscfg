@@ -2,7 +2,7 @@
   "info": {
     "id": {
       "name": "nos.graphics",
-      "version": "0.4.3"
+      "version": "0.5.0"
     },
     "description": "Types & Nodes for graphics operations.",
     "display_name": "Graphics",
@@ -14,7 +14,7 @@
       },
       {
         "name": "nos.sys.track",
-        "version": "1.0"
+        "version": "1.1"
       },
       {
         "name": "nos.reflect",
@@ -23,6 +23,7 @@
     ]
   },
   "custom_types": [ "Config/Graphics.fbs" ],
+  "named_values": [ "Config/CoordinateSystemPresets.json" ],
   "node_definitions": [
     "Config/BillboardMask.nosdef",
     "Config/BillboardPositions.nosdef",
@@ -31,7 +32,10 @@
     "Config/Project.nosdef",
     "Config/TranslationMatrix.nosdef",
     "Config/WorldToScreen.nosdef",
-    "Config/HomographySolver.nosdef"
+    "Config/HomographySolver.nosdef",
+    "Config/ConvertCoordinateFrame.nosdef",
+    "Config/CameraGuide.nosdef",
+    "Config/TrackToTransformQ.nosdef"
   ],
   "binary_path": "Binaries/nosGraphics",
   "associated_nodes": []

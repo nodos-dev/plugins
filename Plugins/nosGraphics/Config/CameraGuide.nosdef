@@ -1,0 +1,82 @@
+{
+	"nodes": [
+		{
+			"class_name": "CameraGuide",
+			"menu_info": {
+				"category": "Graphics|Coordinate System",
+				"display_name": "Camera Guide"
+			},
+			"node": {
+				"class_name": "CameraGuide",
+				"contents_type": "Job",
+				"description": "Passes Source straight through to Out and reports, in its node status, the\negocentric motion needed to bring Source roughly onto Target.\nTranslation is given along Source's local axes (forward/back, right/left,\nup/down) in the chosen coordinate Frame.\nRotation is in camera-operator terms taken against the Frame's vertical:\npan rotates about world up, tilt changes elevation, roll changes bank about\nforward. Roll CW/CCW is as seen by an operator looking along the camera's\nforward axis (through the lens), so looking around (pan + tilt) yields no roll.\nBoth Tracks' Euler rotations are decoded with the same Frame, so no cross-frame\nmismatch is possible. Components below the Position/Angle tolerances are omitted.",
+				"pins": [
+					{
+						"name": "Source",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Track to align. Forwarded unchanged to Out."
+					},
+					{
+						"name": "Target",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Track that Source should be brought onto."
+					},
+					{
+						"name": "Frame",
+						"display_name": "Frame",
+						"type_name": "nos.graphics.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.graphics.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system both Tracks are authored in. Sets which axes map to forward/right/up and the euler encoding both rotations are decoded with."
+					},
+					{
+						"name": "PositionTolerance",
+						"display_name": "Position Tolerance",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.01,
+						"description": "Per-axis translation magnitude below which a direction is considered aligned and omitted from the status."
+					},
+					{
+						"name": "AngleTolerance",
+						"display_name": "Angle Tolerance",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.5,
+						"description": "Rotation magnitude in degrees below which an axis is considered aligned and omitted from the status."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.sys.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Source, forwarded unchanged."
+					},
+					{
+						"name": "Guidance",
+						"type_name": "nos.graphics.TransformGuidance",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Structured correction (alignment, forward/right/up, pan/tilt/roll). Compose display text downstream."
+					},
+					{
+						"name": "GuidanceText",
+						"display_name": "Guidance Text",
+						"type_name": "string",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Prebuilt status text, for a downstream text renderer."
+					}
+				]
+			}
+		}
+	]
+}

@@ -41,7 +41,9 @@ enum Utilities : int
 	PropagateExecution,
 	UploadBufferProvider,
 	BoundedQueue,
+	MultiBoundedQueue,
 	RingBuffer,
+	MultiRingBuffer,
 	Host,
 	DeinterlacedBoundedTextureQueue,
 	DeinterlacedBufferRing,
@@ -57,6 +59,10 @@ enum Utilities : int
 	GridOutputLayout,
 	LoadCubeLUT,
 	RepeatingJunction,
+	MultiLiveOut,
+	TextRender,
+	ScheduleRequest,
+	Counter,
 	Count
 };
 
@@ -75,7 +81,9 @@ nosResult RegisterSink(nosNodeFunctions*);
 nosResult RegisterPropagateExecution(nosNodeFunctions*);
 nosResult RegisterUploadBufferProvider(nosNodeFunctions*);
 nosResult RegisterBoundedQueue(nosNodeFunctions*);
+nosResult RegisterMultiBoundedQueue(nosNodeFunctions*);
 nosResult RegisterRingBuffer(nosNodeFunctions*);
+nosResult RegisterMultiRingBuffer(nosNodeFunctions*);
 nosResult RegisterHost(nosNodeFunctions*);
 nosResult RegisterPin2Json(nosNodeFunctions*);
 nosResult RegisterJson2Pin(nosNodeFunctions*);
@@ -93,6 +101,10 @@ nosResult RegisterFreeOutputLayout(nosNodeFunctions*);
 nosResult RegisterGridOutputLayout(nosNodeFunctions*);
 nosResult RegisterLoadCubeLUT(nosNodeFunctions*);
 nosResult RegisterRepeatingJunction(nosNodeFunctions*);
+nosResult RegisterMultiLiveOut(nosNodeFunctions*);
+nosResult RegisterTextRender(nosNodeFunctions*);
+nosResult RegisterScheduleRequest(nosNodeFunctions*);
+nosResult RegisterCounter(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -129,7 +141,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(PropagateExecution)
 			GEN_CASE_NODE(UploadBufferProvider)
 			GEN_CASE_NODE(BoundedQueue)
+			GEN_CASE_NODE(MultiBoundedQueue)
 			GEN_CASE_NODE(RingBuffer)
+			GEN_CASE_NODE(MultiRingBuffer)
 			GEN_CASE_NODE(Host)
 			GEN_CASE_NODE(DeinterlacedBoundedTextureQueue)
 			GEN_CASE_NODE(DeinterlacedBufferRing)
@@ -145,6 +159,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			GEN_CASE_NODE(GridOutputLayout)
 			GEN_CASE_NODE(LoadCubeLUT)
 			GEN_CASE_NODE(RepeatingJunction)
+			GEN_CASE_NODE(MultiLiveOut)
+			GEN_CASE_NODE(TextRender)
+			GEN_CASE_NODE(ScheduleRequest)
+			GEN_CASE_NODE(Counter)
 		}
 	}
 	return NOS_RESULT_SUCCESS;
@@ -163,7 +181,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* out)
 		}
 		// clang-format off
 		outRenamedFrom[0] = NOS_NAME("nos.fb.ChannelViewerChannels"); outRenamedTo[0] = NOS_NAME("nos.utilities.ChannelViewerChannels");
-		outRenamedFrom[1] = NOS_NAME("nos.fb.ChannelViewerFormats"); outRenamedTo[1] = NOS_NAME("nos.utilities.ChannelViewerFormats");
+		outRenamedFrom[1] = NOS_NAME("nos.fb.ChannelViewerFormats"); outRenamedTo[1] = NOS_NAME("nos.mediaio.ColorSpace");
 		outRenamedFrom[2] = NOS_NAME("nos.fb.GradientKind"); outRenamedTo[2] = NOS_NAME("nos.utilities.GradientKind");
 		outRenamedFrom[3] = NOS_NAME("nos.fb.BlendMode"); outRenamedTo[3] = NOS_NAME("nos.utilities.BlendMode");
 		outRenamedFrom[4] = NOS_NAME("nos.fb.ResizeMethod"); outRenamedTo[4] = NOS_NAME("nos.utilities.ResizeMethod");

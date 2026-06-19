@@ -9,9 +9,3 @@ enum ChannelViewerChannels : uint {
   Cb = 5,
   Cr = 6
 }
-
-enum ChannelViewerFormats : uint {
-  Rec_601 = 0,
-  Rec_709 = 1,
-  Rec_2020 = 2
-}

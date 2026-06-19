@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.filters",
-            "version": "1.7.0"
+            "version": "1.8.0"
         },
         "display_name": "Filters",
         "description": "Collection of image filters.",
@@ -27,6 +27,10 @@
         "Config/Diff.nosdef",
         "Config/GaussianBlur.nosdef",
         "Config/DirectionalBlur.nosdef",
+        "Config/DirectionalDof.nosdef",
+        "Config/DepthOfField.nosdef",
+        "Config/BokehDof.nosdef",
+        "Config/BokehShape.nosdef",
         "Config/KawaseLightStreak.nosdef",
         "Config/Kuwahara.nosdef",
         "Config/PremultiplyAlpha.nosdef",

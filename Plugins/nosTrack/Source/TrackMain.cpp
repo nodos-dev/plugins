@@ -15,12 +15,22 @@ enum TrackNode : int
 	FreeD,
 	UserTrack,
 	AddTrack,
+	RecordTrackCOLMAP,
+	PlaybackTrackCOLMAP,
+	ConvertTrackFrame,
+	ConvertTransform,
+	ReOriginTrack,
 	Count
 };
 
 void RegisterFreeDNode(nosNodeFunctions* functions);
 void RegisterController(nosNodeFunctions* functions);
 void RegisterAddTrack(nosNodeFunctions*);
+void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
+void RegisterPlaybackTrackCOLMAP(nosNodeFunctions*);
+void RegisterConvertTrackFrame(nosNodeFunctions*);
+void RegisterConvertTransform(nosNodeFunctions*);
+void RegisterReOriginTrack(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -40,7 +50,22 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			RegisterController(node);
 			break;
 		case TrackNode::AddTrack:
-			RegisterAddTrack(node); 
+			RegisterAddTrack(node);
+			break;
+		case TrackNode::RecordTrackCOLMAP:
+			RegisterRecordTrackCOLMAP(node);
+			break;
+		case TrackNode::PlaybackTrackCOLMAP:
+			RegisterPlaybackTrackCOLMAP(node);
+			break;
+		case TrackNode::ConvertTrackFrame:
+			RegisterConvertTrackFrame(node);
+			break;
+		case TrackNode::ConvertTransform:
+			RegisterConvertTransform(node);
+			break;
+		case TrackNode::ReOriginTrack:
+			RegisterReOriginTrack(node);
 			break;
 		}
 	}

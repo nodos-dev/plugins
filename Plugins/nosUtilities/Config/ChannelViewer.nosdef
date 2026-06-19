@@ -31,10 +31,10 @@
 					},
 					{
 						"name": "Format",
-						"type_name": "nos.utilities.ChannelViewerFormats",
+						"type_name": "nos.mediaio.ColorSpace",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
-						"data": "Rec_709",
+						"data": "REC709",
 						"description": "Sets the input texture color space,\nRequired for correct YCbCr conversion"
 					},
 					{

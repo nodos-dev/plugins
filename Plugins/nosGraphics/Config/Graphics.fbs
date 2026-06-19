@@ -20,6 +20,55 @@ enum ProjectionType : ubyte
 	Orthographic
 }
 
+// A signed coordinate axis, used to map world-semantic directions onto engine axes.
+enum SignedAxis : ubyte { PosX, NegX, PosY, NegY, PosZ, NegZ }
+
+// Chirality of the coordinate system.
+enum Handedness : ubyte { RightHanded, LeftHanded }
+
+// Intrinsic Euler rotation order. Each value names the sequence of axes a rotation
+// is built from; component i of an Euler triple is always the angle about axis i
+// (rot.x about X, rot.y about Y, rot.z about Z). Mirrors nos.math.EulerOrder
+// (kept local to avoid a cross-plugin schema include).
+enum EulerOrder : ubyte { ZYX, XYZ, YXZ, YZX, ZXY, XZY }
+
+// How a 3-component Euler-angle field (degrees) is decoded into a rotation. The
+// rotation is built as
+//   component i contributes (sign_i * angle_i) about axis i,
+// applied in the sequence given by `order` (intrinsic). Each sign is +1 or -1.
+// Engine conventions are pure DATA -- a new engine needs a new value, not new code:
+//   Unreal      = {ZYX, -1, -1, +1}   (pitch/roll negated vs standard right-handed)
+//   glTF/OpenGL = {YXZ, +1, +1, +1}
+// This is nested into CoordinateFrame (a frame's Euler convention travels with it),
+// but it is only consulted on the Euler-angle path; quaternion consumers ignore it.
+struct EulerEncoding {
+    order: EulerOrder;
+    sign_x: byte;
+    sign_y: byte;
+    sign_z: byte;
+}
+
+// Full convention of a transform endpoint: axis assignments to world-semantic
+// directions (forward, up), the implied handedness, how its Euler-angle fields are
+// decoded (`euler`), and the unit scale. `right` is DERIVED (right = +/-(forward x
+// up), sign from handedness) and not stored. forward and up MUST lie on different
+// axes (else the basis is singular); consumers validate this. `euler` is inert for
+// quaternion-only flows.
+//
+// Common frames are offered as named presets (see CoordinateSystemPresets.json):
+//   Unreal = {PosZ, PosX, LeftHanded,  {ZYX,-1,-1,1}, 0.01}  (Z-up, cm)
+//   glTF   = {PosY, NegZ, RightHanded, {YXZ, 1, 1,1}, 1.0}   (Y-up, m)
+struct CoordinateFrame {
+    up: SignedAxis;
+    forward: SignedAxis;
+    handedness: Handedness;
+    euler: EulerEncoding;
+    // Linear size of one unit, in meters (cm = 0.01, m = 1.0); matches USD's
+    // metersPerUnit. Unit conversion factor between two systems is
+    // src.meters_per_unit / tgt.meters_per_unit.
+    meters_per_unit: double;
+}
+
 table Projection
 {
 	clip_planes: nos.fb.vec2 (native_inline);
@@ -41,6 +90,33 @@ struct Transform
     position: nos.fb.vec3d;
     rotation: nos.fb.vec3d;
     scale:    nos.fb.vec3d;
+}
+
+// Like Transform, but rotation is a quaternion (x, y, z, w) instead of Euler
+// angles, avoiding gimbal lock and convention ambiguity.
+struct TransformQ
+{
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec4d;
+    scale:    nos.fb.vec3d;
+}
+
+enum AlignmentState : ubyte {
+    Aligned = 0,         // within tolerance
+    NeedsCorrection = 1, // a move and/or turn is required
+}
+
+// Egocentric correction to bring a Source transform onto a Target, as computed
+// by CameraGuide. Translation is along Source's local axes; rotation is in
+// operator terms (degrees). Compose display text downstream.
+struct TransformGuidance {
+    alignment: AlignmentState;
+    forward:   float; // +forward / -back
+    right:     float; // +right / -left
+    up:        float; // +up / -down
+    pan:       float; // degrees, + = pan right
+    tilt:      float; // degrees, + = tilt up
+    roll:      float; // degrees, + = roll CCW (operator looking along forward)
 }
 
 // TODO: Move nos.fb.Transform here too

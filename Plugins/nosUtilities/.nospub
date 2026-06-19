@@ -4,6 +4,7 @@
         "*.noscfg",
         "Include/**",
         "Assets/**",
+        "Fonts/**",
         "Shaders/*.{hlsl,glsl,frag,vert,spv,comp}",
         "Binaries/*.{dll,dylib,so}"
     ],
