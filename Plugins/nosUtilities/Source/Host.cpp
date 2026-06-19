@@ -98,9 +98,15 @@ long long GetUpTime()
 	// Windows-specific implementation
 	return GetTickCount64() / 1000;  // Returns uptime in seconds
 #elif __unix__ || __unix || __linux__ || __APPLE__
-	// Unix-based (Linux, macOS, etc.) implementation
+	// Unix-based (Linux, macOS, etc.) implementation.
+	// macOS libc lacks CLOCK_BOOTTIME; CLOCK_MONOTONIC is the closest analogue.
+#if defined(__APPLE__)
+	constexpr clockid_t kUptimeClock = CLOCK_MONOTONIC;
+#else
+	constexpr clockid_t kUptimeClock = CLOCK_BOOTTIME;
+#endif
 	struct timespec ts;
-	if (clock_gettime(CLOCK_BOOTTIME, &ts) == 0) {
+	if (clock_gettime(kUptimeClock, &ts) == 0) {
 		return ts.tv_sec;
 	}
 	else {

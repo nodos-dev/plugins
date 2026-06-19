@@ -13,7 +13,7 @@ struct TriggerOnAnyInput : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	NOS_DECLARE_FUNCTIONS(
+	NOS_DECLARE_FUNCTIONS_FOR(TriggerOnAnyInput,
 		NOS_ADD_FUNCTION(NOS_NAME("Trigger"), Branch),
 	);
 };

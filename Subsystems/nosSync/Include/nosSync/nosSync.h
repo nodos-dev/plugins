@@ -11,8 +11,8 @@
 
 NOS_BEGIN_C_LINKAGE
 
-#define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1UL
-#define NOS_SYNC_NO_SYNC_EVENT_GROUP_ID 0UL
+#define NOS_SYNC_DEFAULT_EVENT_GROUP_ID 1u
+#define NOS_SYNC_NO_SYNC_EVENT_GROUP_ID 0u
 	
 typedef struct nosWaitResult {
 	uint64_t TimeSinceLastEventNs;
