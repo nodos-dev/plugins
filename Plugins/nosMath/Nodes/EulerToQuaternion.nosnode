@@ -1,0 +1,38 @@
+{
+	"nodes": [
+		{
+			"class_name": "EulerToQuaternion",
+			"menu_info": {
+				"category": "Math|Linear Algebra",
+				"display_name": "Euler To Quaternion"
+			},
+			"node": {
+				"class_name": "EulerToQuaternion",
+				"contents_type": "Job",
+				"description": "Converts an Euler-angle rotation (degrees) to a unit quaternion (x, y, z, w). The Order pin selects the intrinsic rotation order applied to the components of the input vec3 (e.g. ZYX means R = Rz(rot.z) * Ry(rot.y) * Rx(rot.x)). Default ZYX matches the FreeD/Track convention.",
+				"pins": [
+					{
+						"name": "Euler",
+						"type_name": "nos.fb.vec3d",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Order",
+						"type_name": "nos.math.EulerOrder",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": "ZYX",
+						"description": "Euler intrinsic rotation order applied to the (rot.x, rot.y, rot.z) components."
+					},
+					{
+						"name": "Quaternion",
+						"type_name": "nos.fb.vec4d",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}

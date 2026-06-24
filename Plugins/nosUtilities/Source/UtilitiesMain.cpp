@@ -18,6 +18,8 @@ enum class Utilities : size_t
 	PrintLog,
 	Sink,
 	Time,
+	Counter,
+	TextRender,
 	Count,
 };
 
@@ -25,6 +27,8 @@ void RegisterHost(nosNodeFunctions*);
 void RegisterPrintLog(nosNodeFunctions*);
 void RegisterSink(nosNodeFunctions*);
 void RegisterTime(nosNodeFunctions*);
+nosResult RegisterCounter(nosNodeFunctions*);
+nosResult RegisterTextRender(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -37,6 +41,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 	RegisterPrintLog(outList[static_cast<size_t>(Utilities::PrintLog)]);
 	RegisterSink(outList[static_cast<size_t>(Utilities::Sink)]);
 	RegisterTime(outList[static_cast<size_t>(Utilities::Time)]);
+	RegisterCounter(outList[static_cast<size_t>(Utilities::Counter)]);
+	RegisterTextRender(outList[static_cast<size_t>(Utilities::TextRender)]);
 	return NOS_RESULT_SUCCESS;
 }
 

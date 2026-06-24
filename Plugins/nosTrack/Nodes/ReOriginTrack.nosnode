@@ -1,0 +1,79 @@
+{
+	"nodes": [
+		{
+			"class_name": "nos.track.ReOriginTrack",
+			"menu_info": {
+				"category": "Track|Coordinate System",
+				"display_name": "Re-Origin Track",
+				"name_aliases": [ "tare", "zero track", "set origin", "reorigin" ]
+			},
+			"node": {
+				"class_name": "nos.track.ReOriginTrack",
+				"display_name": "Re-Origin Track",
+				"contents_type": "Job",
+				"description": "Re-expresses the input track relative to a marked origin pose.\nClick Mark Origin to capture the current input pose as the reference;\noutput location/rotation then become the input pose in that origin's local frame\n(rigid-body relative: inverse(T_origin) * T_input). All other fields (fov, zoom,\nfocus, sensor, lens, ...) pass through unchanged. Until an origin is marked the\noutput equals the input. Set CoordinateSystem to match the connected track.",
+				"pins": [
+					{
+						"name": "Input",
+						"display_name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Camera track to re-origin. Interpreted in the CoordinateSystem convention\n(location, rotation Euler)."
+					},
+					{
+						"name": "CoordinateSystem",
+						"display_name": "Coordinate System",
+						"type_name": "nos.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the connected track (axes, handedness, euler encoding).\nUsed to decode/encode rotation when computing the relative pose.\nDefault matches FreeD / UE convention."
+					},
+					{
+						"name": "Origin",
+						"display_name": "Origin",
+						"type_name": "nos.track.Track",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"location": { "x": 0.0, "y": 0.0, "z": 0.0 },
+							"rotation": { "x": 0.0, "y": 0.0, "z": 0.0 },
+							"fov": 0.0, "zoom": 0.0, "focus": 0.0, "render_ratio": 0.0,
+							"sensor_size": { "x": 0.0, "y": 0.0 },
+							"pixel_aspect_ratio": 0.0, "nodal_offset": 0.0, "focus_distance": 0.0,
+							"lens_distortion": { "k1k2": { "x": 0.0, "y": 0.0 }, "center_shift": { "x": 0.0, "y": 0.0 }, "distortion_scale": 0.0 }
+						},
+						"meta_data_map": [
+							{ "key": "PinHidden", "value": "true" }
+						],
+						"description": "Marked origin pose. Captured by Mark Origin, reset by Clear Origin.\nHidden; persisted with the node so the origin survives save/reload."
+					},
+					{
+						"name": "Output",
+						"display_name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Input track with location/rotation re-expressed relative to the marked origin.\nAll non-pose fields are passed through unchanged."
+					}
+				],
+				"functions": [
+					{
+						"class_name": "ReOriginTrack_MarkOrigin",
+						"display_name": "Mark Origin",
+						"contents_type": "Job",
+						"pins": []
+					},
+					{
+						"class_name": "ReOriginTrack_ClearOrigin",
+						"display_name": "Clear Origin",
+						"contents_type": "Job",
+						"pins": []
+					}
+				]
+			}
+		}
+	]
+}

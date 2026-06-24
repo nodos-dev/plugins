@@ -1,0 +1,69 @@
+include "Common.fbs";
+
+// Shared coordinate-system / transform types, owned by nos.track (the lowest-level
+// shared plugin). nos.graphics and nos.geometry depend on nos.track and use these
+// via nos.track.* — this avoids a circular nos.graphics<->nos.track dependency.
+// The engine requires a plugin's fbs types to be in the plugin's own namespace,
+// so these are nos.track.* (NOT nos.graphics.*).
+namespace nos.track;
+
+// A signed coordinate axis, used to map world-semantic directions onto engine axes.
+enum SignedAxis : ubyte { PosX, NegX, PosY, NegY, PosZ, NegZ }
+
+// Chirality of the coordinate system.
+enum Handedness : ubyte { RightHanded, LeftHanded }
+
+// Intrinsic Euler rotation order. Component i of an Euler triple is always the
+// angle about axis i (rot.x about X, rot.y about Y, rot.z about Z).
+enum EulerOrder : ubyte { ZYX, XYZ, YXZ, YZX, ZXY, XZY }
+
+// How a 3-component Euler-angle field (degrees) is decoded into a rotation.
+struct EulerEncoding {
+    order: EulerOrder;
+    sign_x: byte;
+    sign_y: byte;
+    sign_z: byte;
+}
+
+// Full convention of a transform endpoint: axis assignments to world-semantic
+// directions (forward, up), the implied handedness, how its Euler-angle fields are
+// decoded (`euler`), and the unit scale. `right` is DERIVED and not stored.
+struct CoordinateFrame {
+    up: SignedAxis;
+    forward: SignedAxis;
+    handedness: Handedness;
+    euler: EulerEncoding;
+    // Linear size of one unit, in meters (cm = 0.01, m = 1.0).
+    meters_per_unit: double;
+}
+
+struct Transform {
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec3d;
+    scale:    nos.fb.vec3d;
+}
+
+// Like Transform, but rotation is a quaternion (x, y, z, w).
+struct TransformQ {
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec4d;
+    scale:    nos.fb.vec3d;
+}
+
+enum AlignmentState : ubyte {
+    Aligned = 0,         // within tolerance
+    NeedsCorrection = 1, // a move and/or turn is required
+}
+
+// Egocentric correction to bring a Source transform onto a Target, as computed
+// by CameraGuide. Translation is along Source's local axes; rotation is in
+// operator terms (degrees).
+struct TransformGuidance {
+    alignment: AlignmentState;
+    forward:   float; // +forward / -back
+    right:     float; // +right / -left
+    up:        float; // +up / -down
+    pan:       float; // degrees, + = pan right
+    tilt:      float; // degrees, + = tilt up
+    roll:      float; // degrees, + = roll CCW (operator looking along forward)
+}
