@@ -34,6 +34,8 @@ nosResult RegisterTexture2Buffer(nosNodeFunctions*);
 nosResult RegisterTextureProvider(nosNodeFunctions*);
 nosResult RegisterUploadBuffer(nosNodeFunctions*);
 nosResult RegisterUploadBufferProvider(nosNodeFunctions*);
+nosResult RegisterMultiRingBuffer(nosNodeFunctions*);
+nosResult RegisterMultiBoundedQueue(nosNodeFunctions*);
 }
 
 namespace nos::resource
@@ -58,6 +60,8 @@ enum class Nodes : size_t
 	TextureProvider,
 	UploadBuffer,
 	UploadBufferProvider,
+	MultiRingBuffer,
+	MultiBoundedQueue,
 	Count,
 };
 
@@ -101,6 +105,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(TextureProvider)
 			GEN_CASE_NODE(UploadBuffer)
 			GEN_CASE_NODE(UploadBufferProvider)
+			GEN_CASE_NODE(MultiRingBuffer)
+			GEN_CASE_NODE(MultiBoundedQueue)
 		}
 	}
 

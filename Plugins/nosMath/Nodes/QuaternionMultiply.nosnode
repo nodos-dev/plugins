@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{
+			"class_name": "QuaternionMultiply",
+			"menu_info": {
+				"category": "Math|Linear Algebra",
+				"display_name": "Quaternion Multiply"
+			},
+			"node": {
+				"class_name": "QuaternionMultiply",
+				"contents_type": "Job",
+				"description": "Hamilton product of two unit quaternions: Result = A * B (each as (x, y, z, w)). Composing rotations: A * B applies B first, then A. To rotate (conjugate) a quaternion Q by R, compute R * Q * conjugate(R).",
+				"pins": [
+					{
+						"name": "A",
+						"type_name": "nos.fb.vec4d",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "B",
+						"type_name": "nos.fb.vec4d",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Result",
+						"type_name": "nos.fb.vec4d",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					}
+				]
+			}
+		}
+	]
+}

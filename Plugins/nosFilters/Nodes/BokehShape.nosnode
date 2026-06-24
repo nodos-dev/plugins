@@ -1,0 +1,93 @@
+{
+	"nodes": [
+		{
+			"class_name": "BokehShape",
+			"menu_info": {
+				"category": "Filters",
+				"display_name": "Bokeh Shape"
+			},
+			"node": {
+				"class_name": "BokehShape",
+				"name": "Bokeh Shape",
+				"description": "Procedural bokeh kernel generator. Produces a unit-disc grayscale mask shaped like a regular polygon aperture (blade count, roundness, rotation), with soft edge and optional rim brightening. Feed the Output into a Bokeh DoF node's BokehShape pin.",
+				"contents_type": "Job",
+				"contents": {
+					"type": "nos.sys.vulkan.GPUNode",
+					"options": {
+						"shader": "Shaders/BokehShape.frag"
+					}
+				},
+				"pins": [
+					{
+						"name": "BladeCount",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 6.0,
+						"min": 0.0,
+						"max": 16.0
+					},
+					{
+						"name": "Roundness",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.3,
+						"min": 0.0,
+						"max": 1.0
+					},
+					{
+						"name": "Rotation",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0,
+						"min": -6.2832,
+						"max": 6.2832
+					},
+					{
+						"name": "EdgeSoftness",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.04,
+						"min": 0.0,
+						"max": 0.5
+					},
+					{
+						"name": "RimBoost",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.0,
+						"min": 0.0,
+						"max": 4.0
+					},
+					{
+						"name": "RimWidth",
+						"type_name": "float",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0.08,
+						"min": 0.005,
+						"max": 0.5
+					},
+					{
+						"name": "Output",
+						"type_name": "nos.sys.vulkan.Texture",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"data": {
+							"resolution": "CUSTOM",
+							"width": 128,
+							"height": 128,
+							"format": "R16_UNORM",
+							"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET",
+							"filtering": "LINEAR"
+						}
+					}
+				]
+			}
+		}
+	]
+}

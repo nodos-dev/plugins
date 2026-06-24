@@ -1,0 +1,39 @@
+{
+	"nodes": [
+		{
+			"class_name": "TrackToView",
+			"menu_info": {
+				"category": "Rendering",
+				"display_name": "Track To View"
+			},
+			"node": {
+				"description": "Builds a RenderView from tracked camera data and clip planes.",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Tracked camera data used to derive the view and perspective projection."
+					},
+					{
+						"name": "Clip",
+						"type_name": "nos.fb.vec2",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Near and far clip planes for the generated projection.",
+						"data": {"x": 0.1, "y": 10000.0}
+					},
+					{
+						"name": "View",
+						"type_name": "nos.graphics.RenderView",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Render view built from the track transform, sensor settings, and clip planes."
+					}
+				]
+			}
+		}
+	]
+}

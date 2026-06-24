@@ -1,0 +1,50 @@
+{
+	"nodes": [
+		{
+			"class_name": "ConvertTransform",
+			"menu_info": {
+				"category": "Track|Coordinate System",
+				"display_name": "Convert Transform"
+			},
+			"node": {
+				"class_name": "ConvertTransform",
+				"contents_type": "Job",
+				"description": "Converts a Transform between coordinate systems.\nThe Source and Target systems select axis assignments, handedness, units, and the Euler convention used for the rotation field.\nPosition: basis-changed (Source -> Target), then scaled by the ratio of the two systems' meters_per_unit (e.g. cm -> m yields 0.01).\nRotation: built in the source Euler convention, conjugated by the basis-change matrix, re-extracted in the target convention.\nScale: axis factors are reordered to follow the basis change.",
+				"pins": [
+					{
+						"name": "In",
+						"type_name": "nos.fb.Transform",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "SourceFrame",
+						"display_name": "Source Frame",
+						"type_name": "nos.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the input Transform."
+					},
+					{
+						"name": "TargetFrame",
+						"display_name": "Target Frame",
+						"type_name": "nos.track.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the output Transform."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.fb.Transform",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
+}

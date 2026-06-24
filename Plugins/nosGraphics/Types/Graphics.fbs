@@ -1,0 +1,43 @@
+include "Common.fbs";
+
+namespace nos.graphics;
+
+// NOTE: The coordinate-system / transform types (CoordinateFrame, SignedAxis,
+// Handedness, EulerOrder, EulerEncoding, Transform, TransformQ, AlignmentState,
+// TransformGuidance) live in nos.track (Types/Coordinates.fbs, same nos.graphics
+// namespace) to avoid a circular nos.graphics<->nos.track plugin dependency.
+// Include <nosTrack/Coordinates_generated.h> for those.
+
+table PerspectiveProjection
+{
+	aspect_ratio: float;
+	fov_x: float;
+}
+
+table OrthographicProjection
+{
+	width: float;
+	height: float;
+}
+
+enum ProjectionType : ubyte
+{
+	Perspective,
+	Orthographic
+}
+
+table Projection
+{
+	clip_planes: nos.fb.vec2 (native_inline);
+	center_shift: nos.fb.vec2 (native_inline);
+	projection_type: ProjectionType;
+	perspective: PerspectiveProjection;
+	orthographic: OrthographicProjection;
+}
+
+table RenderView
+{
+	view: nos.fb.mat4(native_inline);
+	left_handed_projection_matrix: nos.fb.mat4(native_inline);
+	projection: Projection;
+}
