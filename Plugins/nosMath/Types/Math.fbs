@@ -1,0 +1,10 @@
+namespace nos.math;
+
+enum EulerOrder : ubyte {
+	ZYX = 0,
+	XYZ = 1,
+	YXZ = 2,
+	YZX = 3,
+	ZXY = 4,
+	XZY = 5,
+}

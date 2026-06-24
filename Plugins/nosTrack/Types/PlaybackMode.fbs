@@ -1,0 +1,9 @@
+namespace nos.track;
+
+// Selects how PlaybackTrackCOLMAP indexes into the recorded frames.
+enum PlaybackTrackMode : uint
+{
+    FrameIndex = 0,  // Use the InFrameIndex pin as a 0-based offset.
+    Timecode = 1,    // Look up by Timecode string from timecodes.txt.
+    FrameNumber = 2, // Look up by FrameNumber column from timecodes.txt.
+}

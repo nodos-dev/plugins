@@ -1,0 +1,56 @@
+{
+	"nodes": [
+		{
+			"class_name": "MultiBoundedQueue",
+			"menu_info": {
+				"category": "Utilities",
+				"display_name": "Multi Bounded Queue",
+				"name_aliases": [ "data structure", "algorithm", "circular", "multi", "fifo" ]
+			},
+			"node": {
+				"class_name": "MultiBoundedQueue",
+				"display_name": "Multi Bounded Queue",
+				"contents_type": "Job",
+				"description": "Bounded FIFO queue with one or more independent input/output channel pairs sharing a single bound. Right-click the node to add a channel, right-click an Input_X or Output_X pin to remove its channel.",
+				"pins": [
+					{
+						"name": "Thread",
+						"type_name": "nos.exe",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Size",
+						"type_name": "uint",
+						"data": 2,
+						"max": 120,
+						"min": 1,
+						"show_as": "PROPERTY",
+						"can_show_as": "PROPERTY_ONLY"
+					},
+					{
+						"name": "Alignment",
+						"description": "Used for creating memory-aligned buffers in memory",
+						"type_name": "uint",
+						"def": 0,
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Input_A",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "Output_A",
+						"type_name": "nos.Generic",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"live": true
+					}
+				]
+			}
+		}
+	]
+}

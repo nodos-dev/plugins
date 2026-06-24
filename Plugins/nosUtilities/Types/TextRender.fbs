@@ -1,0 +1,15 @@
+namespace nos.utilities;
+
+enum TextHAlign : uint
+{
+    LEFT   = 0,
+    CENTER = 1,
+    RIGHT  = 2,
+}
+
+enum TextVAlign : uint
+{
+    TOP    = 0,
+    MIDDLE = 1,
+    BOTTOM = 2,
+}

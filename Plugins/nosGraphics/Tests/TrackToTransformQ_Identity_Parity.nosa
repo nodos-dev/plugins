@@ -1,0 +1,503 @@
+{
+  "info": {
+    "version": "1.4.0.b0",
+    "loaded_modules": [
+      {
+        "name": "nos.test",
+        "version": "0.3.1"
+      },
+      {
+        "name": "nos.reflect",
+        "version": "3.0.0"
+      },
+      {
+        "name": "nos.graphics",
+        "version": "0.5.0"
+      }
+    ]
+  },
+  "graph": {
+    "id": "a18e8b0c-1c28-4082-a6c9-3c01e4c7945d",
+    "pos": {
+      "x": 0,
+      "y": 0
+    },
+    "contents_type": "Graph",
+    "contents": {
+      "nodes": [
+        {
+          "id": "9d32967d-ea68-4a7a-9248-df7674c2ff72",
+          "name": "Thread",
+          "class_name": "nos.Thread",
+          "pins": [
+            {
+              "id": "87f7f0e3-52a4-446f-a7db-6fcf4d8422a2",
+              "name": "Run",
+              "type_name": "nos.exe",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": {},
+              "def": {},
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "live": true
+            },
+            {
+              "id": "ddd80fbe-be24-4c23-ada3-ec45baad4611",
+              "name": "Importance",
+              "type_name": "ulong",
+              "show_as": "PROPERTY",
+              "can_show_as": "PROPERTY_ONLY",
+              "visualizers": [],
+              "data": 0,
+              "def": 0,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": 86,
+            "y": -94
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 0
+          },
+          "always_execute": true
+        },
+        {
+          "id": "ec6cbba6-7413-46c9-bbfa-a24148800655",
+          "name": "TestScheduler",
+          "class_name": "nos.test.TestScheduler",
+          "pins": [
+            {
+              "id": "f97c713b-ee2c-4e87-93b5-3cb9d77f0a4e",
+              "name": "Run",
+              "type_name": "nos.exe",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": {},
+              "def": {},
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "f1371c0f-f252-4e00-95fc-e360306f47b7",
+              "name": "Sink",
+              "type_name": "uint",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "fd53adf3-6280-41a6-aa6b-5b56a5e2ebf8",
+              "name": "FreeRun",
+              "type_name": "bool",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": false,
+              "def": false,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "28a8823a-b240-4fd1-af5e-6dc756b142e8",
+              "name": "DeltaTime",
+              "type_name": "nos.fb.vec2u",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": {
+                "x": 1,
+                "y": 60
+              },
+              "def": {
+                "x": 1,
+                "y": 60
+              },
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": 324,
+            "y": 7
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 3,
+            "patch": 1
+          }
+        },
+        {
+          "id": "de7ad34d-d2ac-4387-a959-3ac150355dd7",
+          "name": "Assert",
+          "class_name": "nos.test.Assert",
+          "pins": [
+            {
+              "id": "698c6390-5c12-41a4-bb29-d5d7285ac2c3",
+              "name": "Behaviour",
+              "type_name": "nos.test.AssertionBehaviour",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": "EXIT_WITH_STATUS_CODE",
+              "def": "EXIT_WITH_STATUS_CODE",
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "5ddf38d0-3bca-4821-9c60-8bdaa12d4531",
+              "name": "NumFramesToWait",
+              "type_name": "uint",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": 0,
+              "def": 0,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "aaf9d12a-1ab7-4d4c-8a9c-6e2daa20cdf7",
+              "name": "FrameCount",
+              "type_name": "uint",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "4949797f-5639-404e-abcb-15d3853d154c",
+              "name": "Condition",
+              "type_name": "bool",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": true,
+              "def": true,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "ddb090ff-945a-4cb5-aa4b-cf52f508e005",
+              "name": "NumFramesToAssertOver",
+              "type_name": "uint",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "min": 1
+            }
+          ],
+          "pos": {
+            "x": 93,
+            "y": 11
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 3,
+            "patch": 1
+          }
+        },
+        {
+          "id": "55de3cdc-ec06-42aa-ba6b-b7a9d81473fa",
+          "name": "IsEqual",
+          "class_name": "nos.reflect.IsEqual",
+          "pins": [
+            {
+              "id": "93af78ff-baed-434e-9b3b-babec9371555",
+              "name": "A",
+              "type_name": "nos.track.TransformQ",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": {
+                "position": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                },
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0,
+                  "z": 1.0
+                }
+              },
+              "def": {
+                "position": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                },
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0,
+                  "z": 1.0
+                }
+              },
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "066d2721-77b5-416d-9760-633c48428efc",
+              "name": "B",
+              "type_name": "nos.track.TransformQ",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": {
+                "position": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                },
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0,
+                  "z": 1.0
+                }
+              },
+              "def": {
+                "position": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0,
+                  "w": 1.0
+                },
+                "scale": {
+                  "x": 1.0,
+                  "y": 1.0,
+                  "z": 1.0
+                }
+              },
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "d81bec80-6622-4b10-b344-6801d04d1416",
+              "name": "IsEqual",
+              "type_name": "bool",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": true,
+              "def": true,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": -105,
+            "y": 4
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 3,
+            "minor": 0,
+            "patch": 0
+          }
+        },
+        {
+          "id": "e6793293-d191-4804-819a-f1b82c9663b9",
+          "name": "TrackToTransformQ",
+          "class_name": "nos.graphics.TrackToTransformQ",
+          "pins": [
+            {
+              "id": "31f45aa9-f88a-41b6-9300-2264b2e7356c",
+              "name": "Track",
+              "type_name": "nos.track.Track",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "data": {
+                "location": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              },
+              "def": {
+                "location": {
+                  "x": 1.0,
+                  "y": 2.0,
+                  "z": 3.0
+                },
+                "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              }
+            },
+            {
+              "id": "0f3ba1fd-bd2a-4042-a99f-48d67381d5af",
+              "name": "Frame",
+              "type_name": "nos.track.CoordinateFrame",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "data": {
+                "up": "PosZ",
+                "forward": "PosX",
+                "handedness": "LeftHanded",
+                "euler": {
+                  "order": "ZYX",
+                  "sign_x": -1,
+                  "sign_y": -1,
+                  "sign_z": 1
+                },
+                "meters_per_unit": 0.01
+              },
+              "def": {
+                "up": "PosZ",
+                "forward": "PosX",
+                "handedness": "LeftHanded",
+                "euler": {
+                  "order": "ZYX",
+                  "sign_x": -1,
+                  "sign_y": -1,
+                  "sign_z": 1
+                },
+                "meters_per_unit": 0.01
+              }
+            },
+            {
+              "id": "d7e7bf02-6c91-4f71-8ff5-81c1ea37a43d",
+              "name": "Out",
+              "type_name": "nos.track.TransformQ",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": -266,
+            "y": 14
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 0
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "87f7f0e3-52a4-446f-a7db-6fcf4d8422a2",
+          "to": "f97c713b-ee2c-4e87-93b5-3cb9d77f0a4e",
+          "id": "d4931938-434b-49d9-aee4-8da2ba610b61"
+        },
+        {
+          "from": "aaf9d12a-1ab7-4d4c-8a9c-6e2daa20cdf7",
+          "to": "f1371c0f-f252-4e00-95fc-e360306f47b7",
+          "id": "ae149eb4-fcc8-4208-92fd-bafbcbf77f7f"
+        },
+        {
+          "from": "d81bec80-6622-4b10-b344-6801d04d1416",
+          "to": "4949797f-5639-404e-abcb-15d3853d154c",
+          "id": "b4040e44-09c6-409a-b7b3-902b0d9f1c1f"
+        },
+        {
+          "from": "d7e7bf02-6c91-4f71-8ff5-81c1ea37a43d",
+          "to": "93af78ff-baed-434e-9b3b-babec9371555",
+          "id": "52a09a7c-4c09-486c-93e5-cdd11f6251e2"
+        }
+      ]
+    },
+    "plugin_version": {
+      "major": 0,
+      "minor": 0,
+      "patch": 0
+    }
+  }
+}

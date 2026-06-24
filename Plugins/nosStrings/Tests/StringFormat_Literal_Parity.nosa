@@ -1,0 +1,378 @@
+{
+  "info": {
+    "version": "1.4.0.b0",
+    "loaded_modules": [
+      {
+        "name": "nos.test",
+        "version": "0.3.1"
+      },
+      {
+        "name": "nos.reflect",
+        "version": "3.0.0"
+      },
+      {
+        "name": "nos.str",
+        "version": "1.1.0"
+      }
+    ]
+  },
+  "graph": {
+    "id": "0ca69677-9c31-4662-9b93-afff25796353",
+    "pos": {
+      "x": 0,
+      "y": 0
+    },
+    "contents_type": "Graph",
+    "contents": {
+      "nodes": [
+        {
+          "id": "2716a0b8-e291-4bb4-9923-d3dc029ada9b",
+          "name": "Thread",
+          "class_name": "nos.Thread",
+          "pins": [
+            {
+              "id": "88578880-377c-4fa0-9fcd-4eafb4e9be56",
+              "name": "Run",
+              "type_name": "nos.exe",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": {},
+              "def": {},
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "live": true
+            },
+            {
+              "id": "b9401cdd-7554-4191-a8b9-7fe2684463e3",
+              "name": "Importance",
+              "type_name": "ulong",
+              "show_as": "PROPERTY",
+              "can_show_as": "PROPERTY_ONLY",
+              "visualizers": [],
+              "data": 0,
+              "def": 0,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": 86,
+            "y": -94
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 0
+          },
+          "always_execute": true
+        },
+        {
+          "id": "c1ee74b1-dedc-42cc-a382-96b030ff88a3",
+          "name": "TestScheduler",
+          "class_name": "nos.test.TestScheduler",
+          "pins": [
+            {
+              "id": "f1f889dc-9c64-4c38-ada9-5f675ad05bd9",
+              "name": "Run",
+              "type_name": "nos.exe",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": {},
+              "def": {},
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "8fe58f58-9a07-475c-9ecd-bdfe47894e83",
+              "name": "Sink",
+              "type_name": "uint",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "089610dc-beea-46a3-9510-e7fb61e125b6",
+              "name": "FreeRun",
+              "type_name": "bool",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": false,
+              "def": false,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "e7499c80-620c-4973-871d-040f2695e582",
+              "name": "DeltaTime",
+              "type_name": "nos.fb.vec2u",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": {
+                "x": 1,
+                "y": 60
+              },
+              "def": {
+                "x": 1,
+                "y": 60
+              },
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": 324,
+            "y": 7
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 3,
+            "patch": 1
+          }
+        },
+        {
+          "id": "2b93c4aa-7a12-4973-8ea4-73811fa7e09a",
+          "name": "Assert",
+          "class_name": "nos.test.Assert",
+          "pins": [
+            {
+              "id": "e318b7ee-3c6c-4722-b1fd-a2f259fdfbe0",
+              "name": "Behaviour",
+              "type_name": "nos.test.AssertionBehaviour",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": "EXIT_WITH_STATUS_CODE",
+              "def": "EXIT_WITH_STATUS_CODE",
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "34c24e32-526b-4780-bde2-57beee932654",
+              "name": "NumFramesToWait",
+              "type_name": "uint",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": 0,
+              "def": 0,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "ee6cdec2-dd84-4f02-a728-3f393ef0b75a",
+              "name": "FrameCount",
+              "type_name": "uint",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "2053afbb-c435-47ca-accf-5e57ee76dac8",
+              "name": "Condition",
+              "type_name": "bool",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": true,
+              "def": true,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "adf7e7ee-d189-4fbc-bad4-58e780b095fb",
+              "name": "NumFramesToAssertOver",
+              "type_name": "uint",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": 1,
+              "def": 1,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "min": 1
+            }
+          ],
+          "pos": {
+            "x": 93,
+            "y": 11
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 3,
+            "patch": 1
+          }
+        },
+        {
+          "id": "d2da15a7-4153-4ba7-9d70-cf9d49995043",
+          "name": "IsEqual",
+          "class_name": "nos.reflect.IsEqual",
+          "pins": [
+            {
+              "id": "083dfe18-10e0-4e2c-9f92-849d24cab19d",
+              "name": "A",
+              "type_name": "string",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": "hello",
+              "def": "hello",
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "d0cb3c69-e02d-4848-8083-5891d4feec69",
+              "name": "B",
+              "type_name": "string",
+              "show_as": "INPUT_PIN",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "data": "hello",
+              "def": "hello",
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            },
+            {
+              "id": "4ef9339d-5c4d-43f6-b330-bead1e3eb7c6",
+              "name": "IsEqual",
+              "type_name": "bool",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "data": true,
+              "def": true,
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": -105,
+            "y": 4
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 3,
+            "minor": 0,
+            "patch": 0
+          }
+        },
+        {
+          "id": "737f4f27-e884-4e0e-8f65-b6bc32c68a14",
+          "name": "StringFormat",
+          "class_name": "nos.str.StringFormat",
+          "pins": [
+            {
+              "id": "5140d6ae-81d1-4fad-afa6-137686df00a9",
+              "name": "Format",
+              "type_name": "string",
+              "show_as": "PROPERTY",
+              "can_show_as": "INPUT_PIN_OR_PROPERTY",
+              "visualizers": [],
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {},
+              "data": "hello",
+              "def": "hello"
+            },
+            {
+              "id": "430d5cdb-08f8-4aea-9d19-ec75fba336ae",
+              "name": "Output",
+              "type_name": "string",
+              "show_as": "OUTPUT_PIN",
+              "can_show_as": "OUTPUT_PIN_ONLY",
+              "visualizers": [],
+              "contents_type": "JobPin",
+              "contents": {},
+              "orphan_state": {}
+            }
+          ],
+          "pos": {
+            "x": -266,
+            "y": 14
+          },
+          "contents_type": "Job",
+          "contents": {
+            "type": ""
+          },
+          "function_category": "Default Node",
+          "plugin_version": {
+            "major": 0,
+            "minor": 0,
+            "patch": 0
+          }
+        }
+      ],
+      "connections": [
+        {
+          "from": "88578880-377c-4fa0-9fcd-4eafb4e9be56",
+          "to": "f1f889dc-9c64-4c38-ada9-5f675ad05bd9",
+          "id": "4f25a328-4b24-4ba3-b327-3b174edb9fde"
+        },
+        {
+          "from": "ee6cdec2-dd84-4f02-a728-3f393ef0b75a",
+          "to": "8fe58f58-9a07-475c-9ecd-bdfe47894e83",
+          "id": "523a4b86-a3e5-4957-b49f-7502102d59e8"
+        },
+        {
+          "from": "4ef9339d-5c4d-43f6-b330-bead1e3eb7c6",
+          "to": "2053afbb-c435-47ca-accf-5e57ee76dac8",
+          "id": "3786ff81-3ae1-441f-9165-3863a8427141"
+        },
+        {
+          "from": "430d5cdb-08f8-4aea-9d19-ec75fba336ae",
+          "to": "083dfe18-10e0-4e2c-9f92-849d24cab19d",
+          "id": "9840c47c-cdb6-49ee-9ca5-e979a957129a"
+        }
+      ]
+    },
+    "plugin_version": {
+      "major": 0,
+      "minor": 0,
+      "patch": 0
+    }
+  }
+}

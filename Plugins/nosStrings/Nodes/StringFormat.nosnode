@@ -1,0 +1,41 @@
+{
+	"nodes": [
+		{
+			"class_name": "StringFormat",
+			"menu_info": {
+				"category": "String",
+				"display_name": "String Format",
+				"hide_in_context_menu": false,
+				"name_aliases": [
+					"format",
+					"template",
+					"interpolate",
+					"sprintf",
+					"compose"
+				]
+			},
+			"node": {
+				"class_name": "StringFormat",
+				"contents_type": "Job",
+				"description": "Builds a string from a format expression. Each {name} placeholder opens an\ninput pin; an optional :spec uses std::format syntax and sets the pin type\n(integer for d/b/o/x/c, floating for e/f/g/%, string otherwise). Write\nliteral braces as {{ and }}.",
+				"display_name": "String Format",
+				"pins": [
+					{
+						"name": "Format",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Format expression. Placeholders like {user} or {count:d} open input pins."
+					},
+					{
+						"name": "Output",
+						"type_name": "string",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Formatted string"
+					}
+				]
+			}
+		}
+	]
+}
