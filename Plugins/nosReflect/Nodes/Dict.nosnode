@@ -1,0 +1,62 @@
+{
+	"nodes": [
+		{
+			"class_name": "MakeDict",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Make Dict",
+				"name_aliases": [
+					"dictionary",
+					"map",
+					"record",
+					"object",
+					"struct"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"description": "Bundles named input pins into a Dict. The pin's display name is the key; add or remove keys from the node's context menu.",
+				"pins": [
+					{
+						"name": "Output",
+						"type_name": "nos.Dict",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "Field 0",
+						"display_name": "Field 0",
+						"type_name": "nos.Generic",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		},
+		{
+			"class_name": "BreakDict",
+			"menu_info": {
+				"category": "Type",
+				"display_name": "Break Dict",
+				"name_aliases": [
+					"dictionary",
+					"unpack",
+					"map"
+				]
+			},
+			"node": {
+				"contents_type": "Job",
+				"description": "Decomposes a Dict into one output pin per entry.",
+				"pins": [
+					{
+						"name": "Input",
+						"type_name": "nos.Dict",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	],
+	"schema_version": "1.4-v1"
+}

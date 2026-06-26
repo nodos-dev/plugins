@@ -21,6 +21,8 @@ enum Nodes : size_t
 	Make = 0,
 	MakeDynamic,
 	Break,
+	MakeDict,
+	BreakDict,
 	Indexer,
 	Array,
 	Delay,
@@ -46,6 +48,8 @@ enum Nodes : size_t
 nosResult RegisterMake(nosNodeFunctions* node);
 nosResult RegisterMakeDynamic(nosNodeFunctions* node);
 nosResult RegisterBreak(nosNodeFunctions* node);
+nosResult RegisterMakeDict(nosNodeFunctions* node);
+nosResult RegisterBreakDict(nosNodeFunctions* node);
 nosResult RegisterIndexer(nosNodeFunctions* node);
 nosResult RegisterArray(nosNodeFunctions* node);
 nosResult RegisterDelay(nosNodeFunctions* node);
@@ -88,6 +92,8 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			GEN_CASE_NODE(Make)
 			GEN_CASE_NODE(MakeDynamic)
 			GEN_CASE_NODE(Break)
+			GEN_CASE_NODE(MakeDict)
+			GEN_CASE_NODE(BreakDict)
 			GEN_CASE_NODE(Indexer)
 			GEN_CASE_NODE(Array)
 			GEN_CASE_NODE(Delay)
