@@ -170,7 +170,7 @@ struct SyncMultiOutletNode : NodeContext
 		nosEngine.ScheduleNode(&params);
 	}
 
-	void OnPinConnected(nos::Name pinName, uuid const&) override 
+	void OnPinConnected(nos::Name pinName, uuid const&, nosObjectId) override
 	{
 		auto& pin = *GetPin(pinName);
 		if (pin.ShowAs != nosFbShowAs::OUTPUT_PIN)

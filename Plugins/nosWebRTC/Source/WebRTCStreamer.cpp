@@ -407,7 +407,7 @@ struct WebRTCNodeContext : nos::NodeContext {
 		}
 	}
 
-	void OnPinConnected(nos::Name pinName, nos::uuid const& connectedPin) override
+	void OnPinConnected(nos::Name pinName, nos::uuid const& connectedPin, nosObjectId connectedObject) override
 	{
 
 	}
