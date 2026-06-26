@@ -884,7 +884,7 @@
               "contents_type": "Job",
               "contents": { "type": "" },
               "function_category": "Default Node",
-              "display_name": "Break nos.graphics.TransformQ",
+              "display_name": "Break nos.math.TransformQ",
               "plugin_version": { "major": 1, "minor": 7, "patch": 16 }
             },
             {

@@ -2,11 +2,10 @@ include "Common.fbs";
 
 namespace nos.graphics;
 
-// NOTE: The coordinate-system / transform types (CoordinateFrame, SignedAxis,
-// Handedness, EulerOrder, EulerEncoding, Transform, TransformQ, AlignmentState,
-// TransformGuidance) live in nos.math (Types/Math.fbs); guidance types in nos.track. (was nos.graphics
-// namespace) to avoid a circular nos.graphics<->nos.track plugin dependency.
-// Include <nosTrack/Coordinates_generated.h> for those.
+// NOTE: The shared coordinate-system / transform types (CoordinateFrame,
+// SignedAxis, Handedness, EulerOrder, EulerEncoding, Transform, TransformQ) live
+// in nos.math (Types/Math.fbs); AlignmentState/TransformGuidance live in nos.track
+// (Types/Guidance.fbs). This file only holds nos.graphics' own rendering types.
 
 table PerspectiveProjection
 {

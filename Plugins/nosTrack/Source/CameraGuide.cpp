@@ -1,7 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include <Nodos/Plugin.hpp>
 
 #include <nosTrack/Track_generated.h>
 #include <nosTrack/Guidance_generated.h>
@@ -22,8 +21,8 @@
 
 namespace nos::track
 {
-// CoordinateFrame/Transform types + conversion helpers live in nos.track (shared,
-// to avoid a nos.graphics<->nos.track cycle).
+// CoordinateFrame + conversion helpers live in nos.math; guidance types are local
+// to nos.track. One-way (acyclic) dependency: nos.track -> nos.math.
 using namespace nos::math;
 
 NOS_REGISTER_NAME(Source)

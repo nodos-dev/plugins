@@ -1,7 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include <Nodos/Plugin.hpp>
 
 // Framework builtins (nos.fb.vec3d / nos.fb.vec4d)
 #include <Builtins_generated.h>

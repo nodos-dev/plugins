@@ -1,10 +1,10 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
-// Frame-conversion helpers for nos.graphics.CoordinateFrame, shared by the
-// graphics nodes (ConvertCoordinateFrame / TrackToTransformQ / CameraGuide),
-// the Track nodes (ConvertTrackFrame / RecordTrackCOLMAP / PlaybackTrackCOLMAP /
-// ConvertTransform) and transform producers such as nos.geometry's FBX reader.
-// Builds basis-change matrices from a CoordinateFrame's fields, encodes the
-// per-system Euler conventions, and converts to/from the COLMAP camera/world frame.
+// Frame-conversion helpers for nos.math.CoordinateFrame, shared across plugins:
+// nos.math (ConvertCoordinateFrame), nos.track (ConvertTrackFrame / ConvertTransform /
+// CameraGuide / Record & Playback TrackCOLMAP), nos.graphics (TrackToTransformQ) and
+// nos.geometry's FBX reader. Builds basis-change matrices from a CoordinateFrame's
+// fields, encodes the per-system Euler conventions, and converts to/from the COLMAP
+// camera/world frame.
 #pragma once
 
 #include <nosMath/Math_generated.h>

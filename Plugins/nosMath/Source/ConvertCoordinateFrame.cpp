@@ -1,7 +1,6 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include <Nodos/Plugin.hpp>
-#include <Nodos/Plugin.hpp>
 
 #include <Builtins_generated.h>
 #include <nosMath/Math_generated.h>
@@ -14,18 +13,17 @@
 // Shared CoordinateFrame basis matrices.
 #include <nosMath/CoordinateFrameConversion.hpp>
 
-namespace nos::graphics
+namespace nos::math
 {
-// CoordinateFrame/TransformQ types + conversion helpers live in nos.track (shared,
-// to avoid a nos.graphics<->nos.track cycle).
-using namespace nos::math;
+// CoordinateFrame/TransformQ types + conversion helpers live in nos.math (a shared
+// leaf plugin), keeping a one-way (acyclic) dependency.
 
 NOS_REGISTER_NAME(In)
 NOS_REGISTER_NAME(SourceFrame)
 NOS_REGISTER_NAME(TargetFrame)
 NOS_REGISTER_NAME(Out)
 
-// Converts a nos.graphics.TransformQ between coordinate frames. Mirrors
+// Converts a nos.math.TransformQ between coordinate frames. Mirrors
 // nos.track.ConvertTransform, but rotation is carried as a quaternion so no
 // Euler convention is involved: the quaternion is conjugated by the basis-change
 // matrix directly.
@@ -73,8 +71,8 @@ struct ConvertCoordinateFrameNode : NodeContext
 
 nosResult RegisterConvertCoordinateFrame(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.ConvertCoordinateFrame"), ConvertCoordinateFrameNode, fn);
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.math.ConvertCoordinateFrame"), ConvertCoordinateFrameNode, fn);
 	return NOS_RESULT_SUCCESS;
 }
 
-}  // namespace nos::graphics
+}  // namespace nos::math

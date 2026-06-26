@@ -16,8 +16,8 @@
 
 namespace nos::graphics
 {
-// CoordinateFrame/TransformQ types + EulerToMat() live in nos.track (shared, to
-// avoid a nos.graphics<->nos.track cycle).
+// CoordinateFrame/TransformQ types + EulerToMat() live in nos.math (shared, to
+// keep a one-way (acyclic) dependency.
 using namespace nos::track;
 using namespace nos::math;
 
@@ -26,7 +26,7 @@ NOS_REGISTER_NAME(Frame)
 NOS_REGISTER_NAME(Out)
 
 // Converts a nos.sys.track.Track's location + Euler rotation into a
-// nos.graphics.TransformQ. The Euler angles are interpreted per Frame's euler
+// nos.math.TransformQ. The Euler angles are interpreted per Frame's euler
 // encoding and emitted as a quaternion; no frame conversion is performed, so the
 // output is expressed in Frame. Track carries no scale, so scale is identity.
 struct TrackToTransformQNode : NodeContext

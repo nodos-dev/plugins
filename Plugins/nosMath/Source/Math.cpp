@@ -91,6 +91,7 @@ enum class MathNodeTypes : int {
 	EulerToQuaternion,
 	QuaternionToEuler,
 	QuaternionMultiply,
+	ConvertCoordinateFrame,
 	Count
 };
 
@@ -140,6 +141,7 @@ void RegisterSineWave(nosNodeFunctions*);
 void RegisterEulerToQuaternion(nosNodeFunctions*);
 void RegisterQuaternionToEuler(nosNodeFunctions*);
 void RegisterQuaternionMultiply(nosNodeFunctions*);
+nosResult RegisterConvertCoordinateFrame(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** outList)
 {
@@ -257,6 +259,10 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outCount, nosNodeFunctions** o
 			RegisterQuaternionMultiply(node);
 			break;
 		}
+		case MathNodeTypes::ConvertCoordinateFrame: {
+			RegisterConvertCoordinateFrame(node);
+			break;
+		}
 		default:
 			break;
 		}
@@ -270,6 +276,14 @@ extern "C"
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctions)
 {
 	outFunctions->ExportNodeFunctions = ExportNodeFunctions;
+	// ConvertCoordinateFrame moved from nos.graphics to nos.math; migrate old graphs.
+	outFunctions->GetRenamedNodeClasses = [](nosName* outFrom, nosName* outTo, size_t* outCount) {
+		*outCount = 1;
+		if (!outFrom || !outTo)
+			return;
+		outFrom[0] = NOS_NAME_STATIC("nos.graphics.ConvertCoordinateFrame");
+		outTo[0] = NOS_NAME_STATIC("nos.math.ConvertCoordinateFrame");
+	};
 	return NOS_RESULT_SUCCESS;
 }
 } // extern "C"

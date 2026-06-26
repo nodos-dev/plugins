@@ -1,5 +1,5 @@
 {
-    "name": "nos.track.CoordinateSystemPresets",
+    "name": "nos.math.CoordinateSystemPresets",
     "values": [
         {
             "type_name": "nos.math.CoordinateFrame",
