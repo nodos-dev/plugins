@@ -52,7 +52,7 @@ struct MakeNode : NodeContext
 		return true;
 	}
 
-	void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
+	void OnPinConnected(nos::Name pinName, uuid const& connectedPin, nosObjectId connectedObject) override
 	{
 		if (pinName == NSN_Value && Type)
 		{
