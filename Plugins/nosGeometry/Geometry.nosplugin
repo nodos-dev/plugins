@@ -10,7 +10,7 @@
         "dependencies": [
             {
                 "name": "nos.math",
-                "version": "2.2"
+                "version": "2.1"
             }
         ]
     },

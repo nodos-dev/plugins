@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.str",
-            "version": "1.1.0"
+            "version": "1.0.0"
         },
         "display_name": "Strings",
         "description": "Collection of string manipulation nodes",
