@@ -2,47 +2,47 @@
     "name": "nos.track.CoordinateSystemPresets",
     "values": [
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
             "value_name": "Unreal"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
             "value_name": "OpenGL-glTF"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "NegY", "forward": "PosZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
             "value_name": "OpenCV-COLMAP"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosY", "forward": "PosZ", "handedness": "LeftHanded", "euler": { "order": "ZXY", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
             "value_name": "Unity"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "XYZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 0.01 },
             "value_name": "Maya"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "XYZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
             "value_name": "Houdini"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosZ", "forward": "PosY", "handedness": "RightHanded", "euler": { "order": "XYZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 0.01 },
             "value_name": "3dsMax"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "pin_value": { "up": "PosZ", "forward": "NegY", "handedness": "RightHanded", "euler": { "order": "XYZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
             "value_name": "Blender"
         },
         {
-            "type_name": "nos.track.CoordinateFrame",
+            "type_name": "nos.math.CoordinateFrame",
             "value_name": "Custom"
         }
     ]

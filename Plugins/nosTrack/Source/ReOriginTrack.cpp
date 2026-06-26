@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -19,7 +19,7 @@ NOS_REGISTER_NAME(ReOriginTrack_ClearOrigin);
 
 struct ReOriginTrackContext : NodeContext
 {
-	nos::track::Frame Frame = nos::track::UNREAL_SYSTEM;
+	nos::math::Frame Frame = nos::math::UNREAL_SYSTEM;
 	nos::track::TTrack Origin;     // Marked reference pose (identity until marked).
 	nos::track::TTrack LatestInput; // Last input seen, captured by Mark Origin.
 
@@ -42,7 +42,7 @@ struct ReOriginTrackContext : NodeContext
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer val) override
 	{
 		if (pinName == NSN_CoordinateSystem)
-			Frame = *static_cast<nos::track::Frame*>(val.Data);
+			Frame = *static_cast<nos::math::Frame*>(val.Data);
 		else if (pinName == NSN_Origin)
 			flatbuffers::GetRoot<nos::track::Track>(val.Data)->UnPackTo(&Origin);
 	}
@@ -75,14 +75,14 @@ struct ReOriginTrackContext : NodeContext
 		// one coordinate system).
 		auto const& il = LatestInput.location;
 		auto const& ol = Origin.location;
-		glm::dmat3 R_origin = nos::track::EulerToMat(
+		glm::dmat3 R_origin = nos::math::EulerToMat(
 			Frame.euler(), glm::dvec3(Origin.rotation.x(), Origin.rotation.y(), Origin.rotation.z()));
-		glm::dmat3 R_in = nos::track::EulerToMat(
+		glm::dmat3 R_in = nos::math::EulerToMat(
 			Frame.euler(), glm::dvec3(LatestInput.rotation.x(), LatestInput.rotation.y(), LatestInput.rotation.z()));
 		glm::dmat3 R_originT = glm::transpose(R_origin);
 
 		glm::dvec3 relPos = R_originT * glm::dvec3(il.x() - ol.x(), il.y() - ol.y(), il.z() - ol.z());
-		glm::dvec3 relRot = nos::track::MatToEuler(Frame.euler(), R_originT * R_in);
+		glm::dvec3 relRot = nos::math::MatToEuler(Frame.euler(), R_originT * R_in);
 
 		out.location = nos::fb::vec3((float)relPos.x, (float)relPos.y, (float)relPos.z);
 		out.rotation = nos::fb::vec3((float)relRot.x, (float)relRot.y, (float)relRot.z);

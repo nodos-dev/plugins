@@ -5,20 +5,21 @@
 
 #include <nosTrack/Track_generated.h>
 #include <Builtins_generated.h>
-#include <nosTrack/Coordinates_generated.h>
+#include <nosMath/Math_generated.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
 // Track.rotation is Euler degrees in a frame-specific convention; EulerToMat
 // turns it into a rotation matrix.
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 namespace nos::graphics
 {
 // CoordinateFrame/TransformQ types + EulerToMat() live in nos.track (shared, to
 // avoid a nos.graphics<->nos.track cycle).
 using namespace nos::track;
+using namespace nos::math;
 
 NOS_REGISTER_NAME(Track)
 NOS_REGISTER_NAME(Frame)

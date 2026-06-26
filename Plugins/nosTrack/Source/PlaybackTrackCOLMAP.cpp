@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -89,7 +89,7 @@ static bool EnumFromName(TEnum const (&values)[N], char const* const* names, std
 // Inverse of the "# SourceFrame: up=... forward=... handedness=... euler_order=...
 // euler_sign=x,y,z" header written by RecordTrackCOLMAP::WriteExtrasTxt. Returns
 // nullopt when any field is missing or unrecognized (e.g. a hand-edited sidecar).
-static std::optional<nos::track::Frame> ParseSourceFrameComment(std::string const& line)
+static std::optional<nos::math::Frame> ParseSourceFrameComment(std::string const& line)
 {
 	auto value = [&](char const* key) -> std::string {
 		auto pos = line.find(key);
@@ -98,13 +98,13 @@ static std::optional<nos::track::Frame> ParseSourceFrameComment(std::string cons
 		pos += std::strlen(key);
 		return line.substr(pos, line.find(' ', pos) - pos);
 	};
-	nos::track::SignedAxis up{}, fwd{};
-	nos::track::Handedness hand{};
-	nos::track::EulerOrder order{};
-	if (!EnumFromName(nos::track::EnumValuesSignedAxis(), nos::track::EnumNamesSignedAxis(), value("up="), up) ||
-		!EnumFromName(nos::track::EnumValuesSignedAxis(), nos::track::EnumNamesSignedAxis(), value("forward="), fwd) ||
-		!EnumFromName(nos::track::EnumValuesHandedness(), nos::track::EnumNamesHandedness(), value("handedness="), hand) ||
-		!EnumFromName(nos::track::EnumValuesEulerOrder(), nos::track::EnumNamesEulerOrder(), value("euler_order="), order))
+	nos::math::SignedAxis up{}, fwd{};
+	nos::math::Handedness hand{};
+	nos::math::EulerOrder order{};
+	if (!EnumFromName(nos::math::EnumValuesSignedAxis(), nos::math::EnumNamesSignedAxis(), value("up="), up) ||
+		!EnumFromName(nos::math::EnumValuesSignedAxis(), nos::math::EnumNamesSignedAxis(), value("forward="), fwd) ||
+		!EnumFromName(nos::math::EnumValuesHandedness(), nos::math::EnumNamesHandedness(), value("handedness="), hand) ||
+		!EnumFromName(nos::math::EnumValuesEulerOrder(), nos::math::EnumNamesEulerOrder(), value("euler_order="), order))
 		return std::nullopt;
 
 	// euler_sign=x,y,z, each +1/-1. Missing or garbled -> reject the whole header.
@@ -116,13 +116,13 @@ static std::optional<nos::track::Frame> ParseSourceFrameComment(std::string cons
 		return std::nullopt;
 
 	// meters_per_unit is irrelevant to rotation, which is all this frame is used for.
-	return nos::track::Frame(up, fwd, hand,
-		nos::track::EulerEncoding(order, (int8_t)sx, (int8_t)sy, (int8_t)sz), 1.0);
+	return nos::math::Frame(up, fwd, hand,
+		nos::math::EulerEncoding(order, (int8_t)sx, (int8_t)sy, (int8_t)sz), 1.0);
 }
 
 // True when Euler angles authored in `a` decode to the same rotation as in `b`
 // (same basis and same nested Euler encoding; units don't enter into rotation).
-static bool SameRotationConvention(nos::track::Frame const& a, nos::track::Frame const& b)
+static bool SameRotationConvention(nos::math::Frame const& a, nos::math::Frame const& b)
 {
 	return a.up() == b.up() && a.forward() == b.forward() && a.handedness() == b.handedness() &&
 		   a.euler().order() == b.euler().order() &&
@@ -134,7 +134,7 @@ static bool SameRotationConvention(nos::track::Frame const& a, nos::track::Frame
 struct PlaybackTrackCOLMAPContext : NodeContext
 {
 	std::string InputDir;
-	nos::track::Frame TargetFrame = nos::track::UNREAL_SYSTEM;
+	nos::math::Frame TargetFrame = nos::math::UNREAL_SYSTEM;
 	PlaybackTrackMode Mode = PlaybackTrackMode::FrameIndex;
 	uint32_t FrameIndex = 0;
 	std::string InTimecode;
@@ -178,7 +178,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		}
 		else if (pinName == NSN_Playback_TargetFrame)
 		{
-			TargetFrame = *(nos::track::Frame*)val.Data;
+			TargetFrame = *(nos::math::Frame*)val.Data;
 			if (!InputDir.empty())
 				LoadFromDirectory();
 		}
@@ -283,7 +283,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 			ParseTimecodesTxt(timecodesPath, images.size());
 
 		std::vector<ExtrasEntry> extras;
-		std::optional<nos::track::Frame> extrasFrame;
+		std::optional<nos::math::Frame> extrasFrame;
 		auto extrasPath = dir / "extras.txt";
 		if (std::filesystem::exists(extrasPath))
 			ParseExtrasTxt(extrasPath, images.size(), extras, extrasFrame);
@@ -294,10 +294,10 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		//   pos_target = M^-1 * pos_colmap
 		//   R_c2w_target = M^-1 * R_c2w_colmap * M
 		//   Track.rotation = MatToEuler(TargetFrame, R_c2w_target)
-		const glm::dmat3 Minv = nos::track::BasisChangeFromColmap(TargetFrame);
+		const glm::dmat3 Minv = nos::math::BasisChangeFromColmap(TargetFrame);
 		const glm::dmat3 M = glm::inverse(Minv);
 		// Scale COLMAP units (meters) back into the target system's units.
-		const double unitFactor = nos::track::UnitFactor(nos::track::COLMAP_SYSTEM, TargetFrame);
+		const double unitFactor = nos::math::UnitFactor(nos::math::COLMAP_SYSTEM, TargetFrame);
 
 		// Extras Euler is authored in the recording SourceFrame (recorded in the
 		// sidecar header). Re-express it in TargetFrame when the conventions
@@ -306,7 +306,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 		const bool convertExtrasRotation = extrasFrame && !SameRotationConvention(*extrasFrame, TargetFrame);
 		glm::dmat3 extrasC(1.0);
 		if (convertExtrasRotation)
-			extrasC = nos::track::BasisMatrix(TargetFrame) * glm::inverse(nos::track::BasisMatrix(*extrasFrame));
+			extrasC = nos::math::BasisMatrix(TargetFrame) * glm::inverse(nos::math::BasisMatrix(*extrasFrame));
 
 		for (size_t i = 0; i < images.size(); ++i)
 		{
@@ -332,15 +332,15 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 				glm::vec3 euler(ex->RotX, ex->RotY, ex->RotZ);
 				if (convertExtrasRotation)
 				{
-					glm::dmat3 R_src = nos::track::EulerToMat(extrasFrame->euler(), glm::dvec3(euler));
-					euler = glm::vec3(nos::track::MatToEuler(TargetFrame.euler(), extrasC * R_src * glm::transpose(extrasC)));
+					glm::dmat3 R_src = nos::math::EulerToMat(extrasFrame->euler(), glm::dvec3(euler));
+					euler = glm::vec3(nos::math::MatToEuler(TargetFrame.euler(), extrasC * R_src * glm::transpose(extrasC)));
 				}
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(euler);
 			}
 			else
 			{
 				glm::dmat3 R_c2w_target = Minv * R_c2w_colmap * M;
-				glm::dvec3 eulerD = nos::track::MatToEuler(TargetFrame.euler(), R_c2w_target);
+				glm::dvec3 eulerD = nos::math::MatToEuler(TargetFrame.euler(), R_c2w_target);
 				glm::vec3 eulerF((float)eulerD.x, (float)eulerD.y, (float)eulerD.z);
 				trackData.rotation = reinterpret_cast<nos::fb::vec3&>(eulerF);
 			}
@@ -485,7 +485,7 @@ struct PlaybackTrackCOLMAPContext : NodeContext
 	}
 
 	void ParseExtrasTxt(const std::filesystem::path& path, size_t expectedCount, std::vector<ExtrasEntry>& outExtras,
-						std::optional<nos::track::Frame>& outSourceFrame)
+						std::optional<nos::math::Frame>& outSourceFrame)
 	{
 		std::ifstream file(path);
 		if (!file.is_open())

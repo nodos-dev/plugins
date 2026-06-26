@@ -76,7 +76,7 @@
           {
             "id": "0efb4000-a3b6-49c0-9f1d-f9a7d0ace9c5",
             "name": "Input (1)",
-            "type_name": "nos.track.TransformQ",
+            "type_name": "nos.math.TransformQ",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
@@ -830,7 +830,7 @@
                 {
                   "id": "2f3e4085-584d-40e9-bc80-295ea5162b38",
                   "name": "Input",
-                  "type_name": "nos.track.TransformQ",
+                  "type_name": "nos.math.TransformQ",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
@@ -948,7 +948,7 @@
                 {
                   "id": "f1eb6cf4-bbd1-4795-b678-9b66d49838b7",
                   "name": "Output",
-                  "type_name": "nos.track.TransformQ",
+                  "type_name": "nos.math.TransformQ",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
@@ -961,7 +961,7 @@
                 {
                   "id": "7fca9817-ae9e-44f6-80a0-b89c94a65e6c",
                   "name": "Input",
-                  "type_name": "nos.track.TransformQ",
+                  "type_name": "nos.math.TransformQ",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {

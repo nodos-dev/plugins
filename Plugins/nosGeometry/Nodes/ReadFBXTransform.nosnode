@@ -39,7 +39,7 @@
 					{
 						"name": "OutputFrame",
 						"display_name": "Output Frame",
-						"type_name": "nos.track.CoordinateFrame",
+						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
@@ -58,7 +58,7 @@
 					{
 						"name": "SourceFrame",
 						"display_name": "Source Frame",
-						"type_name": "nos.track.CoordinateFrame",
+						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.geometry.CoordinateSystemPresets" },
@@ -68,7 +68,7 @@
 					{
 						"name": "LocalTransform",
 						"display_name": "Local Transform",
-						"type_name": "nos.track.TransformQ",
+						"type_name": "nos.math.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "Transform of the object relative to its parent, in the Output Frame."
@@ -76,7 +76,7 @@
 					{
 						"name": "GlobalTransform",
 						"display_name": "Global Transform",
-						"type_name": "nos.track.TransformQ",
+						"type_name": "nos.math.TransformQ",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"description": "World transform of the object, accounting for its parent hierarchy,\nin the Output Frame."

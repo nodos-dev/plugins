@@ -4,8 +4,9 @@
 #include <Nodos/Plugin.hpp>
 
 #include <nosTrack/Track_generated.h>
+#include <nosTrack/Guidance_generated.h>
 #include <Builtins_generated.h>
-#include <nosTrack/Coordinates_generated.h>
+#include <nosMath/Math_generated.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -17,13 +18,13 @@
 #include <string>
 
 // Shared CoordinateFrame basis matrices + Euler extraction.
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
-namespace nos::graphics
+namespace nos::track
 {
 // CoordinateFrame/Transform types + conversion helpers live in nos.track (shared,
 // to avoid a nos.graphics<->nos.track cycle).
-using namespace nos::track;
+using namespace nos::math;
 
 NOS_REGISTER_NAME(Source)
 NOS_REGISTER_NAME(Target)
@@ -216,8 +217,8 @@ struct CameraGuideNode : NodeContext
 
 nosResult RegisterCameraGuide(nosNodeFunctions* fn)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME("nos.graphics.CameraGuide"), CameraGuideNode, fn);
+	NOS_BIND_NODE_CLASS(NOS_NAME("nos.track.CameraGuide"), CameraGuideNode, fn);
 	return NOS_RESULT_SUCCESS;
 }
 
-}  // namespace nos::graphics
+}  // namespace nos::track

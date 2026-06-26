@@ -1,0 +1,21 @@
+// Camera-guidance types, used by the CameraGuide node. Kept in nos.track (rather
+// than nos.math) because they belong to the camera/track guidance feature.
+namespace nos.track;
+
+enum AlignmentState : ubyte {
+    Aligned = 0,         // within tolerance
+    NeedsCorrection = 1, // a move and/or turn is required
+}
+
+// Egocentric correction to bring a Source transform onto a Target, as computed
+// by CameraGuide. Translation is along Source's local axes; rotation is in
+// operator terms (degrees).
+struct TransformGuidance {
+    alignment: AlignmentState;
+    forward:   float; // +forward / -back
+    right:     float; // +right / -left
+    up:        float; // +up / -down
+    pan:       float; // degrees, + = pan right
+    tilt:      float; // degrees, + = tilt up
+    roll:      float; // degrees, + = roll CCW (operator looking along forward)
+}

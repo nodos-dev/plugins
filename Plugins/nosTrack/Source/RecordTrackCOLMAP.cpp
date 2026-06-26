@@ -12,7 +12,7 @@
 #include <cmath>
 #include <iomanip>
 
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 namespace nos::track
 {
@@ -49,7 +49,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 {
 	std::string OutputDir;
 	nosVec2u ImageResolution = {1920, 1080};
-	nos::track::Frame SourceFrame = nos::track::UNREAL_SYSTEM;
+	nos::math::Frame SourceFrame = nos::math::UNREAL_SYSTEM;
 	bool Recording = false;
 	uint32_t ConsecutiveOffFrames = 0;
 	bool LastRequestRecord = false;
@@ -118,7 +118,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 		else if (pinName == NSN_ImageResolution)
 			ImageResolution = *(nosVec2u*)val.Data;
 		else if (pinName == NSN_SourceFrame)
-			SourceFrame = *(nos::track::Frame*)val.Data;
+			SourceFrame = *(nos::math::Frame*)val.Data;
 	}
 
 	bool CanStartRecording(std::string& outError)
@@ -285,10 +285,10 @@ struct RecordTrackCOLMAPContext : NodeContext
 			return;
 		}
 		const std::string frameName =
-			std::string("up=") + nos::track::EnumNameSignedAxis(SourceFrame.up())
-			+ " forward=" + nos::track::EnumNameSignedAxis(SourceFrame.forward())
-			+ " handedness=" + nos::track::EnumNameHandedness(SourceFrame.handedness())
-			+ " euler_order=" + nos::track::EnumNameEulerOrder(SourceFrame.euler().order())
+			std::string("up=") + nos::math::EnumNameSignedAxis(SourceFrame.up())
+			+ " forward=" + nos::math::EnumNameSignedAxis(SourceFrame.forward())
+			+ " handedness=" + nos::math::EnumNameHandedness(SourceFrame.handedness())
+			+ " euler_order=" + nos::math::EnumNameEulerOrder(SourceFrame.euler().order())
 			+ " euler_sign=" + std::to_string((int)SourceFrame.euler().sign_x())
 			+ "," + std::to_string((int)SourceFrame.euler().sign_y())
 			+ "," + std::to_string((int)SourceFrame.euler().sign_z());
@@ -424,9 +424,9 @@ struct RecordTrackCOLMAPContext : NodeContext
 		// source-frame R_c2w and the source-frame camera position into COLMAP.
 		// Positions are also scaled into COLMAP's units (meters) by the ratio of
 		// the two systems' meters_per_unit.
-		const glm::dmat3 M = nos::track::BasisChangeToColmap(SourceFrame);
+		const glm::dmat3 M = nos::math::BasisChangeToColmap(SourceFrame);
 		const glm::dmat3 Minv = glm::inverse(M);
-		const double unitFactor = nos::track::UnitFactor(SourceFrame, nos::track::COLMAP_SYSTEM);
+		const double unitFactor = nos::math::UnitFactor(SourceFrame, nos::math::COLMAP_SYSTEM);
 
 		for (size_t i = 0; i < Frames.size(); ++i)
 		{
@@ -434,7 +434,7 @@ struct RecordTrackCOLMAPContext : NodeContext
 
 			// Build R_c2w in the source frame, then conjugate by M to land in
 			// the COLMAP frame. Likewise frame the position.
-			glm::dmat3 R_c2w_src = nos::track::EulerToMat(SourceFrame.euler(), glm::dvec3(frame.Rotation));
+			glm::dmat3 R_c2w_src = nos::math::EulerToMat(SourceFrame.euler(), glm::dvec3(frame.Rotation));
 			glm::dmat3 R_c2w_colmap = M * R_c2w_src * Minv;
 			glm::dvec3 pos_colmap = M * glm::dvec3(frame.Location) * unitFactor;
 

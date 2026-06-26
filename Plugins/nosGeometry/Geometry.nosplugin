@@ -1,23 +1,23 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.geometry",
-			"version": "1.0.0"
-		},
-		"display_name": "Geometry",
-		"description": "Nodes for reading 3D assets (FBX) and 3D geometry operations.",
-		"category": "Geometry",
-		"dependencies": [
-			{
-				"name": "nos.track",
-				"version": "3.0"
-			}
-		]
-	},
-	"named_values": [
-		"Types/CoordinateSystemPresets.json"
-	],
-	"binary_path": "Binaries/nosGeometry",
-	"sdk_version": "41.0",
-	"schema_version": "1.4-v1"
+    "info": {
+        "id": {
+            "name": "nos.geometry",
+            "version": "1.0.0"
+        },
+        "display_name": "Geometry",
+        "description": "Nodes for reading 3D assets (FBX) and 3D geometry operations.",
+        "category": "Geometry",
+        "dependencies": [
+            {
+                "name": "nos.math",
+                "version": "2.2"
+            }
+        ]
+    },
+    "named_values": [
+        "Types/CoordinateSystemPresets.json"
+    ],
+    "binary_path": "Binaries/nosGeometry",
+    "sdk_version": "41.0",
+    "schema_version": "1.4-v1"
 }

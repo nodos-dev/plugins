@@ -26,7 +26,7 @@
 					{
 						"name": "TargetFrame",
 						"display_name": "Target Frame",
-						"type_name": "nos.track.CoordinateFrame",
+						"type_name": "nos.math.CoordinateFrame",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"visualizer": { "type": "NAMED_VALUE", "name": "nos.track.CoordinateSystemPresets" },

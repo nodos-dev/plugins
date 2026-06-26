@@ -4,7 +4,7 @@ namespace nos.graphics;
 
 // NOTE: The coordinate-system / transform types (CoordinateFrame, SignedAxis,
 // Handedness, EulerOrder, EulerEncoding, Transform, TransformQ, AlignmentState,
-// TransformGuidance) live in nos.track (Types/Coordinates.fbs, same nos.graphics
+// TransformGuidance) live in nos.math (Types/Math.fbs); guidance types in nos.track. (was nos.graphics
 // namespace) to avoid a circular nos.graphics<->nos.track plugin dependency.
 // Include <nosTrack/Coordinates_generated.h> for those.
 

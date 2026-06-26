@@ -19,7 +19,6 @@ enum Nodes : int
 	BillboardPositions,
 	HomographySolver,
 	ConvertCoordinateFrame,
-	CameraGuide,
 	TrackToTransformQ,
 	NormalizedDepthToDepthBuffer,
 	BillboardMask,
@@ -30,7 +29,6 @@ nosResult RegisterTrackToView(nosNodeFunctions*);
 nosResult RegisterBillboardPositions(nosNodeFunctions*);
 nosResult RegisterHomographySolver(nosNodeFunctions*);
 nosResult RegisterConvertCoordinateFrame(nosNodeFunctions*);
-nosResult RegisterCameraGuide(nosNodeFunctions*);
 nosResult RegisterTrackToTransformQ(nosNodeFunctions*);
 nosResult RegisterNormalizedDepthToDepthBuffer(nosNodeFunctions*);
 nosResult RegisterBillboardMask(nosNodeFunctions*);
@@ -58,7 +56,6 @@ struct PluginFunctions : nos::PluginFunctions
 				GEN_CASE_NODE(BillboardPositions)
 				GEN_CASE_NODE(HomographySolver)
 				GEN_CASE_NODE(ConvertCoordinateFrame)
-				GEN_CASE_NODE(CameraGuide)
 				GEN_CASE_NODE(TrackToTransformQ)
 				GEN_CASE_NODE(NormalizedDepthToDepthBuffer)
 				GEN_CASE_NODE(BillboardMask)

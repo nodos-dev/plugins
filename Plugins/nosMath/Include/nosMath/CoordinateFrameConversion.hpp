@@ -7,7 +7,7 @@
 // per-system Euler conventions, and converts to/from the COLMAP camera/world frame.
 #pragma once
 
-#include <nosTrack/Coordinates_generated.h>
+#include <nosMath/Math_generated.h>
 
 #ifndef GLM_ENABLE_EXPERIMENTAL
 #define GLM_ENABLE_EXPERIMENTAL
@@ -18,7 +18,7 @@
 
 #include <cmath>
 
-namespace nos::track
+namespace nos::math
 {
 
 using Frame = CoordinateFrame;
@@ -171,7 +171,7 @@ inline FrameConvert MakeFrameConvert(CoordinateFrame const& src, CoordinateFrame
 {
 	FrameConvert f;
 	f.M = BasisMatrix(tgt) * glm::inverse(BasisMatrix(src));
-	f.UnitFactor = nos::track::UnitFactor(src, tgt);
+	f.UnitFactor = nos::math::UnitFactor(src, tgt);
 	return f;
 }
 
@@ -203,4 +203,4 @@ inline glm::dvec3 ConvertScale(FrameConvert const& f, glm::dvec3 const& s)
 	return absM * s;
 }
 
-}  // namespace nos::track
+}  // namespace nos::math

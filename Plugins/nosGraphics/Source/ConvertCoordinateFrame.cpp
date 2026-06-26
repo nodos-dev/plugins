@@ -4,7 +4,7 @@
 #include <Nodos/Plugin.hpp>
 
 #include <Builtins_generated.h>
-#include <nosTrack/Coordinates_generated.h>
+#include <nosMath/Math_generated.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -12,13 +12,13 @@
 #include <cmath>
 
 // Shared CoordinateFrame basis matrices.
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 namespace nos::graphics
 {
 // CoordinateFrame/TransformQ types + conversion helpers live in nos.track (shared,
 // to avoid a nos.graphics<->nos.track cycle).
-using namespace nos::track;
+using namespace nos::math;
 
 NOS_REGISTER_NAME(In)
 NOS_REGISTER_NAME(SourceFrame)

@@ -26,6 +26,7 @@ enum TrackNode : int
 	PlaybackTrackCOLMAP,
 	ReOriginTrack,
 	RecordTrackCOLMAP,
+	CameraGuide,
 	Count
 };
 
@@ -37,6 +38,7 @@ void RegisterConvertTransform(nosNodeFunctions*);
 void RegisterPlaybackTrackCOLMAP(nosNodeFunctions*);
 void RegisterReOriginTrack(nosNodeFunctions*);
 void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
+nosResult RegisterCameraGuide(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -72,6 +74,9 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			break;
 		case TrackNode::RecordTrackCOLMAP:
 			RegisterRecordTrackCOLMAP(node);
+			break;
+		case TrackNode::CameraGuide:
+			RegisterCameraGuide(node);
 			break;
 		}
 	}
@@ -165,6 +170,14 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 		outRenamedTo[2] = NOS_NAME_STATIC("nos.track.CoordinateSystem");
 		outRenamedFrom[3] = NOS_NAME_STATIC("nos.fb.RotationSystem");
 		outRenamedTo[3] = NOS_NAME_STATIC("nos.track.RotationSystem");
+	};
+	// CameraGuide moved from nos.graphics to nos.track; migrate old graphs.
+	outFunctions->GetRenamedNodeClasses = [](nosName* outFrom, nosName* outTo, size_t* outCount) {
+		*outCount = 1;
+		if (!outFrom || !outTo)
+			return;
+		outFrom[0] = NOS_NAME_STATIC("nos.graphics.CameraGuide");
+		outTo[0] = NOS_NAME_STATIC("nos.track.CameraGuide");
 	};
 
 

@@ -5,12 +5,12 @@
 
 // Framework builtins (nos.fb.vec3d / nos.fb.vec4d)
 #include <Builtins_generated.h>
-// nos.graphics.TransformQ and the CoordinateFrame struct (generated from
-// nos.graphics' Graphics.fbs).
-#include <nosTrack/Coordinates_generated.h>
+// nos.math.TransformQ and the CoordinateFrame struct (generated from nos.math's
+// Math.fbs). Also pulled in transitively by CoordinateFrameConversion.hpp below.
+#include <nosMath/Math_generated.h>
 // BasisMatrix() / UnitFactor() for the source -> output system change, plus the
 // UNREAL_SYSTEM / GLTF_SYSTEM presets used as detection bases.
-#include <nosTrack/CoordinateFrameConversion.hpp>
+#include <nosMath/CoordinateFrameConversion.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -41,7 +41,7 @@ NOS_REGISTER_NAME(GlobalTransform)
 NOS_REGISTER_NAME(DetectedFrame)
 NOS_REGISTER_NAME(IsLoaded)
 
-using Frame = nos::track::CoordinateFrame;
+using Frame = nos::math::CoordinateFrame;
 
 // Frame-independent decomposition of an FBX object's transform. Rotation is kept
 // as a matrix so it can be re-expressed in whatever CoordinateFrame the user picks
@@ -88,8 +88,8 @@ static RawTransform DecomposeMatrix(ofbx::DMatrix const& m)
 // per unit (default 1.0 => cm), so meters_per_unit = UnitScaleFactor / 100.
 static Frame DetectSystem(ofbx::GlobalSettings const* gs)
 {
-	Frame base = (gs && gs->UpAxis == ofbx::UpVector_AxisZ) ? nos::track::UNREAL_SYSTEM
-															: nos::track::GLTF_SYSTEM;
+	Frame base = (gs && gs->UpAxis == ofbx::UpVector_AxisZ) ? nos::math::UNREAL_SYSTEM
+															: nos::math::GLTF_SYSTEM;
 	double mpu = 0.01; // FBX default UnitScaleFactor 1.0 (cm)
 	if (gs && gs->UnitScaleFactor > 0.0f)
 		mpu = static_cast<double>(gs->UnitScaleFactor) / 100.0;
@@ -101,7 +101,7 @@ static Frame DetectSystem(ofbx::GlobalSettings const* gs)
 //   translation -> M * t      rotation -> M * R * M^T      scale -> |M| * s
 // The rotation conjugation stays a proper rotation even across a handedness flip
 // (det(M)^2 = 1), so quat_cast is well-defined.
-static nos::track::TransformQ ConvertToTransformQ(RawTransform const& t, glm::dmat3 const& M, double scale)
+static nos::math::TransformQ ConvertToTransformQ(RawTransform const& t, glm::dmat3 const& M, double scale)
 {
 	glm::dvec3 outT = M * t.Translation * scale;
 	glm::dmat3 outR = M * t.Rotation * glm::transpose(M);
@@ -113,7 +113,7 @@ static nos::track::TransformQ ConvertToTransformQ(RawTransform const& t, glm::dm
 	glm::dvec3 outS = absM * t.Scale;
 
 	glm::dquat q = glm::normalize(glm::quat_cast(outR));
-	return nos::track::TransformQ(
+	return nos::math::TransformQ(
 		fb::vec3d(outT.x, outT.y, outT.z),
 		fb::vec4d(q.x, q.y, q.z, q.w),
 		fb::vec3d(outS.x, outS.y, outS.z));
@@ -132,11 +132,11 @@ struct ReadFBXTransformNode : NodeContext
 	// System settings. The effective source is Detected when AutoDetect is on,
 	// otherwise SourceOverride; the result is expressed in OutputFrame. The unit
 	// conversion is derived from the source and output systems' meters_per_unit.
-	Frame OutputFrame = nos::track::UNREAL_SYSTEM;
+	Frame OutputFrame = nos::math::UNREAL_SYSTEM;
 	bool AutoDetect = true;
-	Frame SourceOverride = nos::track::GLTF_SYSTEM;
+	Frame SourceOverride = nos::math::GLTF_SYSTEM;
 	// Source system read from the loaded file's header (basis + meters_per_unit).
-	Frame Detected = nos::track::GLTF_SYSTEM;
+	Frame Detected = nos::math::GLTF_SYSTEM;
 	bool Loaded = false;
 
 	// File info is surfaced as a set of short status lines (one slot each) rather than a
@@ -347,10 +347,10 @@ struct ReadFBXTransformNode : NodeContext
 			return;
 
 		const Frame source = EffectiveSource();
-		const glm::dmat3 S_src = nos::track::BasisMatrix(source);
-		const glm::dmat3 S_tgt = nos::track::BasisMatrix(OutputFrame);
+		const glm::dmat3 S_src = nos::math::BasisMatrix(source);
+		const glm::dmat3 S_tgt = nos::math::BasisMatrix(OutputFrame);
 		const glm::dmat3 M = S_tgt * glm::inverse(S_src);
-		const double scale = nos::track::UnitFactor(source, OutputFrame);
+		const double scale = nos::math::UnitFactor(source, OutputFrame);
 
 		SetPinValue(NSN_LocalTransform, nos::Buffer::From(ConvertToTransformQ(it->second.Local, M, scale)));
 		SetPinValue(NSN_GlobalTransform, nos::Buffer::From(ConvertToTransformQ(it->second.Global, M, scale)));
@@ -370,8 +370,8 @@ struct ReadFBXTransformNode : NodeContext
 	{
 		char buf[96];
 		std::snprintf(buf, sizeof(buf), "%s up, %s, %g m/unit",
-					  nos::track::EnumNameSignedAxis(Detected.up()),
-					  nos::track::EnumNameHandedness(Detected.handedness()),
+					  nos::math::EnumNameSignedAxis(Detected.up()),
+					  nos::math::EnumNameHandedness(Detected.handedness()),
 					  Detected.meters_per_unit());
 		std::string text = buf;
 		if (!AutoDetect)
