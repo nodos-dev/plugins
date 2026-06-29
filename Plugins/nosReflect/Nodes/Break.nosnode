@@ -10,6 +10,26 @@
 					"argument"
 				]
 			},
+			"presets": [
+				{
+					"menu_info": {
+						"display_name": "Break Dict",
+						"category": "Type",
+						"name_aliases": [
+							"dictionary",
+							"unpack",
+							"map"
+						]
+					},
+					"params": [
+						{
+							"name": "Type",
+							"type_name": "string",
+							"value": "nos.Dict"
+						}
+					]
+				}
+			],
 			"node": {
 				"contents_type": "Job",
 				"pins": [

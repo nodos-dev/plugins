@@ -2,34 +2,86 @@
 
 #include "TypeCommon.h"
 
+#include <algorithm>
+#include <map>
+#include <unordered_set>
+
 // Nodos SDK
 #include <PluginManifest_generated.h>
 
 namespace nos::reflect
 {
 NOS_REGISTER_NAME(Type)
+
+// Make: constructs a value from input pins. A scalar/string/union is built from a single "Value" pin; a
+// struct exposes one input pin per field; a nos.Dict is built from user-named "Field N" pins whose
+// display names become the dict keys (folded-in Make Dict behaviour). The target type is set from the
+// output pin connection, a template parameter (typed presets), or the node's "Set Type" menu.
 struct MakeNode : NodeContext
 {
 	std::optional<nos::TypeInfo> Type = {};
 	nosObjectKind ObjectKind = NOS_OBJECT_KIND_PRIMITIVE;
 	fb::TVisualizer Visualizer = {};
 
+	enum MenuCommand : uint32_t
+	{
+		ADD_FIELD = 1,
+		REMOVE_FIELD = 2,
+		RESET_TYPE = 3,
+		MAKE_DICT = 4,				   // turn an unresolved Make into a dict maker
+		SET_FIELD_TYPE_BASE = 0x10000, // + index into AvailableTypes: set a dict field pin's type
+		SET_NODE_TYPE_BASE = 0x20000,  // + index into AvailableTypes: set the whole node's type
+	};
+
+	bool IsDict() const { return Type && Type->TypeName == NSN_DictTypeName; }
+
 	nosResult OnCreate(const fb::Node* node) override
 	{
+		std::optional<nos::Name> typeName;
 		if (flatbuffers::IsFieldPresent(node, fb::Node::VT_TEMPLATE_PARAMETERS) && 1 == node->template_parameters()->size())
-		{
-			auto p = node->template_parameters()->Get(0);
-			nos::Name typeName = nos::Name((const char*)p->value()->Data());
-			std::optional<std::string> updateDisplayName = std::nullopt;
-			if (flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) && node->display_name()->str().empty())
-				updateDisplayName = "Make " + nos::Name(Type->TypeName).AsString();
-			OnTypeUpdated(typeName, updateDisplayName ? updateDisplayName->c_str() : nullptr);
-		}
+			typeName = nos::Name((const char*)node->template_parameters()->Get(0)->value()->Data());
+		else if (auto* pins = node->pins()) // typed/dict presets carry the target type on the Output pin
+			for (auto* pin : *pins)
+				if (pin->show_as() == fb::ShowAs::OUTPUT_PIN && nos::Name(pin->name()->string_view()) == NSN_Output)
+				{
+					typeName = nos::Name(pin->type_name()->string_view());
+					break;
+				}
+
+		if (!typeName || *typeName == NSN_TypeNameGeneric)
+			return NOS_RESULT_SUCCESS;
+
+		// Auto-name freshly instantiated typed presets ("Make Float", ...); dict keeps its preset name.
+		std::optional<std::string> updateDisplayName;
+		if (*typeName != NSN_DictTypeName && flatbuffers::IsFieldPresent(node, fb::Node::VT_DISPLAY_NAME) &&
+			node->display_name()->str().empty())
+			updateDisplayName = "Make " + typeName->AsString();
+		OnTypeUpdated(*typeName, updateDisplayName ? updateDisplayName->c_str() : nullptr);
+		if (IsDict())
+			UnorphanFieldPins(node);
 		return NOS_RESULT_SUCCESS;
 	}
-	
-	// Strict mode: only builtin types are supported
-	static bool IsTypeSupported(nos::TypeInfo& info, bool strict) {
+
+	// Field pins restored from a saved graph can come back orphaned/passive; reactivate them so they are
+	// live again on load (a la nos.math.Eval).
+	void UnorphanFieldPins(const fb::Node* node)
+	{
+		std::vector<uuid> toUnorphan;
+		for (auto* pin : *node->pins())
+		{
+			if (pin->show_as() != fb::ShowAs::INPUT_PIN)
+				continue;
+			if (auto orphan = pin->orphan_state())
+				if (orphan->type() == fb::PinOrphanStateType::PASSIVE || orphan->type() == fb::PinOrphanStateType::ORPHAN)
+					toUnorphan.push_back(*pin->id());
+		}
+		for (auto const& id : toUnorphan)
+			SetPinOrphanState(id, fb::PinOrphanStateType::ACTIVE);
+	}
+
+	// Strict mode: only builtin types are supported (used to filter the auto-generated presets).
+	static bool IsTypeSupported(nos::TypeInfo& info, bool strict)
+	{
 		if (info->BaseType == NOS_BASE_TYPE_NONE || info->BaseType == NOS_BASE_TYPE_ARRAY)
 			return false;
 		// If has 'skip_make' attribute
@@ -54,17 +106,14 @@ struct MakeNode : NodeContext
 
 	void OnPinConnected(nos::Name pinName, uuid const& connectedPin, nosObjectId connectedObject) override
 	{
-		if (pinName == NSN_Value && Type)
+		if (pinName == NSN_Value && Type && Type->TypeName == NOS_NAME_STATIC("string"))
 		{
-			if (Type->TypeName == NOS_NAME_STATIC("string"))
+			nosBuffer buffer{};
+			nosEngine.GetPinVisualizer(connectedPin, "", &buffer);
+			if (buffer.Size)
 			{
-				nosBuffer buffer{};
-				nosEngine.GetPinVisualizer(connectedPin, "", &buffer);
-				if (buffer.Size)
-				{
-					SetPinVisualizer(NSN_Value, *InterpretObjectData<fb::Visualizer>(buffer)->UnPack());
-					nosEngine.FreeBuffer(&buffer);
-				}
+				SetPinVisualizer(NSN_Value, *InterpretObjectData<fb::Visualizer>(buffer)->UnPack());
+				nosEngine.FreeBuffer(&buffer);
 			}
 		}
 	}
@@ -74,7 +123,9 @@ struct MakeNode : NodeContext
 		if (!Type)
 			return NOS_RESULT_SUCCESS;
 
-		flatbuffers::FlatBufferBuilder fbb;
+		if (IsDict())
+			return ExecuteDict(params);
+
 		auto& type = *Type;
 		switch (type->BaseType)
 		{
@@ -90,27 +141,24 @@ struct MakeNode : NodeContext
 		switch (ObjectKind)
 		{
 		case NOS_OBJECT_KIND_PRIMITIVE:
-		case NOS_OBJECT_KIND_FOREIGN:
-		{
+		case NOS_OBJECT_KIND_FOREIGN: {
 			for (auto const& [name, pin] : params)
 			{
 				if (name == NSN_Output)
 					continue;
-
 				SetField(params[NSN_Output].Id,
-					{ nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name} },
-					*GetObjectDataView(*pin.Object));
+						 {nosDataPathComponent{.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT, .Component = name}},
+						 *GetObjectDataView(*pin.Object));
 			}
 			break;
 		}
-		case NOS_OBJECT_KIND_COMPOSITE:
-		{
+		case NOS_OBJECT_KIND_COMPOSITE: {
 			std::vector<CompositeObjectField> fields;
 			for (auto const& [name, pin] : params)
 			{
 				if (name == NSN_Output)
 					continue;
-				fields.push_back({ name, *pin.Object });
+				fields.push_back({name, *pin.Object});
 			}
 			auto obj = CompositeObjectRef::Create(type->TypeName, fields);
 			if (obj)
@@ -120,93 +168,184 @@ struct MakeNode : NodeContext
 			break;
 		}
 		}
-
 		return NOS_RESULT_SUCCESS;
 	}
 
-	std::vector<nosName> AllTypeNames;
-	
-	void OnMenuRequested(nosContextMenuRequestPtr request) override
+	std::vector<std::pair<nos::Name, uint64_t>> LastSignature; // sorted (key, value object id) last published
+
+	// Bundle the field pins into a nos.Dict, keyed by each field's display name. Only republish when the
+	// inputs actually changed, so we don't churn a fresh object (and re-trigger downstream) every execute.
+	nosResult ExecuteDict(NodeExecuteParams const& params)
 	{
-		if(Type) 
-			return;
-		flatbuffers::FlatBufferBuilder fbb;
+		std::vector<CompositeObjectField> fields;
+		std::vector<std::pair<nos::Name, uint64_t>> signature;
+		std::unordered_set<nos::Name> seenKeys;
+		for (auto const& [name, info] : params)
+		{
+			if (name == NSN_Output)
+				continue;
+			auto* pin = GetPin(name);
+			if (!pin || pin->ShowAs != fb::ShowAs::INPUT_PIN)
+				continue;
+			ObjectRef value = params.GetPinObject(name);
+			if (!value.IsValid())
+				continue;
+			if (!seenKeys.insert(pin->DisplayName).second)
+			{
+				nosEngine.LogW("Make Dict: duplicate key '%s' ignored", pin->DisplayName.AsString().c_str());
+				continue;
+			}
+			signature.push_back({pin->DisplayName, value.GetObjectId().Value});
+			fields.push_back({pin->DisplayName, std::move(value)});
+		}
+		std::sort(signature.begin(), signature.end(),
+				  [](auto const& a, auto const& b) { return a.first.AsString() < b.first.AsString(); });
+		if (signature == LastSignature)
+			return NOS_RESULT_SUCCESS;
+		LastSignature = std::move(signature);
+		auto dict = DictRef::Create(fields);
+		if (!dict)
+			return NOS_RESULT_FAILURE;
+		SetPinObject(NSN_Output, *dict);
+		params.MarkAllOutsDirty = false;
+		return NOS_RESULT_SUCCESS;
+	}
+
+	// --- Type selection / dict field menus --------------------------------------------------------
+
+	std::vector<nos::Name> AvailableTypes;
+
+	std::vector<nos::Name> const& GetAvailableTypes()
+	{
+		if (!AvailableTypes.empty())
+			return AvailableTypes;
 		size_t count = 0;
-		auto res = nosEngine.GetPinDataTypeNames(nullptr, &count);
-		if (NOS_RESULT_FAILED == res)
-			return;
-		AllTypeNames.resize(count);
-		res = nosEngine.GetPinDataTypeNames(AllTypeNames.data(), &count);
-		if (NOS_RESULT_FAILED == res)
-			return;
-		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> types;
-		uint32_t index = 0;
-		std::unordered_map<std::string, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>> typeNamesByNamespace;
-		for (auto ty : AllTypeNames)
+		if (nosEngine.GetPinDataTypeNames(nullptr, &count) == NOS_RESULT_FAILED)
+			return AvailableTypes;
+		std::vector<nosName> names(count);
+		nosEngine.GetPinDataTypeNames(names.data(), &count);
+		for (auto n : names)
+			if (n != NSN_TypeNameGeneric)
+				AvailableTypes.push_back(n);
+		std::sort(AvailableTypes.begin(), AvailableTypes.end(),
+				  [](nos::Name a, nos::Name b) { return a.AsString() < b.AsString(); });
+		return AvailableTypes;
+	}
+
+	// Build a "Set Type" submenu, grouping namespaced types (e.g. nos.fb.*) under nested submenus.
+	void BuildTypeMenu(ContextMenuBuilder& menu, std::vector<nos::Name> const& types, uint32_t commandBase)
+	{
+		std::map<std::string, std::vector<size_t>> byNamespace;
+		std::vector<size_t> topLevel;
+		for (size_t i = 0; i < types.size(); ++i)
 		{
-			auto nameStr = nos::Name(ty).AsString();
-			auto namespacePos = nameStr.rfind(".");
-			if (namespacePos != std::string::npos)
-			{
-				std::string ns = nameStr.substr(0, namespacePos);
-				typeNamesByNamespace[ns].push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
-			}
+			auto name = types[i].AsString();
+			auto pos = name.rfind('.');
+			if (pos != std::string::npos)
+				byNamespace[name.substr(0, pos)].push_back(i);
 			else
-			{
-				types.push_back(nos::CreateContextMenuItemDirect(fbb, nos::Name(ty).AsCStr(), index++));
-			}
+				topLevel.push_back(i);
 		}
-		std::unordered_map<std::string, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>> groupedItems;
-		for (auto& [name, items] : typeNamesByNamespace)
+		for (size_t i : topLevel)
+			menu.Item(types[i].AsString(), commandBase + uint32_t(i));
+		for (auto const& [ns, indices] : byNamespace)
+			menu.Submenu(ns, [&](ContextMenuBuilder& sub) {
+				for (size_t i : indices)
+					sub.Item(types[i].AsString(), commandBase + uint32_t(i));
+			});
+	}
+
+	void OnNodeMenuRequested(nosContextMenuRequestPtr request) override
+	{
+		if (IsDict())
 		{
-			auto menuItem = nos::CreateContextMenuItemDirect(fbb, name.c_str(), -1, &items);
-			types.push_back(menuItem);
+			SendContextMenu(request, [](ContextMenuBuilder& menu) { menu.Item("Add Field", ADD_FIELD); });
+			return;
 		}
-		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
-		items.push_back(nos::CreateContextMenuItemDirect(fbb, "Set Type", -1, &types));
-		HandleEvent(CreateAppEvent(fbb, app::CreateAppContextMenuUpdateDirect(fbb, &NodeId, request->pos(), request->instigator(), &items)));
+		if (Type)
+			return; // already a concrete type; nothing to set
+		auto const& types = GetAvailableTypes();
+		SendContextMenu(request, [&](ContextMenuBuilder& menu) {
+			menu.Submenu("Set Type", [&](ContextMenuBuilder& sub) { BuildTypeMenu(sub, types, SET_NODE_TYPE_BASE); });
+			menu.Item("Make Dictionary", MAKE_DICT); // first-class dict entry alongside Set Type
+		});
 	}
 
-	void OnMenuCommand(uuid const& itemID, uint32_t cmd) override
+	void OnPinMenuRequested(nos::Name pinName, nosContextMenuRequestPtr request) override
 	{
-		if(Type) 
+		if (!IsDict() || pinName == NSN_Output)
 			return;
-		if (cmd >= AllTypeNames.size())
-			return;
-		auto tyName = AllTypeNames[cmd];
-		auto typeInfo = nos::TypeInfo(tyName);
-		SetType(typeInfo);
+		auto const& types = GetAvailableTypes();
+		SendContextMenu(request, [&](ContextMenuBuilder& menu) {
+			menu.Submenu("Set Type", [&](ContextMenuBuilder& sub) { BuildTypeMenu(sub, types, SET_FIELD_TYPE_BASE); });
+			menu.Item("Reset Type", RESET_TYPE);
+			menu.Item("Remove Field", REMOVE_FIELD);
+		});
 	}
 
-	// Set the template parameter, update pin type
-	void SetType(nosTypeInfo const* typeInfo)
+	void OnMenuCommand(uuid const& itemId, uint32_t cmd) override
 	{
-		// Set template parameter
-		flatbuffers::FlatBufferBuilder fbb;
-		
-		std::vector<uint8_t> data = nos::Buffer(nos::Name(typeInfo->TypeName).AsCStr(), 1 + nos::Name(typeInfo->TypeName).AsString().size());
-		std::vector<flatbuffers::Offset<fb::TemplateParameter>> params = {
-			fb::CreateTemplateParameterDirect(fbb, NSN_Type.AsCStr(), "string", &data)};
-		auto paramsOffset = fbb.CreateVector(params);
-		auto typeNameOffset = fbb.CreateString(nos::Name(typeInfo->TypeName).AsCStr());
-		
-		PinResolveRequest(NSN_Output, typeInfo->TypeName);
-		PartialNodeUpdateBuilder update(fbb);
-		update.add_node_id(&NodeId);
-		update.add_template_parameters(paramsOffset);
-		HandleEvent(CreateAppEvent(fbb, update.Finish()));
+		auto const& types = GetAvailableTypes();
+		switch (cmd)
+		{
+		case ADD_FIELD:
+			AddField();
+			return;
+		case REMOVE_FIELD:
+			if (itemId != NodeId)
+				DeletePin(itemId);
+			return;
+		case RESET_TYPE:
+			if (itemId != NodeId)
+				SetPinType(itemId, NSN_TypeNameGeneric);
+			return;
+		case MAKE_DICT:
+			SetType(nos::TypeInfo(nos::Name(NSN_DictTypeName)));
+			return;
+		}
+		if (cmd >= SET_NODE_TYPE_BASE)
+		{
+			size_t idx = cmd - SET_NODE_TYPE_BASE;
+			if (idx < types.size())
+				SetType(nos::TypeInfo(types[idx]));
+		}
+		else if (cmd >= SET_FIELD_TYPE_BASE && itemId != NodeId)
+		{
+			size_t idx = cmd - SET_FIELD_TYPE_BASE;
+			if (idx < types.size())
+				SetPinType(itemId, types[idx]);
+		}
 	}
+
+	size_t NextFieldIndex()
+	{
+		size_t i = 0;
+		while (GetPin(nos::Name("Field " + std::to_string(i))))
+			i++;
+		return i;
+	}
+
+	void AddField()
+	{
+		auto name = nos::Name("Field " + std::to_string(NextFieldIndex()));
+		AddPin(PinBuilder(name)
+				   .SetDisplayName(name)
+				   .SetTypeName(NSN_TypeNameGeneric)
+				   .SetShowAs(nos::fb::ShowAs::INPUT_PIN)
+				   .SetCanShowAs(nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY));
+	}
+
+	// Set the dynamic node's type by resolving the output pin. The chosen type then persists via the
+	// output pin's type_name (read back in OnCreate) - template parameters are reserved for
+	// construction-time presets, not runtime type changes.
+	void SetType(nosTypeInfo const* typeInfo) { PinResolveRequest(NSN_Output, typeInfo->TypeName); }
 
 	void OnPinUpdated(const nosPinUpdate* update) override
 	{
 		if (Type)
 			return;
-		if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME)
-		{
-			if (update->PinName != NSN_Output)
-				return;
+		if (update->UpdatedField == NOS_PIN_FIELD_TYPE_NAME && update->PinName == NSN_Output)
 			OnTypeUpdated(update->TypeName);
-		}
 	}
 
 	void OnTypeUpdated(nos::Name typeName, const char* updatedDisplayName = nullptr)
@@ -217,11 +356,27 @@ struct MakeNode : NodeContext
 			SetNodeOrphanState(fb::NodeOrphanStateType::ORPHAN, "Invalid type");
 			return;
 		}
-		LoadPins(updatedDisplayName);
+		if (updatedDisplayName)
+			SetNodeDisplayName(updatedDisplayName);
+		LoadPins();
 	}
 
 	nosResult OnResolvePinDataTypes(nosResolvePinDataTypesParams* params) override
-	{ 
+	{
+		if (IsDict())
+		{
+			// The engine pre-fills every still-generic pin with the incoming type. Only the instigated
+			// field should adopt it; reset the others to their own type so each field resolves
+			// independently rather than all fields snapping to the first connected type.
+			for (size_t i = 0; i < params->PinCount; i++)
+			{
+				auto& pin = params->Pins[i];
+				pin.OutResolvedTypeName = (nos::Name(pin.Name) == nos::Name(params->InstigatorPinName))
+											  ? params->IncomingTypeName
+											  : pin.TypeName;
+			}
+			return NOS_RESULT_SUCCESS;
+		}
 		nos::TypeInfo incomingType(params->IncomingTypeName);
 		if (!IsTypeSupported(incomingType, false))
 		{
@@ -231,68 +386,61 @@ struct MakeNode : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	void LoadPins(const char* updatedDisplayName = nullptr)
+	// Ensure the Output pin exists with the right type, reactivating/retyping an existing one.
+	void EnsureOutputPin(nos::Name typeName, std::optional<nos::Buffer> defaultValue)
 	{
-		assert((*Type)->BaseType != NOS_BASE_TYPE_NONE);
+		if (auto* out = GetPin(NSN_Output))
+		{
+			if (out->IsOrphan)
+				SetPinOrphanState(out->Id, fb::PinOrphanStateType::ACTIVE);
+			if (out->TypeName != typeName)
+				SetPinType(out->Id, typeName);
+			return;
+		}
+		PinBuilder builder(NSN_Output);
+		builder.SetDisplayName(typeName)
+			.SetTypeName(typeName)
+			.SetShowAs(nos::fb::ShowAs::OUTPUT_PIN)
+			.SetCanShowAs(nos::fb::CanShowAs::OUTPUT_PIN_ONLY);
+		if (defaultValue)
+			builder.SetValue(std::move(*defaultValue));
+		AddPin(builder);
+	}
+
+	void LoadPins()
+	{
 		auto& type = *Type;
-		auto defBuf = GetDefaultValueOfType(type->TypeName); // TODO: This can be freed after type is unloaded, so beware.
+
+		if (IsDict())
+		{
+			EnsureOutputPin(type->TypeName, std::nullopt);
+			if (NextFieldIndex() == 0)
+				AddField(); // a fresh dict starts with one field
+			return;
+		}
+
+		assert(type->BaseType != NOS_BASE_TYPE_NONE);
+		auto defBuf = GetDefaultValueOfType(type->TypeName);
 		if (!defBuf)
 			return;
-		nos::Buffer buf = defBuf->GetBuffer();
-		std::vector<uint8_t> data = buf;
-		flatbuffers::FlatBufferBuilder fbb;
-		std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd = {};
-		std::vector<::flatbuffers::Offset<PartialPinUpdate>> pinsToUpdate = {};
-		std::vector<fb::UUID> pinsToDelete = {};
+		nos::Buffer typeDefault = defBuf->GetBuffer();
 
-		std::unordered_set<nosName> pinNames = { NSN_Output };
+		std::unordered_set<nosName> accepted{NSN_Output};
+		EnsureOutputPin(type->TypeName, typeDefault);
 
-		if (auto out = GetPin(NSN_Output))
-		{
-			if (out->TypeName != type->TypeName || out->IsOrphan)
-			{
-				pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-																	&out->Id,
-																	0,
-																	nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-																	nos::Name(type->TypeName).AsCStr(),
-																	nos::Name(type->TypeName).AsCStr()));
-			}
-		}
-		else
-		{
-			uuid id = nosEngine.GenerateID();
-			nos::fb::TPin outPin{};
-			outPin.id = id;
-			outPin.name = nos::Name(NSN_Output).AsCStr();
-			outPin.type_name = nos::Name(Type->TypeName).AsCStr();
-			outPin.show_as = nos::fb::ShowAs::OUTPUT_PIN;
-			outPin.can_show_as = nos::fb::CanShowAs::OUTPUT_PIN_ONLY;
-			outPin.data = data;
-			outPin.display_name = nos::Name(Type->TypeName).AsCStr();
-			pinsToAdd.push_back(fb::CreatePin(fbb, &outPin));
-		}
-
-		// If the type is a primitive, then it will be constructed from a single pin named "Value"
 		switch (type->BaseType)
 		{
-		case NOS_BASE_TYPE_INT:   
-		case NOS_BASE_TYPE_UINT:  
-		case NOS_BASE_TYPE_FLOAT: 
+		case NOS_BASE_TYPE_INT:
+		case NOS_BASE_TYPE_UINT:
+		case NOS_BASE_TYPE_FLOAT:
 		case NOS_BASE_TYPE_STRING:
-		case NOS_BASE_TYPE_UNION:
-			pinNames.insert(NSN_Value);
-			if (auto pin = GetPin(NSN_Value))
+		case NOS_BASE_TYPE_UNION: {
+			// A primitive is constructed from a single "Value" pin.
+			accepted.insert(NSN_Value);
+			if (auto* pin = GetPin(NSN_Value))
 			{
 				if (pin->IsOrphan)
-				{
-					pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-						&pin->Id,
-						0,
-						nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-						nos::Name(type->TypeName).AsCStr(),
-						nos::Name(NSN_Value).AsCStr()));
-				}
+					SetPinOrphanState(pin->Id, fb::PinOrphanStateType::ACTIVE);
 				if (type->BaseType == NOS_BASE_TYPE_STRING)
 				{
 					nosBuffer buffer{};
@@ -306,96 +454,72 @@ struct MakeNode : NodeContext
 			}
 			else
 			{
-				uuid id = nosEngine.GenerateID();
-				std::vector<uint8_t> data(type->ByteSize);
-				if (type->BaseType == NOS_BASE_TYPE_STRING)
-				{
-					data = std::vector<uint8_t>(1, 0);
-				}
-				pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(NSN_Value).AsCStr(), nos::Name(type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
+				nos::Buffer value = type->BaseType == NOS_BASE_TYPE_STRING ? nos::Buffer(std::vector<uint8_t>(1, 0))
+																		   : nos::Buffer(std::vector<uint8_t>(type->ByteSize));
+				AddPin(PinBuilder(NSN_Value)
+						   .SetDisplayName(NSN_Value)
+						   .SetTypeName(type->TypeName)
+						   .SetShowAs(fb::ShowAs::INPUT_PIN)
+						   .SetCanShowAs(fb::CanShowAs::INPUT_PIN_OR_PROPERTY)
+						   .SetValue(std::move(value)));
 			}
 			break;
-		case NOS_BASE_TYPE_NONE: break;
-		case NOS_BASE_TYPE_ARRAY: break;
-		case NOS_BASE_TYPE_STRUCT:
-		{
-			auto rootIftable = type->ByteSize ? nullptr : buf.As<flatbuffers::Table>();
+		}
+		case NOS_BASE_TYPE_STRUCT: {
 			for (int i = 0; i < type->FieldCount; ++i)
 			{
-				auto field = type->Fields[i];
-				pinNames.insert(field.Name);
-				if (auto f = GetPin(field.Name))
+				auto& field = type->Fields[i];
+				accepted.insert(field.Name);
+				if (auto* pin = GetPin(field.Name))
 				{
-					if (f->TypeName != field.Type->TypeName || f->IsOrphan)
+					if (pin->TypeName == field.Type->TypeName)
 					{
-						pinsToUpdate.push_back(CreatePartialPinUpdateDirect(fbb,
-							&f->Id,
-							0,
-							nos::fb::CreatePinOrphanStateDirect(fbb, fb::PinOrphanStateType::ACTIVE),
-							nos::Name(field.Type->TypeName).AsCStr(),
-							nos::Name(field.Name).AsCStr()));
+						if (pin->IsOrphan)
+							SetPinOrphanState(pin->Id, fb::PinOrphanStateType::ACTIVE);
+						continue;
 					}
+					DeletePin(pin->Id); // field type changed: recreate with the new type
 				}
-				else
-				{
-					uuid id = nosEngine.GenerateID();
-					data = {};
-					nosQueryBufferParams params = {};
-					params.Buffer = buf;
-					nosDataPathComponent path = {};
-					path.Component.FieldName = field.Name;
-					path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
-					params.Path = &path;
-					params.PathLength = 1;
-					params.TypeName = type->TypeName;
-					auto queriedField = QueryBuffer(params);
-					if (!queriedField && field.Type->ByteSize)
-						data = std::vector<uint8_t>{ (uint8_t*)field.DefaultValue.Data, ((uint8_t*)field.DefaultValue.Data) + field.DefaultValue.Size };
-					else if (queriedField) // If field is an empty array, queriedField will be empty
-						data = std::vector<uint8_t>{ (uint8_t*)queriedField->Data(), ((uint8_t*)queriedField->Data()) + queriedField->Size()};
-					pinsToAdd.push_back(fb::CreatePinDirect(fbb, &id, nos::Name(field.Name).AsCStr(), nos::Name(field.Type->TypeName).AsCStr(), nos::fb::ShowAs::INPUT_PIN, nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 0, &data));
-				}
+				AddPin(PinBuilder(field.Name)
+						   .SetDisplayName(field.Name)
+						   .SetTypeName(field.Type->TypeName)
+						   .SetShowAs(fb::ShowAs::INPUT_PIN)
+						   .SetCanShowAs(fb::CanShowAs::INPUT_PIN_OR_PROPERTY)
+						   .SetValue(FieldInitialValue(typeDefault, type->TypeName, field)));
 			}
-		}
 			break;
 		}
-
-		for (auto& [name, id]: PinName2Id )
-			if (!pinNames.contains(name))
-				pinsToDelete.push_back(id);
-
-		if (!pinsToAdd.empty() ||
-			!pinsToDelete.empty() ||
-			!pinsToUpdate.empty())
-		{
-			std::vector<uint8_t> data =
-				nos::Buffer(nos::Name(Type->TypeName).AsCStr(), 1 + nos::Name(Type->TypeName).AsString().size());
-			std::vector<flatbuffers::Offset<fb::TemplateParameter>> params = {
-				fb::CreateTemplateParameterDirect(fbb, NSN_Type.AsCStr(), "string", &data)};
-			HandleEvent(CreateAppEvent(fbb,
-												  CreatePartialNodeUpdateDirect(fbb,
-																				&NodeId,
-																				ClearFlags::CLEAR_TEMPLATE_PARAMETERS,
-																				&pinsToDelete,
-																				&pinsToAdd,
-																				0,
-																				0,
-																				0,
-																				0,
-																				0,
-																				&pinsToUpdate,
-																				0,
-																				0,
-																				&params,
-																				updatedDisplayName)));
 		}
+
+		for (auto& [id, pin] : Pins)
+			if (!accepted.contains(pin.Name))
+				DeletePin(id);
+	}
+
+	// The field's value taken from the type's default buffer, falling back to the field's own default.
+	nos::Buffer FieldInitialValue(nos::Buffer const& typeDefault, nos::Name typeName, nosFieldInfo const& field)
+	{
+		nosQueryBufferParams params = {};
+		params.Buffer = typeDefault;
+		nosDataPathComponent path = {};
+		path.Component.FieldName = field.Name;
+		path.ComponentType = NOS_DATA_PATH_FIELD_COMPONENT;
+		params.Path = &path;
+		params.PathLength = 1;
+		params.TypeName = typeName;
+		auto queriedField = QueryBuffer(params);
+		if (queriedField) // empty arrays come back as an empty buffer, which is still the right value
+			return nos::Buffer(queriedField->Data(), queriedField->Size());
+		if (field.Type->ByteSize)
+			return nos::Buffer(field.DefaultValue.Data, field.DefaultValue.Size);
+		return nos::Buffer();
 	}
 };
 
 nosResult RegisterMake(nosNodeFunctions* fn)
 {
 	NOS_BIND_NODE_CLASS(NSN_Make, MakeNode, fn);
-	
+
 	std::vector<nosName> typeNames;
 	size_t count = 0;
 	auto res = nosEngine.GetPinDataTypeNames(0, &count);
@@ -410,9 +534,11 @@ nosResult RegisterMake(nosNodeFunctions* fn)
 		nos::TypeInfo typeInfo(typeName);
 		if (!MakeNode::IsTypeSupported(typeInfo, true))
 			continue;
+		if (typeInfo.TypeName == NSN_DictTypeName)
+			continue; // "Make Dict" is provided as a curated preset in Make.nosnode
 		std::string name = nos::Name(typeInfo.TypeName).AsString();
 		auto idx = name.find_last_of(".");
-		idx = idx == std::string::npos ? 0 : 1+idx;
+		idx = idx == std::string::npos ? 0 : 1 + idx;
 		fb::TNodePreset preset;
 		fb::TNodeMenuInfo info;
 		info.category = "Type";
@@ -439,4 +565,4 @@ nosResult RegisterMakeDynamic(nosNodeFunctions* fn)
 	return NOS_RESULT_SUCCESS;
 }
 
-} // namespace nos
+} // namespace nos::reflect

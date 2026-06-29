@@ -29,6 +29,28 @@
 		{
 			"class_name": "Make",
 			"hide_in_context_menu": true,
+			"presets": [
+				{
+					"menu_info": {
+						"display_name": "Make Dict",
+						"category": "Type",
+						"name_aliases": [
+							"dictionary",
+							"map",
+							"record",
+							"object",
+							"struct"
+						]
+					},
+					"params": [
+						{
+							"name": "Type",
+							"type_name": "string",
+							"value": "nos.Dict"
+						}
+					]
+				}
+			],
 			"node": {
 				"contents_type": "Job"
 			}
