@@ -1,0 +1,42 @@
+{
+	"nodes": [
+		{
+			"class_name": "TrackToTransformQ",
+			"menu_info": {
+				"category": "Graphics|Coordinate System",
+				"display_name": "Track To TransformQ"
+			},
+			"node": {
+				"class_name": "TrackToTransformQ",
+				"contents_type": "Job",
+				"description": "Converts a Track's location and Euler rotation into a TransformQ.\nThe rotation is decoded per Encoding and emitted as a quaternion. No frame\nconversion is performed: the output is expressed in the same frame the Track is\nauthored in. Track carries no scale, so the output scale is identity.",
+				"pins": [
+					{
+						"name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Track whose location and rotation are converted."
+					},
+					{
+						"name": "Frame",
+						"display_name": "Frame",
+						"type_name": "nos.math.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system the Track is authored in; its euler encoding decodes the rotation. No frame conversion is performed."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.math.TransformQ",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "Track pose expressed as a quaternion TransformQ."
+					}
+				]
+			}
+		}
+	]
+}

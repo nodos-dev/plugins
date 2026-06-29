@@ -1,0 +1,62 @@
+include "Common.fbs";
+
+namespace nos.math;
+
+// Intrinsic Euler rotation order. Component i of an Euler triple is always the
+// angle about axis i (rot.x about X, rot.y about Y, rot.z about Z).
+enum EulerOrder : ubyte {
+	ZYX = 0,
+	XYZ = 1,
+	YXZ = 2,
+	YZX = 3,
+	ZXY = 4,
+	XZY = 5,
+}
+
+// --- Shared coordinate-system / transform types ---
+// Owned by nos.math (a leaf plugin), so nos.track, nos.graphics and nos.geometry
+// can all depend on nos.math and use these via nos.math.* without a dependency
+// cycle. The engine requires a plugin's fbs types to be in the plugin's own
+// namespace, so these are nos.math.*.
+
+// A signed coordinate axis, used to map world-semantic directions onto engine axes.
+enum SignedAxis : ubyte { PosX, NegX, PosY, NegY, PosZ, NegZ }
+
+// Chirality of the coordinate system.
+enum Handedness : ubyte { RightHanded, LeftHanded }
+
+// How a 3-component Euler-angle field (degrees) is decoded into a rotation.
+struct EulerEncoding {
+    order: EulerOrder;
+    sign_x: byte;
+    sign_y: byte;
+    sign_z: byte;
+}
+
+// Full convention of a transform endpoint: axis assignments to world-semantic
+// directions (forward, up), the implied handedness, how its Euler-angle fields are
+// decoded (`euler`), and the unit scale. `right` is DERIVED and not stored.
+struct CoordinateFrame {
+    up: SignedAxis;
+    forward: SignedAxis;
+    handedness: Handedness;
+    euler: EulerEncoding;
+    // Linear size of one unit, in meters (cm = 0.01, m = 1.0).
+    meters_per_unit: double;
+}
+
+struct Transform {
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec3d;
+    scale:    nos.fb.vec3d;
+}
+
+// Like Transform, but rotation is a quaternion (x, y, z, w).
+struct TransformQ {
+    position: nos.fb.vec3d;
+    rotation: nos.fb.vec4d;
+    scale:    nos.fb.vec3d;
+}
+
+// NOTE: AlignmentState and TransformGuidance live in nos.track (Types/Guidance.fbs),
+// since they belong to the camera-guidance feature.

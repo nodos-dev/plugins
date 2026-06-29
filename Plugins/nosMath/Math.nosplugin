@@ -1,23 +1,26 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.math",
-      "version": "2.0.0"
-		},
-		"description": "Nodes for math operations.",
-		"display_name": "Math",
-		"category": "Mathematics",
-		"dependencies": [
-			{
-				"name": "nos.reflect",
-        "version": "3.0"
-			}
-		]
-	},
-	"binary_path": "Binaries/nosMath",
-	"third_party_software": [
-		"Config/Licenses.json"
-	],
-  "sdk_version": "41.0",
-	"schema_version": "1.4-v1"
+    "info": {
+        "id": {
+            "name": "nos.math",
+            "version": "2.1.0"
+        },
+        "description": "Nodes for math operations.",
+        "display_name": "Math",
+        "category": "Mathematics",
+        "dependencies": [
+            {
+                "name": "nos.reflect",
+                "version": "3.0"
+            }
+        ]
+    },
+    "named_values": [
+        "Types/CoordinateSystemPresets.json"
+    ],
+    "binary_path": "Binaries/nosMath",
+    "third_party_software": [
+        "Config/Licenses.json"
+    ],
+    "sdk_version": "41.0",
+    "schema_version": "1.4-v1"
 }

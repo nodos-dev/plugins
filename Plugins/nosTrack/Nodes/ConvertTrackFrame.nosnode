@@ -1,0 +1,48 @@
+{
+	"nodes": [
+		{
+			"class_name": "ConvertTrackFrame",
+			"menu_info": {
+				"category": "Track|Coordinate System",
+				"display_name": "Convert Track Frame"
+			},
+			"node": {
+				"class_name": "ConvertTrackFrame",
+				"contents_type": "Job",
+				"description": "Transforms a Track between coordinate systems.\nThe Source and Target systems select axis assignments, handedness, units, and the Euler convention used for the rotation field.\nLocation: basis-changed (Source -> Target), then scaled by the ratio of the two systems' meters_per_unit (e.g. cm -> m yields 0.01).\nRotation: built in the source Euler convention, conjugated by the basis-change matrix, re-extracted in the target convention.\nOther Track fields (fov, focus, sensor_size, lens_distortion, ...) pass through unchanged.",
+				"pins": [
+					{
+						"name": "In",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "Source",
+						"type_name": "nos.math.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the input Track."
+					},
+					{
+						"name": "Target",
+						"type_name": "nos.math.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"data": { "up": "PosY", "forward": "NegZ", "handedness": "RightHanded", "euler": { "order": "YXZ", "sign_x": 1, "sign_y": 1, "sign_z": 1 }, "meters_per_unit": 1.0 },
+						"description": "Coordinate system convention (axes, handedness, units, Euler encoding) of the output Track."
+					},
+					{
+						"name": "Out",
+						"type_name": "nos.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+					}
+				]
+			}
+		}
+	]
+}

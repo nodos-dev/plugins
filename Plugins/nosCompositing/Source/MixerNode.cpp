@@ -285,7 +285,7 @@ struct MixerContext : public NodeContext
 		}
 	}
 
-	virtual void OnPinConnected(nos::Name pinName, const nos::uuid& connectedPin) override
+	virtual void OnPinConnected(nos::Name pinName, const nos::uuid& connectedPin, nosObjectId connectedObject) override
 	{
 		if (pinName == NSN_Overlay)
 		{

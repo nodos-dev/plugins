@@ -21,12 +21,24 @@ enum TrackNode : int
 	FreeD,
 	UserTrack,
 	AddTrack,
+	ConvertTrackFrame,
+	ConvertTransform,
+	PlaybackTrackCOLMAP,
+	ReOriginTrack,
+	RecordTrackCOLMAP,
+	CameraGuide,
 	Count
 };
 
 void RegisterFreeDNode(nosNodeFunctions* functions);
 void RegisterController(nosNodeFunctions* functions);
 void RegisterAddTrack(nosNodeFunctions*);
+void RegisterConvertTrackFrame(nosNodeFunctions*);
+void RegisterConvertTransform(nosNodeFunctions*);
+void RegisterPlaybackTrackCOLMAP(nosNodeFunctions*);
+void RegisterReOriginTrack(nosNodeFunctions*);
+void RegisterRecordTrackCOLMAP(nosNodeFunctions*);
+nosResult RegisterCameraGuide(nosNodeFunctions*);
 
 nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
@@ -46,7 +58,25 @@ nosResult NOSAPI_CALL ExportNodeFunctions(size_t* outSize, nosNodeFunctions** ou
 			RegisterController(node);
 			break;
 		case TrackNode::AddTrack:
-			RegisterAddTrack(node); 
+			RegisterAddTrack(node);
+			break;
+		case TrackNode::ConvertTrackFrame:
+			RegisterConvertTrackFrame(node);
+			break;
+		case TrackNode::ConvertTransform:
+			RegisterConvertTransform(node);
+			break;
+		case TrackNode::PlaybackTrackCOLMAP:
+			RegisterPlaybackTrackCOLMAP(node);
+			break;
+		case TrackNode::ReOriginTrack:
+			RegisterReOriginTrack(node);
+			break;
+		case TrackNode::RecordTrackCOLMAP:
+			RegisterRecordTrackCOLMAP(node);
+			break;
+		case TrackNode::CameraGuide:
+			RegisterCameraGuide(node);
 			break;
 		}
 	}
@@ -141,6 +171,14 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 		outRenamedFrom[3] = NOS_NAME_STATIC("nos.fb.RotationSystem");
 		outRenamedTo[3] = NOS_NAME_STATIC("nos.track.RotationSystem");
 	};
+	// CameraGuide moved from nos.graphics to nos.track; migrate old graphs.
+	outFunctions->GetRenamedNodeClasses = [](nosName* outFrom, nosName* outTo, size_t* outCount) {
+		*outCount = 1;
+		if (!outFrom || !outTo)
+			return;
+		outFrom[0] = NOS_NAME_STATIC("nos.graphics.CameraGuide");
+		outTo[0] = NOS_NAME_STATIC("nos.track.CameraGuide");
+	};
 
 
 	nosAnimationInterpolator trackInterpolator = {
@@ -149,7 +187,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportPlugin(nosPluginFunctions* outFunctio
 
 	nosAnimationInterpolator transformInterpolator = {.TypeName = NOS_NAME(fb::Transform::GetFullyQualifiedName()),
 											 .InterpolateCallback = InterpolateTransform};
-	nosAnimation->RegisterInterpolator(&trackInterpolator);
+	nosAnimation->RegisterInterpolator(&transformInterpolator);
 
 
 	return NOS_RESULT_SUCCESS;

@@ -394,7 +394,7 @@ public:
 		CallMethod<void>("on_menu_command", nosUUID(itemID), cmd);
 	}
 
-	void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
+	void OnPinConnected(nos::Name pinName, uuid const& connectedPin, nosObjectId connectedObject) override
 	{
 		CallMethod<void>("on_pin_connected", PyNativeOnPinConnectedArgs(pinName));
 	}

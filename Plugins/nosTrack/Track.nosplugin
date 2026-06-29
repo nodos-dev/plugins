@@ -1,22 +1,26 @@
 {
-	"info": {
-		"id": {
-			"name": "nos.track",
-			"version": "3.0.0"
-		},
-		"display_name": "Track",
-		"category": "Virtual Studio",
-		"dependencies": [
-			{
-				"name": "nos.sys.animation",
-				"version": "3.0"
-			}
-		]
-	},
-	"defaults": [
-		"Types/Defaults.json"
-	],
-	"binary_path": "Binaries/nosTrack",
-	"sdk_version": "41.0",
-	"schema_version": "1.4-v1"
+    "info": {
+        "id": {
+            "name": "nos.track",
+            "version": "3.0.0"
+        },
+        "display_name": "Track",
+        "category": "Virtual Studio",
+        "dependencies": [
+            {
+                "name": "nos.sys.animation",
+                "version": "3.0"
+            },
+            {
+                "name": "nos.math",
+                "version": "2.1"
+            }
+        ]
+    },
+    "defaults": [
+        "Types/Defaults.json"
+    ],
+    "binary_path": "Binaries/nosTrack",
+    "sdk_version": "41.0",
+    "schema_version": "1.4-v1"
 }

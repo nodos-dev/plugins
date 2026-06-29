@@ -1,0 +1,121 @@
+{
+	"nodes": [
+		{
+			"class_name": "RecordTrackCOLMAP",
+			"menu_info": {
+				"category": "nosTrack",
+				"display_name": "Record Track (COLMAP)",
+				"name_aliases": [ "colmap", "export camera", "record camera" ]
+			},
+			"node": {
+				"class_name": "RecordTrackCOLMAP",
+				"display_name": "Record Track (COLMAP)",
+				"contents_type": "Job",
+				"always_execute": true,
+				"description": "Records camera track data each frame while Record is true.\nOn falling edge (after MinOffFrames debounce) writes COLMAP-spec cameras.txt + images.txt and clears the buffer.\nIntrinsics come from FOV/sensor/distortion. Extrinsics are written as world-to-camera in the COLMAP frame (RH, +X right, +Y down, +Z forward).\nSet SourceFrame to match the convention of the connected Track.",
+				"pins": [
+					{
+						"name": "Timecode",
+						"display_name": "Timecode",
+						"type_name": "string",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Optional SMPTE timecode (HH:MM:SS:FF). Written to timecodes.txt sidecar when non-empty."
+					},
+					{
+						"name": "FrameNumber",
+						"display_name": "Frame Number",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 0,
+						"description": "Optional absolute frame number paired with Timecode. Written to timecodes.txt sidecar."
+					},
+					{
+						"name": "OutputDirectory",
+						"display_name": "Output Directory",
+						"type_name": "string",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "FOLDER_PICKER" },
+						"description": "Where cameras.txt and images.txt are written when recording stops. Must be empty to start recording."
+					},
+					{
+						"name": "ImageResolution",
+						"display_name": "Image Resolution",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": {
+							"x": 1920,
+							"y": 1080
+						},
+						"description": "Image WIDTH/HEIGHT in pixels. Used to compute focal length and principal point for cameras.txt."
+					},
+					{
+						"name": "SourceFrame",
+						"display_name": "Source Frame",
+						"type_name": "nos.math.CoordinateFrame",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"visualizer": { "type": "NAMED_VALUE", "name": "nos.math.CoordinateSystemPresets" },
+						"data": { "up": "PosZ", "forward": "PosX", "handedness": "LeftHanded", "euler": { "order": "ZYX", "sign_x": -1, "sign_y": -1, "sign_z": 1 }, "meters_per_unit": 0.01 },
+						"description": "Coordinate system of the connected Track (axes, handedness, units, euler encoding).\nUsed to convert location and rotation into the COLMAP frame (meters) before writing; the euler encoding is recorded into the extras sidecar.\nDefault matches FreeD / UE convention."
+					},
+					{
+						"name": "Record",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": false,
+						"description": "Drives recording.\nRising edge: clear buffer and start.\nFalling edge (after MinOffFrames): stop and write files.\nFails to start if OutputDirectory is non-empty."
+					},
+					{
+						"name": "MinOffFrames",
+						"display_name": "Min Off Frames",
+						"type_name": "uint",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"data": 1,
+						"min": "1",
+						"description": "Debounce: minimum consecutive Record=false frames before stopping. Default 1 = stop immediately. Use 5-15 to ride out short upstream glitches (e.g. SDI bit flips on a camera-derived flag)."
+					},
+					{
+						"name": "RecordingFrame",
+						"display_name": "Recording Frame",
+						"type_name": "uint",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0,
+						"description": "Current recording frame index. 0 when not recording."
+					},
+					{
+						"name": "FrameCount",
+						"display_name": "Frame Count",
+						"type_name": "uint",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"data": 0,
+						"description": "Frames in the buffer."
+					},
+					{
+						"name": "InTrack",
+						"display_name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Camera track to record. Interpreted in the SourceFrame convention (location, rotation Euler, FOV, sensor, lens distortion)."
+					},
+					{
+						"name": "OutTrack",
+						"display_name": "Track",
+						"type_name": "nos.track.Track",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Pass-through of InTrack."
+					}
+				]
+			}
+		}
+	]
+}

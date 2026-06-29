@@ -1,0 +1,75 @@
+{
+	"nodes": [
+		{
+			"class_name": "BillboardPositions",
+			"menu_info": {
+				"category": "Rendering",
+				"display_name": "Billboard Positions"
+			},
+			"node": {
+				"description": "Computes the four world-space corners of a camera-facing billboard.",
+				"contents_type": "Job",
+				"pins": [
+					{
+						"name": "Position",
+						"type_name": "nos.fb.vec3",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard base center."
+					},
+					{
+						"name": "Width",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Billboard width in world units.",
+						"data": 100.0
+					},
+					{
+						"name": "Height",
+						"type_name": "float",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Billboard height in world units, measured upward from Position.",
+						"data": 100.0
+					},
+					{
+						"name": "RenderView",
+						"type_name": "nos.graphics.RenderView",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Render view used to orient the billboard toward the camera."
+					},
+					{
+						"name": "BottomLeft",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard's bottom-left corner."
+					},
+					{
+						"name": "BottomRight",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard's bottom-right corner."
+					},
+					{
+						"name": "TopLeft",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard's top-left corner."
+					},
+					{
+						"name": "TopRight",
+						"type_name": "nos.fb.vec3",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+						"description": "World-space position of the billboard's top-right corner."
+					}
+				]
+			}
+		}
+	]
+}

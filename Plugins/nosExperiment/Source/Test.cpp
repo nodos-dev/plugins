@@ -54,7 +54,7 @@ public:
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 	}
-	virtual void OnPinConnected(nos::Name pinName, uuid const& connectedPin) override
+	virtual void OnPinConnected(nos::Name pinName, uuid const& connectedPin, nosObjectId connectedObject) override
 	{
 		nosEngine.LogI("TestNode: %s", __FUNCTION__);
 	}

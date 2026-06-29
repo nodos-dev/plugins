@@ -1,5 +1,4 @@
 #include <Nodos/Plugin.hpp>
-#include <Nodos/Plugin.hpp>
 
 #include <nosSysVariables/nosVariableSubsystem.h>
 #include <nosTransfer/nosTransfer.h>

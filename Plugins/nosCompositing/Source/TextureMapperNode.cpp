@@ -89,7 +89,7 @@ private:
 	TextureParams Params[4];
 
 public:
-	virtual void OnPinConnected(nos::Name pinName, const nos::uuid& connectedPin) override
+	virtual void OnPinConnected(nos::Name pinName, const nos::uuid& connectedPin, nosObjectId connectedObject) override
 	{
 		for (int i = 0; i < 4; ++i)
 			if (pinName == NSN_Inputs(i))
