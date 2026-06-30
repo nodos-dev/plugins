@@ -115,6 +115,12 @@ struct DelayNode : NodeContext
     nosName TypeName = NSN_TypeNameGeneric;
 	DelayQueue Queue{};
 
+	enum class Status
+	{
+		Ok,
+		WarnDelayIsNotMultipleOfPhaseCount
+	} CurrentStatus = Status::Ok;
+
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		for (auto pin : *node->pins())
@@ -161,6 +167,26 @@ struct DelayNode : NodeContext
 		}
 	}
 
+	void SetStatus(Status newStatus, std::optional<std::string> warningMsg = std::nullopt)
+	{
+		if (CurrentStatus == newStatus)
+			return;
+		CurrentStatus = newStatus;
+		switch (CurrentStatus)
+		{
+		case Status::Ok:
+			ClearNodeStatusMessages();
+			return;
+		case Status::WarnDelayIsNotMultipleOfPhaseCount:
+			SetNodeStatusMessage(warningMsg.value_or("WARNING:\n\tDelay value is not\n\ta multiple of input signal phase "
+													 "count.\n\tThis may cause phase mismatch problems downstream."),
+								 fb::NodeStatusMessageType::WARNING);
+			return;
+		default:
+			return;
+		}
+	}
+
 	void SetType(nos::Name typeName)
 	{
 		TypeName = typeName;
@@ -177,6 +203,7 @@ struct DelayNode : NodeContext
 		if (0 == delay)
 		{
 			Queue.Clear();
+			SetStatus(Status::Ok);
 			SetPinObject(NSN_Output, inputObject);
 			return NOS_RESULT_SUCCESS;
 		}
@@ -196,6 +223,12 @@ struct DelayNode : NodeContext
 		if (auto pushSlot = Queue.BeginPush())
 		{
 			pushSlot->CopyFrom(inputObject);
+			std::optional<std::string> warning;
+			auto phaseCount = transfer::GetPhaseCount(inputObject, &warning);
+			if (phaseCount > 1 && delay % phaseCount != 0)
+				SetStatus(Status::WarnDelayIsNotMultipleOfPhaseCount, warning);
+			else
+				SetStatus(Status::Ok);
 			Queue.EndPush(*pushSlot);
 		}
 		return NOS_RESULT_SUCCESS;
