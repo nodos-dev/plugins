@@ -35,7 +35,7 @@ struct MakeNode : NodeContext
 
 	bool IsDict() const { return Type && Type->TypeName == NSN_DictTypeName; }
 
-	nosResult OnCreate(const fb::Node* node) override
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		std::optional<nos::Name> typeName;
 		if (flatbuffers::IsFieldPresent(node, fb::Node::VT_TEMPLATE_PARAMETERS) && 1 == node->template_parameters()->size())
@@ -64,10 +64,13 @@ struct MakeNode : NodeContext
 
 	// Field pins restored from a saved graph can come back orphaned/passive; reactivate them so they are
 	// live again on load (a la nos.math.Eval).
-	void UnorphanFieldPins(const fb::Node* node)
+	void UnorphanFieldPins(nosFbNodePtr node)
 	{
 		std::vector<uuid> toUnorphan;
-		for (auto* pin : *node->pins())
+		auto pins = node->pins();
+		if (!pins)
+			return;
+		for (auto* pin : *pins)
 		{
 			if (pin->show_as() != fb::ShowAs::INPUT_PIN)
 				continue;
