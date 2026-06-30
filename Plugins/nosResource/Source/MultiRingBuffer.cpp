@@ -174,7 +174,7 @@ struct MultiRingBufferNodeContext : NodeContext
 	~MultiRingBufferNodeContext() override
 	{
 		for (auto& [_, ch] : Channels)
-			NOS_SOFT_CHECK(ch->LastPopped == nullptr);
+			NOS_SOFT_CHECK(ch->LastPopped == nullptr, "Channel destroyed with an unreleased popped resource");
 		Ring.Stop();
 	}
 
