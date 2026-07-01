@@ -1,0 +1,16 @@
+{
+    "release_globs": [
+        "Config/**",
+        "*.nosplugin",
+        "Include/**",
+        "Assets/**",
+        "Shaders/**",
+        "Binaries/*.{dll,dylib,so}",
+        "Types/**",
+        "Nodes/*.nosnode"
+    ],
+    "trigger_publish_globs": [
+        "Source/**",
+        "CMakeLists.txt"
+    ]
+}
