@@ -19,7 +19,7 @@ struct ConditionalTrigger : NodeContext
 		return NOS_RESULT_SUCCESS;
 	}
 
-	NOS_DECLARE_FUNCTIONS_FOR(ConditionalTrigger,
+	NOS_DECLARE_FUNCTIONS(
 		NOS_ADD_FUNCTION(NOS_NAME("Branch"), Branch),
 	);
 };
